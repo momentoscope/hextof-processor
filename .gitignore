@@ -1,0 +1,10 @@
+# We don't need the checkpoints
+.ipynb_checkpoints
+
+# Forget cache stuff
+__pycache__
+*.pyc
+
+lib/*.so
+lib/*.c
+lib/*.html
