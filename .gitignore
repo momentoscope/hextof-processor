@@ -8,3 +8,5 @@ __pycache__
 lib/*.so
 lib/*.c
 lib/*.html
+
+\.idea/
