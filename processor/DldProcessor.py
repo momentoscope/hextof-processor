@@ -66,7 +66,7 @@ class DldProcessor():
         self.DATA_RESULTS_DIR = str
         self.initAttributes()
 
-    def initAttributes(self, import_all=True):
+    def initAttributes(self, import_all=False):
         """ Parse settings file and assign the variables.
 
         Parameters:
@@ -90,7 +90,7 @@ class DldProcessor():
                     setattr(self, entry.upper(), _type(settings[section][entry]))
                     print(entry.upper(), _type(settings[section][entry]))
                 except AttributeError as e:
-                    print('attribute error: {}'.format(e))
+                    # print('attribute error: {}'.format(e))
                     if import_all:  # old method
                         try:  # assign the attribute to the best fitting type between float, int and string
                             f = float(settings[section][entry])
@@ -405,10 +405,10 @@ class DldProcessor():
                 parquet files where the data was saved.
         """
         # TODO: remove this function once retrocompatibility is ensured
-        print('WARNING: readDataframesParquet is being removed.\nUse readDataframes instead (default behaviour is now parqet. '
-              'Specify format="h5" for legacy use.')
+        print(
+            'WARNING: readDataframesParquet is being removed.\nUse readDataframes instead: Default behaviour is now parqet.\n',
+            ' Specify format="h5" for legacy use.')
         self.readDataframes(fileName)
 
-
-if __name__ == "__main__":
-    main()
+        if __name__ == "__main__":
+            main()

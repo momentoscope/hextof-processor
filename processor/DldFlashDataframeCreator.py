@@ -4,7 +4,9 @@ import dask
 import dask.dataframe
 import dask.multiprocessing
 import numpy
-from processor import DldProcessor
+from configparser import ConfigParser
+
+from processor import DldProcessor, utils
 
 try:
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
@@ -19,21 +21,7 @@ from processor.pah import BeamtimeDaqAccess
 def main():
     processor = DldFlashProcessor()
     processor.runNumber = 19059
-    # processor.writeRunToMultipleParquet(processor.runNumber, single_file=True)
-    processor.readRun(runNumber=processor.runNumber)
-    filename = 'E:/data/FLASH/parquet/19135'
-
-    filename = processor.DATA_PARQUET_DIR + str(processor.runNumber)
-    print(filename)
-    processor.storeDataframes(filename, 'parquet')
-    processor.readDataframesParquet(filename)
-
-    processor.addBinning('posX', 480, 980, 10)
-    processor.addBinning('posY', 480, 980, 10)
-    result = processor.computeBinnedData()
-    import matplotlib.pyplot as plt
-    plt.imshow(result)
-    plt.show()
+    processor.readData()
 
 
 class DldFlashProcessor(DldProcessor.DldProcessor):
@@ -71,168 +59,69 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.runNumber = None
         self.interval = None
 
-    def readRun(self, runNumber=None, path=None):
-        """ Read a run
+    def readData(self, runNumber=None, pulseIdInterval=None, path=None):
+        """Access to data by run or macrobunch pulseID interval.
 
-        Generates dd and dd_micrubunches attributes as pd.DataFrame
-        containing data from the given run.
+
+        Useful for scans that would otherwise hit the machine's memory limit.
 
         Parameters:
-            runNumber (int, optional): number corresponding to the rung to read data from. if None, it uses the value
-                defined in the runNumber attribute.
-            path (str): path to location where raw HDF5 files are stored. If None, it uses the value from SETTINGS.ini.
+            runNumber (int): number of the run from which to read data. If None, requires pulseIdInterval.
+            pulseIdInterval (int,int): first and last macrobunches of selected data range. If None, the whole run
+                defined by runNumber will be taken.
+            path (str): path to location where raw HDF5 files are stored
 
-        Raises:
-            AttributeError: if runNumber is not given and
-
-        Example:
-            processor = DldFlashProcessor()
-            processor.readRun(19059)
-
+        This is a union of the readRun and readInterval methods defined in previous versions.
         """
-
-        if path is None:  # allow for using the default path, which can be redefined as class variable.
-            path = self.DATA_RAW_DIR
+        # check inputs:
         if runNumber is None:
             runNumber = self.runNumber
-            assert runNumber is not None, 'No run number assigned!'
-        else:
-            self.runNumber = runNumber
-        if self.runNumber is None:
-            raise AttributeError('Run number not defined. ')
-        # Import the dataset
-        dldPosXName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset"
-        dldPosYName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:1/dset"
-        dldTimeName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset"
+        assert runNumber == pulseIdInterval is None, 'One of RunNumber or pulseIdInterval needs to be specified.'
 
-        dldMicrobunchIdName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:2/dset"
-        dldAuxName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset"
-        # delayStageName = "/Experiment/Pump probe laser/laser delay"
-        # ENC.DELAY seems to be the wrong channel! Values appear in groups of exactly the same value
-        # delayStageName = "/Experiment/Pump probe laser/delay line IK220.0/ENC.DELAY"
-        # Proper channel is column with index 1 of ENC
-        delayStageName = "/Experiment/Pump probe laser/delay line IK220.0/ENC"
-
-        bamName = '/Electron Diagnostic/BAM/4DBC3/electron bunch arrival time (low charge)'
-        bunchChargeName = '/Electron Diagnostic/Bunch charge/after undulator'
-        macroBunchPulseIdName = '/Timing/Bunch train info/index 1.sts'
-        opticalDiodeName = '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD'
-        gmdTunnelName = '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel'
-
-        # adc1Name = '/Experiment/PG/SIS8300 100MHz ADC/CH6/TD'
-        # adc2Name = '/Experiment/PG/SIS8300 100MHz ADC/CH7/TD'
-
-        daqAccess = BeamtimeDaqAccess.create(path)
-
-        print('reading DAQ data')
-        # ~ print("reading dldPosX")
-        self.dldPosX, otherStuff = daqAccess.allValuesOfRun(dldPosXName, runNumber)
-        print('run contains macrobunchID from {0:,} to {1:,} \n-> {2:,} total macrobunches'.format(otherStuff[0],
-                                                                                                   otherStuff[1],
-                                                                                                   otherStuff[1] -
-                                                                                                   otherStuff[0]))
-        # ~ print("reading dldPosY")
-        self.dldPosY, otherStuff = daqAccess.allValuesOfRun(dldPosYName, runNumber)
-        # ~ print("reading dldTime")
-        self.dldTime, otherStuff = daqAccess.allValuesOfRun(dldTimeName, runNumber)
-        # ~ print("reading dldMicrobunchId")
-        self.dldMicrobunchId, otherStuff = daqAccess.allValuesOfRun(dldMicrobunchIdName, runNumber)
-        # ~ print("reading dldAux")
-        self.dldAux, otherStuff = daqAccess.allValuesOfRun(dldAuxName, runNumber)
-
-        # ~ print("reading delayStage")
-        self.delaystage, otherStuff = daqAccess.allValuesOfRun(delayStageName, runNumber)
-        self.delaystage = self.delaystage[:, 1]
-
-        # ~ print("reading BAM")
-        self.bam, otherStuff = daqAccess.allValuesOfRun(bamName, runNumber)
-        self.opticalDiode, otherStuff = daqAccess.allValuesOfRun(opticalDiodeName, runNumber)
-        # ~ print("reading bunchCharge")
-        self.bunchCharge, otherStuff = daqAccess.allValuesOfRun(bunchChargeName, runNumber)
-        self.macroBunchPulseId, otherStuff = daqAccess.allValuesOfRun(macroBunchPulseIdName, runNumber)
-        self.macroBunchPulseId -= otherStuff[0]
-        self.gmdTunnel, otherStuff = daqAccess.allValuesOfRun(gmdTunnelName, runNumber)
-        electronsToCount = self.dldPosX.copy().flatten()
-        electronsToCount = numpy.nan_to_num(electronsToCount)
-        electronsToCount = electronsToCount[electronsToCount > 0]
-        electronsToCount = electronsToCount[electronsToCount < 10000]
-        numOfElectrons = len(electronsToCount)
-        print("Number of electrons: {0:,} ".format(numOfElectrons))
-        print("Creating data frame: Please wait...")
-        self.createDataframePerElectron()
-        self.createDataframePerMicrobunch()
-        print('dataframe created')
-
-    def readInterval(self, pulseIdInterval, path=None):
-        """Access to data by macrobunch pulseID intervall.
-
-        Usefull for scans that would otherwise hit the machine's memory limit.
-
-        Parameters:
-            pulseIdInterval ():
-            path (str): path to location where raw HDF5 files are stored
-        """
-        # TODO: incorporate this function in readRun.
-        # allow for using the default path, which can be redefined as class variable. leaving retrocompatibility
         if path is None:
             path = self.DATA_RAW_DIR
 
-        self.interval = pulseIdInterval
-        # Import the dataset
-        dldPosXName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset"
-        dldPosYName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:1/dset"
-        dldTimeName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset"
+        # parse settings and set all dataset addresses as attributes.
+        settings = ConfigParser()
+        path_to_settings = '\\'.join(os.path.realpath(__file__).split('\\')[:-2])
+        print(path_to_settings)
+        print(os.path.isfile(path_to_settings + '\\SETTINGS.ini'))
+        settings.read(path_to_settings + '\\SETTINGS.ini')
 
-        dldMicrobunchIdName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:2/dset"
-        dldAuxName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset"
-        # delayStageName = "/Experiment/Pump probe laser/laser delay"
-        # ENC.DELAY seems to be the wrong channel! Values appear in groups of ~10 identical values
-        # -> ENC.DELAY is read out with 1 Hz
-        # delayStageName = "/Experiment/Pump probe laser/delay line IK220.0/ENC.DELAY"
-        # Proper channel is culumn with index 1 of ENC
-        delayStageName = "/Experiment/Pump probe laser/delay line IK220.0/ENC"
-
-        bamName = '/Electron Diagnostic/BAM/4DBC3/electron bunch arrival time (low charge)'
-        bunchChargeName = '/Electron Diagnostic/Bunch charge/after undulator'
-        macroBunchPulseIdName = '/Timing/Bunch train info/index 1.sts'
-        opticalDiodeName = '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD'
-        gmdTunnelName = '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel'
-
-        # adc1Name = '/Experiment/PG/SIS8300 100MHz ADC/CH6/TD'
-        # adc2Name = '/Experiment/PG/SIS8300 100MHz ADC/CH7/TD'
+        section = 'DAQ address - used'
+        daqAddresses = []
+        for entry in settings[section]:
+            name = utils.camelCaseIt(entry)
+            val = str(settings[section][entry])
+            daqAddresses.append(name)
+            setattr(self, name, val)
 
         daqAccess = BeamtimeDaqAccess.create(path)
 
-        print('reading DAQ data')
-        # ~ print("reading dldPosX")
-        self.dldPosX = daqAccess.valuesOfInterval(dldPosXName, pulseIdInterval)
-        # ~ print("reading dldPosY")
-        self.dldPosY = daqAccess.valuesOfInterval(dldPosYName, pulseIdInterval)
-        # ~ print("reading dldTime")
-        self.dldTime = daqAccess.valuesOfInterval(dldTimeName, pulseIdInterval)
-        # ~ print("reading dldMicrobunchId")
-        self.dldMicrobunchId = daqAccess.valuesOfInterval(dldMicrobunchIdName, pulseIdInterval)
-        # ~ print("reading dldAux")
-        self.dldAux = daqAccess.valuesOfInterval(dldAuxName, pulseIdInterval)
+        if pulseIdInterval is None:
+            print('reading DAQ data from run {}'.format(runNumber))
+            for address in daqAddresses:
+                values, otherStuff = daqAccess.valuesOfRun(address, runNumber)
+                setattr(self, address, values)
+                if address == 'macroBunchPulseId':  # catch the value of the first macrobunchID
+                    macroBunchPulseId_correction = otherStuff[0]
+        else:
+            print('reading DAQ data from interval {}'.format(pulseIdInterval))
+            self.interval = pulseIdInterval
+            for address in daqAddresses:
+                setattr(self, address, daqAccess.valuesOfInterval(address, pulseIdInterval))
+            macroBunchPulseId_correction = pulseIdInterval[0]
 
-        # ~ print("reading delayStage")
-        self.delaystage = daqAccess.valuesOfInterval(delayStageName, pulseIdInterval)
-        self.delaystage = self.delaystage[:, 1]
+        # necessary corrections for specific channels:
+        self.delayStage = self.delayStage[:, 1]
+        self.macroBunchPulseId -= macroBunchPulseId_correction
 
-        # ~ print("reading BAM")
-        self.bam = daqAccess.valuesOfInterval(bamName, pulseIdInterval)
-        self.opticalDiode = daqAccess.valuesOfInterval(opticalDiodeName, pulseIdInterval)
-        # ~ print("reading bunchCharge")
-        self.bunchCharge = daqAccess.valuesOfInterval(bunchChargeName, pulseIdInterval)
-        self.macroBunchPulseId = daqAccess.valuesOfInterval(macroBunchPulseIdName, pulseIdInterval)
-        # self.macroBunchPulseId -= self.macroBunchPulseId[self.macroBunchPulseId > 0].min()
-        self.macroBunchPulseId -= pulseIdInterval[0]
-        self.gmdTunnel = daqAccess.valuesOfInterval(gmdTunnelName, pulseIdInterval)
         electronsToCount = self.dldPosX.copy().flatten()
         electronsToCount = numpy.nan_to_num(electronsToCount)
         electronsToCount = electronsToCount[electronsToCount > 0]
         electronsToCount = electronsToCount[electronsToCount < 10000]
         numOfElectrons = len(electronsToCount)
+
         print("Number of electrons: {0:,} ".format(numOfElectrons))
         print("Creating data frame: Please wait...")
         self.createDataframePerElectron()
@@ -403,158 +292,179 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             dask.dataframe.to_hdf(self.dd, fileName, '/electrons')
             dask.dataframe.to_hdf(self.ddMicrobunches, fileName, '/microbunches')
 
-    # ==================================================================
+    # ==================
+    # DEPRECATED METHODS
+    # ==================
+    def readRun(self, runNumber=None, path=None):
+        """ Read a run
 
-    def writeRunToMultipleParquet(self, runNumber=None, parquetPath=None, path=None, interval_size=None,
-                                  single_file=False):
-        """ Function that allows for storing parquet data from large runs on machines with limited ram memory.
-
-        DEPRECATED - do not use.
-
-        interval_size defines the size of each macrobunchID interval to save at a time, each in a separated parquet file.
-
-        Data is saved in outputFolder as subfolders with names part_1, part_2 etc...
-        use the function readMultipleDataframesParquet method of the DldProcessor class (DldProcessorV2 or later)
-        to load data for analysis.
-        as an example: an interval_size of 30000 was used on a 32Gb ram system.
-
-        :parameter runNumber:
-
-
-        :parameter parquetPath:
-            Location where to store the multiple parquet files. If None, default is used.
-
-        :parameter path:
-            location of data to be analyzed. If None, default is used.
-
-        :parameter interval_size:
-            maximum number of macrobunches per interval. Each interval will run the readInterval method, creating then
-            destroying a DldProcessor instance.
-
-        NOTE: please do not read runs before running this, as the first data read will be ignored and will only occupy ram.
-
-        """
-
-        if path is None:
-            path = self.DATA_RAW_DIR
-        if parquetPath is None:
-            parquetPath = self.DATA_PARQUET_DIR
-        if runNumber is None:
-            runNumber = self.runNumber
-        if interval_size is None:
-            interval_size = self.MAX_INTERVAL_SIZE
-
-        fileName = parquetPath + str(runNumber)
-
-        # get the intervals belonging to given run, and output the split ranges in a list
-        temp_processor = DldFlashProcessor()
-        intervals = temp_processor.getMacrobunchIDIntervals(runNumber, interval_size=interval_size, path=path)
-        print('Data divided in {} intervals'.format(len(intervals)))
-        del temp_processor
-
-        # iterate over all intervals and output relative files.
-        for i in range(len(intervals)):
-            print("Reading interval {}".format(i + 1))
-            temp_processor = DldFlashProcessor()
-            temp_processor.readInterval(intervals[i], path=path)
-
-            print("Saving Parquet File")
-            if single_file:
-                temp_processor.storeDataframes(fileName, 'parquet', append=True)
-            else:
-                temp_processor.storeDataframes(fileName + '/part_' + str(i), 'parquet')
-        print("Data saved in {0} as {1} parquet folder couples. \nLoading saved data".format(fileName,
-                                                                                             len(intervals) * 2))
-
-        self.readMultipleDataframesParquet(fileName)
-        try:
-            test = len(self.dd)
-            print('Successfully loaded parquet data.')
-        except AttributeError:
-            print('Problems during parquet data loading. No data available.')
-
-    def readMultipleDataframesParquet(self, runNumber=None, parquetPath=None):
-        """ Allows for loading of parquet datasets created in multiple files.
-
-        DEPRECATED - see writeRunToMultipleParquet.
-
-        Data is expected in a series of subfolders as created by the function storeDataframesMultiParquet,
-        located in (DldFlashDataframeCreator_5 or later file)
-
-
-        """
-
-        if runNumber is None:
-            runNumber = self.runNumber
-
-        if parquetPath is None:
-            fileName = self.DATA_PARQUET_DIR + str(runNumber)
-        else:
-            if parquetPath[-1] != '/':
-                parquetPath = parquetPath + '/'
-            fileName = parquetPath + str(runNumber)
-
-        subDirs = os.listdir(fileName)
-        print(fileName)
-        print(subDirs)
-        names = []
-        for i in range(int(len(subDirs) / 2)):
-            names.append(subDirs[2 * i][:-3])
-        del subDirs
-        self.readDataframesParquet("{0}/{1}".format(fileName, names[0]))
-
-        for name in names[1:]:
-            self.appendDataframeParquet("{0}/{1}".format(fileName, name))
-
-    def getMacrobunchIDIntervals(self, runNumber, interval_size=10000, force_max_intervals=0, path=None):
-        """ Divide macrobunches from a run into intervals of defined size.
-
-        Returns list of tuples containing first and last macrobunchID of each interval.
-        Usefull for splitting large runs in smaller blocks.
-        Defined particularly for the function writeToMUltipleParquet.
+        Generates dd and dd_micrubunches attributes as pd.DataFrame
+        containing data from the given run.
 
         Parameters:
-            runNumber (int): number of the run you want to look at
-            interval_size (int): number of macrobunches to be contained in each interval.
-            force_max_intervals (bool): number of intervals to return(counted from the start).
-            path (str): path to the location where hdf5 data from FLASH is saved
-            if None, uses the string defined in self.defaultPath
+            runNumber (int, optional): number corresponding to the rung to read data from. if None, it uses the value
+                defined in the runNumber attribute.
+            path (str): path to location where raw HDF5 files are stored. If None, it uses the value from SETTINGS.ini.
 
-        Returns:
-            intervals (list of tuples): list of tuples containing first and last macrobunchID of each interval
+        Raises:
+            AttributeError: if runNumber is not given and
+
+        Example:
+            processor = DldFlashProcessor()
+            processor.readRun(19059)
 
         """
+        print('WARNING: readRun method is obsolete. Please use readData(runNumber=xxx).')
 
+        if path is None:  # allow for using the default path, which can be redefined as class variable.
+            path = self.DATA_RAW_DIR
+        if runNumber is None:
+            runNumber = self.runNumber
+            assert runNumber is not None, 'No run number assigned!'
+        else:
+            self.runNumber = runNumber
+        if self.runNumber is None:
+            raise AttributeError('Run number not defined. ')
+        # Import the dataset
+        dldPosXName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset"
+        dldPosYName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:1/dset"
+        dldTimeName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset"
+
+        dldMicrobunchIdName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:2/dset"
+        dldAuxName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset"
+        # delayStageName = "/Experiment/Pump probe laser/laser delay"
+        # ENC.DELAY seems to be the wrong channel! Values appear in groups of exactly the same value
+        # delayStageName = "/Experiment/Pump probe laser/delay line IK220.0/ENC.DELAY"
+        # Proper channel is column with index 1 of ENC
+        delayStageName = "/Experiment/Pump probe laser/delay line IK220.0/ENC"
+
+        bamName = '/Electron Diagnostic/BAM/4DBC3/electron bunch arrival time (low charge)'
+        bunchChargeName = '/Electron Diagnostic/Bunch charge/after undulator'
+        macroBunchPulseIdName = '/Timing/Bunch train info/index 1.sts'
+        opticalDiodeName = '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD'
+        gmdTunnelName = '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel'
+
+        # adc1Name = '/Experiment/PG/SIS8300 100MHz ADC/CH6/TD'
+        # adc2Name = '/Experiment/PG/SIS8300 100MHz ADC/CH7/TD'
+
+        daqAccess = BeamtimeDaqAccess.create(path)
+
+        print('reading DAQ data')
+        # ~ print("reading dldPosX")
+        self.dldPosX, otherStuff = daqAccess.allValuesOfRun(dldPosXName, runNumber)
+        print('run contains macrobunchID from {0:,} to {1:,} \n-> {2:,} total macrobunches'.format(otherStuff[0],
+                                                                                                   otherStuff[1],
+                                                                                                   otherStuff[1] -
+                                                                                                   otherStuff[0]))
+        # ~ print("reading dldPosY")
+        self.dldPosY, otherStuff = daqAccess.allValuesOfRun(dldPosYName, runNumber)
+        # ~ print("reading dldTime")
+        self.dldTime, otherStuff = daqAccess.allValuesOfRun(dldTimeName, runNumber)
+        # ~ print("reading dldMicrobunchId")
+        self.dldMicrobunchId, otherStuff = daqAccess.allValuesOfRun(dldMicrobunchIdName, runNumber)
+        # ~ print("reading dldAux")
+        self.dldAux, otherStuff = daqAccess.allValuesOfRun(dldAuxName, runNumber)
+
+        # ~ print("reading delayStage")
+        self.delaystage, otherStuff = daqAccess.allValuesOfRun(delayStageName, runNumber)
+        self.delaystage = self.delaystage[:, 1]
+
+        # ~ print("reading BAM")
+        self.bam, otherStuff = daqAccess.allValuesOfRun(bamName, runNumber)
+        self.opticalDiode, otherStuff = daqAccess.allValuesOfRun(opticalDiodeName, runNumber)
+        # ~ print("reading bunchCharge")
+        self.bunchCharge, otherStuff = daqAccess.allValuesOfRun(bunchChargeName, runNumber)
+        self.macroBunchPulseId, otherStuff = daqAccess.allValuesOfRun(macroBunchPulseIdName, runNumber)
+        self.macroBunchPulseId -= otherStuff[0]
+        self.gmdTunnel, otherStuff = daqAccess.allValuesOfRun(gmdTunnelName, runNumber)
+        electronsToCount = self.dldPosX.copy().flatten()
+        electronsToCount = numpy.nan_to_num(electronsToCount)
+        electronsToCount = electronsToCount[electronsToCount > 0]
+        electronsToCount = electronsToCount[electronsToCount < 10000]
+        numOfElectrons = len(electronsToCount)
+        print("Number of electrons: {0:,} ".format(numOfElectrons))
+        print("Creating data frame: Please wait...")
+        self.createDataframePerElectron()
+        self.createDataframePerMicrobunch()
+        print('dataframe created')
+
+    def readInterval(self, pulseIdInterval, path=None):
+        """Access to data by macrobunch pulseID intervall.
+
+        Usefull for scans that would otherwise hit the machine's memory limit.
+
+        Parameters:
+            pulseIdInterval ():
+            path (str): path to location where raw HDF5 files are stored
+        """
+        # TODO: incorporate this function in readRun.
         # allow for using the default path, which can be redefined as class variable. leaving retrocompatibility
+        print('WARNING: readInterval method is obsolete. Please use readData(pulseIdInterval=xxx).')
+
         if path is None:
             path = self.DATA_RAW_DIR
 
-        daqAccess = BeamtimeDaqAccess.create(path)
+        self.interval = pulseIdInterval
+        # Import the dataset
         dldPosXName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset"
-        _, otherStuff = daqAccess.allValuesOfRun(dldPosXName, runNumber)
-        macrobunches_from = otherStuff[0]
-        macrobunches_to = otherStuff[1]
+        dldPosYName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:1/dset"
+        dldTimeName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset"
 
-        n_of_macrobunches = macrobunches_to - macrobunches_from
-        n_of_intervals = int(n_of_macrobunches / interval_size) + 1
+        dldMicrobunchIdName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:2/dset"
+        dldAuxName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset"
+        # delayStageName = "/Experiment/Pump probe laser/laser delay"
+        # ENC.DELAY seems to be the wrong channel! Values appear in groups of ~10 identical values
+        # -> ENC.DELAY is read out with 1 Hz
+        # delayStageName = "/Experiment/Pump probe laser/delay line IK220.0/ENC.DELAY"
+        # Proper channel is culumn with index 1 of ENC
+        delayStageName = "/Experiment/Pump probe laser/delay line IK220.0/ENC"
 
-        print('{0:,} MacroBunchIDs divided into {1} intervals\n'.format(n_of_macrobunches, n_of_intervals))
+        bamName = '/Electron Diagnostic/BAM/4DBC3/electron bunch arrival time (low charge)'
+        bunchChargeName = '/Electron Diagnostic/Bunch charge/after undulator'
+        macroBunchPulseIdName = '/Timing/Bunch train info/index 1.sts'
+        opticalDiodeName = '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD'
+        gmdTunnelName = '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel'
 
-        # force maximum number of segments:
+        # adc1Name = '/Experiment/PG/SIS8300 100MHz ADC/CH6/TD'
+        # adc2Name = '/Experiment/PG/SIS8300 100MHz ADC/CH7/TD'
 
-        if force_max_intervals != 0:
-            n_of_intervals = force_max_intervals
-            print("Forced to process only first {} macrobunches\n".format(n_of_intervals * interval_size))
+        daqAccess = BeamtimeDaqAccess.create(path)
 
-        intervals = []  # list containing tuple of start and stop point for each interval.
+        print('reading DAQ data')
+        # ~ print("reading dldPosX")
+        self.dldPosX = daqAccess.valuesOfInterval(dldPosXName, pulseIdInterval)
+        # ~ print("reading dldPosY")
+        self.dldPosY = daqAccess.valuesOfInterval(dldPosYName, pulseIdInterval)
+        # ~ print("reading dldTime")
+        self.dldTime = daqAccess.valuesOfInterval(dldTimeName, pulseIdInterval)
+        # ~ print("reading dldMicrobunchId")
+        self.dldMicrobunchId = daqAccess.valuesOfInterval(dldMicrobunchIdName, pulseIdInterval)
+        # ~ print("reading dldAux")
+        self.dldAux = daqAccess.valuesOfInterval(dldAuxName, pulseIdInterval)
 
-        for i in range(n_of_intervals):
-            start = macrobunches_from + i * interval_size
-            stop = macrobunches_from + (i + 1) * interval_size - 1
-            if stop > macrobunches_to:
-                stop = macrobunches_to
-            intervals.append((int(start), int(stop)))
-        return intervals
+        # ~ print("reading delayStage")
+        self.delaystage = daqAccess.valuesOfInterval(delayStageName, pulseIdInterval)
+        self.delaystage = self.delaystage[:, 1]
+
+        # ~ print("reading BAM")
+        self.bam = daqAccess.valuesOfInterval(bamName, pulseIdInterval)
+        self.opticalDiode = daqAccess.valuesOfInterval(opticalDiodeName, pulseIdInterval)
+        # ~ print("reading bunchCharge")
+        self.bunchCharge = daqAccess.valuesOfInterval(bunchChargeName, pulseIdInterval)
+        self.macroBunchPulseId = daqAccess.valuesOfInterval(macroBunchPulseIdName, pulseIdInterval)
+        # self.macroBunchPulseId -= self.macroBunchPulseId[self.macroBunchPulseId > 0].min()
+        self.macroBunchPulseId -= pulseIdInterval[0]
+        self.gmdTunnel = daqAccess.valuesOfInterval(gmdTunnelName, pulseIdInterval)
+        electronsToCount = self.dldPosX.copy().flatten()
+        electronsToCount = numpy.nan_to_num(electronsToCount)
+        electronsToCount = electronsToCount[electronsToCount > 0]
+        electronsToCount = electronsToCount[electronsToCount < 10000]
+        numOfElectrons = len(electronsToCount)
+        print("Number of electrons: {0:,} ".format(numOfElectrons))
+        print("Creating data frame: Please wait...")
+        self.createDataframePerElectron()
+        self.createDataframePerMicrobunch()
+        print('dataframe created')
 
 
 if __name__ == '__main__':

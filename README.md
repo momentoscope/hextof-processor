@@ -23,4 +23,11 @@ To initialize correctly this code on a new machine, run the InitializeSettings.p
 file to create the SETTINGS.ini file where local settings are stored.
 This is not tracked in the git, to keep compatibility across multiple machines.
 
+Current version
+--
 
+Latest version of the processor is in processor. lib contains a legacy version, kept for retrocompatibility checks.
+
+How to use
+--
+Need to write about this.
