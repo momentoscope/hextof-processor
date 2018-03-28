@@ -10,3 +10,6 @@ lib/*.c
 lib/*.html
 
 \.idea/
+
+# ignore local settings
+SETTINGS.ini
