@@ -7,6 +7,7 @@ import numpy as np
 import h5py
 import configparser
 
+#================================================================================
 
 def PulseEnergy400(Diode):
     """ Returns the pulse energy of 400nm laser in uJ.
@@ -43,10 +44,12 @@ def EnergyDensity800(Diode, Diameter=600):
 	"""
     return PulseEnergy800(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
 
+#================================================================================
 
 def radius(df, center=(0, 0)):
     return np.sqrt(np.square(df.posX - center[0]) + np.square(df.posY - center[1]))
 
+#================================================================================
 
 def save_HDF5_timestack_XYET(data_array, filename, path=None, overwrite=True):
     """ Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI
@@ -90,3 +93,10 @@ def save_HDF5_timestack_XYET(data_array, filename, path=None, overwrite=True):
         dset = f.create_dataset("experiment/xyE_tstep{}".format(timeStep), xyeData.shape, dtype='float64')
         dset[...] = xyeData
     print("Created file " + filepath)
+
+#================================================================================
+
+
+def camelCaseIt(snake_str):
+    first, *others = snake_str.split('_')
+    return ''.join([first.lower(), *map(str.title, others)])

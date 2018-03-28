@@ -23,9 +23,9 @@ def make_new_settings():
     settings_dict = {
         'paths': {
             'DATA_RAW_DIR': 'D:/data/FLASH/_RAW/online-3/',
-            'DATA_H5_DIR': 'D:/data/FLASH/_processed/h5',
-            'DATA_PARQUET_DIR': 'D:/data/FLASH/_processed/parquet',
-            'DATA_RESULTS_DIR': 'D:/data/FLASH/Results',
+            'DATA_H5_DIR': 'D:/data/FLASH/_processed/h5/',
+            'DATA_PARQUET_DIR': 'D:/data/FLASH/_processed/parquet/',
+            'DATA_RESULTS_DIR': 'D:/data/FLASH/Results/',
             'PAH_MODULE_DIR': 'D:/py_code/FLASH/PAH/',
         },
         'processor': {
@@ -33,7 +33,22 @@ def make_new_settings():
             'CHUNK_SIZE': 1000000,
             'TOF_STEP_TO_NS': 0.0205761316872428,
             'TOF_NS_TO_EV': 0.22,
-        }
+        },
+        'DAQ address - used': {
+            'dld_pos_x': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset",
+            'dld_pos_y': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:1/dset",
+            'dld_time': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset",
+            'dld_microbunch_id': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:2/dset",
+            'dld_aux': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset",
+            'delay_stage': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset",
+            'bam': '/Electron Diagnostic/BAM/4DBC3/electron bunch arrival time (low charge)',
+            'bunch_charge': '/Electron Diagnostic/Bunch charge/after undulator',
+            'macro_bunch_pulse_id': '/Timing/Bunch train info/index 1.sts',
+            'optical_diode': '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD',
+            'gmd_tunnel': '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel',
+
+        },
+        'DAQ address - not used': {}
     }
 
     # write dictionary to .ini structure
