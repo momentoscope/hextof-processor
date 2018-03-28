@@ -31,8 +31,8 @@ def make_new_settings():
         'processor': {
             'N_CORES': psutil.cpu_count(),
             'CHUNK_SIZE': 1000000,
-            'ToF_STEP_NS': 0.0205761316872428,
-            'ToF_STEP_EV': 1,
+            'TOF_STEP_TO_NS': 0.0205761316872428,
+            'TOF_NS_TO_EV': 0.22,
         }
     }
 
