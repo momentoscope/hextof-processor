@@ -8,3 +8,7 @@ __pycache__
 lib/*.so
 lib/*.c
 lib/*.html
+
+#ignore IDE settings folers 
+\.idea/
+\.spyproject/
