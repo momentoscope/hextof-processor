@@ -32,6 +32,7 @@ def make_new_settings():
             'N_CORES': psutil.cpu_count(),
             'CHUNK_SIZE': 1000000,
             'TOF_STEP_TO_NS': 0.0205761316872428,
+            'TOF_STEP_TO_EV':  0.0205761316872428 *0.22,
             'TOF_NS_TO_EV': 0.22,
         },
         'DAQ address - used': {
