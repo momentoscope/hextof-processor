@@ -1,27 +1,37 @@
 import os
+from configparser import ConfigParser
 
 import dask
 import dask.dataframe
 import dask.multiprocessing
 import numpy
-from configparser import ConfigParser
 
 from processor import DldProcessor, utils
+from processor.pah import BeamtimeDaqAccess
 
-try:
+try: # TODO: fix the cython import problem!
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
 except ImportError:
+    print('Failed loading Cython script. Using Python version instead. TODO: FIX IT!!')
     import processor.cscripts.DldFlashProcessorNotCy as DldFlashProcessorCy
-
 assignToMircobunch = DldFlashProcessorCy.assignToMircobunch
-# from processor.cscripts import DldFlashProcessorCy
-from processor.pah import BeamtimeDaqAccess
+
+_VERBOSE = False
 
 
 def main():
     processor = DldFlashProcessor()
-    processor.runNumber = 19059
+    processor.runNumber = 18843
+    # processor.pulseIdInterval =
     processor.readData()
+    processor.postProcess()
+
+
+    processor.addBinning('dldTime', 620, 670, 1)
+    result = processor.computeBinnedData()
+    import matplotlib.pyplot as plt
+    plt.plot(result)
+    plt.show()
 
 
 class DldFlashProcessor(DldProcessor.DldProcessor):
@@ -45,7 +55,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
     Attributes:
         runNumber (int): number of the run from which data is taken.
-        interval (int): macrobunch ID corresponding to the interval of data
+        pulseIdInterval (int): macrobunch ID corresponding to the interval of data
             read from the given run.
         dd (pd.DataFrame): dataframe containing chosen channel information from
             the given run
@@ -57,7 +67,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         super().__init__()
 
         self.runNumber = None
-        self.interval = None
+        self.pulseIdInterval = None
 
     def readData(self, runNumber=None, pulseIdInterval=None, path=None):
         """Access to data by run or macrobunch pulseID interval.
@@ -76,7 +86,16 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         # check inputs:
         if runNumber is None:
             runNumber = self.runNumber
-        assert runNumber == pulseIdInterval is None, 'One of RunNumber or pulseIdInterval needs to be specified.'
+        else:
+            self.runNumber = runNumber
+        if pulseIdInterval is None:
+            pulseIdInterval = self.pulseIdInterval
+        else:
+            self.pulseIdInterval = pulseIdInterval
+
+        if pulseIdInterval is None:
+            if runNumber is None:
+                raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
 
         if path is None:
             path = self.DATA_RAW_DIR
@@ -94,35 +113,47 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             name = utils.camelCaseIt(entry)
             val = str(settings[section][entry])
             daqAddresses.append(name)
+            if _VERBOSE: print('assigning address: {}: {}'.format(name.ljust(20), val))
             setattr(self, name, val)
 
         daqAccess = BeamtimeDaqAccess.create(path)
 
         if pulseIdInterval is None:
-            print('reading DAQ data from run {}'.format(runNumber))
-            for address in daqAddresses:
-                values, otherStuff = daqAccess.valuesOfRun(address, runNumber)
-                setattr(self, address, values)
-                if address == 'macroBunchPulseId':  # catch the value of the first macrobunchID
-                    macroBunchPulseId_correction = otherStuff[0]
+            print('reading DAQ data from run {}...\nPlease wait...'.format(runNumber))
+
+            for address_name in daqAddresses:
+                if _VERBOSE: print('reading address: {}'.format(address_name))
+                values, otherStuff = daqAccess.allValuesOfRun(getattr(self, address_name), runNumber)
+                setattr(self, address_name, values)
+                if address_name == 'macroBunchPulseId':  # catch the value of the first macrobunchID
+                    pulseIdInterval = (otherStuff[0], otherStuff[-1])
+                    macroBunchPulseId_correction = pulseIdInterval[0]
+            numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
+            print('Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}'.format(runNumber,
+                                                                                    numOfMacrobunches,
+                                                                                    pulseIdInterval[0],
+                                                                                    pulseIdInterval[1]))
         else:
             print('reading DAQ data from interval {}'.format(pulseIdInterval))
-            self.interval = pulseIdInterval
-            for address in daqAddresses:
-                setattr(self, address, daqAccess.valuesOfInterval(address, pulseIdInterval))
+            self.pulseIdInterval = pulseIdInterval
+            for address_name in daqAddresses:
+                if _VERBOSE: print('reading address: {}'.format(address_name))
+                setattr(self, address_name, daqAccess.valuesOfInterval(getattr(self, address_name), pulseIdInterval))
             macroBunchPulseId_correction = pulseIdInterval[0]
 
         # necessary corrections for specific channels:
         self.delayStage = self.delayStage[:, 1]
         self.macroBunchPulseId -= macroBunchPulseId_correction
 
+        if _VERBOSE: print('Counting electrons...')
+
         electronsToCount = self.dldPosX.copy().flatten()
         electronsToCount = numpy.nan_to_num(electronsToCount)
         electronsToCount = electronsToCount[electronsToCount > 0]
         electronsToCount = electronsToCount[electronsToCount < 10000]
         numOfElectrons = len(electronsToCount)
-
-        print("Number of electrons: {0:,} ".format(numOfElectrons))
+        electronsPerMacrobunch = int(numOfElectrons / numOfMacrobunches)
+        print("Number of electrons: {0:,}; {1:,} e/mb ".format(numOfElectrons, electronsPerMacrobunch))
         print("Creating data frame: Please wait...")
         self.createDataframePerElectron()
         self.createDataframePerMicrobunch()
@@ -147,9 +178,9 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         daBam = bamArray.flatten()
 
         # convert the delay stage position to the electron format
-        delaystageArray = numpy.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
-        delaystageArray[:, :] = (self.delaystage[mbIndexStart:mbIndexEnd])[:, None]
-        daDelaystage = delaystageArray.flatten()
+        delayStageArray = numpy.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+        delayStageArray[:, :] = (self.delayStage[mbIndexStart:mbIndexEnd])[:, None]
+        daDelaystage = delayStageArray.flatten()
 
         daMicrobunchId = self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].flatten()
 
@@ -199,11 +230,12 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         """
 
         # self.dldTime=self.dldTime*self.dldTimeStep
-
+        if _VERBOSE: print('creating electron dataframe...')
         maxIndex = self.dldTime.shape[0]
         chunkSize = min(self.CHUNK_SIZE, maxIndex / self.N_CORES)  # ensure minimum one chunk per core.
         numOfPartitions = int(maxIndex / chunkSize) + 1
         daList = []
+
         for i in range(0, numOfPartitions):
             indexFrom = int(i * chunkSize)
             indexTo = int(min(indexFrom + chunkSize, maxIndex))
@@ -225,14 +257,14 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.dd['dldTime'] = self.dd['dldTime'] * self.TOF_STEP_TO_NS
 
     def createDataframePerMicrobunch(self):
+        if _VERBOSE: print('creating microbunch dataframe...')
 
         numOfMacrobunches = self.bam.shape[0]
 
         # convert the delay stage position to the electron format
-        delaystageArray = numpy.zeros_like(self.bam)
-        delaystageArray[:, :] = (self.delaystage[:])[:, None]
-
-        daDelaystage = dask.array.from_array(delaystageArray.flatten(), chunks=(self.CHUNK_SIZE))
+        delayStageArray = numpy.zeros_like(self.bam)
+        delayStageArray[:, :] = (self.delayStage[:])[:, None]
+        daDelayStage = dask.array.from_array(delayStageArray.flatten(), chunks=self.CHUNK_SIZE)
 
         # convert the MacroBunchPulseId to the electron format
         macroBunchPulseIdArray = numpy.zeros_like(self.bam)
@@ -260,26 +292,39 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         daOpticalDiode = dask.array.from_array(paddedOpticalDiode.flatten(), chunks=(self.CHUNK_SIZE))
 
         # Added MacroBunchPulseId
-        da = dask.array.stack([daDelaystage, daBam, daAux0, daAux1, daBunchCharge, daOpticalDiode, daMacroBunchPulseId])
+        da = dask.array.stack([daDelayStage, daBam, daAux0, daAux1, daBunchCharge, daOpticalDiode, daMacroBunchPulseId])
 
         # create the data frame:
         self.ddMicrobunches = dask.dataframe.from_array(da.T,
                                                         columns=('delayStageTime', 'bam', 'aux0', 'aux1', 'bunchCharge',
                                                                  'opticalDiode', 'macroBunchPulseId'))
 
-    def storeDataframes(self, fileName, format='parquet', append=False):
+    def storeDataframes(self, fileName=None, path=None, format='parquet', append=False):
         """ Saves imported dask dataframe into a parquet or hdf5 file.
 
         Parameters:
-            fileName (string): name (including path) of the file where to save data.
+            fileName (string): name of the file where to save data.
+            path (str): path to the folder where to save the parquet or hdf5 files.
             format (string, optional): accepts: 'parquet' and 'hdf5'. Choose output file format.
                 Default value makes a dask parquet file.
                 append (bool): when using parquet file, allows to append the data to a preexisting file.
-
-
         """
 
-        # todo: implement fileName checking wheather it is a path, and if not, use default data path.
+        format = format.lower()
+        assert format in ['parquet', 'h5', 'hdf5'], 'Invalid format for data input. Please select between parquet or h5'
+
+        if path is None:
+            if format == 'parquet':
+                path = self.DATA_PARQUET_DIR
+            else:
+                path = self.DATA_H5_DIR
+        if fileName is None:
+            if self.runNumber is None:
+                fileName = 'mb{}to{}'.format(self.pulseIdInterval[0],self.pulseIdInterval[1])
+            else:
+                fileName = 'run{}'.format(self.runNumber)
+        fileName = path+fileName # TODO: test if naming is correct
+
         if format == 'parquet':
             if append:
                 self.dd.to_parquet(fileName + "_el", compression="UNCOMPRESSED", append=True, ignore_divisions=True)
@@ -366,8 +411,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.dldAux, otherStuff = daqAccess.allValuesOfRun(dldAuxName, runNumber)
 
         # ~ print("reading delayStage")
-        self.delaystage, otherStuff = daqAccess.allValuesOfRun(delayStageName, runNumber)
-        self.delaystage = self.delaystage[:, 1]
+        self.delayStage, otherStuff = daqAccess.allValuesOfRun(delayStageName, runNumber)
+        self.delayStage = self.delayStage[:, 1]
 
         # ~ print("reading BAM")
         self.bam, otherStuff = daqAccess.allValuesOfRun(bamName, runNumber)
@@ -397,14 +442,13 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             pulseIdInterval ():
             path (str): path to location where raw HDF5 files are stored
         """
-        # TODO: incorporate this function in readRun.
         # allow for using the default path, which can be redefined as class variable. leaving retrocompatibility
         print('WARNING: readInterval method is obsolete. Please use readData(pulseIdInterval=xxx).')
 
         if path is None:
             path = self.DATA_RAW_DIR
 
-        self.interval = pulseIdInterval
+        self.pulseIdInterval = pulseIdInterval
         # Import the dataset
         dldPosXName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset"
         dldPosYName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:1/dset"
@@ -443,8 +487,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.dldAux = daqAccess.valuesOfInterval(dldAuxName, pulseIdInterval)
 
         # ~ print("reading delayStage")
-        self.delaystage = daqAccess.valuesOfInterval(delayStageName, pulseIdInterval)
-        self.delaystage = self.delaystage[:, 1]
+        self.delayStage = daqAccess.valuesOfInterval(delayStageName, pulseIdInterval)
+        self.delayStage = self.delayStage[:, 1]
 
         # ~ print("reading BAM")
         self.bam = daqAccess.valuesOfInterval(bamName, pulseIdInterval)
