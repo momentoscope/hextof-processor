@@ -7,16 +7,19 @@ import numpy as np
 import pandas
 from configparser import ConfigParser
 import matplotlib.pyplot as plt
-
+_VERBOSE = False
 
 def main():
     from processor import DldFlashDataframeCreator
     print('start\n')
     processor = DldFlashDataframeCreator.DldFlashProcessor()
+    print(processor.runNumber)
     processor.runNumber = 19135
     print('end\n')
     for k, v in processor.__dict__.items():
         print('{}: {} type: {}'.format(k.ljust(17), str(v).ljust(40), type(v)))
+    # processor.readRun(19135)
+    processor.readData(runNumber = processor.runNumber)
     processor.readDataframesParquet()
     # processor.addBinning('posX',480,980,10)
     # processor.addBinning('posY',480,980,10)
@@ -59,6 +62,7 @@ class DldProcessor():
         self.CHUNK_SIZE = int
         self.TOF_STEP_TO_NS = float
         self.TOF_NS_TO_EV = float
+        self.TOF_STEP_TO_EV = float
 
         self.DATA_RAW_DIR = str
         self.DATA_H5_DIR = str
@@ -82,15 +86,13 @@ class DldProcessor():
 
         for section in settings:
             for entry in settings[section]:
-                print('trying: {} {}'.format(entry.upper(), settings[section][entry]))
-
+                if _VERBOSE: print('trying: {} {}'.format(entry.upper(), settings[section][entry]))
                 try:
-
                     _type = getattr(self, entry.upper())
                     setattr(self, entry.upper(), _type(settings[section][entry]))
-                    print(entry.upper(), _type(settings[section][entry]))
+                    if _VERBOSE: print(entry.upper(), _type(settings[section][entry]))
                 except AttributeError as e:
-                    # print('attribute error: {}'.format(e))
+                    if _VERBOSE: print('attribute error: {}'.format(e))
                     if import_all:  # old method
                         try:  # assign the attribute to the best fitting type between float, int and string
                             f = float(settings[section][entry])
@@ -105,7 +107,7 @@ class DldProcessor():
                     else:
                         pass
 
-    def readDataframes(self, fileName, format='parquet'):
+    def readDataframes(self, fileName=None, path=None, format='parquet'):
         """ Load data from a parquet or HDF5 dataframe.
 
         Access the data as hdf5 file (this is the format used internally,
@@ -117,10 +119,21 @@ class DldProcessor():
             format (str): either 'parquet' to load a parquet type of dataframe,
                 or 'h5' or 'hdf5' to load hdf5 dataframes
         """
-        if fileName is None:
-            fileName = self.DATA_PARQUET_DIR + str(self.runNumber)
         format = format.lower()
         assert format in ['parquet', 'h5', 'hdf5'], 'Invalid format for data input. Please select between parquet or h5'
+
+        if path is None:
+            if format == 'parquet':
+                path = self.DATA_PARQUET_DIR
+            else:
+                path = self.DATA_H5_DIR
+        if fileName is None:
+            if self.runNumber is None:
+                fileName = 'mb{}to{}'.format(self.pulseIdInterval[0],self.pulseIdInterval[1])
+            else:
+                fileName = 'run{}'.format(self.runNumber)
+        fileName = path + fileName # TODO: test if naming is correct
+
 
         if format == 'parquet':
             self.dd = dask.dataframe.read_parquet(fileName + "_el")
@@ -190,9 +203,7 @@ class DldProcessor():
         Parameters:
             kCenter (int,int): position of the center of k-space in the dld
                 detector array
-
         """
-
         def radius(df):
             return np.sqrt(np.square(df.posX - kCenter[0]) + np.square(df.posY - kCenter[1]))
 
@@ -207,7 +218,7 @@ class DldProcessor():
 
         Normalises the data array to the number of counts per delay stage step.
 
-        Paramteters:
+        Parameters:
             data_array (np.array): data array containing binned data, as
             created by the computeBinnedData method.
 
@@ -223,7 +234,7 @@ class DldProcessor():
             norm_array = self.delaystageHistogram
             for i in range(np.ndim(data_array_normalized) - 1):
                 norm_array = norm_array[:, None]
-            print('normalized pumpProbe data on axis {}'.format(idx))
+            print('normalized pumpProbe data found along axis {}'.format(idx))
             data_array_normalized = data_array_normalized / norm_array
             data_array_normalized = np.swapaxes(data_array_normalized, idx, 0)
             return data_array_normalized
@@ -410,5 +421,5 @@ class DldProcessor():
             ' Specify format="h5" for legacy use.')
         self.readDataframes(fileName)
 
-        if __name__ == "__main__":
-            main()
+if __name__ == "__main__":
+    main()
