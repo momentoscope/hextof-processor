@@ -29,5 +29,188 @@ Current version
 Latest version of the processor is in processor. lib contains a legacy version, kept for retrocompatibility checks.
 
 How to use
---
-Need to write about this.
+==
+
+In order to make use of this offline-analysis tool, the irst thing is how to import the correct modules.
+Therefore, after adding the repos folder to the system path, start as:
+```python
+import sys,os
+sys.path.append('/path/to/HextofOfflineAnalyzer/')
+
+from processor.DldFlashDataframeCreator import DldFlashProcessor()
+```
+
+Some usefull imports for initializing an Ipython notebook should look as follows:
+```python
+import sys,os
+import numpy as np
+import matplotlib.pyplot as plt
+from importlib import reload
+
+import processor.utils as utils # contains commonly used functions for treating this data.
+import processor.DldFlashDataframeCreator as DldFlashProcessor
+reload(dldFlashProcessor)
+```
+
+
+
+Read DAQ data
+-------------
+
+Load the data from a given DAQ run number
+
+```python
+# create a processor isntance
+processor = DldFlashProcessor()
+# assign a run number
+processor.runNumber = 18843
+```
+
+data can now be loaded from either a full DAQ run:
+```python
+#read the data from the DAQ hdf5 dataframes
+processor.readData(runNumber=processor.runNumber)
+```
+or from a selected range of , the pulseIdInterval:
+```python
+mbFrom = 1000 # first macrobunch
+mbTo = 2000 # last macrobunch
+processor.readData(pulseIdInterval=(mbFrom,mbTo))
+```
+Next step is to run the postProcess method, which generates a bam corrected pumpProbeDelay dataset, toghether with polar coordinates for the k-resolved axes.
+
+```python
+processor.postProcess()
+```
+
+The dask dataframe is now created and can be used directly or stored in parquet format for optimized future use.
+
+A shorter snap of code for copy-pasting is the following:
+
+```python
+processor = DldFlashProcessor()
+processor.runNumber = 18843
+processor.readData(runNumber=processor.runNumber)
+processor.postProcess()
+```
+
+
+Save dataset to dask parquet files
+----------------------------------
+
+For faster access to these dataframes for future analysis, it is convenient to store the datasets in dask parquet dataframes.
+This is done using:
+```pthon
+processor.storeDataframes('filename')
+```
+
+This saves two folders in path/to/file: name_el and name_mb. These are the two datasets processor.dd and processor.ddMicrobunches.
+if 'filename' is not specified, it uses either 'run{runNumber}' or mb{firstMacrobunch}to{lastMacrobunch}'
+
+Alternatively it is possible to store these datasets similarly in hdf5 format, using the same function:
+```pthon
+processor.storeDataframes('filename', format='hdf5')
+```
+However, this is not advised, since the parquet format outperforms the hdf5.
+
+Such datasets can be loaded back into the processor the readDataframes() method.
+Using parquet:
+```python
+processor = DldFlashProcessor()
+processor.readDataframes('filename')
+```
+and using hdf5:
+```python
+processor = DldFlashProcessor()
+processor.readDataframes('name', format='hdf5')
+```
+
+An optional parameter for both storeDataframes() and readDataframes() is path=''. When unspecified, (left as default None) the value from SETTINGS DATA_PARQUET_DIR or DATA_H5_DIR is assigned.
+
+
+Binning
+=======
+In order to get n-dimensional np.arrays from the generated datasets, it is necessary to bin data along the desired axes.
+an example of how this is done, starting from loading parquet data:
+```python
+processor = DldFlashProcessor()
+processor.runNumber = 18843
+processor.readDataframes('path/to/file/name')
+```
+This can be also done from direct data read with readData()
+To create the bin array structure:
+```python
+processor.addBinning('posX',480,980,10)
+processor.addBinning('posY',480,980,10)
+```
+This adds binning along the k-parallel x and y directions, from point 480 to point 980 with bin size of 10.
+The resulting array can now be obtained using
+```python
+result = processor.ComputeBinnedData()
+```
+where the resulting np.array of float64 values will have the axis order same as the order in which we generated the bins.
+
+Other binning axis commonly used are:
+
+| name                  | string          | typical values | units |
+| ----------------------|:---------------:| --------------:|------:|
+| ToF delay (ns)        | 'dldTime'       | 620,670,10 *   | ns    |
+| pump-probe time delay | 'pumpProbeDelay | -10,10,1       | ps    |
+| sparate dld detectors | 'dldDetectors'  | -1,2,1         | detID |
+
+\* ToF delay bin size needs to be multiplied by processor.TOF_STEP_TO_NS in order to avoid artifacts.
+
+# Full code example
+
+Some examples, Ipython compatible:
+imports:
+```python
+import sys,os
+import math
+import numpy as np
+import h5py
+import time
+
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import matplotlib.colors as colors
+import scipy.signal as spsignal
+# %matplotlib inline # uncomment in Ipython
+
+from imp import reload
+from scipy.ndimage import gaussian_filter
+from processor import utils, DldFlashDataframeCreator as DldFlashProcessor
+# reload(dldFlashProcessor)
+
+```
+Load from raw data:
+```python
+reload(dldFlashProcessor) # in case code has changed since import.
+
+runNumber = 12345
+read_from_raw = True # set false to go straight for the stored parquet data
+save_and_use_parquet = True # set false to skip saving as parquet and reloading.
+
+processor = DldFlashProcessor()
+processor.runNumber = runNumber
+if read_from_raw:
+    processor.readData()
+    processor.postProcess()
+    if save_and_use_parquet:
+        processor.storeDataframes()
+        del processor
+        processor = DldFlashProcessor()
+        processor.runNumber = 18843
+        processor.readDataframes()
+else:
+    processor.readDataframes()
+
+#start binning procedure
+processor.addBinning('posX',480,980,10)
+processor.addBinning('posY',480,980,10)
+
+result = processor.ComputeBinnedData()
+result = nan_to_num(result)
+plt.imshow(result)
+```
