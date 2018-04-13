@@ -183,19 +183,22 @@ class DldProcessor():
         if kCenter is not None:
             self.createPolarCoordinates(kCenter)
 
-    def correctBAM(self, sign=0):
+    def correctBAM(self, sign=1):
         """ Correct pump probe time by BAM.
 
         Corrects the pulse to pulse jitter, and changes name from
-        delayStageTime to pumpProbeTime.
+        delayStageTime to pumpProbeTime. BAM correction shifts the time delay
+        by a constant value.
+
+        Default BAM correction is 1. #TODO: describe why!
 
         Parameters:
             sign (int): sign multiplier for BAM correction
                 accepted values: 0, 1, -1
         """
-        self.dd['pumpProbeTime'] = self.dd['delayStageTime'] - self.dd['bam'] * 1e-3 * sign
+        self.dd['pumpProbeTime'] = self.dd['delayStageTime'] - self.dd['bam'] * sign
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStageTime'] - self.ddMicrobunches[
-            'bam'] * 1e-3 * sign
+            'bam'] * sign
 
     def createPolarCoordinates(self, kCenter=(250, 250)):
         """ Define polar coordinates for k-space values.
@@ -308,7 +311,7 @@ class DldProcessor():
         f.close()
         print("Created file " + filename)
 
-    def addBinning(self, name, start, end, stepSize):
+    def addBinning(self, name, start, end, stepSize, include_last=False, stepSizePriority=True):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -330,6 +333,12 @@ class DldProcessor():
             If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.
         """
         bins = np.arange(start, end, stepSize)
+        # CHANGES:
+        # variable end: impose step size and start point and calculate resulting end ponint
+        #if stepSizePriority: prioritize stepsize, if False: prioritize start-end, and recalculate closest stepSize
+        #    USE LINSPACE
+        # bins = np.linspace(start, end, 1 + round(abs((end - start) / stepSize)))
+
         # write the parameters to the binner list:
         self.binNameList.append(name)
         self.binRangeList.append(bins)
@@ -339,6 +348,7 @@ class DldProcessor():
             delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)
+
 
     def resetBins(self):
         """ Make an empty bin list

@@ -9,8 +9,9 @@ import numpy
 from processor import DldProcessor, utils
 from processor.pah import BeamtimeDaqAccess
 
-try: # TODO: fix the cython import problem!
+try:
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
+    print('loaded cython module')
 except ImportError:
     print('Failed loading Cython script. Using Python version instead. TODO: FIX IT!!')
     import processor.cscripts.DldFlashProcessorNotCy as DldFlashProcessorCy
@@ -20,18 +21,21 @@ _VERBOSE = False
 
 
 def main():
+    from datetime import datetime
+    t0 = datetime.now()
     processor = DldFlashProcessor()
     processor.runNumber = 18843
     # processor.pulseIdInterval =
     processor.readData()
     processor.postProcess()
 
-
-    processor.addBinning('dldTime', 620, 670, 1)
-    result = processor.computeBinnedData()
-    import matplotlib.pyplot as plt
-    plt.plot(result)
-    plt.show()
+    #
+    # processor.addBinning('dldTime', 620, 670, 1)
+    # result = processor.computeBinnedData()
+    # import matplotlib.pyplot as plt
+    # plt.plot(result)
+    # plt.show()
+    print("Computation time: {} s".format(datetime.now() - t0))
 
 
 class DldFlashProcessor(DldProcessor.DldProcessor):
@@ -117,7 +121,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             setattr(self, name, val)
 
         daqAccess = BeamtimeDaqAccess.create(path)
-
+        # TODO: get the available pulse id from PAH
         if pulseIdInterval is None:
             print('reading DAQ data from run {}...\nPlease wait...'.format(runNumber))
 
@@ -320,10 +324,10 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 path = self.DATA_H5_DIR
         if fileName is None:
             if self.runNumber is None:
-                fileName = 'mb{}to{}'.format(self.pulseIdInterval[0],self.pulseIdInterval[1])
+                fileName = 'mb{}to{}'.format(self.pulseIdInterval[0], self.pulseIdInterval[1])
             else:
                 fileName = 'run{}'.format(self.runNumber)
-        fileName = path+fileName # TODO: test if naming is correct
+        fileName = path + fileName  # TODO: test if naming is correct
 
         if format == 'parquet':
             if append:

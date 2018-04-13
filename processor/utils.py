@@ -100,3 +100,4 @@ def save_HDF5_timestack_XYET(data_array, filename, path=None, overwrite=True):
 def camelCaseIt(snake_str):
     first, *others = snake_str.split('_')
     return ''.join([first.lower(), *map(str.title, others)])
+
