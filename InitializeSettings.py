@@ -32,7 +32,7 @@ def make_new_settings():
             'N_CORES': psutil.cpu_count(),
             'CHUNK_SIZE': 1000000,
             'TOF_STEP_TO_NS': 0.0205761316872428,
-            'TOF_STEP_TO_EV':  0.0205761316872428 *0.22,
+            'TOF_STEP_TO_EV': 0.0205761316872428 * 0.22,
             'TOF_NS_TO_EV': 0.22,
         },
         'DAQ address - used': {
@@ -47,7 +47,7 @@ def make_new_settings():
             'macro_bunch_pulse_id': '/Timing/Bunch train info/index 1.sts',
             'optical_diode': '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD',
             'gmd_tunnel': '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel',
-            'gmdBDA': '/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA',
+            'gmd_bda': '/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA',
 
         },
         'DAQ address - not used': {}

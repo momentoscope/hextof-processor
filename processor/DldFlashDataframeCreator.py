@@ -11,6 +11,7 @@ from processor.pah import BeamtimeDaqAccess
 
 try:
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
+
     print('loaded cython module')
 except ImportError:
     print('Failed loading Cython script. Using Python version instead. TODO: FIX IT!!')
@@ -29,12 +30,11 @@ def main():
     processor.readData()
     processor.postProcess()
 
-    #
-    # processor.addBinning('dldTime', 620, 670, 1)
-    # result = processor.computeBinnedData()
-    # import matplotlib.pyplot as plt
-    # plt.plot(result)
-    # plt.show()
+    processor.addBinning('dldTime', 620, 670, 1)
+    result = processor.computeBinnedData()
+    import matplotlib.pyplot as plt
+    plt.plot(result)
+    plt.show()
     print("Computation time: {} s".format(datetime.now() - t0))
 
 
@@ -254,11 +254,12 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         self.dd = dask.dataframe.from_array(da, columns=('posX', 'posY', 'dldTime', 'delayStageTime', 'bam',
                                                          'microbunchId', 'dldDetectorId',
-                                                         'bunchCharge', 'opticalDiode', 'gmdTunnel',
-                                                         'macroBunchPulseId'))
+                                                         'bunchCharge', 'opticalDiode', 'gmdTunnel', 'gmdBda',
+                                                         'macroBunchPulseId'))  # TODO: choose columns from SETTINGS
 
-        self.dd = self.dd[self.dd['microbunchId'] > 0]
-        self.dd['dldTime'] = self.dd['dldTime'] * self.TOF_STEP_TO_NS
+        # self.dd = self.dd[self.dd['microbunchId'] > 0] # TODO: REMOVE? is it really useful?
+        self.dd['dldTime'] = self.dd[
+                                 'dldTime'] * self.TOF_STEP_TO_NS  # TODO: change to eV? no! this is more Dima friendly
 
     def createDataframePerMicrobunch(self):
         if _VERBOSE: print('creating microbunch dataframe...')
