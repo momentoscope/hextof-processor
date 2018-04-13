@@ -5,6 +5,7 @@
 import sys, os
 import configparser
 
+os.chdir(os.path.abspath(os.path.dirname(__file__))) # TODO: find a smarter way
 if not os.path.isfile('SETTINGS.ini'):
     os.chdir('../')
 settings = configparser.ConfigParser()
