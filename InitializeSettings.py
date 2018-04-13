@@ -47,6 +47,7 @@ def make_new_settings():
             'macro_bunch_pulse_id': '/Timing/Bunch train info/index 1.sts',
             'optical_diode': '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD',
             'gmd_tunnel': '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel',
+            'gmdBDA': '/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA',
 
         },
         'DAQ address - not used': {}
