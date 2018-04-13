@@ -101,3 +101,21 @@ def camelCaseIt(snake_str):
     first, *others = snake_str.split('_')
     return ''.join([first.lower(), *map(str.title, others)])
 
+
+#================================================================================
+
+
+def t2e(t):
+    offs=371.258
+    oo=323.98
+
+    e= 0.5*1e18*9.10938e-31/(((t)-offs)*((t)-offs))/1.602177e-19-oo
+    return e
+
+def e2t(e):
+    offs=371.258
+    oo=323.98
+
+    t= np.sqrt(0.5*1e18*9.10938e-31/1.602177e-19/(e+oo))+offs
+    return t
+
