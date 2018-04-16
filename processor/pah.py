@@ -5,13 +5,15 @@
 import sys, os
 import configparser
 
-if not os.path.isfile('SETTINGS.ini'):
-    os.chdir('../')
-settings = configparser.ConfigParser()
-settings.read('SETTINGS.ini')
-PAH_MODULE_DIR = settings['paths']['PAH_MODULE_DIR']
+settings = configparser.ConfigParser() # TODO: find a smarter way
+if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+    settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+else:
+    settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
-sys.path.append(PAH_MODULE_DIR)  # appends the path where PAH is located, taken from SETTINGS.ini
+# importing stuff from PAH modules
+import sys
+sys.path.append(settings['paths']['PAH_MODULE_DIR'])
 from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess, H5FileDataAccess, H5FileManager
 
 """ 
