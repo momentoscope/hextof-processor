@@ -13,8 +13,8 @@ try:
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
 
     print('loaded cython module')
-except ImportError:
-    print('Failed loading Cython script. Using Python version instead. TODO: FIX IT!!')
+except ImportError as e:
+    print('Failed loading Cython script. Using Python version instead. TODO: FIX IT!!#n Error msg: {}'.format(e))
     import processor.cscripts.DldFlashProcessorNotCy as DldFlashProcessorCy
 assignToMircobunch = DldFlashProcessorCy.assignToMircobunch
 
