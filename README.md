@@ -125,25 +125,30 @@ processor = DldFlashProcessor()
 processor.readDataframes('name', format='hdf5')
 ```
 
-An optional parameter for both storeDataframes() and readDataframes() is path=''. When unspecified, (left as default None) the value from SETTINGS DATA_PARQUET_DIR or DATA_H5_DIR is assigned.
+An optional parameter for both storeDataframes() and readDataframes() is
+path=''. When unspecified, (left as default None) the value from
+SETTINGS DATA_PARQUET_DIR or DATA_H5_DIR is assigned.
 
 
 Binning
 =======
-In order to get n-dimensional np.arrays from the generated datasets, it is necessary to bin data along the desired axes.
+In order to get n-dimensional np.arrays from the generated datasets,
+it is necessary to bin data along the desired axes.
 an example of how this is done, starting from loading parquet data:
 ```python
 processor = DldFlashProcessor()
 processor.runNumber = 18843
 processor.readDataframes('path/to/file/name')
 ```
-This can be also done from direct data read with readData()
+This can be also done from direct raw data read with readData()
 To create the bin array structure:
 ```python
 processor.addBinning('posX',480,980,10)
 processor.addBinning('posY',480,980,10)
 ```
-This adds binning along the k-parallel x and y directions, from point 480 to point 980 with bin size of 10.
+This adds binning along the k-parallel x and y directions, from point
+480 to point 980 with bin size of 10.
+This method allows multiple
 The resulting array can now be obtained using
 ```python
 result = processor.ComputeBinnedData()
@@ -152,11 +157,11 @@ where the resulting np.array of float64 values will have the axis order same as 
 
 Other binning axis commonly used are:
 
-| name                  | string          | typical values | units |
-| ----------------------|:---------------:| --------------:|------:|
-| ToF delay (ns)        | 'dldTime'       | 620,670,10 *   | ns    |
-| pump-probe time delay | 'pumpProbeDelay | -10,10,1       | ps    |
-| sparate dld detectors | 'dldDetectors'  | -1,2,1         | detID |
+| name                   | string          | typical values | units |
+| -----------------------|:---------------:| --------------:|------:|
+| ToF delay (ns)         | 'dldTime'       | 620,670,10 *   | ns    |
+| pump-probe time delay  | 'pumpProbeDelay'| -10,10,1       | ps    |
+| separate dld detectors | 'dldDetectors'  | -1,2,1         | detID |
 
 \* ToF delay bin size needs to be multiplied by processor.TOF_STEP_TO_NS in order to avoid artifacts.
 
