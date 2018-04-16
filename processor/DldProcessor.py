@@ -7,7 +7,9 @@ import numpy as np
 import pandas
 from configparser import ConfigParser
 import matplotlib.pyplot as plt
+
 _VERBOSE = False
+
 
 def main():
     from processor import DldFlashDataframeCreator
@@ -19,7 +21,7 @@ def main():
     for k, v in processor.__dict__.items():
         print('{}: {} type: {}'.format(k.ljust(17), str(v).ljust(40), type(v)))
     # processor.readRun(19135)
-    processor.readData(runNumber = processor.runNumber)
+    processor.readData(runNumber=processor.runNumber)
     processor.readDataframesParquet()
     # processor.addBinning('posX',480,980,10)
     # processor.addBinning('posY',480,980,10)
@@ -69,6 +71,8 @@ class DldProcessor():
         self.DATA_PARQUET_DIR = str
         self.DATA_RESULTS_DIR = str
         self.initAttributes()
+
+        self._LEGACY_BINNING = False # set true to use the old binning method with arange, instead of linspace
 
     def initAttributes(self, import_all=False):
         """ Parse settings file and assign the variables.
@@ -129,11 +133,10 @@ class DldProcessor():
                 path = self.DATA_H5_DIR
         if fileName is None:
             if self.runNumber is None:
-                fileName = 'mb{}to{}'.format(self.pulseIdInterval[0],self.pulseIdInterval[1])
+                fileName = 'mb{}to{}'.format(self.pulseIdInterval[0], self.pulseIdInterval[1])
             else:
                 fileName = 'run{}'.format(self.runNumber)
-        fileName = path + fileName # TODO: test if naming is correct
-
+        fileName = path + fileName  # TODO: test if naming is correct
 
         if format == 'parquet':
             self.dd = dask.dataframe.read_parquet(fileName + "_el")
@@ -207,6 +210,7 @@ class DldProcessor():
             kCenter (int,int): position of the center of k-space in the dld
                 detector array
         """
+
         def radius(df):
             return np.sqrt(np.square(df.posX - kCenter[0]) + np.square(df.posY - kCenter[1]))
 
@@ -311,7 +315,7 @@ class DldProcessor():
         f.close()
         print("Created file " + filename)
 
-    def addBinning(self, name, start, end, stepSize, include_last=False, stepSizePriority=True):
+    def addBinning(self, name, start, end, steps, useStepSize=True, include_last=True, force_legacy=False, ):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -319,12 +323,22 @@ class DldProcessor():
         as in this list. The attribute binRangeList will contain the ranges of
         the binning used for the corresponding dimension.
 
+        Binning is created usin np.linspace (formerly was done with np.arange).
+        The implementation allows to choose between setting a step size
+        (useStepSize=True, default) or using a number of bins (useStepSize=False).
+
         Parameters:
             name (string): Name of the column to bin to. Possible column names are:
                 posX, posY, dldTime, pumpProbeTime, dldDetector, etc...
             start (float): position of first bin
             end (float): position of last bin (not included!)
-            stepSize (float): size of each bin
+            steps (float): define the bin size: if useStepSize=True (default),
+                this is the step size, while if useStepSize=False, then this is the
+                number of bins. In Legacy mode (force_legacy=True, or
+                processor._LEGACY_MODE=True)
+
+            force_legacy (bool): if true, imposes old method for generating binns,
+                based on np.arange instead of linspace.
 
         See also:
             computeBinnedData : Method to compute all bins created with this function.
@@ -332,14 +346,22 @@ class DldProcessor():
         Notes:
             If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.
         """
-        bins = np.arange(start, end, stepSize)
-        # CHANGES:
-        # variable end: impose step size and start point and calculate resulting end ponint
-        #if stepSizePriority: prioritize stepsize, if False: prioritize start-end, and recalculate closest stepSize
-        #    USE LINSPACE
-        # bins = np.linspace(start, end, 1 + round(abs((end - start) / stepSize)))
+        _LEGACY_BINNING = False
+        if _LEGACY_BINNING or force_legacy:
+            bins = np.arange(start, end, steps)
 
-        # write the parameters to the binner list:
+        elif useStepSize:
+            rest = abs(end - start) % steps
+            n_bins = int((abs(end - start) - rest) / steps) + 1
+
+            if not include_last:
+                n_bins -= 1
+            bins = np.linspace(start, end, n_bins, endpoint=include_last)
+        else:
+            assert isinstance(steps, int) and steps > 0, 'number of steps must be a positive integer number'
+            bins = np.linspace(start, end, steps, endpoint=include_last)
+
+        # write the parameters to the bin list:
         self.binNameList.append(name)
         self.binRangeList.append(bins)
         if (name == 'pumpProbeTime'):
@@ -347,8 +369,7 @@ class DldProcessor():
             delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(pandas.cut, bins)
             delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
-                np.float64)
-
+                np.float64) # TODO: discuss and improve the delay stage histogram normalization.
 
     def resetBins(self):
         """ Make an empty bin list
@@ -430,6 +451,7 @@ class DldProcessor():
             'WARNING: readDataframesParquet is being removed.\nUse readDataframes instead: Default behaviour is now parqet.\n',
             ' Specify format="h5" for legacy use.')
         self.readDataframes(fileName)
+
 
 if __name__ == "__main__":
     main()
