@@ -51,7 +51,7 @@ def radius(df, center=(0, 0)):
 
 #================================================================================
 
-def save_HDF5_timestack_XYET(data_array, filename, path=None, overwrite=True):
+def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
     """ Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI
 
     Parameters:
@@ -61,8 +61,6 @@ def save_HDF5_timestack_XYET(data_array, filename, path=None, overwrite=True):
         overwrite (str): if true, it overwrites existing file with the same
         	name. Otherwise raises and error.
     """
-    # TODO: merge path and filename in one input variable.
-
     mode = "w-"  # fail if file exists
     if overwrite:
         mode = "w"
@@ -118,4 +116,5 @@ def e2t(e):
 
     t= np.sqrt(0.5*1e18*9.10938e-31/1.602177e-19/(e+oo))+offs
     return t
+
 
