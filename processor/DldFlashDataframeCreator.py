@@ -106,10 +106,10 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         # parse settings and set all dataset addresses as attributes.
         settings = ConfigParser()
-        path_to_settings = '\\'.join(os.path.realpath(__file__).split('\\')[:-2])
-        print(path_to_settings)
-        print(os.path.isfile(path_to_settings + '\\SETTINGS.ini'))
-        settings.read(path_to_settings + '\\SETTINGS.ini')
+        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+            settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+        else:
+            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
         section = 'DAQ address - used'
         daqAddresses = []
@@ -340,6 +340,43 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         elif format == 'hdf5':
             dask.dataframe.to_hdf(self.dd, fileName, '/electrons')
             dask.dataframe.to_hdf(self.ddMicrobunches, fileName, '/microbunches')
+
+    def getIds(self, runNumber=None, path=None):
+        """ Returns initial and final MBunchIDs of runNumber
+
+        Parameters:
+            runNumber (int): number of the run from which to read id interval.
+            path (str): path to location where raw HDF5 files are stored
+        """
+
+        if runNumber is None:
+            runNumber = self.runNumber
+        else:
+            self.runNumber = runNumber
+
+        if path is None:
+            path = self.DATA_RAW_DIR
+
+        # Gets paths from settings file.
+        # Checks for SETTINGS.ini in processor folder.
+        # If not there, checks parent directory
+        settings = ConfigParser()
+        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+            settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+        else:
+            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+        path = settings['paths']['DATA_RAW_DIR']
+
+        # needs to import stuff from PAH modules
+        import sys
+        sys.path.append(settings['paths']['PAH_MODULE_DIR'])
+        from camp.pah.beamtimedaqaccess import H5FileDataAccess, H5FileManager
+        fileAccess = H5FileDataAccess(H5FileManager(path))
+        pulseIdInterval = fileAccess.availablePulseIdInterval(runNumber)
+
+        return pulseIdInterval
+
+
 
     # ==================
     # DEPRECATED METHODS
