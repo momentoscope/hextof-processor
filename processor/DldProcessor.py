@@ -83,10 +83,10 @@ class DldProcessor():
                 False is the better choice, since it keeps better track of attributes.
         """
         settings = ConfigParser()
-        path_to_settings = '\\'.join(os.path.realpath(__file__).split('\\')[:-2])
-        print(path_to_settings)
-        print(os.path.isfile(path_to_settings + '\\SETTINGS.ini'))
-        settings.read(path_to_settings + '\\SETTINGS.ini')
+        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+            settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+        else:
+            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
         for section in settings:
             for entry in settings[section]:
@@ -170,6 +170,12 @@ class DldProcessor():
         Runs the methods to post process the dataframe. Includes BAM sign
         correction and polar coordinates axes generation.
 
+        /!\ BAM correction is tricky and will mess up the delay histogram.
+        This is because of strong correlation with micro bunch ID of both the
+        BAM value and the photoemission yield, i.e. photons at the end of a
+        Macro bunch give more photoelectrons while systematically being
+        shifted in time.
+
         Parameters:
             bamCorrectionSign (int): used to apply sign to the bam correction: accepted values are 0,1,-1
                 set to 0 to avoid applying bam correction, set to None to leave
@@ -193,11 +199,24 @@ class DldProcessor():
         delayStageTime to pumpProbeTime. BAM correction shifts the time delay
         by a constant value.
 
-        Default BAM correction is 1. #TODO: describe why!
+        /!\ BAM correction is tricky and will mess up the delay histogram.
+        This is because of strong correlation with micro bunch ID of both the
+        BAM value and the photoemission yield, i.e. photons at the end of a
+        Macro bunch give more photoelectrons while systematically being
+        shifted in time.
+
+        Default value is 1 since the BAM measures the delay between the master
+        clock start and the arrival of the beam.
+        On the other hand, more positive delay stage values are for when the FEL
+        arrives earlier (FEL before pump is on the more positive side of t0).
+        A bigger delay in beam arrival for an FEL pulse means that the photoelectrons
+        actually had a more negative delay (probe later than pump) than what the delay stage
+        measured, and should therefore be moved to more negative values.
 
         Parameters:
             sign (int): sign multiplier for BAM correction
                 accepted values: 0, 1, -1
+                Avoid using -1 unless debugging
         """
         self.dd['pumpProbeTime'] = self.dd['delayStageTime'] - self.dd['bam'] * sign
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStageTime'] - self.ddMicrobunches[
@@ -252,7 +271,7 @@ class DldProcessor():
         """ Store the binned data in a hdf5 file.
 
         Parameters:
-            binneddata (pd.DataFrame): binned data with binnes in dldTime, posX, and posY
+            binneddata (pd.DataFrame): binned data with bins in dldTime, posX, and posY
                 (and if to be normalized, binned in detectors)
             filename (string): name of the file,
             path (string, optional): path to the location where to save the hdf5 file. If None, uses the default value
@@ -402,7 +421,7 @@ class DldProcessor():
         calculatedResults = []
         for i in range(0, self.dd.npartitions, self.N_CORES):
             resultsToCalculate = []
-            # proces the data in blocks of n partitions (given by the number of cores):
+            # process the data in blocks of n partitions (given by the number of cores):
             for j in range(0, self.N_CORES):
                 if (i + j) >= self.dd.npartitions:
                     break
@@ -411,7 +430,7 @@ class DldProcessor():
 
             # now do the calculation on each partition (using the dask framework):
             if len(resultsToCalculate) > 0:
-                print("computing partitions " + str(i) + " of " + str(self.dd.npartitions) + ". len: " + str(
+                print("computing partitions " + str(i) + " to " + str(i+j) + " of " + str(self.dd.npartitions) + ". partitions calculated in parallel: " + str(
                     len(resultsToCalculate)))
                 results = dask.compute(*resultsToCalculate)
                 total = np.zeros_like(results[0])

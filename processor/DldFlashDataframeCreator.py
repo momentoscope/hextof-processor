@@ -9,16 +9,17 @@ import numpy
 from processor import DldProcessor, utils
 from processor.pah import BeamtimeDaqAccess
 
+_VERBOSE = False
+
 try:
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
 
-    print('loaded cython module')
+    if _VERBOSE: print('loaded cython module')
 except ImportError as e:
     print('Failed loading Cython script. Using Python version instead. TODO: FIX IT!!#n Error msg: {}'.format(e))
     import processor.cscripts.DldFlashProcessorNotCy as DldFlashProcessorCy
 assignToMircobunch = DldFlashProcessorCy.assignToMircobunch
 
-_VERBOSE = False
 
 
 def main():
@@ -143,6 +144,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             for address_name in daqAddresses:
                 if _VERBOSE: print('reading address: {}'.format(address_name))
                 setattr(self, address_name, daqAccess.valuesOfInterval(getattr(self, address_name), pulseIdInterval))
+            numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
             macroBunchPulseId_correction = pulseIdInterval[0]
 
         # necessary corrections for specific channels:
@@ -157,7 +159,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         electronsToCount = electronsToCount[electronsToCount < 10000]
         numOfElectrons = len(electronsToCount)
         electronsPerMacrobunch = int(numOfElectrons / numOfMacrobunches)
-        print("Number of electrons: {0:,}; {1:,} e/mb ".format(numOfElectrons, electronsPerMacrobunch))
+        print("Number of electrons: {0:,}; {1:,} e/Mb ".format(numOfElectrons, electronsPerMacrobunch))
         print("Creating data frame: Please wait...")
         self.createDataframePerElectron()
         self.createDataframePerMicrobunch()
@@ -208,6 +210,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             self.gmdTunnel[mbIndexStart:mbIndexEnd, :].astype(numpy.float64))
         daGmdTunnel = gmdTunnelArray.flatten()
 
+        gmdBdaArray = assignToMircobunch(
+            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(numpy.float64),
+            self.gmdBda[mbIndexStart:mbIndexEnd, :].astype(numpy.float64))
+        daGmdBda = gmdBdaArray.flatten()
+
         # the Aux channel: aux0:
         # aux0Arr= assignToMircobunch(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(numpy.float64), self.dldAux[mbIndexStart:mbIndexEnd, 0].astype(numpy.float64))
         # daAux0 = dask.array.from_array(aux0Arr.flatten(), chunks=(chunks))
@@ -222,7 +229,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         #                       daGmdTunnel, daMacroBunchPulseId])
         da = numpy.stack([daX, daY, daTime, daDelaystage, daBam, daMicrobunchId,
                           daDetectorId, daBunchCharge, daOpticalDiode,
-                          daGmdTunnel, daMacroBunchPulseId])
+                          daGmdTunnel, daGmdBda, daMacroBunchPulseId])
 
         return da
 
@@ -430,6 +437,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         macroBunchPulseIdName = '/Timing/Bunch train info/index 1.sts'
         opticalDiodeName = '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD'
         gmdTunnelName = '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel'
+        gmdBdaName = '/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA'
 
         # adc1Name = '/Experiment/PG/SIS8300 100MHz ADC/CH6/TD'
         # adc2Name = '/Experiment/PG/SIS8300 100MHz ADC/CH7/TD'
@@ -464,6 +472,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.macroBunchPulseId, otherStuff = daqAccess.allValuesOfRun(macroBunchPulseIdName, runNumber)
         self.macroBunchPulseId -= otherStuff[0]
         self.gmdTunnel, otherStuff = daqAccess.allValuesOfRun(gmdTunnelName, runNumber)
+        self.gmdBda, otherStuff = daqAccess.allValuesOfRun(gmdBdaName, runNumber)
         electronsToCount = self.dldPosX.copy().flatten()
         electronsToCount = numpy.nan_to_num(electronsToCount)
         electronsToCount = electronsToCount[electronsToCount > 0]
@@ -510,6 +519,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         macroBunchPulseIdName = '/Timing/Bunch train info/index 1.sts'
         opticalDiodeName = '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD'
         gmdTunnelName = '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel'
+        gmdBdaName = '/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA'
 
         # adc1Name = '/Experiment/PG/SIS8300 100MHz ADC/CH6/TD'
         # adc2Name = '/Experiment/PG/SIS8300 100MHz ADC/CH7/TD'
@@ -541,6 +551,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         # self.macroBunchPulseId -= self.macroBunchPulseId[self.macroBunchPulseId > 0].min()
         self.macroBunchPulseId -= pulseIdInterval[0]
         self.gmdTunnel = daqAccess.valuesOfInterval(gmdTunnelName, pulseIdInterval)
+        self.gmdBda = daqAccess.valuesOfInterval(gmdBdaName, pulseIdInterval)
         electronsToCount = self.dldPosX.copy().flatten()
         electronsToCount = numpy.nan_to_num(electronsToCount)
         electronsToCount = electronsToCount[electronsToCount > 0]
