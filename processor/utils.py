@@ -7,7 +7,8 @@ import numpy as np
 import h5py
 import configparser
 
-#================================================================================
+
+# ================================================================================
 
 def PulseEnergy400(Diode):
     """ Returns the pulse energy of 400nm laser in uJ.
@@ -44,12 +45,14 @@ def EnergyDensity800(Diode, Diameter=600):
 	"""
     return PulseEnergy800(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
 
-#================================================================================
+
+# ================================================================================
 
 def radius(df, center=(0, 0)):
     return np.sqrt(np.square(df.posX - center[0]) + np.square(df.posY - center[1]))
 
-#================================================================================
+
+# ================================================================================
 
 def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
     """ Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI
@@ -92,7 +95,8 @@ def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
         dset[...] = xyeData
     print("Created file " + filepath)
 
-#================================================================================
+
+# ================================================================================
 
 
 def camelCaseIt(snake_str):
@@ -100,7 +104,7 @@ def camelCaseIt(snake_str):
     return ''.join([first.lower(), *map(str.title, others)])
 
 
-#================================================================================
+# ================================================================================
 
 """ The following functions convert between binding energy (Eb) in eV (negative convention)
     and time of flight (ToF) in ns.
@@ -130,20 +134,85 @@ Parameters:
     e (float) the binding energy
 """
 
-# TODO: include offs and oo in the SETTINGS.ini file
-def t2e(t):
-    offs = 371.258
-    oo = 323.98
 
-    e = 0.5*1e18*9.10938e-31/(((t)-offs)*((t)-offs))/1.602177e-19-oo
+# TODO: include offs and oo in the SETTINGS.ini file
+def t2e(t, offset=None, oo=None):
+    """ Transform ToF to eV.
+
+    The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)
+    and time of flight (ToF) in ns.
+    The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
+    binding energy Eb is given by
+    Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+    With W the work function, hv the photon energy, V the electrostatic potential applied to
+    the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
+    The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
+    time in the drift tube. The measured ToF, however, has some offset due to clock start not
+    coinciding with entry in the drift section.
+
+    offs is supposed to include the time offset for when the electrons enter the drift section.
+    Its main mainly affects peak spacing, and there are several strategies for calibrating this
+    value:
+        1.  By measuring the photon peak and correcting by some extractor voltage-dependent offset
+        2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum
+        3.  Imposing some calibrated spacing between features in a spectrum
+
+    oo is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
+    there are several strategies for calibrating this value:
+        1.  By getting the correct values for W, hv, and V
+        2.  It can be calibrated by imposing peak position
+
+    Parameters:
+        t (float) the ToF
+
+    Returns:
+        e (float) the binding energy
+    """
+    if offset is None:
+        offset = 371.258
+    if oo is None:
+        oo = 323.98
+
+    e = 0.5 * 1e18 * 9.10938e-31 / (((t) - offset) * ((t) - offset)) / 1.602177e-19 - oo
     return e
 
 
-def e2t(e):
-    offs = 371.258
-    oo = 323.98
+def e2t(e, offset=None, oo=None):
+    """ Transform eV to ToF.
 
-    t = np.sqrt(0.5*1e18*9.10938e-31/1.602177e-19/(e+oo))+offs
+    The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)
+    and time of flight (ToF) in ns.
+    The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
+    binding energy Eb is given by
+    Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+    With W the work function, hv the photon energy, V the electrostatic potential applied to
+    the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
+    The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
+    time in the drift tube. The measured ToF, however, has some offset due to clock start not
+    coinciding with entry in the drift section.
+
+    offs is supposed to include the time offset for when the electrons enter the drift section.
+    Its main mainly affects peak spacing, and there are several strategies for calibrating this
+    value:
+        1.  By measuring the photon peak and correcting by some extractor voltage-dependent offset
+        2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum
+        3.  Imposing some calibrated spacing between features in a spectrum
+
+    oo is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
+    there are several strategies for calibrating this value:
+        1.  By getting the correct values for W, hv, and V
+        2.  It can be calibrated by imposing peak position
+
+    Parameters:
+        e (float): the binding energy
+
+    returns:
+        t (float): the ToF
+    """
+    if offset is None:
+        offset = 371.258
+    if oo is None:
+        oo = 323.98
+
+    t = np.sqrt(0.5 * 1e18 * 9.10938e-31 / 1.602177e-19 / (e + oo)) + offset
     return t
-
-
