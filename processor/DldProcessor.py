@@ -72,7 +72,7 @@ class DldProcessor():
         self.DATA_RESULTS_DIR = str
         self.initAttributes()
 
-        self._LEGACY_BINNING = False # set true to use the old binning method with arange, instead of linspace
+        self._LEGACY_BINNING = False  # set true to use the old binning method with arange, instead of linspace
 
     def initAttributes(self, import_all=False):
         """ Parse settings file and assign the variables.
@@ -342,7 +342,7 @@ class DldProcessor():
         as in this list. The attribute binRangeList will contain the ranges of
         the binning used for the corresponding dimension.
 
-        Binning is created usin np.linspace (formerly was done with np.arange).
+        Binning is created using np.linspace (formerly was done with np.arange).
         The implementation allows to choose between setting a step size
         (useStepSize=True, default) or using a number of bins (useStepSize=False).
 
@@ -388,7 +388,7 @@ class DldProcessor():
             delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(pandas.cut, bins)
             delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
-                np.float64) # TODO: discuss and improve the delay stage histogram normalization.
+                np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
 
     def resetBins(self):
         """ Make an empty bin list
@@ -430,7 +430,8 @@ class DldProcessor():
 
             # now do the calculation on each partition (using the dask framework):
             if len(resultsToCalculate) > 0:
-                print("computing partitions " + str(i) + " to " + str(i+j) + " of " + str(self.dd.npartitions) + ". partitions calculated in parallel: " + str(
+                print("computing partitions " + str(i) + " to " + str(i + j) + " of " + str(
+                    self.dd.npartitions) + ". partitions calculated in parallel: " + str(
                     len(resultsToCalculate)))
                 results = dask.compute(*resultsToCalculate)
                 total = np.zeros_like(results[0])

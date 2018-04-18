@@ -7,7 +7,8 @@ import numpy as np
 import h5py
 import configparser
 
-#================================================================================
+
+# ================================================================================
 
 def PulseEnergy400(Diode):
     """ Returns the pulse energy of 400nm laser in uJ.
@@ -44,12 +45,14 @@ def EnergyDensity800(Diode, Diameter=600):
 	"""
     return PulseEnergy800(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
 
-#================================================================================
+
+# ================================================================================
 
 def radius(df, center=(0, 0)):
     return np.sqrt(np.square(df.posX - center[0]) + np.square(df.posY - center[1]))
 
-#================================================================================
+
+# ================================================================================
 
 def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
     """ Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI
@@ -92,7 +95,8 @@ def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
         dset[...] = xyeData
     print("Created file " + filepath)
 
-#================================================================================
+
+# ================================================================================
 
 
 def camelCaseIt(snake_str):
@@ -100,7 +104,7 @@ def camelCaseIt(snake_str):
     return ''.join([first.lower(), *map(str.title, others)])
 
 
-#================================================================================
+# ================================================================================
 
 """ The following functions convert between binding energy (Eb) in eV (negative convention)
     and time of flight (ToF) in ns.
@@ -130,8 +134,9 @@ Parameters:
     e (float) the binding energy
 """
 
+
 # TODO: include offs and oo in the SETTINGS.ini file
-def t2e(t):
+def t2e(t, offset=None, oo=None):
     """ Transform ToF to eV.
 
     The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)
@@ -159,16 +164,20 @@ def t2e(t):
 
     Parameters:
         t (float) the ToF
+
+    Returns:
         e (float) the binding energy
     """
-    offs = 371.258
-    oo = 323.98
+    if offset is None:
+        offset = 371.258
+    if oo is None:
+        oo = 323.98
 
-    e = 0.5*1e18*9.10938e-31/(((t)-offs)*((t)-offs))/1.602177e-19-oo
+    e = 0.5 * 1e18 * 9.10938e-31 / (((t) - offset) * ((t) - offset)) / 1.602177e-19 - oo
     return e
 
 
-def e2t(e):
+def e2t(e, offset=None, oo=None):
     """ Transform eV to ToF.
 
     The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)
@@ -195,13 +204,15 @@ def e2t(e):
         2.  It can be calibrated by imposing peak position
 
     Parameters:
-        t (float) the ToF
-        e (float) the binding energy
+        e (float): the binding energy
+
+    returns:
+        t (float): the ToF
     """
-    offs = 371.258
-    oo = 323.98
+    if offset is None:
+        offset = 371.258
+    if oo is None:
+        oo = 323.98
 
-    t = np.sqrt(0.5*1e18*9.10938e-31/1.602177e-19/(e+oo))+offs
+    t = np.sqrt(0.5 * 1e18 * 9.10938e-31 / 1.602177e-19 / (e + oo)) + offset
     return t
-
-
