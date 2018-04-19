@@ -12,23 +12,10 @@ _VERBOSE = False
 
 
 def main():
-    from processor import DldFlashDataframeCreator
-    print('start\n')
-    processor = DldFlashDataframeCreator.DldFlashProcessor()
-    print(processor.runNumber)
+    from processor.DldFlashDataframeCreator import DldFlashProcessor
+    processor = DldFlashProcessor()
     processor.runNumber = 19135
-    print('end\n')
-    for k, v in processor.__dict__.items():
-        print('{}: {} type: {}'.format(k.ljust(17), str(v).ljust(40), type(v)))
-    # processor.readRun(19135)
-    processor.readData(runNumber=processor.runNumber)
-    processor.readDataframesParquet()
-    # processor.addBinning('posX',480,980,10)
-    # processor.addBinning('posY',480,980,10)
-    processor.addBinning('dldTime', 620, 670, 10 * processor.TOF_STEP_TO_NS)
-    result = processor.computeBinnedData()
-    plt.plot(result)
-    plt.show()
+    processor.readDataframes()
 
 
 class DldProcessor():
@@ -135,7 +122,7 @@ class DldProcessor():
             if self.runNumber is None:
                 fileName = 'mb{}to{}'.format(self.pulseIdInterval[0], self.pulseIdInterval[1])
             else:
-                fileName = 'run{}'.format(self.runNumber)
+                fileName = '{}'.format(self.runNumber)
         fileName = path + fileName  # TODO: test if naming is correct
 
         if format == 'parquet':
