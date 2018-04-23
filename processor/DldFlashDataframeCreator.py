@@ -13,7 +13,6 @@ _VERBOSE = False
 
 try:
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
-
     if _VERBOSE: print('loaded cython module')
 except ImportError as e:
     print('Failed loading Cython script. Using Python version instead. TODO: FIX IT!!#n Error msg: {}'.format(e))
