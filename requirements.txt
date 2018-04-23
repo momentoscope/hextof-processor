@@ -1,2 +1,5 @@
 dask
 numpy
+matplotlib
+h5py
+pandas

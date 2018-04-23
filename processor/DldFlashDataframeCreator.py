@@ -20,7 +20,6 @@ except ImportError as e:
 assignToMircobunch = DldFlashProcessorCy.assignToMircobunch
 
 
-
 def main():
     from datetime import datetime
     t0 = datetime.now()
@@ -382,8 +381,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         pulseIdInterval = fileAccess.availablePulseIdInterval(runNumber)
 
         return pulseIdInterval
-
-
 
     # ==================
     # DEPRECATED METHODS

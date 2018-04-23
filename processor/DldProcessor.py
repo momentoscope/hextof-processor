@@ -12,23 +12,10 @@ _VERBOSE = False
 
 
 def main():
-    from processor import DldFlashDataframeCreator
-    print('start\n')
-    processor = DldFlashDataframeCreator.DldFlashProcessor()
-    print(processor.runNumber)
+    from processor.DldFlashDataframeCreator import DldFlashProcessor
+    processor = DldFlashProcessor()
     processor.runNumber = 19135
-    print('end\n')
-    for k, v in processor.__dict__.items():
-        print('{}: {} type: {}'.format(k.ljust(17), str(v).ljust(40), type(v)))
-    # processor.readRun(19135)
-    processor.readData(runNumber=processor.runNumber)
-    processor.readDataframesParquet()
-    # processor.addBinning('posX',480,980,10)
-    # processor.addBinning('posY',480,980,10)
-    processor.addBinning('dldTime', 620, 670, 10 * processor.TOF_STEP_TO_NS)
-    result = processor.computeBinnedData()
-    plt.plot(result)
-    plt.show()
+    processor.readDataframes()
 
 
 class DldProcessor():
@@ -72,7 +59,7 @@ class DldProcessor():
         self.DATA_RESULTS_DIR = str
         self.initAttributes()
 
-        self._LEGACY_BINNING = False # set true to use the old binning method with arange, instead of linspace
+        self._LEGACY_BINNING = False  # set true to use the old binning method with arange, instead of linspace
 
     def initAttributes(self, import_all=False):
         """ Parse settings file and assign the variables.
@@ -135,7 +122,7 @@ class DldProcessor():
             if self.runNumber is None:
                 fileName = 'mb{}to{}'.format(self.pulseIdInterval[0], self.pulseIdInterval[1])
             else:
-                fileName = 'run{}'.format(self.runNumber)
+                fileName = '{}'.format(self.runNumber)
         fileName = path + fileName  # TODO: test if naming is correct
 
         if format == 'parquet':
@@ -334,7 +321,7 @@ class DldProcessor():
         f.close()
         print("Created file " + filename)
 
-    def addBinning(self, name, start, end, steps, useStepSize=True, include_last=True, force_legacy=False, ):
+    def addBinningOld(self, name, start, end, steps, useStepSize=True, include_last=True, force_legacy=False, ):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -342,7 +329,7 @@ class DldProcessor():
         as in this list. The attribute binRangeList will contain the ranges of
         the binning used for the corresponding dimension.
 
-        Binning is created usin np.linspace (formerly was done with np.arange).
+        Binning is created using np.linspace (formerly was done with np.arange).
         The implementation allows to choose between setting a step size
         (useStepSize=True, default) or using a number of bins (useStepSize=False).
 
@@ -381,6 +368,115 @@ class DldProcessor():
             bins = np.linspace(start, end, steps, endpoint=include_last)
 
         # write the parameters to the bin list:
+        self.binNameList.append(name)
+        self.binRangeList.append(bins)
+        if (name == 'pumpProbeTime'):
+            # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
+            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(pandas.cut, bins)
+            delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
+            self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
+                np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
+
+    def genBins(self, start, end, steps, useStepSize=True, forceEnds=False, include_last=True, force_legacy=False):
+        """Creates bins for use by binning functions. Can also be used to generate x axes.
+
+        Binning is created using np.linspace (formerly was done with np.arange).
+        The implementation allows to choose between setting a step size
+        (useStepSize=True, default) or using a number of bins (useStepSize=False).
+
+        In general, it is not possible to satisfy all 3 parameters: start, end, steps.
+        For this reason, you can choose to give priority to the step size or to the
+        interval size. In case forceEnds=False, the steps parameter is given
+        priority and the end parameter is redefined, so the interval can actually
+        be larger than expected. In case forceEnds = true, the stepSize is not
+        enforced, and the interval is divided by the closest step that divides it
+        cleanly. This of course only has meaning when choosing steps that do not
+        cleanly divide the interval.
+
+        Parameters:
+            start (float): position of first bin
+            end (float): position of last bin (not included!)
+            steps (float): define the bin size: if useStepSize=True (default),
+                this is the step size, while if useStepSize=False, then this is the
+                number of bins. In Legacy mode (force_legacy=True, or
+                processor._LEGACY_MODE=True)
+            useStepSize (bool): tells python to interpret steps as a step size if
+                True, or as the number of steps if False
+            forceEnds (bool): tells python to give priority to the end parameter
+                rather than the step parameter (see above for more info)
+            include_last (bool): closes the interval on the right when true. If
+                using step size priority, will expand the interval to include
+                the next value when true, will shrink the interval to contain all
+                points within the bounds if false.
+            force_legacy (bool): if true, imposes old method for generating binns,
+                based on np.arange instead of linspace.
+        """
+        from decimal import Decimal
+
+        _LEGACY_BINNING = False
+        # uses old method of binning
+        if _LEGACY_BINNING or force_legacy:
+            bins = np.arange(start, end, steps)
+
+        # default interpretation of steps as the step size
+        # needs Decimal library for dealing with float representation issues
+        elif useStepSize:
+            if not forceEnds:
+                if (abs(float(Decimal(str(abs(end - start))) % Decimal(str(steps)))) > 0):
+                    if include_last:
+                        end += float(Decimal(str(steps))-(Decimal(str(abs(end - start))) % Decimal(str(steps))))
+                    else:
+                        end -= float((Decimal(str(abs(end - start))) % Decimal(str(steps))))
+                        include_last = True
+            n_bins = round((abs(end - start)) / steps) + 1
+            if not include_last:
+                n_bins -= 1
+            bins = np.linspace(start, end, n_bins, endpoint=include_last)
+
+        # non default interpretation of steps as the number of steps
+        # /!\ remember to use n+1 if including the end point (default)
+        else:
+            assert isinstance(steps, int) and steps > 0, 'number of steps must be a positive integer number'
+            bins = np.linspace(start, end, steps, endpoint=include_last)
+        return bins
+
+    def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False, include_last=True, force_legacy=False):
+        """ Add binning of one dimension, to be then computed with computeBinnedData method.
+
+        Creates a list of bin names, (binNameList) to identify the axis on
+        which to bin the data. Output array dimensions order will be the same
+        as in this list. The attribute binRangeList will contain the ranges of
+        the binning used for the corresponding dimension.
+
+        Parameters:
+            name (string): Name of the column to bin to. Possible column names are:
+                posX, posY, dldTime, pumpProbeTime, dldDetector, etc...
+            start (float): position of first bin
+            end (float): position of last bin (not included!)
+            steps (float): define the bin size: if useStepSize=True (default),
+                this is the step size, while if useStepSize=False, then this is the
+                number of bins. In Legacy mode (force_legacy=True, or
+                processor._LEGACY_MODE=True)
+            useStepSize (bool): tells python to interpret steps as a step size if
+                True, or as the number of steps if False
+            forceEnds (bool): tells python to give priority to the end parameter
+                rather than the step parameter (see genBins for more info)
+            include_last (bool): closes the interval on the right when true. If
+                using step size priority, will expand the interval to include
+                the next value when true, will shrink the interval to contain all
+                points within the bounds if false.
+            force_legacy (bool): if true, imposes old method for generating binns,
+                based on np.arange instead of linspace.
+
+        See also:
+            computeBinnedData : Method to compute all bins created with this function.
+
+        Notes:
+            If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.
+        """
+
+        # write the parameters to the bin list:
+        bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
         self.binNameList.append(name)
         self.binRangeList.append(bins)
         if (name == 'pumpProbeTime'):
@@ -430,7 +526,8 @@ class DldProcessor():
 
             # now do the calculation on each partition (using the dask framework):
             if len(resultsToCalculate) > 0:
-                print("computing partitions " + str(i) + " to " + str(i+j) + " of " + str(self.dd.npartitions) + ". partitions calculated in parallel: " + str(
+                print("computing partitions " + str(i) + " to " + str(i + j) + " of " + str(
+                    self.dd.npartitions) + ". partitions calculated in parallel: " + str(
                     len(resultsToCalculate)))
                 results = dask.compute(*resultsToCalculate)
                 total = np.zeros_like(results[0])
