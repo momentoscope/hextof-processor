@@ -534,7 +534,6 @@ class DldProcessor(object):
                 for result in results:
                     total = total + result
                 calculatedResults.append(total)
-                del total
             del resultsToCalculate
 
         # we now need to add them all up (single core):
