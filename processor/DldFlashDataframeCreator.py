@@ -67,7 +67,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
     """
 
     def __init__(self):
-        super().__init__()
+        super(DldFlashProcessor,self).__init__()
 
         self.runNumber = None
         self.pulseIdInterval = None

@@ -18,7 +18,7 @@ def main():
     processor.readDataframes()
 
 
-class DldProcessor():
+class DldProcessor(object):
     """
       This class simplifies the analysis of data files recorded during the
       beamtime of August 2017. It converts the electrons from the DLD into
