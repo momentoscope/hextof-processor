@@ -122,7 +122,7 @@ class DldProcessor(object):
             if self.runNumber is None:
                 fileName = 'mb{}to{}'.format(self.pulseIdInterval[0], self.pulseIdInterval[1])
             else:
-                fileName = '{}'.format(self.runNumber)
+                fileName = 'run{}'.format(self.runNumber)
         fileName = path + fileName  # TODO: test if naming is correct
 
         if format == 'parquet':
