@@ -15,3 +15,11 @@ lib/*.html
 
 # ignore local settings
 SETTINGS.ini
+
+XPSdoniachs/XPSdoniachs_ext\.cpython-36m-darwin\.so
+
+build/
+
+\.DS_Store
+
+*.so
