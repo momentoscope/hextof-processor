@@ -263,7 +263,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                                                          'bunchCharge', 'opticalDiode', 'gmdTunnel', 'gmdBda',
                                                          'macroBunchPulseId'))  # TODO: choose columns from SETTINGS
 
-        # self.dd = self.dd[self.dd['microbunchId'] > 0] # TODO: REMOVE? is it really useful?
+        self.dd = self.dd[self.dd['microbunchId'] > 0] # needed as negative values are used to mark bad data
         self.dd['dldTime'] = self.dd[
                                  'dldTime'] * self.TOF_STEP_TO_NS  # TODO: change to eV? no! this is more Dima friendly
 
@@ -298,10 +298,12 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                                               chunks=(self.CHUNK_SIZE))
 
         lengthToPad = numOfMicrobunches - self.opticalDiode.shape[1]
-        paddedOpticalDiode = numpy.pad(self.opticalDiode, ((0, 0), (0, lengthToPad)), 'constant',
-                                       constant_values=(0, 0))
-        daOpticalDiode = dask.array.from_array(paddedOpticalDiode.flatten(), chunks=(self.CHUNK_SIZE))
-
+        try:
+            paddedOpticalDiode = numpy.pad(self.opticalDiode, ((0, 0), (0, lengthToPad)), 'constant', constant_values=(0, 0))
+            daOpticalDiode = dask.array.from_array(paddedOpticalDiode.flatten(), chunks=(self.CHUNK_SIZE))
+        except:
+            print('fix optical diode DAQ: Langth: ' + str( self.opticalDiode.shape[1]))
+            daOpticalDiode = dask.array.from_array(self.opticalDiode[:,0:numOfMicrobunches].flatten(), chunks=(self.CHUNK_SIZE))                        
         # Added MacroBunchPulseId
         da = dask.array.stack([daDelayStage, daBam, daAux0, daAux1, daBunchCharge, daOpticalDiode, daMacroBunchPulseId])
 

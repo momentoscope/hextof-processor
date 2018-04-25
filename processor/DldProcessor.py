@@ -122,7 +122,7 @@ class DldProcessor():
             if self.runNumber is None:
                 fileName = 'mb{}to{}'.format(self.pulseIdInterval[0], self.pulseIdInterval[1])
             else:
-                fileName = '{}'.format(self.runNumber)
+                fileName = 'run{}'.format(self.runNumber)
         fileName = path + fileName  # TODO: test if naming is correct
 
         if format == 'parquet':
@@ -483,8 +483,14 @@ class DldProcessor():
             # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
             delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(pandas.cut, bins)
             delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
+            self.pumpProbeHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
+                np.float64)
+        if (name == 'delayStageTime'):
+            # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
+            delaystageHistBinner = self.ddMicrobunches['delayStageTime'].map_partitions(pandas.cut, bins)
+            delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
-                np.float64) # TODO: discuss and improve the delay stage histogram normalization.
+                np.float64)
 
     def resetBins(self):
         """ Make an empty bin list
