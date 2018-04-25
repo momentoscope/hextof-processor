@@ -41,7 +41,7 @@ def make_new_settings():
             'dld_time': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset",
             'dld_microbunch_id': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:2/dset",
             'dld_aux': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset",
-            'delay_stage': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset",
+            'delay_stage': "/Experiment/Pump probe laser/delay line IK220.0/ENC",
             'bam': '/Electron Diagnostic/BAM/4DBC3/electron bunch arrival time (low charge)',
             'bunch_charge': '/Electron Diagnostic/Bunch charge/after undulator',
             'macro_bunch_pulse_id': '/Timing/Bunch train info/index 1.sts',

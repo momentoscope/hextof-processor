@@ -16,6 +16,13 @@ def main():
     processor = DldFlashProcessor()
     processor.runNumber = 19135
     processor.readDataframes()
+    processor.postProcess()
+    ToF = processor.addBinning('dldTime', 630, 670, 10*processor.TOF_STEP_TO_NS)
+    pptime = processor.addBinning('pumpProbeTime',-54,-44,.1)
+    result = processor.computeBinnedData()
+
+    plt.imshow(result, aspect='auto')
+    plt.show()
 
 
 class DldProcessor(object):
@@ -424,7 +431,7 @@ class DldProcessor(object):
             if not forceEnds:
                 if (abs(float(Decimal(str(abs(end - start))) % Decimal(str(steps)))) > 0):
                     if include_last:
-                        end += float(Decimal(str(steps))-(Decimal(str(abs(end - start))) % Decimal(str(steps))))
+                        end += float(Decimal(str(steps)) - (Decimal(str(abs(end - start))) % Decimal(str(steps))))
                     else:
                         end -= float((Decimal(str(abs(end - start))) % Decimal(str(steps))))
                         include_last = True
@@ -440,7 +447,8 @@ class DldProcessor(object):
             bins = np.linspace(start, end, steps, endpoint=include_last)
         return bins
 
-    def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False, include_last=True, force_legacy=False):
+    def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False, include_last=True,
+                   force_legacy=False):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -498,10 +506,11 @@ class DldProcessor(object):
         if useStepSize:
             stepSize = steps
         else:
-            stepSize = (end-start)/steps
-        axes = self.genBins(start+stepSize/2,end-stepSize/2,stepSize)
+            stepSize = (end - start) / steps
+        axes = self.genBins(start + stepSize / 2, end - stepSize / 2, stepSize)
 
         return axes
+
     def resetBins(self):
         """ Make an empty bin list
         """
