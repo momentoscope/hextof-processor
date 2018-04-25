@@ -9,9 +9,14 @@ lib/*.so
 lib/*.c
 lib/*.html
 
-#ignore IDE settings folers 
+#ignore IDE settings folders
 \.idea/
 \.spyproject/
 
 # ignore local settings
 SETTINGS.ini
+\.DS_Store
+
+# ignore cython builds
+build/
+*.so
