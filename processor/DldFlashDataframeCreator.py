@@ -13,6 +13,7 @@ _VERBOSE = False
 
 try:
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
+
     if _VERBOSE: print('loaded cython module')
 except ImportError as e:
     print('Failed loading Cython script. Using Python version instead. TODO: FIX IT!!#n Error msg: {}'.format(e))
@@ -67,7 +68,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
     """
 
     def __init__(self):
-        super(DldFlashProcessor,self).__init__()
+        super().__init__()
 
         self.runNumber = None
         self.pulseIdInterval = None
@@ -262,7 +263,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                                                          'bunchCharge', 'opticalDiode', 'gmdTunnel', 'gmdBda',
                                                          'macroBunchPulseId'))  # TODO: choose columns from SETTINGS
 
-        self.dd = self.dd[self.dd['microbunchId'] > 0] # needed as negative values are used to mark bad data
+        self.dd = self.dd[self.dd['microbunchId'] > -1] # needed as negative values are used to mark bad data
         self.dd['dldTime'] = self.dd[
                                  'dldTime'] * self.TOF_STEP_TO_NS  # TODO: change to eV? no! this is more Dima friendly
 
