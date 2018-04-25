@@ -122,7 +122,7 @@ class DldProcessor(object):
             if self.runNumber is None:
                 fileName = 'mb{}to{}'.format(self.pulseIdInterval[0], self.pulseIdInterval[1])
             else:
-                fileName = '{}'.format(self.runNumber)
+                fileName = 'run{}'.format(self.runNumber)
         fileName = path + fileName  # TODO: test if naming is correct
 
         if format == 'parquet':
@@ -534,7 +534,6 @@ class DldProcessor(object):
                 for result in results:
                     total = total + result
                 calculatedResults.append(total)
-                del total
             del resultsToCalculate
 
         # we now need to add them all up (single core):
