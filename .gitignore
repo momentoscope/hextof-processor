@@ -1,6 +1,6 @@
 # We don't need the checkpoints
 .ipynb_checkpoints
-
+\IPython
 # Forget cache stuff
 __pycache__
 *.pyc
