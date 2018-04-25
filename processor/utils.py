@@ -283,3 +283,6 @@ def plot_lines(data,  normalization='None', range=None, color_range=(0,1),
                 transparent=True, bbox_inches=None, pad_inches=0.1,
                 frameon=None)
     plt.show()
+
+def get_idx(array,value):
+    return (np.abs(array-value)).argmin()
