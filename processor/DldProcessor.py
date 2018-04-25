@@ -467,6 +467,9 @@ class DldProcessor(object):
                 points within the bounds if false.
             force_legacy (bool): if true, imposes old method for generating binns,
                 based on np.arange instead of linspace.
+        Returns:
+            axes (np.array): axis of the binned dimesion. The points defined on this axis are the middle points of each
+                bin.
 
         See also:
             computeBinnedData : Method to compute all bins created with this function.
@@ -492,7 +495,13 @@ class DldProcessor(object):
             delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)
+        if useStepSize:
+            stepSize = steps
+        else:
+            stepSize = (end-start)/steps
+        axes = self.genBins(start+stepSize/2,end-stepSize/2,stepSize)
 
+        return axes
     def resetBins(self):
         """ Make an empty bin list
         """
