@@ -4,7 +4,6 @@
 @author: Davide Curcio
 """
 from distutils.core import setup, Extension
-import os
 
 XPSdoniachs = Extension('XPSdoniachs_ext',
                         sources=['XPSdoniachs_ext.cpp'],
