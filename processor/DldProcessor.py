@@ -18,7 +18,7 @@ def main():
     processor.readDataframes()
 
 
-class DldProcessor(object):
+class DldProcessor():
     """
       This class simplifies the analysis of data files recorded during the
       beamtime of August 2017. It converts the electrons from the DLD into
@@ -132,7 +132,7 @@ class DldProcessor(object):
             self.dd = dask.dataframe.read_hdf(fileName, '/electrons', mode='r', chunksize=self.CHUNK_SIZE)
             self.ddMicrobunches = dask.dataframe.read_hdf(fileName, '/microbunches', mode='r',
                                                           chunksize=self.CHUNK_SIZE)
-        print('Loaded dask dataframes.')
+
         # self.postProcess()
 
     def appendDataframeParquet(self, fileName):
@@ -476,8 +476,8 @@ class DldProcessor(object):
         """
 
         # write the parameters to the bin list:
-        assert name not in self.binNameList, 'Bin parameters already assigned for {}.\nPlease reset binns'.format(name)
         bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
+        print(bins.shape)
         self.binNameList.append(name)
         self.binRangeList.append(bins)
         if (name == 'pumpProbeTime'):
@@ -541,6 +541,7 @@ class DldProcessor(object):
                 for result in results:
                     total = total + result
                 calculatedResults.append(total)
+                del total
             del resultsToCalculate
 
         # we now need to add them all up (single core):
