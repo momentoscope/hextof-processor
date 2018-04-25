@@ -20,3 +20,4 @@ SETTINGS.ini
 # ignore cython builds
 build/
 *.so
+*.pyd
