@@ -100,10 +100,14 @@ def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
 # ================================================================================
 
 
-def camelCaseIt(snake_str):
-    first, *others = snake_str.split('_')
-    return ''.join([first.lower(), *map(str.title, others)])
+# def camelCaseIt_onlyPython3(snake_str):
+#     first, *others = snake_str.split('_')
+#     return ''.join([first.lower(), *map(str.title, others)])
 
+def camelCaseIt(snake_case_string):
+    titleCaseVersion =  snake_case_string.title().replace("_", "")
+    camelCaseVersion = titleCaseVersion[0].lower() + titleCaseVersion[1:]
+    return camelCaseVersion
 
 # ================================================================================
 

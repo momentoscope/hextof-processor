@@ -13,7 +13,6 @@ _VERBOSE = False
 
 try:
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
-
     if _VERBOSE: print('loaded cython module')
 except ImportError as e:
     print('Failed loading Cython script. Using Python version instead. TODO: FIX IT!!#n Error msg: {}'.format(e))
@@ -68,7 +67,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
     """
 
     def __init__(self):
-        super().__init__()
+        super(DldFlashProcessor,self).__init__()
 
         self.runNumber = None
         self.pulseIdInterval = None
