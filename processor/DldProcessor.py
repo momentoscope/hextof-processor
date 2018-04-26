@@ -530,6 +530,37 @@ class DldProcessor():
             grouped = part.groupby(grouperList)
             result = (grouped.count())['microbunchId'].to_xarray().values
             return np.nan_to_num(result)
+        
+        
+        
+        
+        
+        # new binner for a partition, not using the Pandas framework. It should be faster!
+        def analyzePartNumpy(part):
+            """ Function called by each thread of the analysis. This now should be faster. """
+            # get the data as numpy:
+            vals = part.values
+            cols = part.columns.values
+            # create array of columns to be used for binning
+            colsToBin = []
+            for binName in self.binNameList:
+                idx = cols.tolist().index(binName)
+                colsToBin.append(idx)
+    
+            # create the array with the bins and bin ranges
+            numBins = []
+            ranges = []
+            for i in range(0, len(colsToBin)):
+                numBins.append(len(self.binRangeList[i]))
+                ranges.append((self.binRangeList[i].min(), self.binRangeList[i].max()))
+            # now we are ready for the analysis with numpy:
+            res, edges = np.histogramdd(vals[:,colsToBin],bins=numBins,range=ranges)
+            return res
+        
+        
+        
+        
+        
 
         # prepare the partitions for the calculation in parallel    
         calculatedResults = []
@@ -540,7 +571,7 @@ class DldProcessor():
                 if (i + j) >= self.dd.npartitions:
                     break
                 part = self.dd.get_partition(i + j)
-                resultsToCalculate.append(dask.delayed(analyzePart)(part))
+                resultsToCalculate.append(dask.delayed(analyzePartNumpy)(part))
 
             # now do the calculation on each partition (using the dask framework):
             if len(resultsToCalculate) > 0:
