@@ -261,7 +261,7 @@ class DldProcessor():
         except ValueError:
             raise ValueError('No pump probe time bin, could not normalize to delay stage histogram.')
 
-    def save2hdf5(self, binnedData, path=None, filename='default.hdf5', normalizedData=None, overwrite=False):
+    def save2hdf5(self, binnedData, path=None, filename='default.hdf5', overwrite=False):
         """ Store the binned data in a hdf5 file.
 
         Parameters:
@@ -295,26 +295,27 @@ class DldProcessor():
         if path is None:
             path = self.DATA_H5_DIR
 
-        if normalizedData is not None:
-            if binnedData.ndim != 4:
-                raise Exception('Wrong dimension')
-            data2hdf5 = np.zeros_like(binnedData[:, :, :, 0])
+        # if normalizedData is not None:
+        #     if binnedData.ndim != 4:
+        #         raise Exception('Wrong dimension')
+        #     data2hdf5 = np.zeros_like(binnedData[:, :, :, 0])
+        #
+        #     # normalize for all time binns
+        #     for i in range(binnedData.shape[0]):
+        #         # normalize for both detectors (0 and 1)
+        #
+        #         data2hdf5[i, :, :] = binnedData[i, :, :, 0].transpose() / normalizedData[:, :, 0].transpose()
+        #         data2hdf5[i, :, :] += binnedData[i, :, :, 1].transpose() / normalizedData[:, :, 1].transpose()
+        # else:
+        #     # detector binned? -> sum together
+        #     if binnedData.ndim == 4:
+        #         data2hdf5 = binnedData.sum(axis=3).transpose((0, 2, 1))
+        #     else:
+        #         if binnedData.ndim != 3:
+        #             raise Exception('Wrong dimension')
+        #         # print(binnedData.transpose((1,2).shape)
 
-            # normalize for all time binns
-            for i in range(binnedData.shape[0]):
-                # normalize for both detectors (0 and 1)
-
-                data2hdf5[i, :, :] = binnedData[i, :, :, 0].transpose() / normalizedData[:, :, 0].transpose()
-                data2hdf5[i, :, :] += binnedData[i, :, :, 1].transpose() / normalizedData[:, :, 1].transpose()
-        else:
-            # detector binned? -> sum together
-            if binnedData.ndim == 4:
-                data2hdf5 = binnedData.sum(axis=3).transpose((0, 2, 1))
-            else:
-                if binnedData.ndim != 3:
-                    raise Exception('Wrong dimension')
-                # print(binnedData.transpose((1,2).shape)
-                data2hdf5 = binnedData.transpose((0, 2, 1))
+        data2hdf5 = binnedData
 
         # create file and save data
         mode = "w-"  # fail if file exists
@@ -504,9 +505,9 @@ class DldProcessor():
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)
         if useStepSize:
-            stepSize = steps
+            stepSize = int(steps)
         else:
-            stepSize = (end - start) / steps
+            stepSize = int((end - start) / steps)
         axes = self.genBins(start + stepSize / 2, end - stepSize / 2, stepSize)
 
         return axes
