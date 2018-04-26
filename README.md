@@ -48,10 +48,11 @@ Therefore, after adding the repos folder to the system path, start as:
 import sys,os
 sys.path.append('/path/to/HextofOfflineAnalyzer/')
 
-from processor.DldFlashDataframeCreator import DldFlashProcessor()
+from processor.DldFlashDataframeCreator import DldFlashProcessor
 ```
+/!\ For windows users, remember to use forward slashes
 
-Some usefull imports for initializing an Ipython notebook should look as
+Some useful imports for initializing an Ipython notebook should look as
 follows:
 ```python
 import sys,os
