@@ -174,9 +174,11 @@ def t2e(t, offset=None, oo=None):
         e (float) the binding energy
     """
     if offset is None:
-        offset = 371.258
+#         offset = 371.258
+        offset = 323.93874
     if oo is None:
-        oo = 323.98
+#         oo = 323.98
+        oo = 32
 
     e = 0.5 * 1e18 * 9.10938e-31 / (((t) - offset) * ((t) - offset)) / 1.602177e-19 - oo
     return e
@@ -215,9 +217,11 @@ def e2t(e, offset=None, oo=None):
         t (float): the ToF
     """
     if offset is None:
-        offset = 371.258
+#         offset = 371.258
+        offset = 323.93874
     if oo is None:
-        oo = 323.98
+#         oo = 323.98
+        oo = 32
 
     t = np.sqrt(0.5 * 1e18 * 9.10938e-31 / 1.602177e-19 / (e + oo)) + offset
     return t
