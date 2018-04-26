@@ -20,6 +20,7 @@ def main():
     ToF = processor.addBinning('dldTime', 630, 670, 10*processor.TOF_STEP_TO_NS)
     pptime = processor.addBinning('pumpProbeTime',-54,-44,.1)
     result = processor.computeBinnedData()
+    processor.save_array(result,'test')
 
     plt.imshow(result, aspect='auto')
     plt.show()
@@ -327,6 +328,21 @@ class DldProcessor():
         dset[...] = data2hdf5
         f.close()
         print("Created file " + filename)
+
+    def save_array(self, binnedData, name, path=None, mode='w'):
+        """ save a binned array to h5 file.
+
+        """
+        if path is None:
+            path = self.DATA_RESULTS_DIR
+
+        filename = 'run{}_{}.h5'.format(self.runNumber,name)
+        h5File =  h5py.File(path+filename, mode)
+        h5File.create_dataset('binnedData',data=binnedData)
+        for i, binName in enumerate(self.binNameList):
+            h5File.create_dataset('axis/{}'.format(binName), data=self.binRangeList[i])
+        h5File.close()
+
 
     def addBinningOld(self, name, start, end, steps, useStepSize=True, include_last=True, force_legacy=False, ):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
