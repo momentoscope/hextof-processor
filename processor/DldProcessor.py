@@ -17,10 +17,11 @@ def main():
     processor.runNumber = 19135
     processor.readDataframes()
     processor.postProcess()
-    ToF = processor.addBinning('dldTime', 630, 670, 10*processor.TOF_STEP_TO_NS)
     pptime = processor.addBinning('pumpProbeTime',-54,-44,.1)
-    result = processor.computeBinnedData()
-    processor.save_array(result,'test')
+    ToF = processor.addBinning('dldTime', 630, 670, 10*processor.TOF_STEP_TO_NS)
+
+    result = processor.computeBinnedData(saveName='test2')
+    # processor.save_array(result,'test')
 
 
 class DldProcessor():
@@ -530,7 +531,7 @@ class DldProcessor():
         self.binNameList = []
         self.binRangeList = []
 
-    def computeBinnedData(self):
+    def computeBinnedData(self,saveName=None, savePath= None, saveMode='w'):
         """ Use the bin list to bin the data.
 
         Returns:
@@ -580,7 +581,10 @@ class DldProcessor():
         for r in calculatedResults:
             r = np.nan_to_num(r)
             result = result + r
-        return result.astype(np.float64)
+        result = result.astype(np.float64)
+        if saveName is not None:
+            self.save_array(result,saveName, path=savePath, mode=saveMode)
+        return result
 
     # ==================
     # DEPRECATED METHODS
