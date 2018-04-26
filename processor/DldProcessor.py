@@ -59,6 +59,8 @@ class DldProcessor():
         self.TOF_STEP_TO_NS = float
         self.TOF_NS_TO_EV = float
         self.TOF_STEP_TO_EV = float
+        self.ET_CONV_E_OFFSET = float
+        self.ET_CONV_T_OFFSET = float
 
         self.DATA_RAW_DIR = str
         self.DATA_H5_DIR = str

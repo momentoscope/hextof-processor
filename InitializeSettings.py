@@ -34,6 +34,9 @@ def make_new_settings():
             'TOF_STEP_TO_NS': 0.0205761316872428,
             'TOF_STEP_TO_EV': 0.0205761316872428 * 0.22,
             'TOF_NS_TO_EV': 0.22,
+            'ET_CONV_E_OFFSET': 323.98,
+            'ET_CONV_T_OFFSET': 371.258,
+
         },
         'DAQ address - used': {
             'dld_pos_x': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset",
