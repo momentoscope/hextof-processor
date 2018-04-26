@@ -286,3 +286,6 @@ def plot_lines(data,  normalization='None', range=None, color_range=(0,1),
 
 def get_idx(array,value):
     return (np.abs(array-value)).argmin()
+
+def load_results(filename, path=None):
+    """ load the data saved with processor.save_array()"""
