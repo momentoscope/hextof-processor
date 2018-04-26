@@ -173,11 +173,17 @@ def t2e(t, offset=None, oo=None):
     Returns:
         e (float) the binding energy
     """
-    if offset is None:
-        offset = 371.258
-    if oo is None:
-        oo = 323.98
+    from configparser import ConfigParser
+    settings = ConfigParser()
+    if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+        settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+    else:
+        settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
+    if offset is None:
+        offset = float(settings['processor']['ET_CONV_T_OFFSET'])
+    if oo is None:
+        oo = float(settings['processor']['ET_CONV_E_OFFSET'])
     e = 0.5 * 1e18 * 9.10938e-31 / (((t) - offset) * ((t) - offset)) / 1.602177e-19 - oo
     return e
 
@@ -214,11 +220,17 @@ def e2t(e, offset=None, oo=None):
     returns:
         t (float): the ToF
     """
-    if offset is None:
-        offset = 371.258
-    if oo is None:
-        oo = 323.98
+    from configparser import ConfigParser
+    settings = ConfigParser()
+    if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+        settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+    else:
+        settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
+    if offset is None:
+        offset = float(settings['processor']['ET_CONV_T_OFFSET'])
+    if oo is None:
+        oo = float(settings['processor']['ET_CONV_E_OFFSET'])
     t = np.sqrt(0.5 * 1e18 * 9.10938e-31 / 1.602177e-19 / (e + oo)) + offset
     return t
 
