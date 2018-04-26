@@ -8,6 +8,7 @@ from Cython.Build import cythonize
 import numpy
 import os
 
+build_doniachs = False
 
 extensions = [
     Extension("processor.cscripts.DldFlashProcessorCy", [os.path.join("processor", "cscripts", "DldFlashProcessorCy.pyx")],

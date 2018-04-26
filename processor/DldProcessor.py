@@ -16,6 +16,12 @@ def main():
     processor = DldFlashProcessor()
     processor.runNumber = 19135
     processor.readDataframes()
+    processor.postProcess()
+    pptime = processor.addBinning('pumpProbeTime',-54,-44,.1)
+    ToF = processor.addBinning('dldTime', 630, 670, 10*processor.TOF_STEP_TO_NS)
+
+    result = processor.computeBinnedData(saveName='test2')
+    # processor.save_array(result,'test')
 
 
 class DldProcessor():
@@ -323,6 +329,21 @@ class DldProcessor():
         f.close()
         print("Created file " + filename)
 
+    def save_array(self, binnedData, name, path=None, mode='w'):
+        """ save a binned array to h5 file.
+
+        """
+        if path is None:
+            path = self.DATA_RESULTS_DIR
+
+        filename = 'run{}_{}.h5'.format(self.runNumber,name)
+        h5File =  h5py.File(path+filename, mode)
+        h5File.create_dataset('binnedData',data=binnedData)
+        for i, binName in enumerate(self.binNameList):
+            h5File.create_dataset('axis/{}'.format(binName), data=self.binRangeList[i])
+        h5File.close()
+
+
     def addBinningOld(self, name, start, end, steps, useStepSize=True, include_last=True, force_legacy=False, ):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
 
@@ -510,7 +531,7 @@ class DldProcessor():
         self.binNameList = []
         self.binRangeList = []
 
-    def computeBinnedData(self):
+    def computeBinnedData(self,saveName=None, savePath= None, saveMode='w'):
         """ Use the bin list to bin the data.
 
         Returns:
@@ -591,7 +612,10 @@ class DldProcessor():
         for r in calculatedResults:
             r = np.nan_to_num(r)
             result = result + r
-        return result.astype(np.float64)
+        result = result.astype(np.float64)
+        if saveName is not None:
+            self.save_array(result,saveName, path=savePath, mode=saveMode)
+        return result
 
     # ==================
     # DEPRECATED METHODS
