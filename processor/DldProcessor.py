@@ -22,9 +22,6 @@ def main():
     result = processor.computeBinnedData()
     processor.save_array(result,'test')
 
-    plt.imshow(result, aspect='auto')
-    plt.show()
-
 
 class DldProcessor():
     """
@@ -60,6 +57,8 @@ class DldProcessor():
         self.TOF_STEP_TO_NS = float
         self.TOF_NS_TO_EV = float
         self.TOF_STEP_TO_EV = float
+        self.ET_CONV_E_OFFSET = float
+        self.ET_CONV_T_OFFSET = float
 
         self.DATA_RAW_DIR = str
         self.DATA_H5_DIR = str
@@ -447,7 +446,7 @@ class DldProcessor():
             if not forceEnds:
                 if (abs(float(Decimal(str(abs(end - start))) % Decimal(str(steps)))) > 0):
                     if include_last:
-                        end += float(Decimal(str(steps)) - (Decimal(str(abs(end - start))) % Decimal(str(steps))))
+                        end += float(Decimal(str(steps))-(Decimal(str(abs(end - start))) % Decimal(str(steps))))
                     else:
                         end -= float((Decimal(str(abs(end - start))) % Decimal(str(steps))))
                         include_last = True
@@ -463,8 +462,7 @@ class DldProcessor():
             bins = np.linspace(start, end, steps, endpoint=include_last)
         return bins
 
-    def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False, include_last=True,
-                   force_legacy=False):
+    def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False, include_last=True, force_legacy=False):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -522,11 +520,10 @@ class DldProcessor():
         if useStepSize:
             stepSize = steps
         else:
-            stepSize = (end - start) / steps
-        axes = self.genBins(start + stepSize / 2, end - stepSize / 2, stepSize)
+            stepSize = (end-start)/steps
+        axes = self.genBins(start+stepSize/2,end-stepSize/2,stepSize)
 
         return axes
-
     def resetBins(self):
         """ Make an empty bin list
         """
