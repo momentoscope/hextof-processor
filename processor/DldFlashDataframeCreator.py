@@ -31,6 +31,7 @@ def main():
     processor.postProcess()
 
     processor.addBinning('dldTime', 620, 670, 1)
+
     result = processor.computeBinnedData()
     import matplotlib.pyplot as plt
     plt.plot(result)
