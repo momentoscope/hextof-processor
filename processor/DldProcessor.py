@@ -343,7 +343,6 @@ class DldProcessor():
             h5File.create_dataset('axis/{}'.format(binName), data=self.binRangeList[i])
         h5File.close()
 
-
     def addBinningOld(self, name, start, end, steps, useStepSize=True, include_last=True, force_legacy=False, ):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
 
@@ -525,6 +524,7 @@ class DldProcessor():
         axes = self.genBins(start+stepSize/2,end-stepSize/2,stepSize)
 
         return axes
+
     def resetBins(self):
         """ Make an empty bin list
         """
@@ -572,7 +572,8 @@ class DldProcessor():
             numBins = []
             ranges = []
             for i in range(0, len(colsToBin)):
-                numBins.append(len(self.binRangeList[i]))
+                # need to subtract 1 from the number of bin ranges
+                numBins.append(len(self.binRangeList[i])-1)
                 ranges.append((self.binRangeList[i].min(), self.binRangeList[i].max()))
             # now we are ready for the analysis with numpy:
             res, edges = np.histogramdd(vals[:,colsToBin],bins=numBins,range=ranges)
