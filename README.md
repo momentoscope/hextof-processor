@@ -10,24 +10,20 @@ The `DldFlashDataframeCreator` class is used for creating the dataframes from th
 The data from the DAQ system is read through the code provided by FLASH, which can be found on the bitbucket repo at https://stash.desy.de/projects/CS The location of the downloaded repo must be set in the **SETTINGS.ini** file, under `PAH_MODULE_DIR`. This will be contained in the processor object as
 `processor.PAH_MODULE_DIR`.
 
-#Settings
+# Settings
 
-To initialize this code correctly on a new machine, run the **InitializeSettings.py** file at the command line,
+To initialize the code correctly on a new machine, run the **InitializeSettings.py** file to create the **SETTINGS.ini** file where local settings are stored. It contains the file paths and the parallelization parameters, which can be modified by the user externally. The .ini file is not synced (git-ignored) in the git repository to allow the code to adapt to different computing environments.
 
-```python InitializeSettings.py```
+# Versions and package structure
 
-This generates a **SETTINGS.ini** file where local settings are stored. It contains the defaults for the folder paths and parallelization settings, which will be read during the run of a processor instance. Note that the .ini file is not synced in the git repository (git-ignored) to allow the code to adapt to different computing environments.
+* **processor** folder -- contains the latest version of the processor.
+* **lib** folder -- contains the legacy version of the processor, retained for retro-compatibility.
+* **XPSdoniachs** folder -- contains version, kept here for .
 
-#Versions and package structure
-
-* **processor** folder -- contains the latest version of the processor library
-* **lib** folder -- contains the legacy processor library, retained for retro-compatibility
-* **XPSdoniachs** folder -- contains Doniach-Sunjic line profile function used for core-level fitting
-
-#How to use
+# How to use
 
 In order to make use of this offline-analysis tool, the first thing is how to import the correct modules.
-Therefore, after adding the repos folder to the system path, start as:
+Therefore, after adding the folders of the relevant repos to the system path, start as,
 ```python
 import sys,os
 sys.path.append('/path/to/HextofOfflineAnalyzer/')
@@ -51,7 +47,7 @@ reload(dldFlashProcessor)
 
 
 
-##1. Read DAQ data
+## 1. Read DAQ data
 
 **(1)** Load the data with a given DAQ run number
 
@@ -90,14 +86,14 @@ processor.readData(runNumber=processor.runNumber)
 processor.postProcess()
 ```
 
-##2. Save dataset to dask parquet files
+## 2. Save dataset to dask parquet files
 
 For faster access to these dataframes for future analysis, it is convenient to store the datasets in dask parquet dataframes. This is done using
 ```pthon
 processor.storeDataframes('filename')
 ```
 
-This saves two folders in path/to/file: name_el and name_mb. These are the two datasets processor.dd and processor.ddMicrobunches. if 'filename' is not specified, it uses either 'run{runNumber}' or mb{firstMacrobunch}to{lastMacrobunch}'
+This saves two folders in path/to/file: name_el and name_mb. These are the two datasets processor.dd and processor.ddMicrobunches. If 'filename' is not specified, it uses either 'run{runNumber}' or mb{firstMacrobunch}to{lastMacrobunch}'
 
 
 
@@ -125,18 +121,18 @@ processor = DldFlashProcessor()
 processor.runNumber = 18843
 processor.readDataframes('path/to/file/name')
 ```
-This can be also done from direct raw data read with `readData` To create the bin array structure:
+This can be also done from direct raw data read with `readData` To create the bin array structure, run
 ```python
 processor.addBinning('posX',480,980,10)
 processor.addBinning('posY',480,980,10)
 ```
-This adds binning along the kx and ky directions, from point 480 to point 980 with bin size of 10. Bins can be created defining start and end points and either step size or number of steps. The default behavior is The resulting array can now be obtained using
+This adds binning along the k-parallel x and y directions, from point 480 to point 980 with bin size of 10. Bins can be created defining start and end points and either step size or number of steps. The resulting array can now be obtained using
 ```python
 result = processor.ComputeBinnedData()
 ```
 where the resulting np.array of float64 values will have the axis order same as the order in which we generated the bins.
 
-Other binning axis commonly used are:
+Other binning axes commonly used are:
 
 |          name          |       string        | typical values | units |
 | :--------------------: | :-----------------: | :------------: | ----: |
@@ -154,29 +150,18 @@ Other binning axis commonly used are:
 
 
 
-\* ToF delay bin size needs to be multiplied by `processor.TOF_STEP_TO_NS`
-in order to avoid artifacts.
+\* ToF delay bin size needs to be multiplied by `processor.TOF_STEP_TO_NS` in order to avoid artifacts.
 
-\** binning on microbunch works only when not binning on any other
-dimension
+\** binning on microbunch works only when not binning on any other dimension
 
-Binning is created using np.linspace (formerly was done with np.arange).
-The implementation allows to choose between setting a step size
-(`useStepSize=True`, default) or using a number of bins
-(`useStepSize=False`).
+Binning is created using np.linspace (formerly was done with np.arange). The implementation allows to choose between setting a step size (`useStepSize=True`, default) or using a number of bins (`useStepSize=False`).
 
-In general, it is not possible to satisfy all 3 parameters: start, end,
-steps. For this reason, you can choose to give priority to the step size
-or to the interval size. In the case of `forceEnds=False`, the steps parameter is
-given priority and the end parameter is redefined, so the interval can
-actually be larger than expected. In the case of `forceEnds = true`, the stepSize
-is not enforced, and the interval is divided by the closest step that
-divides it cleanly. This of course only has meaning when choosing steps
-that do not cleanly divide the interval.
+In general, it is not possible to satisfy all 3 parameters: start, end, steps. For this reason, you can choose to give priority to the step size or to the interval size. In the case of `forceEnds=False`, the steps parameter is given priority and the end parameter is redefined, so the interval can actually be larger than expected. In the case of `forceEnds = true`, the stepSize is not enforced, and the interval is divided by the closest step that divides it cleanly. This of course only has meaning when choosing steps that do not cleanly divide the interval.
 
-##3b. Extracting data without binning
+## 3b. Extracting data without binning
 
-Sometimes it is not necessary to bin the electrons to extract the data. It is actually possible to directly extract data from the appropriate dataframe. This is useful if, for example, you just want to plot some parameters, not involving the number of electrons that happen to have such a value (this would require binning).
+Sometimes it is not necessary to bin the electrons to extract the data. It is actually possible to directly extract data from the appropriate dataframe. This is useful if, for example, you just want to plot some parameters, not involving the number of electrons that happen to have such a value (this would require
+binning).
 
 Because of the structure of the dataframe, which is divided in dd and ddMicrobunches, it is possible to get electron-resolved data (the electron number will be on the x axis), or `uBunchID` resolved data (the `uBid` will be on the x axis).
 
@@ -209,8 +194,7 @@ The data you can get from the ddMicrobunches (uBID resolved) dataframe includes:
 |pump laser optical diode reading|  'opticalDiode'
 |macro bunch ID| 'macroBunchPulseId'
 
-Some of the values overlap, and in these cases, you can get the values either uBid-resolved
-or electron-resolved.
+Some of the values overlap, and in these cases, you can get the values either uBid-resolved or electron-resolved.
 
 An example of how to retrieve values both from the dd and ddMicrobunches dataframes:
 ```python
@@ -248,9 +232,11 @@ for j in range(0,len(uBid)):
 
 ```
 
-##4. Complete code example
+## 4. Complete code example
 
 Complete examples suitable for use in an IPython notebook:
+
+
 
 **(1)** Importing packages and modules
 
