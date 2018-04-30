@@ -329,19 +329,61 @@ class DldProcessor():
         f.close()
         print("Created file " + filename)
 
-    def save_array(self, binnedData, name, path=None, mode='w'):
-        """ save a binned array to h5 file.
+    def save_binned(self, binnedData, name, path=None, mode='w'):
+        """ save a binned array to h5 file. The file includes the axes (taken from the scheduled bins)
+        and the delay histograms, if present.
+
 
         """
+
         if path is None:
             path = self.DATA_RESULTS_DIR
 
         filename = 'run{}_{}.h5'.format(self.runNumber,name)
         h5File =  h5py.File(path+filename, mode)
+
+        # Saving data
         h5File.create_dataset('binnedData',data=binnedData)
+
+        # Saving axes
+        aa = h5File.create_group("axes")
         for i, binName in enumerate(self.binNameList):
-            h5File.create_dataset('axis/{}'.format(binName), data=self.binRangeList[i])
+            aa.create_dataset(format(binName), data=self.binRangeList[i])
+
+        # Saving delay histograms
+        hh = h5File.create_group("histograms")
+        if hasattr(self,'delaystageHistogram'):
+            hh.create_dataset('delaystageHistogram', data=self.delaystageHistogram)
+        if hasattr(self,'delaystageHistogram'):
+            hh.create_dataset('pumpProbeHistogram', data=self.pumpProbeHistogram)
+
         h5File.close()
+
+    def load_binned(self, name, path=None, mode='r'):
+        """ load an h5 file saved with save_array.
+
+        """
+        if path is None:
+            path = self.DATA_RESULTS_DIR
+
+        filename = 'run{}_{}.h5'.format(self.runNumber, name)
+        h5File = h5py.File(path + filename, mode)
+
+        # Retrieving binned data
+        data = h5File['binnedData'][()]
+
+        # Retrieving axes from h5 file
+        axes = []
+        for ax in h5File['axes/']:
+            axes.append(h5File['axes/'+ax][()])
+
+        # Retrieving delay histograms
+        hists = []
+        for hist in h5File['histograms/']:
+            hists.append(h5File['histograms/'+hist][()])
+
+        h5File.close()
+        return data, axes, hists
 
     def addBinningOld(self, name, start, end, steps, useStepSize=True, include_last=True, force_legacy=False, ):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
@@ -502,7 +544,6 @@ class DldProcessor():
 
         # write the parameters to the bin list:
         bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
-        print(bins.shape)
         self.binNameList.append(name)
         self.binRangeList.append(bins)
         if (name == 'pumpProbeTime'):
@@ -521,7 +562,7 @@ class DldProcessor():
             stepSize = steps
         else:
             stepSize = (end-start)/steps
-        axes = self.genBins(start+stepSize/2,end-stepSize/2,stepSize)
+        axes = self.genBins(start+stepSize/2,end-stepSize/2,stepSize, useStepSize, forceEnds, include_last, force_legacy)
 
         return axes
 
