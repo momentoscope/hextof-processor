@@ -22,16 +22,16 @@ The location of the downloaded repo must be set in the **SETTINGS.ini** file,
 under `PAH_MODULE_DIR`. This will be contained in the processor object as
 `processor.PAH_MODULE_DIR`.
 
-#Settings
+# Settings
 
 To initialize correctly this code on a new machine, run the **InitializeSettings.py** file to create the **SETTINGS.ini** file where local settings are stored. The .ini file is not synced in the git repository to allow the code to adapt to different computing environments.
 
-#Versions
+# Versions
 
 Latest version of the processor is in the **processor** folder. **lib** contains the legacy
 version, kept here for retro-compatibility.
 
-#How to use
+# How to use
 
 In order to make use of this offline-analysis tool, the first thing is how to import the correct modules.
 Therefore, after adding the repos folder to the system path, start as:
@@ -59,7 +59,7 @@ reload(dldFlashProcessor)
 
 
 
-##1. Read DAQ data
+## 1. Read DAQ data
 
 -------------
 
@@ -100,7 +100,7 @@ processor.readData(runNumber=processor.runNumber)
 processor.postProcess()
 ```
 
-##2. Save dataset to dask parquet files
+## 2. Save dataset to dask parquet files
 
 ----------------------------------
 
@@ -195,7 +195,7 @@ is not enforced, and the interval is divided by the closest step that
 divides it cleanly. This of course only has meaning when choosing steps
 that do not cleanly divide the interval.
 
-##3b. Extracting data without binning
+## 3b. Extracting data without binning
 
 Sometimes it is not necessary to bin the electrons to extract the data. It is
 actually possible to directly extract data from the appropriate dataframe. This
@@ -278,7 +278,7 @@ for j in range(0,len(uBid)):
 
 ```
 
-##4. Complete code example
+## 4. Complete code example
 
 Complete examples suitable for use in an IPython notebook:
 **(1)** Importing packages and modules
