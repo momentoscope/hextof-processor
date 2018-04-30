@@ -329,7 +329,7 @@ class DldProcessor():
         f.close()
         print("Created file " + filename)
 
-    def save_array(self, binnedData, name, path=None, mode='w'):
+    def save_binned(self, binnedData, name, path=None, mode='w'):
         """ save a binned array to h5 file. The file includes the axes (taken from the scheduled bins)
         and the delay histograms, if present.
 
@@ -359,7 +359,7 @@ class DldProcessor():
 
         h5File.close()
 
-    def load_array(self, name, path=None, mode='r'):
+    def load_binned(self, name, path=None, mode='r'):
         """ load an h5 file saved with save_array.
 
         """
@@ -440,6 +440,26 @@ class DldProcessor():
             delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
+
+    def filterProcessor(self, name, lb=None, ub=None):
+        """ Filters the dataframes contained in the current processor
+        
+        Parameters:
+            name
+            lb
+            ub
+        """
+        if name in self.dd.columns:
+            if lb is not None:
+                self.dd = self.dd[self.dd[name] > lb]
+            if ub is not None:
+                self.dd = self.dd[self.dd[name] < ub]
+        if name in self.ddMicrobunches.columns:
+            if lb is not None:
+                self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[name] > lb]
+            if ub is not None:
+                self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[name] < ub]
+
 
     def genBins(self, start, end, steps, useStepSize=True, forceEnds=False, include_last=True, force_legacy=False):
         """Creates bins for use by binning functions. Can also be used to generate x axes.
@@ -656,7 +676,7 @@ class DldProcessor():
             result = result + r
         result = result.astype(np.float64)
         if saveName is not None:
-            self.save_array(result,saveName, path=savePath, mode=saveMode)
+            self.save_binned(result, saveName, path=savePath, mode=saveMode)
         return result
 
     # ==================
