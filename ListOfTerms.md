@@ -4,9 +4,11 @@
 
 **SASE** = self-amplified spontaneous emission
 
-**BAM** = beam arrival monitor -- monitors when the FEL beam arrives
+**BAM** = beam arrival monitor, monitors when the FEL beam arrives
 
-**GMD** = gas monitor detector -- measures the intensity of the FEL beam before and after the gas attenuator
+**GMD** = gas monitor detector, measures the intensity of the FEL beam before and after the gas attenuator
+
+**DLD** = delay line detector, measures the (x,y) positions of electrons by two pairs of timing difference measurements.
 
 **macrobunch** -- a macroscopic bunch of electrons which can possess substructures (i.e. microbunches). It is the operating unit of a high-gain FEL and also referred to colloquially as a pulse train. Each macrobunch of electrons is tagged by the macrobunch ID.
 
