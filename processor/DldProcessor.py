@@ -329,7 +329,7 @@ class DldProcessor():
         f.close()
         print("Created file " + filename)
 
-    def save_binned(self, binnedData, name, path=None, mode='w'):
+    def save_array(self, binnedData, name, path=None, mode='w'):
         """ save a binned array to h5 file. The file includes the axes (taken from the scheduled bins)
         and the delay histograms, if present.
 
@@ -359,7 +359,7 @@ class DldProcessor():
 
         h5File.close()
 
-    def load_binned(self, name, path=None, mode='r'):
+    def load_array(self, name, path=None, mode='r'):
         """ load an h5 file saved with save_array.
 
         """
