@@ -30,6 +30,7 @@ def make_new_settings():
         },
         'processor': {
             'N_CORES': psutil.cpu_count(),
+            'UBID_OFFSET': 5,
             'CHUNK_SIZE': 1000000,
             'TOF_STEP_TO_NS': 0.0205761316872428,
             'TOF_STEP_TO_EV': 0.0205761316872428 * 0.22,

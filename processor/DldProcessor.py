@@ -54,6 +54,7 @@ class DldProcessor():
         self.resetBins()
         # initialize attributes to their type. Values are then taken from SETTINGS.ini through initialize_attributes()
         self.N_CORES = int
+        self.UBID_OFFSET = int
         self.CHUNK_SIZE = int
         self.TOF_STEP_TO_NS = float
         self.TOF_NS_TO_EV = float
