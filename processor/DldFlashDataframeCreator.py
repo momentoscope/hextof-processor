@@ -150,6 +150,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         # necessary corrections for specific channels:
         self.delayStage = self.delayStage[:, 1]
         self.macroBunchPulseId -= macroBunchPulseId_correction
+        self.dldMicrobunchId -= self.UBID_OFFSET
 
         if _VERBOSE: print('Counting electrons...')
 
