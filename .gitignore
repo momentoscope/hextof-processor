@@ -21,3 +21,5 @@ SETTINGS.ini
 build/
 *.so
 *.pyd
+
+*.ini
