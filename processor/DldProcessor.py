@@ -235,7 +235,7 @@ class DldProcessor():
         self.dd['posR'] = self.dd.map_partitions(radius)
         self.dd['posT'] = self.dd.map_partitions(angle)
 
-    def normalizePumpProbeTime(self, data_array):  # TODO: method untested
+    def normalizePumpProbeTime(self, data_array):
         """ Normalise data to the delay stage histogram.
 
         Normalises the data array to the number of counts per delay stage step.
@@ -251,7 +251,10 @@ class DldProcessor():
             data_array_normalized: normalized version of the input array.
         """
         try:
-            idx = self.binNameList.index('pumpProbeTime')
+            if ax is None:
+                idx = self.binNameList.index('pumpProbeTime')
+            else:
+                idx = ax
             data_array_normalized = np.swapaxes(data_array, 0, idx)
             norm_array = self.delaystageHistogram
             for i in range(np.ndim(data_array_normalized) - 1):
@@ -260,6 +263,7 @@ class DldProcessor():
             data_array_normalized = data_array_normalized / norm_array
             data_array_normalized = np.swapaxes(data_array_normalized, idx, 0)
             return data_array_normalized
+
         except ValueError:
             raise ValueError('No pump probe time bin, could not normalize to delay stage histogram.')
 
@@ -460,7 +464,6 @@ class DldProcessor():
                 self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[name] > lb]
             if ub is not None:
                 self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[name] < ub]
-
 
     def genBins(self, start, end, steps, useStepSize=True, forceEnds=False, include_last=True, force_legacy=False):
         """Creates bins for use by binning functions. Can also be used to generate x axes.
