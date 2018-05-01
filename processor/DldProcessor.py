@@ -4,13 +4,14 @@ import dask.dataframe
 import dask.multiprocessing
 import h5py
 import numpy as np
-import pandas
+import pandas as pd
 from configparser import ConfigParser
 import matplotlib.pyplot as plt
 
 _VERBOSE = False
 
 
+# For code testing (Steinn Y. Agustsson)
 def main():
     from processor.DldFlashDataframeCreator import DldFlashProcessor
     processor = DldFlashProcessor()
@@ -78,6 +79,7 @@ class DldProcessor():
                 if False, only imports those that match existing attribute names.
                 False is the better choice, since it keeps better track of attributes.
         """
+        
         settings = ConfigParser()
         if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
             settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
@@ -119,6 +121,7 @@ class DldProcessor():
             format (str): either 'parquet' to load a parquet type of dataframe,
                 or 'h5' or 'hdf5' to load hdf5 dataframes
         """
+        
         format = format.lower()
         assert format in ['parquet', 'h5', 'hdf5'], 'Invalid format for data input. Please select between parquet or h5'
 
@@ -154,6 +157,7 @@ class DldProcessor():
             fileName (str): name (including path) of the folder containing
                 parquet files where to append the new data.
         """
+        
         print(len(self.dd.divisions))
         newdd = dask.dataframe.read_parquet(fileName + "_el")
         print(len(newdd.divisions))
@@ -182,6 +186,7 @@ class DldProcessor():
                 See createPolarCoordinates for details.
 
         """
+        
         if bamCorrectionSign is not None:
             self.correctBAM(sign=bamCorrectionSign)
 
@@ -214,6 +219,7 @@ class DldProcessor():
                 accepted values: 0, 1, -1
                 Avoid using -1 unless debugging
         """
+        
         self.dd['pumpProbeTime'] = self.dd['delayStageTime'] - self.dd['bam'] * sign
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStageTime'] - self.ddMicrobunches[
             'bam'] * sign
@@ -235,7 +241,8 @@ class DldProcessor():
         self.dd['posR'] = self.dd.map_partitions(radius)
         self.dd['posT'] = self.dd.map_partitions(angle)
 
-    def normalizePumpProbeTime(self, data_array, ax=None): # TODO: work on better implementation and accessibility for this method
+    def normalizePumpProbeTime(self, data_array, ax=None):
+    # TODO: work on better implementation and accessibility for this method
         """ Normalise data to the delay stage histogram.
 
         Normalises the data array to the number of counts per delay stage step.
@@ -250,6 +257,7 @@ class DldProcessor():
         Returns:
             data_array_normalized: normalized version of the input array.
         """
+        
         try:
             if ax is None:
                 idx = self.binNameList.index('pumpProbeTime')
@@ -269,10 +277,19 @@ class DldProcessor():
 
 
     def save_binned(self, binnedData, name, path=None, mode='w'):
-        """ save a binned array to h5 file. The file includes the axes (taken from the scheduled bins)
+        """ Save a binned array to h5 file. The file includes the axes (taken from the scheduled bins)
         and the delay histograms, if present.
 
-
+        Parameters:
+        
+            binnedData : 
+                binned data
+            name : str
+                extra name tag in the filename
+            path : str | None
+                file path
+            mode : str | 'w' (write)
+                write mode of h5 file
         """
 
         if path is None:
@@ -300,8 +317,17 @@ class DldProcessor():
 
     def load_binned(self, name, path=None, mode='r'):
         """ load an h5 file saved with save_array.
-
+        
+        Parameters:
+        
+                name : str
+                    extra name tag in the filename
+                path : str | None
+                    file path
+                mode : str | 'r' (read)
+                    read mode of h5 file
         """
+        
         if path is None:
             path = self.DATA_RESULTS_DIR
 
@@ -322,6 +348,7 @@ class DldProcessor():
             hists.append(h5File['histograms/'+hist][()])
 
         h5File.close()
+        
         return data, axes, hists
 
     def addBinningOld(self, name, start, end, steps, useStepSize=True, include_last=True, force_legacy=False, ):
@@ -355,6 +382,7 @@ class DldProcessor():
         Notes:
             If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.
         """
+        
         _LEGACY_BINNING = False
         if _LEGACY_BINNING or force_legacy:
             bins = np.arange(start, end, steps)
@@ -375,7 +403,7 @@ class DldProcessor():
         self.binRangeList.append(bins)
         if (name == 'pumpProbeTime'):
             # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(pandas.cut, bins)
+            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(pd.cut, bins)
             delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
@@ -388,16 +416,17 @@ class DldProcessor():
             lb (float64): lower boundary of the filter
             ub (float64): upper bounday of the filter
         """
-        if name in self.dd.columns:
+        
+        if colname in self.dd.columns:
             if lb is not None:
-                self.dd = self.dd[self.dd[name] > lb]
+                self.dd = self.dd[self.dd[colname] > lb]
             if ub is not None:
-                self.dd = self.dd[self.dd[name] < ub]
-        if name in self.ddMicrobunches.columns:
+                self.dd = self.dd[self.dd[colname] < ub]
+        if colname in self.ddMicrobunches.columns:
             if lb is not None:
-                self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[name] > lb]
+                self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[colname] > lb]
             if ub is not None:
-                self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[name] < ub]
+                self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[colname] < ub]
 
     def genBins(self, start, end, steps, useStepSize=True, forceEnds=False, include_last=True, force_legacy=False):
         """Creates bins for use by binning functions. Can also be used to generate x axes.
@@ -460,6 +489,7 @@ class DldProcessor():
         else:
             assert isinstance(steps, int) and steps > 0, 'number of steps must be a positive integer number'
             bins = np.linspace(start, end, steps, endpoint=include_last)
+        
         return bins
 
     def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False, include_last=True, force_legacy=False):
@@ -506,13 +536,13 @@ class DldProcessor():
         self.binRangeList.append(bins)
         if (name == 'pumpProbeTime'):
             # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(pandas.cut, bins)
+            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(pd.cut, bins)
             delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
             self.pumpProbeHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)
         if (name == 'delayStageTime'):
             # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['delayStageTime'].map_partitions(pandas.cut, bins)
+            delaystageHistBinner = self.ddMicrobunches['delayStageTime'].map_partitions(pd.cut, bins)
             delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)
@@ -525,8 +555,9 @@ class DldProcessor():
         return axes
 
     def resetBins(self):
-        """ Make an empty bin list
+        """ Reset the bin list
         """
+        
         self.binNameList = []
         self.binRangeList = []
 
@@ -543,12 +574,15 @@ class DldProcessor():
         """
 
         def analyzePart(part):
-            """ Function called by each thread of the analysis."""
+            """ Function called by each thread of the analysis.
+            """
+            
             grouperList = []
             for i in range(len(self.binNameList)):
-                grouperList.append(pandas.cut(part[self.binNameList[i]], self.binRangeList[i]))
+                grouperList.append(pd.cut(part[self.binNameList[i]], self.binRangeList[i]))
             grouped = part.groupby(grouperList)
             result = (grouped.count())['microbunchId'].to_xarray().values
+            
             return np.nan_to_num(result)
         
         
@@ -557,7 +591,9 @@ class DldProcessor():
         
         # new binner for a partition, not using the Pandas framework. It should be faster!
         def analyzePartNumpy(part):
-            """ Function called by each thread of the analysis. This now should be faster. """
+            """ Function called by each thread of the analysis. This now should be faster.
+            """
+            
             # get the data as numpy:
             vals = part.values
             cols = part.columns.values
@@ -576,6 +612,7 @@ class DldProcessor():
                 ranges.append((self.binRangeList[i].min(), self.binRangeList[i].max()))
             # now we are ready for the analysis with numpy:
             res, edges = np.histogramdd(vals[:,colsToBin],bins=numBins,range=ranges)
+            
             return res
         
         
@@ -615,6 +652,7 @@ class DldProcessor():
         result = result.astype(np.float64)
         if saveName is not None:
             self.save_binned(result, saveName, path=savePath, mode=saveMode)
+        
         return result
         
     def computeBinnedDataMulti(self,saveName=None, savePath= None, saveMode='w', rank=None, size=None):
@@ -633,9 +671,10 @@ class DldProcessor():
             """ Function called by each thread of the analysis."""
             grouperList = []
             for i in range(len(self.binNameList)):
-                grouperList.append(pandas.cut(part[self.binNameList[i]], self.binRangeList[i]))
+                grouperList.append(pd.cut(part[self.binNameList[i]], self.binRangeList[i]))
             grouped = part.groupby(grouperList)
             result = (grouped.count())['microbunchId'].to_xarray().values
+            
             return np.nan_to_num(result)
         
         
@@ -662,6 +701,7 @@ class DldProcessor():
                 ranges.append((self.binRangeList[i].min(), self.binRangeList[i].max()))
             # now we are ready for the analysis with numpy:
             res, edges = np.histogramdd(vals[:,colsToBin],bins=numBins,range=ranges)
+            
             return res
         
         
@@ -692,6 +732,7 @@ class DldProcessor():
         results = results.astype(np.float64)
         if saveName is not None:
             self.save_binned(results, saveName, path=savePath, mode=saveMode)
+        
         return results
 
     # ==================
@@ -766,7 +807,9 @@ class DldProcessor():
         print("Created file " + filename)
 
     def deleteBinners(self):
-        """ DEPRECATED in favour of resetBins"""
+        """ DEPRECATED in favour of resetBins
+        """
+        
         print('WARNING: deleteBinners method has been renamed to resetBins.')
         self.resetBins()
 
@@ -779,7 +822,8 @@ class DldProcessor():
             fileName (str): name (including path) of the folder containing
                 parquet files where the data was saved.
         """
-        # TODO: remove this function once retrocompatibility is ensured
+        # TODO: remove this function once retro-compatibility is ensured
+        
         print(
             'WARNING: readDataframesParquet is being removed.\nUse readDataframes instead: Default behaviour is now parqet.\n',
             ' Specify format="h5" for legacy use.')
