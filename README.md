@@ -12,7 +12,7 @@ The data obtained from the DAQ system is read through the **pah** package provid
 
 # Settings
 
-To initialize the code correctly on a new machine, run the **InitializeSettings.py** file using
+To initialize the code correctly on a new machine, run the **InitializeSettings.py** file in the terminal using
 
 ```python InitializeSettings.py```
 
@@ -22,12 +22,11 @@ This creates the **SETTINGS.ini** file where local settings are stored. It conta
 
 * **processor** folder -- contains the latest version of the processor.
 * **lib** folder -- contains the legacy version of the processor, retained for retro-compatibility.
-* **XPSdoniachs** folder -- contains version, kept here for .
+* **XPSdoniachs** folder -- contains the Doniach-Sunjic lineshape function in C++ for fitting.
 
 # How to use
 
-In order to make use of this offline-analysis tool, the first thing is how to import the correct modules.
-Therefore, after adding the folders of the relevant repos to the system path, start as,
+To use this offline analysis package, first, import the dependent modules. Add the folders of the relevant repos to the system path,
 ```python
 import sys,os
 sys.path.append('/path/to/HextofOfflineAnalyzer/')
@@ -36,7 +35,7 @@ from processor.DldFlashDataframeCreator import DldFlashProcessor
 ```
 /!\ For windows users, remember to use forward slashes
 
-Some useful imports for initializing an Ipython notebook should look as follows,
+Some useful imports for initializing an IPython notebook include,
 ```python
 import sys,os
 import numpy as np
@@ -90,16 +89,16 @@ processor.postProcess()
 
 ## 2. Save dataset to dask parquet files
 
-For faster access to these dataframes for future analysis, it is convenient to store the datasets in dask parquet dataframes. This is done using
+For faster access to these dataframes in extended offline analysis, it is convenient to store the datasets in dask parquet dataframes. This is done using
 ```pthon
 processor.storeDataframes('filename')
 ```
 
-This saves two folders in path/to/file: **name_el** and **name_mb**. These are the two datasets `processor.dd` and `processor.ddMicrobunches`. If `'filename'` is not specified, it uses either `'run{runNumber}'` or `mb{firstMacrobunch}to{lastMacrobunch}'`, for example, `run18843`, or `mb90000000to900000500`.
+This saves two folders in path/to/file: **name_el** and **name_mb**. These are the two datasets `processor.dd` and `processor.ddMicrobunches`. If `'filename'` is not specified, it uses either `'run{runNumber}'` or `'mb{firstMacrobunch}to{lastMacrobunch}'`, for example, `run18843`, or `mb90000000to900000500`.
 
 
 
-Such datasets can be loaded back into the processor the `readDataframes` method. Using parquet,
+Datasets in parquet format can be loaded back into the processor using the `readDataframes` method.
 ```python
 processor = DldFlashProcessor()
 processor.readDataframes('filename')
@@ -108,7 +107,7 @@ processor.readDataframes('filename')
 
 An optional parameter for both `storeDataframes` and `readDataframes` is `path=''`. If it is unspecified, (left as default None) the values from`DATA_PARQUET_DIR` or `DATA_H5_DIR` in **SETTINGS.ini** is used.
 
-Alternatively, it is possible to store these datasets similarly in hdf5 format, using the same function:
+Alternatively, it is possible to store these datasets similarly in hdf5 format, using the same function,
 ```pthon
 processor.storeDataframes('filename', format='hdf5')
 ```
