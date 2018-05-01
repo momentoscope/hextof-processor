@@ -14,10 +14,10 @@ extensions = [
     Extension("processor.cscripts.DldFlashProcessorCy", [os.path.join("processor", "cscripts", "DldFlashProcessorCy.pyx")],
         include_dirs=[numpy.get_include()]),
 
-    Extension('XPSdoniachs.XPSdoniachs_ext',
-                        sources=['XPSdoniachs/XPSdoniachs_ext.cpp'],
-                        library_dirs=["/usr/local/Cellar/boost-python3/1.67.0/lib/"],
-                        libraries=["boost_python36"])
+#    Extension('XPSdoniachs.XPSdoniachs_ext',
+ #                       sources=['XPSdoniachs/XPSdoniachs_ext.cpp'],
+  #                      library_dirs=["/usr/local/Cellar/boost-python3/1.67.0/lib/"],
+   #                     libraries=["boost_python36"])
 ]
 
 setup(
