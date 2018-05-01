@@ -139,8 +139,6 @@ Parameters:
     e (float) the binding energy
 """
 
-
-# TODO: include offs and oo in the SETTINGS.ini file
 def t2e(t, offset=None, oo=None):
     """ Transform ToF to eV.
 
@@ -187,7 +185,6 @@ def t2e(t, offset=None, oo=None):
     e = 0.5 * 1e18 * 9.10938e-31 / (((t) - offset) * ((t) - offset)) / 1.602177e-19 - oo
     return e
 
-
 def e2t(e, offset=None, oo=None):
     """ Transform eV to ToF.
 
@@ -233,8 +230,6 @@ def e2t(e, offset=None, oo=None):
         oo = float(settings['processor']['ET_CONV_E_OFFSET'])
     t = np.sqrt(0.5 * 1e18 * 9.10938e-31 / 1.602177e-19 / (e + oo)) + offset
     return t
-
-
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
