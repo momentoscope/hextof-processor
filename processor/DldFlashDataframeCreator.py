@@ -21,6 +21,7 @@ except ImportError as e:
 assignToMircobunch = DldFlashProcessorCy.assignToMircobunch
 
 
+# For code testing (Steinn Y. Agustsson)
 def main():
     from datetime import datetime
     t0 = datetime.now()
@@ -88,6 +89,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         This is a union of the readRun and readInterval methods defined in previous versions.
         """
+        
         # check inputs:
         if runNumber is None:
             runNumber = self.runNumber
@@ -420,6 +422,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             processor.readRun(19059)
 
         """
+        
         print('WARNING: readRun method is obsolete. Please use readData(runNumber=xxx).')
 
         if path is None:  # allow for using the default path, which can be redefined as class variable.
@@ -505,6 +508,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             pulseIdInterval ():
             path (str): path to location where raw HDF5 files are stored
         """
+        
         # allow for using the default path, which can be redefined as class variable. leaving retrocompatibility
         print('WARNING: readInterval method is obsolete. Please use readData(pulseIdInterval=xxx).')
 
