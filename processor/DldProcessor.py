@@ -16,7 +16,7 @@ def main():
     from processor.DldFlashDataframeCreator import DldFlashProcessor
     processor = DldFlashProcessor()
     processor.runNumber = 19135
-    processor.readDataframes()
+    processor.readData()
     processor.postProcess()
     pptime = processor.addBinning('pumpProbeTime',-54,-44,.1)
     ToF = processor.addBinning('dldTime', 630, 670, 10*processor.TOF_STEP_TO_NS)
@@ -310,7 +310,7 @@ class DldProcessor():
         hh = h5File.create_group("histograms")
         if hasattr(self,'delaystageHistogram'):
             hh.create_dataset('delaystageHistogram', data=self.delaystageHistogram)
-        if hasattr(self,'delaystageHistogram'):
+        if hasattr(self,'pumpProbeHistogram'):
             hh.create_dataset('pumpProbeHistogram', data=self.pumpProbeHistogram)
 
         h5File.close()
