@@ -286,7 +286,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         # convert the laser polarization motor position to the uBunch format
         pumpPolArray = numpy.zeros_like(self.bam)
-        pumpPolArray[:, :] = (self.pumpPol[:])[:, None]
+        pumpPolArray[:] = (self.pumpPol[:])[:, None]
         daPumpPol = dask.array.from_array(pumpPolArray.flatten(), chunks=self.CHUNK_SIZE)
 
         daBam = dask.array.from_array(self.bam.flatten(), chunks=(self.CHUNK_SIZE))
