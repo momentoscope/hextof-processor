@@ -289,3 +289,9 @@ result = processor.ComputeBinnedData()
 result = nan_to_num(result)
 plt.imshow(result)
 ```
+
+FLASH DAQ info
+--
+
+A brief information about each channel of the DAQ can be found at this link:
+http://www.desy.de/~wwwuser/hdf5main.html
