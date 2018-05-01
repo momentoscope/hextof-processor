@@ -262,7 +262,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         self.dd = dask.dataframe.from_array(da, columns=('posX', 'posY', 'dldTime', 'delayStageTime', 'bam',
                                                          'microbunchId', 'dldDetectorId',
-                                                         'bunchCharge', 'opticalDiode', 'gmdTunnel', 'gmdBda',
+                                                         'bunchCharge', 'opticalDiode', 'gmdTunnel', 'gmdBda', 'pumpPol',
                                                          'macroBunchPulseId'))  # TODO: choose columns from SETTINGS
 
         self.dd = self.dd[self.dd['microbunchId'] > -1] # needed as negative values are used to mark bad data
