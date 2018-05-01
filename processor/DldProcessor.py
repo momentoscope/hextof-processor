@@ -408,7 +408,7 @@ class DldProcessor():
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
 
-    def addFilter(self, name, lb=None, ub=None):
+    def addFilter(self, colname, lb=None, ub=None):
         """ Filters the dataframes contained in the current processor
         
         Parameters:
@@ -713,7 +713,7 @@ class DldProcessor():
         calculatedResults = []
         results=[]
         print(rank,size)
-        for i in range(0, self.dd.nparti tions, size):
+        for i in range(0, self.dd.npartitions, size):
             resultsToCalculate = []
             # process the data in blocks of n partitions (given by the number of cores):
             #for j in range(0, self.N_CORES):
