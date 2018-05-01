@@ -267,72 +267,6 @@ class DldProcessor():
         except ValueError:
             raise ValueError('No pump probe time bin, could not normalize to delay stage histogram.')
 
-    def save2hdf5(self, binnedData, path=None, filename='default.hdf5', normalizedData=None, overwrite=False):
-        """ Store the binned data in a hdf5 file.
-
-        Parameters:
-            binneddata (pd.DataFrame): binned data with bins in dldTime, posX, and posY
-                (and if to be normalized, binned in detectors)
-            filename (string): name of the file,
-            path (string, optional): path to the location where to save the hdf5 file. If None, uses the default value
-                defined in SETTINGS.ini
-            normalizedData (bool): Normalized data for both detector, so it should be a 3d array (posX, posY,detectorID).
-            overwrite (bool): if True, overwrites existing files with matching name.
-
-        Example:
-            Normalization given, for example take it from run 18440.
-
-            processor.readRun(18440)
-            processor.addBinning('posX', 500, 1000, 2)
-            processor.addBinning('posY', 500, 1000, 2)
-            processor.addBinning('dldDetectorId', -1, 2, 1)
-            norm = processor.computeBinnedData()
-            norm = np.nan_to_num(norm)
-            norm[norm<10]=1 # 10 or smaller seems to be outside of detector
-            norm[:,:,0][norm[:,:,0] >= 10]/=norm[:,:,0][norm[:,:,0] >= 10].mean()
-            norm[:,:,1][norm[:,:,1] >= 10]/=norm[:,:,1][norm[:,:,1] >= 10].mean()
-            norm[norm<0.05]=0.1
-
-            Raises:
-                Exception Wrong dimension: if data from binnedData has dimensions different from 4
-        """
-
-        # TODO: generalise this function for different data input shapes or bin orders
-        if path is None:
-            path = self.DATA_H5_DIR
-
-        if normalizedData is not None:
-            if binnedData.ndim != 4:
-                raise Exception('Wrong dimension')
-            data2hdf5 = np.zeros_like(binnedData[:, :, :, 0])
-
-            # normalize for all time binns
-            for i in range(binnedData.shape[0]):
-                # normalize for both detectors (0 and 1)
-
-                data2hdf5[i, :, :] = binnedData[i, :, :, 0].transpose() / normalizedData[:, :, 0].transpose()
-                data2hdf5[i, :, :] += binnedData[i, :, :, 1].transpose() / normalizedData[:, :, 1].transpose()
-        else:
-            # detector binned? -> sum together
-            if binnedData.ndim == 4:
-                data2hdf5 = binnedData.sum(axis=3).transpose((0, 2, 1))
-            else:
-                if binnedData.ndim != 3:
-                    raise Exception('Wrong dimension')
-                # print(binnedData.transpose((1,2).shape)
-                data2hdf5 = binnedData.transpose((0, 2, 1))
-
-        # create file and save data
-        mode = "w-"  # fail if file exists
-        if overwrite:
-            mode = "w"
-
-        f = h5py.File(path + filename, mode)
-        dset = f.create_dataset("experiment/xyt_data", data2hdf5.shape, dtype='float64')
-
-        dset[...] = data2hdf5
-        f.close()
-        print("Created file " + filename)
 
     def save_binned(self, binnedData, name, path=None, mode='w'):
         """ save a binned array to h5 file. The file includes the axes (taken from the scheduled bins)
@@ -686,6 +620,73 @@ class DldProcessor():
     # ==================
     # DEPRECATED METHODS
     # ==================
+
+    def save2hdf5(self, binnedData, path=None, filename='default.hdf5', normalizedData=None, overwrite=False):
+        """ Store the binned data in a hdf5 file.
+
+        Parameters:
+            binneddata (pd.DataFrame): binned data with bins in dldTime, posX, and posY
+                (and if to be normalized, binned in detectors)
+            filename (string): name of the file,
+            path (string, optional): path to the location where to save the hdf5 file. If None, uses the default value
+                defined in SETTINGS.ini
+            normalizedData (bool): Normalized data for both detector, so it should be a 3d array (posX, posY,detectorID).
+            overwrite (bool): if True, overwrites existing files with matching name.
+
+        Example:
+            Normalization given, for example take it from run 18440.
+
+            processor.readRun(18440)
+            processor.addBinning('posX', 500, 1000, 2)
+            processor.addBinning('posY', 500, 1000, 2)
+            processor.addBinning('dldDetectorId', -1, 2, 1)
+            norm = processor.computeBinnedData()
+            norm = np.nan_to_num(norm)
+            norm[norm<10]=1 # 10 or smaller seems to be outside of detector
+            norm[:,:,0][norm[:,:,0] >= 10]/=norm[:,:,0][norm[:,:,0] >= 10].mean()
+            norm[:,:,1][norm[:,:,1] >= 10]/=norm[:,:,1][norm[:,:,1] >= 10].mean()
+            norm[norm<0.05]=0.1
+
+            Raises:
+                Exception Wrong dimension: if data from binnedData has dimensions different from 4
+        """
+
+        # TODO: generalise this function for different data input shapes or bin orders
+        if path is None:
+            path = self.DATA_H5_DIR
+
+        if normalizedData is not None:
+            if binnedData.ndim != 4:
+                raise Exception('Wrong dimension')
+            data2hdf5 = np.zeros_like(binnedData[:, :, :, 0])
+
+            # normalize for all time binns
+            for i in range(binnedData.shape[0]):
+                # normalize for both detectors (0 and 1)
+
+                data2hdf5[i, :, :] = binnedData[i, :, :, 0].transpose() / normalizedData[:, :, 0].transpose()
+                data2hdf5[i, :, :] += binnedData[i, :, :, 1].transpose() / normalizedData[:, :, 1].transpose()
+        else:
+            # detector binned? -> sum together
+            if binnedData.ndim == 4:
+                data2hdf5 = binnedData.sum(axis=3).transpose((0, 2, 1))
+            else:
+                if binnedData.ndim != 3:
+                    raise Exception('Wrong dimension')
+                # print(binnedData.transpose((1,2).shape)
+                data2hdf5 = binnedData.transpose((0, 2, 1))
+
+        # create file and save data
+        mode = "w-"  # fail if file exists
+        if overwrite:
+            mode = "w"
+
+        f = h5py.File(path + filename, mode)
+        dset = f.create_dataset("experiment/xyt_data", data2hdf5.shape, dtype='float64')
+
+        dset[...] = data2hdf5
+        f.close()
+        print("Created file " + filename)
 
     def deleteBinners(self):
         """ DEPRECATED in favour of resetBins"""
