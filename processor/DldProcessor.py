@@ -235,7 +235,7 @@ class DldProcessor():
         self.dd['posR'] = self.dd.map_partitions(radius)
         self.dd['posT'] = self.dd.map_partitions(angle)
 
-    def normalizePumpProbeTime(self, data_array):
+    def normalizePumpProbeTime(self, data_array, ax=None): # TODO: work on better implementation and accessibility for this method
         """ Normalise data to the delay stage histogram.
 
         Normalises the data array to the number of counts per delay stage step.
