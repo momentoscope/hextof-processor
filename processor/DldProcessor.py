@@ -380,13 +380,13 @@ class DldProcessor():
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
 
-    def filterProcessor(self, name, lb=None, ub=None):
+    def addFilter(self, name, lb=None, ub=None):
         """ Filters the dataframes contained in the current processor
         
         Parameters:
-            name
-            lb
-            ub
+            name (str): name of the column in the dask dataframes
+            lb (float64): lower boundary of the filter
+            ub (float64): upper bounday of the filter
         """
         if name in self.dd.columns:
             if lb is not None:
