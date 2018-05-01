@@ -616,6 +616,83 @@ class DldProcessor():
         if saveName is not None:
             self.save_binned(result, saveName, path=savePath, mode=saveMode)
         return result
+        
+    def computeBinnedDataMulti(self,saveName=None, savePath= None, saveMode='w', rank=None, size=None):
+        """ Use the bin list to bin the data.
+
+        Returns:
+            result (np.array): It returns a numpy array of float64 values. Number of bins defined will define the
+            dimensions of such array.
+
+        Notes:
+            postProcess method must be used before computing the binned data if binning along pumpProbeDelay or polar
+            k-space coordinates.
+        """
+
+        def analyzePart(part):
+            """ Function called by each thread of the analysis."""
+            grouperList = []
+            for i in range(len(self.binNameList)):
+                grouperList.append(pandas.cut(part[self.binNameList[i]], self.binRangeList[i]))
+            grouped = part.groupby(grouperList)
+            result = (grouped.count())['microbunchId'].to_xarray().values
+            return np.nan_to_num(result)
+        
+        
+        
+        
+        
+        # new binner for a partition, not using the Pandas framework. It should be faster!
+        def analyzePartNumpy(vals,cols):
+            """ Function called by each thread of the analysis. This now should be faster. """
+            # get the data as numpy:
+            #vals = part.values
+            #cols = part.columns.values
+            # create array of columns to be used for binning
+            colsToBin = []
+            for binName in self.binNameList:
+                idx = cols.tolist().index(binName)
+                colsToBin.append(idx)
+    
+            # create the array with the bins and bin ranges
+            numBins = []
+            ranges = []
+            for i in range(0, len(colsToBin)):
+                numBins.append(len(self.binRangeList[i]))
+                ranges.append((self.binRangeList[i].min(), self.binRangeList[i].max()))
+            # now we are ready for the analysis with numpy:
+            res, edges = np.histogramdd(vals[:,colsToBin],bins=numBins,range=ranges)
+            return res
+        
+        
+        
+        
+        
+
+        # prepare the partitions for the calculation in parallel    
+        calculatedResults = []
+        results=[]
+        print(rank,size)
+        for i in range(0, self.dd.nparti tions, size):
+            resultsToCalculate = []
+            # process the data in blocks of n partitions (given by the number of cores):
+            #for j in range(0, self.N_CORES):
+            if (i + rank) >= self.dd.npartitions:
+                    break
+            partval = self.dd.get_partition(i + rank).values.compute()
+            partcol = self.dd.get_partition(i + rank).columns.values
+            if (i==0):
+              results=analyzePartNumpy(partval,partcol)
+            else:
+              results+=analyzePartNumpy(partval,partcol) 
+            print("computing partitions " + str(i+rank) + " of " + str(
+                    self.dd.npartitions) + ". partitions calculated in parallel: " + str(size))
+            
+        results = np.nan_to_num(results)
+        results = results.astype(np.float64)
+        if saveName is not None:
+            self.save_binned(results, saveName, path=savePath, mode=saveMode)
+        return results
 
     # ==================
     # DEPRECATED METHODS

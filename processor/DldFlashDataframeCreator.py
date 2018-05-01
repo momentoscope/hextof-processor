@@ -196,6 +196,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         macroBunchPulseIdArray[:, :] = (self.macroBunchPulseId[mbIndexStart:mbIndexEnd, 0])[:, None]
         daMacroBunchPulseId = macroBunchPulseIdArray.flatten()
 
+        # convert the laser polarization motor position to the electron format
+        pumpPolArray = numpy.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+        pumpPolArray[:,:] = (self.pumpPol[mbIndexStart:mbIndexEnd,0])[:, None]
+        daPumpPol = pumpPolArray.flatten()
+
         bunchChargeArray = assignToMircobunch(
             self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(numpy.float64),
             self.bunchCharge[mbIndexStart:mbIndexEnd, :].astype(numpy.float64))
@@ -216,6 +221,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             self.gmdBda[mbIndexStart:mbIndexEnd, :].astype(numpy.float64))
         daGmdBda = gmdBdaArray.flatten()
 
+
         # the Aux channel: aux0:
         # aux0Arr= assignToMircobunch(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(numpy.float64), self.dldAux[mbIndexStart:mbIndexEnd, 0].astype(numpy.float64))
         # daAux0 = dask.array.from_array(aux0Arr.flatten(), chunks=(chunks))
@@ -230,7 +236,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         #                       daGmdTunnel, daMacroBunchPulseId])
         da = numpy.stack([daX, daY, daTime, daDelaystage, daBam, daMicrobunchId,
                           daDetectorId, daBunchCharge, daOpticalDiode,
-                          daGmdTunnel, daGmdBda, daMacroBunchPulseId])
+                          daGmdTunnel, daGmdBda, daPumpPol, daMacroBunchPulseId])
 
         return da
 
@@ -262,7 +268,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         self.dd = dask.dataframe.from_array(da, columns=('posX', 'posY', 'dldTime', 'delayStageTime', 'bam',
                                                          'microbunchId', 'dldDetectorId',
-                                                         'bunchCharge', 'opticalDiode', 'gmdTunnel', 'gmdBda',
+                                                         'bunchCharge', 'opticalDiode', 'gmdTunnel', 'gmdBda','pumpPol', 
                                                          'macroBunchPulseId'))  # TODO: choose columns from SETTINGS
 
         self.dd = self.dd[self.dd['microbunchId'] > -1] # needed as negative values are used to mark bad data
@@ -274,15 +280,20 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         numOfMacrobunches = self.bam.shape[0]
 
-        # convert the delay stage position to the electron format
+        # convert the delay stage position to the uBunch format
         delayStageArray = numpy.zeros_like(self.bam)
         delayStageArray[:, :] = (self.delayStage[:])[:, None]
         daDelayStage = dask.array.from_array(delayStageArray.flatten(), chunks=self.CHUNK_SIZE)
 
-        # convert the MacroBunchPulseId to the electron format
+        # convert the MacroBunchPulseId to the uBunch format
         macroBunchPulseIdArray = numpy.zeros_like(self.bam)
         macroBunchPulseIdArray[:, :] = (self.macroBunchPulseId[:, 0])[:, None]
         daMacroBunchPulseId = dask.array.from_array(macroBunchPulseIdArray.flatten(), chunks=(self.CHUNK_SIZE))
+
+        # convert the laser polarization motor position to the uBunch format
+        pumpPolArray = numpy.zeros_like(self.bam)
+        pumpPolArray[:] = (self.pumpPol[:,0])[:, None]
+        daPumpPol = dask.array.from_array(pumpPolArray.flatten(), chunks=self.CHUNK_SIZE)
 
         daBam = dask.array.from_array(self.bam.flatten(), chunks=(self.CHUNK_SIZE))
         numOfMicrobunches = self.bam.shape[1]
@@ -306,13 +317,13 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         except:
             print('fix optical diode DAQ: Langth: ' + str( self.opticalDiode.shape[1]))
             daOpticalDiode = dask.array.from_array(self.opticalDiode[:,0:numOfMicrobunches].flatten(), chunks=(self.CHUNK_SIZE))                        
-        # Added MacroBunchPulseId
-        da = dask.array.stack([daDelayStage, daBam, daAux0, daAux1, daBunchCharge, daOpticalDiode, daMacroBunchPulseId])
+
+        da = dask.array.stack([daDelayStage, daBam, daAux0, daAux1, daBunchCharge, daOpticalDiode, daPumpPol, daMacroBunchPulseId])
 
         # create the data frame:
         self.ddMicrobunches = dask.dataframe.from_array(da.T,
                                                         columns=('delayStageTime', 'bam', 'aux0', 'aux1', 'bunchCharge',
-                                                                 'opticalDiode', 'macroBunchPulseId'))
+                                                                 'opticalDiode', 'pumpPol', 'macroBunchPulseId'))
 
     def storeDataframes(self, fileName=None, path=None, format='parquet', append=False):
         """ Saves imported dask dataframe into a parquet or hdf5 file.
