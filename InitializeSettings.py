@@ -52,7 +52,7 @@ def make_new_settings():
             'optical_diode': '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD',
             'gmd_tunnel': '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel',
             'gmd_bda': '/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA',
-
+            'pump_pol' : '/uncategorised/FLASH1_USER2/FLASH.EXP/NF.ESP301/PG2/MOTOR3.POS',
         },
         'DAQ address - not used': {}
     }
