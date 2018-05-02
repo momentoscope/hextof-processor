@@ -14,44 +14,66 @@ from matplotlib import pyplot as plt, cm
 def PulseEnergy400(Diode):
     """ Returns the pulse energy of 400nm laser in uJ.
 
-	:param Diode: value from photodiode (arb. units)
-	um for beam diameter, uJ/cm^2 for energy density.
-	"""
+    :param Diode: value from photodiode (arb. units)
+    um for beam diameter, uJ/cm^2 for energy density.
+    """
     return 0.86 * (Diode * 0.0008010439 + 0.0352573)
 
 
 def PulseEnergy800(Diode):
     """ Returns the pulse energy of 800nm laser in uJ.
 
-	:param Diode: value from photodiode (arb. units)
-	um for beam diameter, uJ/cm^2 for energy density.
-	"""
+    :param Diode: value from photodiode (arb. units)
+    um for beam diameter, uJ/cm^2 for energy density.
+    """
     return 0.86 * (Diode * 0.0009484577 + 0.1576)
 
 
 def EnergyDensity400(Diode, Diameter=600):
     """ Returns the pulse energy density of 400nm laser in uJ/cm^2.
 
-	:param Diode: value from photodiode (arb. units)
-	um for beam diameter, uJ/cm^2 for energy density.
-	"""
+    :param Diode: value from photodiode (arb. units)
+    um for beam diameter, uJ/cm^2 for energy density.
+    """
     return PulseEnergy400(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
 
 
 def EnergyDensity800(Diode, Diameter=600):
     """ Returns the pulse energy density of 800nm laser in uJ/cm^2.
 
-	:param Diode: value from photodiode (arb. units)
-	um for beam diameter, uJ/cm^2 for energy density
-	"""
+    :param Diode: value from photodiode (arb. units)
+    um for beam diameter, uJ/cm^2 for energy density
+    """
     return PulseEnergy800(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
 
 
 # ================================================================================
 
 def radius(df, center=(0, 0)):
+
     return np.sqrt(np.square(df.posX - center[0]) + np.square(df.posY - center[1]))
 
+def argnearest(array, val, rettype='vectorized'):
+    """Find the coordinates of the nD array element nearest to a specified value
+    
+    Parameters
+    
+    array : ndarray
+        Numeric array
+    val : numeric
+        Look-up value
+        
+    Return
+        coordinate position
+    """
+    
+    vnz = np.abs(array - val)
+    argval = np.argmin(vnz)
+    
+    if rettype == 'vectorized':
+        return argval
+    elif rettype == 'coordinates':
+        return np.unravel_index(argval, array.shape)
 
 # ================================================================================
 
@@ -63,7 +85,7 @@ def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
         filename (str): name of the file to save
         path (str, optional): path to where to save hdf5 file. If None, uses the "results" folder from SETTINGS.ini
         overwrite (str): if true, it overwrites existing file with the same
-        	name. Otherwise raises and error.
+            name. Otherwise raises and error.
     """
     mode = "w-"  # fail if file exists
     if overwrite:
