@@ -1,5 +1,5 @@
 # HextofOfflineAnalyzer
-This code is used to analyze data measured at FLASH using the HEXTOF instrument. The HEXTOF uses a delayline detector to detect single electrons in position and arrival time.
+This code is used to analyze data measured at FLASH using the HEXTOF instrument. The HEXTOF uses a delay line detector (DLD) to measure the position and arrival time of single electron events.
 
 The analysis of the data is based on clean tables as dask dataframes. The main table contains all detected electrons and can be binned according to the needs of the experiment. The second dataframe contains the FEL pulses needed for normalization.
 
@@ -14,13 +14,11 @@ The data obtained from the DAQ system is read through the **pah** package provid
 
 To initialize the code correctly on a new machine, run the **InitializeSettings.py** file in the terminal using
 
-Also, run the setup.py. To do this, cd to your repo folder and run the following command:
+Also, run the setup.py. To do this, cd to your repo folder and run the following commands,
 ```bash 
 python setup.py build_ext --inplace
+python InitializeSettings.py
 ```
- 
-
-```python InitializeSettings.py```
 
 This creates the **SETTINGS.ini** file where local settings are stored. It contains the file paths and the parallelization parameters, which can be modified by the user externally. The ini file is not synced (git-ignored) in the git repository to allow the code to adapt to different computing environments.
 
