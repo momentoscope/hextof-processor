@@ -11,10 +11,12 @@ from processor.pah import BeamtimeDaqAccess
 
 _VERBOSE = False
 
+# Try to load Cython version of the microbunch assignment code
+# If fails, load a vanilla python equivalent (Steinn Y. Agustsson)
 try:
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
-
-    if _VERBOSE: print('loaded cython module')
+    if _VERBOSE:
+        print('loaded cython module')
 except ImportError as e:
     print('Failed loading Cython script. Using Python version instead. TODO: FIX IT!!#n Error msg: {}'.format(e))
     import processor.cscripts.DldFlashProcessorNotCy as DldFlashProcessorCy
@@ -70,13 +72,14 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
     """
 
     def __init__(self):
+        
         super().__init__()
 
         self.runNumber = None
         self.pulseIdInterval = None
 
     def readData(self, runNumber=None, pulseIdInterval=None, path=None):
-        """Access to data by run or macrobunch pulseID interval.
+        """Read data by run or macrobunch pulseID interval.
 
 
         Useful for scans that would otherwise hit the machine's memory limit.
@@ -120,16 +123,19 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             name = utils.camelCaseIt(entry)
             val = str(settings[section][entry])
             daqAddresses.append(name)
-            if _VERBOSE: print('assigning address: {}: {}'.format(name.ljust(20), val))
+            if _VERBOSE:
+                print('assigning address: {}: {}'.format(name.ljust(20), val))
             setattr(self, name, val)
 
         daqAccess = BeamtimeDaqAccess.create(path)
+
         # TODO: get the available pulse id from PAH
         if pulseIdInterval is None:
-            print('reading DAQ data from run {}...\nPlease wait...'.format(runNumber))
+            print('Reading DAQ data from run {}... Please wait...'.format(runNumber))
 
             for address_name in daqAddresses:
-                if _VERBOSE: print('reading address: {}'.format(address_name))
+                if _VERBOSE:
+                    print('Reading address: {}'.format(address_name))
                 values, otherStuff = daqAccess.allValuesOfRun(getattr(self, address_name), runNumber)
                 setattr(self, address_name, values)
                 if address_name == 'macroBunchPulseId':  # catch the value of the first macrobunchID
@@ -144,7 +150,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             print('reading DAQ data from interval {}'.format(pulseIdInterval))
             self.pulseIdInterval = pulseIdInterval
             for address_name in daqAddresses:
-                if _VERBOSE: print('reading address: {}'.format(address_name))
+                if _VERBOSE:
+                    print('reading address: {}'.format(address_name))
                 setattr(self, address_name, daqAccess.valuesOfInterval(getattr(self, address_name), pulseIdInterval))
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
             macroBunchPulseId_correction = pulseIdInterval[0]
@@ -154,7 +161,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.macroBunchPulseId -= macroBunchPulseId_correction
         self.dldMicrobunchId -= self.UBID_OFFSET
 
-        if _VERBOSE: print('Counting electrons...')
+        if _VERBOSE:
+            print('Counting electrons...')
 
         electronsToCount = self.dldPosX.copy().flatten()
         electronsToCount = np.nan_to_num(electronsToCount)
@@ -169,7 +177,10 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         print('dataframe created')
 
     def createDataframePerElectronRange(self, mbIndexStart, mbIndexEnd):
-
+        """Create numpy array indexed by photoelectron events for a given range
+        of electron macrobunch ID.
+        """
+        
         # the chunk size here is too large in order to do the chunking by the loop around it.
 
         daX = self.dldPosX[mbIndexStart:mbIndexEnd, :].flatten()
@@ -243,14 +254,13 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         return da
 
     def createDataframePerElectron(self):
-        """ Create a data frame from the read arrays (either from the test file or the run number)
-
-
-
+        """Create a dataframe indexed by photoelectron events from
+        the read arrays (either from the test file or the run number)
         """
 
         # self.dldTime=self.dldTime*self.dldTimeStep
-        if _VERBOSE: print('creating electron dataframe...')
+        if _VERBOSE:
+            print('creating electron dataframe...')
         maxIndex = self.dldTime.shape[0]
         chunkSize = min(self.CHUNK_SIZE, maxIndex / self.N_CORES)  # ensure minimum one chunk per core.
         numOfPartitions = int(maxIndex / chunkSize) + 1
@@ -278,7 +288,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                                  'dldTime'] * self.TOF_STEP_TO_NS  # TODO: change to eV? no! this is more Dima friendly
 
     def createDataframePerMicrobunch(self):
-        if _VERBOSE: print('creating microbunch dataframe...')
+        """Create a dataframe indexed by the microbunch ID
+        """
+        
+        if _VERBOSE:
+            print('creating microbunch dataframe...')
 
         numOfMacrobunches = self.bam.shape[0]
 
@@ -313,6 +327,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                                               chunks=(self.CHUNK_SIZE))
 
         lengthToPad = numOfMicrobunches - self.opticalDiode.shape[1]
+        
         try:
             paddedOpticalDiode = np.pad(self.opticalDiode, ((0, 0), (0, lengthToPad)), 'constant', constant_values=(0, 0))
             daOpticalDiode = dask.array.from_array(paddedOpticalDiode.flatten(), chunks=(self.CHUNK_SIZE))
@@ -403,6 +418,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
     # ==================
     # DEPRECATED METHODS
     # ==================
+    
     def readRun(self, runNumber=None, path=None):
         """ Read a run
 
