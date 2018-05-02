@@ -56,14 +56,20 @@ def radius(df, center=(0, 0)):
 def argnearest(array, val, rettype='vectorized'):
     """Find the coordinates of the nD array element nearest to a specified value
     
-    Parameters
+    **Parameters**
     
     array : ndarray
         Numeric array
     val : numeric
         Look-up value
+    rettype : str | 'vectorized'
+        return type specification
+        'vectorized' denotes vectorized coordinates (integer)
+        'coordinates' denotes multidimensional coordinates (tuple)
         
-    Return
+    **Return**
+    
+    argval : numeric
         coordinate position
     """
     
