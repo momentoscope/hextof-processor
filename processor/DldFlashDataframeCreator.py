@@ -4,7 +4,7 @@ from configparser import ConfigParser
 import dask
 import dask.dataframe
 import dask.multiprocessing
-import numpy
+import numpy as np
 
 from processor import DldProcessor, utils
 from processor.pah import BeamtimeDaqAccess
@@ -157,7 +157,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         if _VERBOSE: print('Counting electrons...')
 
         electronsToCount = self.dldPosX.copy().flatten()
-        electronsToCount = numpy.nan_to_num(electronsToCount)
+        electronsToCount = np.nan_to_num(electronsToCount)
         electronsToCount = electronsToCount[electronsToCount > 0]
         electronsToCount = electronsToCount[electronsToCount < 10000]
         numOfElectrons = len(electronsToCount)
@@ -182,61 +182,61 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         # convert the bam data to electron format
         bamArray = assignToMircobunch(
-            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(numpy.float64),
-            self.bam[mbIndexStart:mbIndexEnd, :].astype(numpy.float64))
+            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+            self.bam[mbIndexStart:mbIndexEnd, :].astype(np.float64))
         daBam = bamArray.flatten()
 
         # convert the delay stage position to the electron format
-        delayStageArray = numpy.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+        delayStageArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
         delayStageArray[:, :] = (self.delayStage[mbIndexStart:mbIndexEnd])[:, None]
         daDelaystage = delayStageArray.flatten()
 
         daMicrobunchId = self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].flatten()
 
         # convert the MacroBunchPulseId to the electron format
-        macroBunchPulseIdArray = numpy.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+        macroBunchPulseIdArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
         macroBunchPulseIdArray[:, :] = (self.macroBunchPulseId[mbIndexStart:mbIndexEnd, 0])[:, None]
         daMacroBunchPulseId = macroBunchPulseIdArray.flatten()
 
         # convert the laser polarization motor position to the electron format
-        pumpPolArray = numpy.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+        pumpPolArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
         pumpPolArray[:,:] = (self.pumpPol[mbIndexStart:mbIndexEnd,0])[:, None]
         daPumpPol = pumpPolArray.flatten()
 
         bunchChargeArray = assignToMircobunch(
-            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(numpy.float64),
-            self.bunchCharge[mbIndexStart:mbIndexEnd, :].astype(numpy.float64))
+            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+            self.bunchCharge[mbIndexStart:mbIndexEnd, :].astype(np.float64))
         daBunchCharge = bunchChargeArray.flatten()
 
         opticalDiodeArray = assignToMircobunch(
-            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(numpy.float64),
-            self.opticalDiode[mbIndexStart:mbIndexEnd, :].astype(numpy.float64))
+            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+            self.opticalDiode[mbIndexStart:mbIndexEnd, :].astype(np.float64))
         daOpticalDiode = opticalDiodeArray.flatten()
 
         gmdTunnelArray = assignToMircobunch(
-            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(numpy.float64),
-            self.gmdTunnel[mbIndexStart:mbIndexEnd, :].astype(numpy.float64))
+            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+            self.gmdTunnel[mbIndexStart:mbIndexEnd, :].astype(np.float64))
         daGmdTunnel = gmdTunnelArray.flatten()
 
         gmdBdaArray = assignToMircobunch(
-            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(numpy.float64),
-            self.gmdBda[mbIndexStart:mbIndexEnd, :].astype(numpy.float64))
+            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+            self.gmdBda[mbIndexStart:mbIndexEnd, :].astype(np.float64))
         daGmdBda = gmdBdaArray.flatten()
 
 
         # the Aux channel: aux0:
-        # aux0Arr= assignToMircobunch(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(numpy.float64), self.dldAux[mbIndexStart:mbIndexEnd, 0].astype(numpy.float64))
+        # aux0Arr= assignToMircobunch(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64), self.dldAux[mbIndexStart:mbIndexEnd, 0].astype(np.float64))
         # daAux0 = dask.array.from_array(aux0Arr.flatten(), chunks=(chunks))
 
         # the Aux channel: aux1:
-        # aux1Arr= assignToMircobunch(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(numpy.float64), self.dldAux[mbIndexStart:mbIndexEnd, 1].astype(numpy.float64))
+        # aux1Arr= assignToMircobunch(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64), self.dldAux[mbIndexStart:mbIndexEnd, 1].astype(np.float64))
         # daAux1 = dask.array.from_array(aux0Arr.flatten(), chunks=(chunks))
 
         # added macroBunchPulseId at last position
         # da = dask.array.stack([daX, daY, daTime, daDelaystage, daBam, daMicrobunchId,
         #                       daDetectorId, daBunchCharge, daOpticalDiode,
         #                       daGmdTunnel, daMacroBunchPulseId])
-        da = numpy.stack([daX, daY, daTime, daDelaystage, daBam, daMicrobunchId,
+        da = np.stack([daX, daY, daTime, daDelaystage, daBam, daMicrobunchId,
                           daDetectorId, daBunchCharge, daOpticalDiode,
                           daGmdTunnel, daGmdBda, daPumpPol, daMacroBunchPulseId])
 
@@ -265,7 +265,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         # create the data frame:
         self.daListResult = dask.compute(*daList)
 
-        a = numpy.concatenate(self.daListResult, axis=1)
+        a = np.concatenate(self.daListResult, axis=1)
         da = dask.array.from_array(a.T, chunks=self.CHUNK_SIZE)
 
         self.dd = dask.dataframe.from_array(da, columns=('posX', 'posY', 'dldTime', 'delayStageTime', 'bam',
@@ -283,17 +283,17 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         numOfMacrobunches = self.bam.shape[0]
 
         # convert the delay stage position to the uBunch format
-        delayStageArray = numpy.zeros_like(self.bam)
+        delayStageArray = np.zeros_like(self.bam)
         delayStageArray[:, :] = (self.delayStage[:])[:, None]
         daDelayStage = dask.array.from_array(delayStageArray.flatten(), chunks=self.CHUNK_SIZE)
 
         # convert the MacroBunchPulseId to the uBunch format
-        macroBunchPulseIdArray = numpy.zeros_like(self.bam)
+        macroBunchPulseIdArray = np.zeros_like(self.bam)
         macroBunchPulseIdArray[:, :] = (self.macroBunchPulseId[:, 0])[:, None]
         daMacroBunchPulseId = dask.array.from_array(macroBunchPulseIdArray.flatten(), chunks=(self.CHUNK_SIZE))
 
         # convert the laser polarization motor position to the uBunch format
-        pumpPolArray = numpy.zeros_like(self.bam)
+        pumpPolArray = np.zeros_like(self.bam)
         pumpPolArray[:] = (self.pumpPol[:,0])[:, None]
         daPumpPol = dask.array.from_array(pumpPolArray.flatten(), chunks=self.CHUNK_SIZE)
 
@@ -302,11 +302,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         # the Aux channel: aux0:
         dldAux0 = self.dldAux[:, 0]
-        aux0 = numpy.ones(self.bam.shape) * dldAux0[:, None]
+        aux0 = np.ones(self.bam.shape) * dldAux0[:, None]
         daAux0 = dask.array.from_array(aux0.flatten(), chunks=(self.CHUNK_SIZE))
         # the Aux channel: aux1:
         dldAux1 = self.dldAux[:, 1]
-        aux1 = numpy.ones(self.bam.shape) * dldAux1[:, None]
+        aux1 = np.ones(self.bam.shape) * dldAux1[:, None]
         daAux1 = dask.array.from_array(aux1.flatten(), chunks=(self.CHUNK_SIZE))
 
         daBunchCharge = dask.array.from_array(self.bunchCharge[:, 0:numOfMicrobunches].flatten(),
@@ -314,7 +314,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         lengthToPad = numOfMicrobunches - self.opticalDiode.shape[1]
         try:
-            paddedOpticalDiode = numpy.pad(self.opticalDiode, ((0, 0), (0, lengthToPad)), 'constant', constant_values=(0, 0))
+            paddedOpticalDiode = np.pad(self.opticalDiode, ((0, 0), (0, lengthToPad)), 'constant', constant_values=(0, 0))
             daOpticalDiode = dask.array.from_array(paddedOpticalDiode.flatten(), chunks=(self.CHUNK_SIZE))
         except:
             print('fix optical diode DAQ: Langth: ' + str( self.opticalDiode.shape[1]))
@@ -489,7 +489,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.gmdTunnel, otherStuff = daqAccess.allValuesOfRun(gmdTunnelName, runNumber)
         self.gmdBda, otherStuff = daqAccess.allValuesOfRun(gmdBdaName, runNumber)
         electronsToCount = self.dldPosX.copy().flatten()
-        electronsToCount = numpy.nan_to_num(electronsToCount)
+        electronsToCount = np.nan_to_num(electronsToCount)
         electronsToCount = electronsToCount[electronsToCount > 0]
         electronsToCount = electronsToCount[electronsToCount < 10000]
         numOfElectrons = len(electronsToCount)
@@ -569,7 +569,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.gmdTunnel = daqAccess.valuesOfInterval(gmdTunnelName, pulseIdInterval)
         self.gmdBda = daqAccess.valuesOfInterval(gmdBdaName, pulseIdInterval)
         electronsToCount = self.dldPosX.copy().flatten()
-        electronsToCount = numpy.nan_to_num(electronsToCount)
+        electronsToCount = np.nan_to_num(electronsToCount)
         electronsToCount = electronsToCount[electronsToCount > 0]
         electronsToCount = electronsToCount[electronsToCount < 10000]
         numOfElectrons = len(electronsToCount)
