@@ -5,6 +5,7 @@ import dask.multiprocessing
 import h5py
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 from configparser import ConfigParser
 import matplotlib.pyplot as plt
 
@@ -412,7 +413,7 @@ class DldProcessor():
         """ Filters the dataframes contained in the current processor
         
         Parameters:
-            name (str): name of the column in the dask dataframes
+            colname (str): name of the column in the dask dataframes
             lb (float64): lower boundary of the filter
             ub (float64): upper bounday of the filter
         """
@@ -622,7 +623,7 @@ class DldProcessor():
 
         # prepare the partitions for the calculation in parallel    
         calculatedResults = []
-        for i in range(0, self.dd.npartitions, self.N_CORES):
+        for i in tqdm(range(0, self.dd.npartitions, self.N_CORES)):
             resultsToCalculate = []
             # process the data in blocks of n partitions (given by the number of cores):
             for j in range(0, self.N_CORES):
@@ -633,9 +634,9 @@ class DldProcessor():
 
             # now do the calculation on each partition (using the dask framework):
             if len(resultsToCalculate) > 0:
-                print("computing partitions " + str(i) + " to " + str(i + j) + " of " + str(
-                    self.dd.npartitions) + ". partitions calculated in parallel: " + str(
-                    len(resultsToCalculate)))
+#                print("computing partitions " + str(i) + " to " + str(i + j) + " of " + str(
+#                    self.dd.npartitions) + ". partitions calculated in parallel: " + str(
+#                    len(resultsToCalculate)))
                 results = dask.compute(*resultsToCalculate)
                 total = np.zeros_like(results[0])
                 for result in results:
