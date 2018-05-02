@@ -14,6 +14,12 @@ The data obtained from the DAQ system is read through the **pah** package provid
 
 To initialize the code correctly on a new machine, run the **InitializeSettings.py** file in the terminal using
 
+Also, run the setup.py. To do this, cd to your repo folder and run the following command:
+```bash 
+python setup.py build_ext --inplace
+```
+ 
+
 ```python InitializeSettings.py```
 
 This creates the **SETTINGS.ini** file where local settings are stored. It contains the file paths and the parallelization parameters, which can be modified by the user externally. The ini file is not synced (git-ignored) in the git repository to allow the code to adapt to different computing environments.
