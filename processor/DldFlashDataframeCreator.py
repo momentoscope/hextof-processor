@@ -1,17 +1,16 @@
 import os
 from configparser import ConfigParser
-
 import dask
 import dask.dataframe
 import dask.multiprocessing
+from dask.diagnostics import ProgressBar
 import numpy as np
-
 from processor import DldProcessor, utils
 from processor.pah import BeamtimeDaqAccess
 
 _VERBOSE = False
 
-# Try to load Cython version of the microbunch assignment code
+# Try to load the Cython version of the microbunch assignment code
 # If fails, load a vanilla python equivalent (Steinn Y. Agustsson)
 try:
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
@@ -79,8 +78,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.pulseIdInterval = None
 
     def readData(self, runNumber=None, pulseIdInterval=None, path=None):
-        """Read data by run or macrobunch pulseID interval.
-
+        """Read data by run number or macrobunch pulseID interval.
 
         Useful for scans that would otherwise hit the machine's memory limit.
 
@@ -171,13 +169,16 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         numOfElectrons = len(electronsToCount)
         electronsPerMacrobunch = int(numOfElectrons / numOfMacrobunches)
         print("Number of electrons: {0:,}; {1:,} e/Mb ".format(numOfElectrons, electronsPerMacrobunch))
-        print("Creating data frame: Please wait...")
-        self.createDataframePerElectron()
-        self.createDataframePerMicrobunch()
-        print('dataframe created')
+        
+        print("Creating dataframes... Please wait...")
+        with ProgressBar():
+            self.createDataframePerElectron()
+            print('Electron dataframe created.')
+            self.createDataframePerMicrobunch()
+            print('Microbunch dataframe created.')
 
     def createDataframePerElectronRange(self, mbIndexStart, mbIndexEnd):
-        """Create numpy array indexed by photoelectron events for a given range
+        """Create a numpy array indexed by photoelectron events for a given range
         of electron macrobunch ID.
         """
         
@@ -261,6 +262,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         # self.dldTime=self.dldTime*self.dldTimeStep
         if _VERBOSE:
             print('creating electron dataframe...')
+        
         maxIndex = self.dldTime.shape[0]
         chunkSize = min(self.CHUNK_SIZE, maxIndex / self.N_CORES)  # ensure minimum one chunk per core.
         numOfPartitions = int(maxIndex / chunkSize) + 1
@@ -272,16 +274,18 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             result = dask.delayed(self.createDataframePerElectronRange)(indexFrom, indexTo)
             daList.append(result)
         # self.dd = self.createDataframePerElectronRange(0, maxIndex)
-        # create the data frame:
+        
+        # Create the electron-indexed dataframe
         self.daListResult = dask.compute(*daList)
 
         a = np.concatenate(self.daListResult, axis=1)
         da = dask.array.from_array(a.T, chunks=self.CHUNK_SIZE)
 
         self.dd = dask.dataframe.from_array(da, columns=('posX', 'posY', 'dldTime', 'delayStageTime', 'bam',
-                                                         'microbunchId', 'dldDetectorId',
-                                                         'bunchCharge', 'opticalDiode', 'gmdTunnel', 'gmdBda','pumpPol', 
-                                                         'macroBunchPulseId'))  # TODO: choose columns from SETTINGS
+                                                             'microbunchId', 'dldDetectorId',
+                                                             'bunchCharge', 'opticalDiode', 'gmdTunnel', 'gmdBda','pumpPol', 
+                                                             'macroBunchPulseId'))
+        # TODO: choose columns from SETTINGS
 
         self.dd = self.dd[self.dd['microbunchId'] > -1] # needed as negative values are used to mark bad data
         self.dd['dldTime'] = self.dd[
@@ -337,20 +341,20 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         da = dask.array.stack([daDelayStage, daBam, daAux0, daAux1, daBunchCharge, daOpticalDiode, daPumpPol, daMacroBunchPulseId])
 
-        # create the data frame:
+        # Create the microbunch-indexed dataframe
         self.ddMicrobunches = dask.dataframe.from_array(da.T,
                                                         columns=('delayStageTime', 'bam', 'aux0', 'aux1', 'bunchCharge',
                                                                  'opticalDiode', 'pumpPol', 'macroBunchPulseId'))
 
     def storeDataframes(self, fileName=None, path=None, format='parquet', append=False):
-        """ Saves imported dask dataframe into a parquet or hdf5 file.
+        """ Save imported dask dataframe as a parquet or hdf5 file.
 
         Parameters:
             fileName (string): name of the file where to save data.
             path (str): path to the folder where to save the parquet or hdf5 files.
             format (string, optional): accepts: 'parquet' and 'hdf5'. Choose output file format.
                 Default value makes a dask parquet file.
-                append (bool): when using parquet file, allows to append the data to a preexisting file.
+                append (bool): when using parquet file, allows to append the data to a pre-existing file.
         """
 
         format = format.lower()
@@ -381,7 +385,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             dask.dataframe.to_hdf(self.ddMicrobunches, fileName, '/microbunches')
 
     def getIds(self, runNumber=None, path=None):
-        """ Returns initial and final MBunchIDs of runNumber
+        """ Returns the initial and the final MBunchIDs of runNumber
 
         Parameters:
             runNumber (int): number of the run from which to read id interval.
