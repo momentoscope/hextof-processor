@@ -621,7 +621,7 @@ class DldProcessor():
         
         
 
-        # prepare the partitions for the calculation in parallel    
+        # prepare the partitions for the calculation in parallel
         calculatedResults = []
         for i in tqdm(range(0, self.dd.npartitions, self.N_CORES)):
             resultsToCalculate = []
@@ -651,6 +651,7 @@ class DldProcessor():
             r = np.nan_to_num(r)
             result = result + r
         result = result.astype(np.float64)
+        
         if saveName is not None:
             self.save_binned(result, saveName, path=savePath, mode=saveMode)
         
