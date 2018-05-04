@@ -3,6 +3,7 @@
 import os
 from configparser import ConfigParser
 import psutil
+import argparse
 
 """Create a SETTINGS.ini file
 
@@ -17,7 +18,7 @@ This was created to allow this code to be machine and OS agnostic.
 """
 
 
-def make_new_settings(updating=True):
+def make_new_settings(rebuilding=False, clean=False):
     config = ConfigParser()
 
     settings_dict = {
@@ -65,6 +66,26 @@ def make_new_settings(updating=True):
         for key, val in section.items():
             config.set(section_name, key, str(val))
 
+    # trying not to overwrite old settings every time
+    if not rebuilding:
+        current_settings = ConfigParser()
+        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+            current_settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+        else:
+            current_settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+
+        for section in current_settings:
+            for entry in current_settings[section]:
+                try:
+                    if config.has_option(section, entry):
+                        config.set(section, entry, current_settings[section][entry])
+                    else:
+                        print('WARNING: option {} not a standard setting.'.format(entry))
+                        if not clean:
+                            config.set(section, entry, current_settings[section][entry])
+                except Exception as e:
+                    print('Invalid section in current config: {}'.format(e))
+
     missing_folders = []
     for dir_name in config['paths']:
         if not os.path.isdir(config['paths'][dir_name]):
@@ -80,13 +101,29 @@ def make_new_settings(updating=True):
     print(' -> New setting file generated.')
 
 
+# -------------------------------------------------------------------
+
+parser = argparse.ArgumentParser(description='Generate, update, or overwrite SETTINGS.ini file.')
+parser.add_argument('--overwrite', dest='overwrite', action='store_true',
+                    help='forces the SETTINGS.ini file to be overwritten (default: update mode)')
+parser.add_argument('--clean', dest='clean', action='store_true',
+                    help='removes options from current SETTINGS.ini that are not standard (default: keeps everything)')
+args = parser.parse_args()
+overwrite = args.overwrite
+clean = args.clean
+
 if os.path.isfile('SETTINGS.ini'):
-    answer = input('Overwriting existing settings.\nAre you sure? [y/n]')
+    promptMsg = ''
+    if overwrite:
+        promptMsg = 'Overwriting existing settings.\nAre you sure? [y/n]'
+    else:
+        promptMsg = 'Updating existing settings.\nAre you sure? [y/n]'
+    answer = input(promptMsg)
     if answer.lower() in ['y', 'yes', 'si', 'ja']:
-        print(' -> Overwriting previous settings.')
-        make_new_settings()
+        print(' -> Updating previous settings.')
+        make_new_settings(rebuilding=overwrite, clean=clean)
     else:
         print('Settings file generation aborted by user.')
 else:
     print(' -> No Settings found. Initializing new Settings file.')
-    make_new_settings()
+    make_new_settings(rebuilding=True, clean=True)
