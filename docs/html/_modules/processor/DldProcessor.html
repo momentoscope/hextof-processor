@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>processor.DldProcessor &mdash; hextof-processor 1.0.2 documentation</title>
+  <title>processor.DldProcessor &mdash; hextof-processor 1.0.3 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                1.0.2
+                1.0.3
               </div>
             
           
@@ -194,6 +194,7 @@
 <span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">ConfigParser</span>
 <span class="kn">from</span> <span class="nn">processor.utilities</span> <span class="kn">import</span> <span class="n">misc</span><span class="p">,</span> <span class="n">io</span><span class="p">,</span> <span class="n">dfops</span>
+<span class="kn">import</span> <span class="nn">processor</span>
 <span class="c1"># warnings.resetwarnings()</span>
 
 <span class="n">_VERBOSE</span> <span class="o">=</span> <span class="kc">False</span>
@@ -227,17 +228,35 @@
 <span class="sd">            tiff stack formats etc.</span>
 <span class="sd">        </span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">processor</span><span class="o">.</span><span class="vm">__file__</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create and manage a dask DataFrame from the data recorded at FLASH.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">loadSettings</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_settings_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_folder</span><span class="p">,</span><span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_settings_file</span> <span class="o">=</span> <span class="n">settings</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Using settings from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings_file</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">initAttributes</span><span class="p">()</span>  <span class="c1"># in else because it is called already in load_settings</span>
+            <span class="n">available_settings</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_folder</span><span class="p">,</span> <span class="s1">&#39;settings&#39;</span><span class="p">))</span>
+            <span class="n">settings</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">settings</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;.ini&#39;</span>
+            <span class="k">if</span> <span class="n">settings</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_settings</span><span class="p">:</span>
+                <span class="n">err_str</span> <span class="o">=</span> <span class="s1">&#39;No Settings &quot;</span><span class="si">{settings}</span><span class="s1">&quot; available.</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                          <span class="s1">&#39;Available settings files are:&#39;</span>
+                <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">available_settings</span><span class="p">:</span>
+                    <span class="n">err_str</span> <span class="o">+=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\t</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_settings_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_folder</span><span class="p">,</span><span class="s1">&#39;settings&#39;</span><span class="p">,</span><span class="n">settings</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Using settings from </span><span class="si">{</span><span class="n">settings</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initAttributes</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resetBins</span><span class="p">()</span>
+
 
         <span class="c1"># initialize attributes for metadata</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># this should contain &#39;name&#39;, &#39;sampleID&#39;, &#39;cleave number&#39; etc...</span>
@@ -287,21 +306,24 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            dictionary with the settings file structure</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
-        <span class="n">root_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s1">&#39;SETTINGS.ini&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">root_folder</span><span class="p">):</span>
-            <span class="c1"># if &#39;setup.py&#39; in os.listdir(root_folder):</span>
-            <span class="c1">#     raise SettingsInitializationError</span>
-            <span class="c1"># else:</span>
-            <span class="n">root_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">root_folder</span><span class="p">)</span>
-                <span class="c1"># if &#39;setup.py&#39; in os.listdir(root_folder):</span>
-                <span class="c1">#     raise SettingsInitializationError</span>
-        <span class="n">file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_folder</span><span class="p">,</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)</span>
-        <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">sections</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Failed loading main settings!&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">settings</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
+            <span class="c1"># root_folder = os.path.dirname(__file__)</span>
+            <span class="c1"># if self._settings_file not in os.listdir(root_folder):</span>
+            <span class="c1">#     # if &#39;setup.py&#39; in os.listdir(root_folder):</span>
+            <span class="c1">#     #     raise SettingsInitializationError</span>
+            <span class="c1">#     # else:</span>
+            <span class="c1">#     root_folder = os.path.dirname(root_folder)</span>
+            <span class="c1">#         # if &#39;setup.py&#39; in os.listdir(root_folder):</span>
+            <span class="c1"># #         #     raise SettingsInitializationError</span>
+            <span class="c1"># #</span>
+            <span class="c1"># file = os.path.join(root_folder, self._settings_file)</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings_file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">sections</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Failed loading main settings!&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="o">=</span> <span class="n">settings</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span>
 
 <div class="viewcode-block" id="DldProcessor.initAttributes"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.initAttributes">[docs]</a>    <span class="k">def</span> <span class="nf">initAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">import_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Parse settings file and assign the variables.</span>
@@ -346,6 +368,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">USE_BAM</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">USE_STREAK</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">SECTOR_CORRECTION</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">DATA_RAW_DIR</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;/gpfs/pg2/current/raw/hdf&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">DATA_H5_DIR</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;/home/pg2user/data/h5&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">DATA_PARQUET_DIR</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;/home/pg2user/DATA/parquet/&#39;</span><span class="p">)</span>
@@ -362,7 +386,10 @@
                     <span class="k">for</span> <span class="n">entry_name</span><span class="p">,</span> <span class="n">entry_value</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                         <span class="k">for</span> <span class="n">type_</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>  <span class="c1"># try assigning numeric values</span>
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">val</span> <span class="o">=</span> <span class="n">type_</span><span class="p">(</span><span class="n">entry_value</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">entry_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                                    <span class="n">val</span> <span class="o">=</span> <span class="p">[</span><span class="n">type_</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">entry_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">val</span> <span class="o">=</span> <span class="n">type_</span><span class="p">(</span><span class="n">entry_value</span><span class="p">)</span>
                                 <span class="k">break</span>
                             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                                 <span class="n">val</span> <span class="o">=</span> <span class="kc">None</span>
@@ -422,19 +449,38 @@
 <span class="sd">                Disables overwriting local file saving paths. Defaults to True.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;DEPRECATED: Do not load settings, &#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDefaultSettings</span><span class="p">(</span> <span class="n">settings_file_name</span><span class="p">,</span> <span class="n">preserve_path</span><span class="o">=</span><span class="n">preserve_path</span><span class="p">)</span></div>
 
-        <span class="n">root_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s1">&#39;SETTINGS.ini&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">root_folder</span><span class="p">):</span>
-            <span class="n">root_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">root_folder</span><span class="p">)</span>
-        <span class="n">old_settings_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_folder</span><span class="p">,</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="DldProcessor.setDefaultSettings"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.setDefaultSettings">[docs]</a>    <span class="k">def</span> <span class="nf">setDefaultSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings_file_name</span><span class="p">,</span> <span class="n">preserve_path</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Load settings from an other saved setting file.</span>
+
+<span class="sd">        To save settings simply copy paste the SETTINGS.ini file to the</span>
+<span class="sd">        utilities/settings folder, and rename it. Use this name in this method</span>
+<span class="sd">        to then load its content to the SETTINGS.ini file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            settings_file_name: str</span>
+<span class="sd">                Name of the settings file to load.</span>
+<span class="sd">                This file must be in the folder &quot;hextof-processor/utilities/settings&quot;.</span>
+<span class="sd">            preserve_path: bool | True</span>
+<span class="sd">                Disables overwriting local file saving paths. Defaults to True.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># root_folder = os.path.dirname(__file__)</span>
+        <span class="c1"># if &#39;SETTINGS.ini&#39; not in os.listdir(root_folder):</span>
+        <span class="c1">#     root_folder = os.path.dirname(root_folder)</span>
+        <span class="n">old_settings_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_folder</span><span class="p">,</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)</span>
+
         <span class="n">new_settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">settings_file_name</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s1">&#39;.ini&#39;</span><span class="p">:</span>
             <span class="n">settings_file_name</span> <span class="o">+=</span> <span class="s1">&#39;.ini&#39;</span>
-        <span class="n">new_settings_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_folder</span><span class="p">,</span> <span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="n">settings_file_name</span><span class="p">)</span>
+        <span class="n">new_settings_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_folder</span><span class="p">,</span> <span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="n">settings_file_name</span><span class="p">)</span>
         <span class="n">new_settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">new_settings_file</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_settings</span><span class="o">.</span><span class="n">sections</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No settings file </span><span class="si">{</span><span class="n">settings_file_name</span><span class="si">}</span><span class="s1"> found.&#39;</span><span class="p">)</span>
-            <span class="n">available_settings</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_folder</span><span class="p">,</span> <span class="s1">&#39;settings&#39;</span><span class="p">))</span>
+            <span class="n">available_settings</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_folder</span><span class="p">,</span> <span class="s1">&#39;settings&#39;</span><span class="p">))</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Available settings files are:&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">available_settings</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n\t</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">preserve_path</span><span class="p">:</span>
@@ -443,7 +489,8 @@
                 <span class="n">new_settings</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_settings</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">]</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">old_settings_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">SETTINGS_file</span><span class="p">:</span>  <span class="c1"># overwrite SETTINGS.ini with the new settings</span>
                 <span class="n">new_settings</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">SETTINGS_file</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loaded settings from </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">settings_file_name</span><span class="p">))</span></div>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loaded settings from </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">settings_file_name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_settings_file</span> <span class="o">=</span> <span class="s1">&#39;SETTINGS.ini&#39;</span></div>
             <span class="c1"># reload settings in the current processor instance</span>
     <span class="c1"># ==================</span>
     <span class="c1"># Dataframe creation</span>
@@ -480,16 +527,20 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">fileName</span> <span class="o">=</span> <span class="s1">&#39;run</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span><span class="p">)</span>
         <span class="n">fullName</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">fileName</span>  <span class="c1"># TODO: test if naming is correct</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Loading </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s1"> data from </span><span class="si">{</span><span class="n">fileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Searching for </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s1"> data from </span><span class="si">{</span><span class="n">fileName</span><span class="si">}</span><span class="s1">...&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">fullName</span> <span class="o">+</span> <span class="s2">&quot;_el&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">fullName</span> <span class="o">+</span> <span class="s2">&quot;_mb&quot;</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fullName</span> <span class="o">+</span> <span class="s1">&#39;_el&#39;</span><span class="p">,</span> <span class="s1">&#39;run_metadata.txt&#39;</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Failed loading metadata from parquet stored files!, </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">fullName</span> <span class="o">+</span> <span class="s2">&quot;_el&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">fullName</span> <span class="o">+</span> <span class="s2">&quot;_mb&quot;</span><span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fullName</span> <span class="o">+</span> <span class="s1">&#39;_el&#39;</span><span class="p">,</span> <span class="s1">&#39;run_metadata.txt&#39;</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Failed loading metadata from parquet stored files!, </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No parquet file </span><span class="si">{</span><span class="n">fileName</span><span class="si">}</span><span class="s1"> found under </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;h5&#39;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_hdf</span><span class="p">(</span>
                 <span class="n">fullName</span><span class="p">,</span> <span class="s1">&#39;/electrons&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
@@ -697,7 +748,8 @@
         
 <div class="viewcode-block" id="DldProcessor.calibrateEnergy"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.calibrateEnergy">[docs]</a>    <span class="k">def</span> <span class="nf">calibrateEnergy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">toffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">useAvgSampleBias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">k_shift_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">k_shift_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">applyJitter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">jitterAmplitude</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">jitterType</span><span class="o">=</span><span class="s1">&#39;uniform&#39;</span><span class="p">,</span>
-                        <span class="n">useAvgMonochormatorEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">useAvgToFEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                        <span class="n">useAvgMonochormatorEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">useAvgToFEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">sampleBias</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">monochromatorPhotonEnergy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tofVoltage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Add calibrated energy axis to dataframe</span>
 
 <span class="sd">        Uses the same equation as in tof2energy in calibrate.</span>
@@ -730,9 +782,18 @@
         <span class="k">if</span> <span class="n">l</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">l</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">][</span><span class="s1">&#39;ET_CONV_L&#39;</span><span class="p">])</span>
 
+        <span class="k">if</span> <span class="n">sampleBias</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sampleBias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;sampleBias&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">monochromatorPhotonEnergy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">monochromatorPhotonEnergy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;monochromatorPhotonEnergy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tofVoltage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tofVoltage</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;tofVoltage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime_corrected&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="s1">&#39;dldSectorId&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime_corrected&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldSectorId&#39;</span><span class="p">]</span>
+            <span class="c1"># Converts the SECTOR_CORRECTION list to a dask array so things can be kept lazy</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime_corrected&#39;</span><span class="p">]</span> <span class="o">-=</span> \
+                <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SECTOR_CORRECTION</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldSectorId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)]</span>
 
         <span class="k">def</span> <span class="nf">correct_dldTime_shift</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
             <span class="n">r</span> <span class="o">=</span> <span class="n">func</span><span class="p">((</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;dldPosX&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dldPosY&#39;</span><span class="p">]),</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
@@ -749,17 +810,17 @@
                                                                   <span class="n">col</span><span class="o">=</span><span class="s1">&#39;dldTime_corrected&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">jitterType</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">useAvgSampleBias</span><span class="p">:</span>
-            <span class="n">eoffset</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;sampleBias&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">eoffset</span> <span class="o">-=</span> <span class="n">sampleBias</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">eoffset</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;sampleBias&#39;</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">useAvgMonochormatorEnergy</span><span class="p">:</span>        <span class="c1"># TODO: add monocrhomator position,</span>
-            <span class="n">eoffset</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;monochromatorPhotonEnergy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">useAvgMonochormatorEnergy</span><span class="p">:</span>
+            <span class="n">eoffset</span> <span class="o">+=</span> <span class="n">monochromatorPhotonEnergy</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">eoffset</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;monochromatorPhotonEnergy&#39;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">useAvgToFEnergy</span><span class="p">:</span>        <span class="c1"># TODO: add monocrhomator position,</span>
-            <span class="n">eoffset</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;tofVoltage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">eoffset</span> <span class="o">+=</span> <span class="n">tofVoltage</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">eoffset</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;tofVoltage&#39;</span><span class="p">]</span>
 
@@ -1440,7 +1501,7 @@
 
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="DldProcessor.get_metadata"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.get_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fast_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="DldProcessor.get_metadata"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.get_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fast_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span> <span class="c1"># TODO: make this great...!</span>
         <span class="sd">&quot;&quot;&quot;  Creates a dictionary with the most relevant metadata.</span>
 
 <span class="sd">        **Args**\n</span>
@@ -1468,8 +1529,8 @@
                               <span class="c1"># &#39;bin array creation&#39;: datetime.now().strftime(&#39;%Y-%m-%d %H:%M:%S&#39;),</span>
                               <span class="p">}</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">parse_category</span><span class="p">(</span><span class="s1">&#39;processor&#39;</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">parse_category</span><span class="p">(</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">]</span><span class="c1">#misc.parse_category(&#39;processor&#39;)</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">]</span><span class="c1">#misc.parse_category(&#39;DAQ channels&#39;)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fast_mode</span><span class="p">:</span>
             <span class="n">pulseIdFrom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
             <span class="n">pulseIdTo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
@@ -1510,92 +1571,92 @@
         <span class="c1">#         print(&quot;Couldn&#39;t find GMD channel for making GMD normalization histograms\nError: {}&quot;.format(e))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;...done!&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">metadata</span></div>
-
-<div class="viewcode-block" id="DldProcessor.res_to_xarray_old"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.res_to_xarray_old">[docs]</a>    <span class="k">def</span> <span class="nf">res_to_xarray_old</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">fast_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Creates a BinnedArray (xarray subclass) out of the given numpy.array.</span>
-<span class="sd">        </span>
-<span class="sd">        **Parameters**\n</span>
-<span class="sd">        res: np.array</span>
-<span class="sd">            nd array of binned data</span>
-<span class="sd">        fast_mode: bool default True</span>
-<span class="sd">            if True, it skips the creation of metadata element which require computation.</span>
-<span class="sd">        </span>
-<span class="sd">        **Returns**\n</span>
-<span class="sd">        ba: BinnedArray (xarray)</span>
-<span class="sd">            an xarray-like container with binned data, axis, and all available metadata.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">binAxesList</span><span class="p">):</span>
-            <span class="n">coords</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span>
-
-        <span class="n">ba</span> <span class="o">=</span> <span class="n">BinnedArray</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span>
-
-        <span class="n">units</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">default_units</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dldTime&#39;</span><span class="p">:</span> <span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">:</span> <span class="s1">&#39;ps&#39;</span><span class="p">,</span> <span class="s1">&#39;pumpProbeDelay&#39;</span><span class="p">:</span> <span class="s1">&#39;ps&#39;</span><span class="p">}</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">u</span> <span class="o">=</span> <span class="n">default_units</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="n">u</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">units</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">u</span>
-        <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">fast_mode</span><span class="p">:</span>
-                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;timeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;timeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
-
-        <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;acquisition start&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">),</span>
-                              <span class="s1">&#39;acquisition stop&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">),</span>
-                              <span class="s1">&#39;acquisition duration&#39;</span><span class="p">:</span> <span class="n">stop</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span>
-                              <span class="s1">&#39;bin array creation&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">),</span>
-                              <span class="p">}</span>
-        <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span>
-        <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">parse_category</span><span class="p">(</span><span class="s1">&#39;processor&#39;</span><span class="p">)</span>
-        <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">parse_category</span><span class="p">(</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">pulseIdFrom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-            <span class="n">pulseIdTo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">pulseIdFrom</span><span class="p">,</span> <span class="n">pulseIdTo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;run&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;runNumber&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span><span class="p">,</span>
-            <span class="s1">&#39;macroBunchPulseIdInterval&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">pulseIdFrom</span><span class="p">,</span> <span class="n">pulseIdTo</span><span class="p">],</span>
-            <span class="s1">&#39;nMacrobunches&#39;</span><span class="p">:</span> <span class="n">pulseIdTo</span> <span class="o">-</span> <span class="n">pulseIdFrom</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;run&#39;</span><span class="p">][</span><span class="s1">&#39;nElectrons&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numOfElectrons</span>
-            <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;run&#39;</span><span class="p">][</span><span class="s1">&#39;electronsPerMacrobunch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">electronsPerMacrobunch</span><span class="p">,</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="k">pass</span>  <span class="c1"># TODO: find smarter solution</span>
-
-        <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;histograms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;delaystageHistogram&#39;</span><span class="p">):</span>
-            <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;histograms&#39;</span><span class="p">][</span><span class="s1">&#39;delay&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;axis&#39;</span><span class="p">:</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">,</span> <span class="s1">&#39;histogram&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">delaystageHistogram</span><span class="p">}</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;pumpProbeHistogram&#39;</span><span class="p">):</span>
-            <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;histograms&#39;</span><span class="p">][</span><span class="s1">&#39;delay&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;axis&#39;</span><span class="p">:</span> <span class="s1">&#39;pumpProbeDelay&#39;</span><span class="p">,</span> <span class="s1">&#39;histogram&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pumpProbeTimeHistogram</span><span class="p">}</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">fast_mode</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">axis_values</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">ax_len</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">coords</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">ax_len</span><span class="p">:</span>
-                        <span class="n">ax_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-                        <span class="n">axis_name</span> <span class="o">=</span> <span class="n">ax</span>
-                        <span class="n">axis_values</span> <span class="o">=</span> <span class="n">val</span>
-
-                <span class="n">GMD_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_GMD_histogram</span><span class="p">(</span><span class="n">axis_name</span><span class="p">,</span> <span class="n">axis_values</span><span class="p">)</span>
-                <span class="n">ba</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;histograms&#39;</span><span class="p">][</span><span class="s1">&#39;GMD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;axis&#39;</span><span class="p">:</span> <span class="n">axis_name</span><span class="p">,</span> <span class="s1">&#39;histogram&#39;</span><span class="p">:</span> <span class="n">GMD_norm</span><span class="p">}</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t find GMD channel for making GMD normalization histograms</span><span class="se">\n</span><span class="s2">Error: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="n">ba</span></div>
+    <span class="c1">#</span>
+    <span class="c1"># def res_to_xarray_old(self, res, fast_mode=False):</span>
+    <span class="c1">#     &quot;&quot;&quot; Creates a BinnedArray (xarray subclass) out of the given numpy.array.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     **Parameters**\n</span>
+    <span class="c1">#     res: np.array</span>
+    <span class="c1">#         nd array of binned data</span>
+    <span class="c1">#     fast_mode: bool default True</span>
+    <span class="c1">#         if True, it skips the creation of metadata element which require computation.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     **Returns**\n</span>
+    <span class="c1">#     ba: BinnedArray (xarray)</span>
+    <span class="c1">#         an xarray-like container with binned data, axis, and all available metadata.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     dims = self.binNameList</span>
+    <span class="c1">#     coords = {}</span>
+    <span class="c1">#     for name, vals in zip(self.binNameList, self.binAxesList):</span>
+    <span class="c1">#         coords[name] = vals</span>
+    <span class="c1">#</span>
+    <span class="c1">#     ba = BinnedArray(res, dims=dims, coords=coords)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     units = {}</span>
+    <span class="c1">#     default_units = {&#39;dldTime&#39;: &#39;step&#39;, &#39;delayStage&#39;: &#39;ps&#39;, &#39;pumpProbeDelay&#39;: &#39;ps&#39;}</span>
+    <span class="c1">#     for name in self.binNameList:</span>
+    <span class="c1">#         try:</span>
+    <span class="c1">#             u = default_units[name]</span>
+    <span class="c1">#         except KeyError:</span>
+    <span class="c1">#             u = None</span>
+    <span class="c1">#         units[name] = u</span>
+    <span class="c1">#     ba.attrs[&#39;units&#39;] = units</span>
+    <span class="c1">#</span>
+    <span class="c1">#     try:</span>
+    <span class="c1">#         start, stop = self.startEndTime[0], self.startEndTime[1]</span>
+    <span class="c1">#     except AttributeError:</span>
+    <span class="c1">#         if not fast_mode:</span>
+    <span class="c1">#             start, stop = self.dd[&#39;timeStamp&#39;].min().compute(), self.dd[&#39;timeStamp&#39;].max().compute()</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             start, stop = 0, 1</span>
+    <span class="c1">#</span>
+    <span class="c1">#     ba.attrs[&#39;timing&#39;] = {&#39;acquisition start&#39;: datetime.fromtimestamp(start).strftime(&#39;%Y-%m-%d %H:%M:%S&#39;),</span>
+    <span class="c1">#                           &#39;acquisition stop&#39;: datetime.fromtimestamp(stop).strftime(&#39;%Y-%m-%d %H:%M:%S&#39;),</span>
+    <span class="c1">#                           &#39;acquisition duration&#39;: stop - start,</span>
+    <span class="c1">#                           &#39;bin array creation&#39;: datetime.now().strftime(&#39;%Y-%m-%d %H:%M:%S&#39;),</span>
+    <span class="c1">#                           }</span>
+    <span class="c1">#     ba.attrs[&#39;sample&#39;] = self.sample</span>
+    <span class="c1">#     ba.attrs[&#39;settings&#39;] = misc.parse_category(&#39;processor&#39;)</span>
+    <span class="c1">#     ba.attrs[&#39;DAQ channels&#39;] = misc.parse_category(&#39;DAQ channels&#39;)</span>
+    <span class="c1">#     if self.pulseIdInterval is None:</span>
+    <span class="c1">#         pulseIdFrom = self.dd[&#39;macroBunchPulseId&#39;].min().compute()</span>
+    <span class="c1">#         pulseIdTo = self.dd[&#39;macroBunchPulseId&#39;].max().compute()</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]</span>
+    <span class="c1">#</span>
+    <span class="c1">#     ba.attrs[&#39;run&#39;] = {</span>
+    <span class="c1">#         &#39;runNumber&#39;: self.runNumber,</span>
+    <span class="c1">#         &#39;macroBunchPulseIdInterval&#39;: [pulseIdFrom, pulseIdTo],</span>
+    <span class="c1">#         &#39;nMacrobunches&#39;: pulseIdTo - pulseIdFrom,</span>
+    <span class="c1">#     }</span>
+    <span class="c1">#     try:</span>
+    <span class="c1">#         ba.attrs[&#39;run&#39;][&#39;nElectrons&#39;] = self.numOfElectrons</span>
+    <span class="c1">#         ba.attrs[&#39;run&#39;][&#39;electronsPerMacrobunch&#39;] = self.electronsPerMacrobunch,</span>
+    <span class="c1">#     except:</span>
+    <span class="c1">#         pass  # TODO: find smarter solution</span>
+    <span class="c1">#</span>
+    <span class="c1">#     ba.attrs[&#39;histograms&#39;] = {}</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if hasattr(self, &#39;delaystageHistogram&#39;):</span>
+    <span class="c1">#         ba.attrs[&#39;histograms&#39;][&#39;delay&#39;] = {&#39;axis&#39;: &#39;delayStage&#39;, &#39;histogram&#39;: self.delaystageHistogram}</span>
+    <span class="c1">#     elif hasattr(self, &#39;pumpProbeHistogram&#39;):</span>
+    <span class="c1">#         ba.attrs[&#39;histograms&#39;][&#39;delay&#39;] = {&#39;axis&#39;: &#39;pumpProbeDelay&#39;, &#39;histogram&#39;: self.pumpProbeTimeHistogram}</span>
+    <span class="c1">#     if not fast_mode:</span>
+    <span class="c1">#         try:</span>
+    <span class="c1">#             axis_values = []</span>
+    <span class="c1">#             ax_len = 0</span>
+    <span class="c1">#             for ax, val in coords.items():</span>
+    <span class="c1">#                 if len(val) &gt; ax_len:</span>
+    <span class="c1">#                     ax_len = len(val)</span>
+    <span class="c1">#                     axis_name = ax</span>
+    <span class="c1">#                     axis_values = val</span>
+    <span class="c1">#</span>
+    <span class="c1">#             GMD_norm = self.make_GMD_histogram(axis_name, axis_values)</span>
+    <span class="c1">#             ba.attrs[&#39;histograms&#39;][&#39;GMD&#39;] = {&#39;axis&#39;: axis_name, &#39;histogram&#39;: GMD_norm}</span>
+    <span class="c1">#         except Exception as e:</span>
+    <span class="c1">#             print(&quot;Couldn&#39;t find GMD channel for making GMD normalization histograms\nError: {}&quot;.format(e))</span>
+    <span class="c1">#</span>
+    <span class="c1">#     return ba</span>
 
 <div class="viewcode-block" id="DldProcessor.computeBinnedDataMulti"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.computeBinnedDataMulti">[docs]</a>    <span class="k">def</span> <span class="nf">computeBinnedDataMulti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">savePath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                <span class="n">rank</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1691,7 +1752,7 @@
 
         <span class="k">return</span> <span class="n">results</span></div>
 
-<div class="viewcode-block" id="DldProcessor.save_binned"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.save_binned">[docs]</a>    <span class="k">def</span> <span class="nf">save_binned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binnedData</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="DldProcessor.save_binned"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.save_binned">[docs]</a>    <span class="k">def</span> <span class="nf">save_binned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binnedData</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">saveFrames</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Save a binned numpy array to h5 file. The file includes the axes</span>
 <span class="sd">        (taken from the scheduled bins) and the delay stage histogram, if it exists.</span>
 
@@ -1732,11 +1793,11 @@
 
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;saving data to </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="n">filename</span><span class="p">))</span>
 
-                <span class="k">if</span> <span class="s1">&#39;pumpProbeTime&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;pumpProbeTime&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span> <span class="ow">and</span> <span class="n">saveFrames</span><span class="p">:</span>
                     <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">)</span>
                     <span class="n">pp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">binnedData</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
 
-                <span class="k">elif</span> <span class="s1">&#39;delayStage&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="s1">&#39;delayStage&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span> <span class="ow">and</span> <span class="n">saveFrames</span><span class="p">:</span>
                     <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;delayStage&#39;</span><span class="p">)</span>
                     <span class="n">pp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">binnedData</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -1746,7 +1807,7 @@
 
                 <span class="n">ff</span> <span class="o">=</span> <span class="n">h5File</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s1">&#39;frames&#39;</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">pp_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># in case there is no time axis, make a single dataset</span>
+                <span class="k">if</span> <span class="n">pp_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">saveFrames</span><span class="p">:</span>  <span class="c1"># in case there is no time axis, make a single dataset</span>
                     <span class="n">ff</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;f</span><span class="si">{:04d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">binnedData</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pp_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>  <span class="c1"># otherwise make a dataset for each time frame.</span>
@@ -1757,7 +1818,7 @@
                 <span class="c1"># aa.create_dataset(&#39;axis_order&#39;, data=self.binNameList)</span>
                 <span class="n">ax_n</span> <span class="o">=</span> <span class="mi">1</span>
                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">binName</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">binName</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">,</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">binName</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">,</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">saveFrames</span><span class="p">:</span>
                         <span class="n">ds</span> <span class="o">=</span> <span class="n">aa</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;ax0 - </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">binName</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">binAxesList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
                         <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binName</span>
                     <span class="k">else</span><span class="p">:</span>
