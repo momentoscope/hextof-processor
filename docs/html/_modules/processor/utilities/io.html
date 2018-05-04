@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>processor.utilities.io &mdash; hextof-processor 1.0.2 documentation</title>
+  <title>processor.utilities.io &mdash; hextof-processor 1.0.3 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                1.0.2
+                1.0.3
               </div>
             
           
@@ -239,7 +239,7 @@
     <span class="n">_abort</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">parse_setting</span><span class="p">(</span><span class="s1">&#39;paths&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA_H5_DIR&#39;</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">parse_setting</span><span class="p">(</span><span class="s1">&#39;paths&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA_H5_DIR&#39;</span><span class="p">)</span> <span class="c1">#TODO: generalise to get path from any settings, as in processor.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>  <span class="c1"># test if the path exists...</span>
         <span class="n">answer</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;The folder </span><span class="si">{}</span><span class="s2"> doesn&#39;t exist,&quot;</span>
                        <span class="s2">&quot;do you want to create it? [y/n]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>

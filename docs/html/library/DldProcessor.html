@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2. DldProcessor class (DldProcessor) &mdash; hextof-processor 1.0.2 documentation</title>
+  <title>2. DldProcessor class (DldProcessor) &mdash; hextof-processor 1.0.3 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                1.0.2
+                1.0.3
               </div>
             
           
@@ -315,7 +315,7 @@ parquet files to append the new data.</p>
 
 <dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.calibrateEnergy">
-<code class="sig-name descname">calibrateEnergy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">useAvgSampleBias</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">k_shift_func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">k_shift_parameters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">applyJitter</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">jitterAmplitude</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">jitterType</span><span class="o">=</span><span class="default_value">'uniform'</span></em>, <em class="sig-param"><span class="n">useAvgMonochormatorEnergy</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">useAvgToFEnergy</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.calibrateEnergy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.calibrateEnergy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">calibrateEnergy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">useAvgSampleBias</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">k_shift_func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">k_shift_parameters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">applyJitter</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">jitterAmplitude</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">jitterType</span><span class="o">=</span><span class="default_value">'uniform'</span></em>, <em class="sig-param"><span class="n">useAvgMonochormatorEnergy</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">useAvgToFEnergy</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">sampleBias</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">monochromatorPhotonEnergy</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tofVoltage</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.calibrateEnergy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.calibrateEnergy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add calibrated energy axis to dataframe</p>
 <p>Uses the same equation as in tof2energy in calibrate.</p>
 <dl class="simple">
@@ -936,24 +936,6 @@ parquet files where the data was saved.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="processor.DldProcessor.DldProcessor.res_to_xarray_old">
-<code class="sig-name descname">res_to_xarray_old</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">res</span></em>, <em class="sig-param"><span class="n">fast_mode</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.res_to_xarray_old"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.res_to_xarray_old" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a BinnedArray (xarray subclass) out of the given numpy.array.</p>
-<p><strong>Parameters</strong></p>
-<dl class="simple">
-<dt>res: np.array</dt><dd><p>nd array of binned data</p>
-</dd>
-<dt>fast_mode: bool default True</dt><dd><p>if True, it skips the creation of metadata element which require computation.</p>
-</dd>
-</dl>
-<p><strong>Returns</strong></p>
-<dl class="simple">
-<dt>ba: BinnedArray (xarray)</dt><dd><p>an xarray-like container with binned data, axis, and all available metadata.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.resetBins">
 <code class="sig-name descname">resetBins</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.resetBins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.resetBins" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset the bin list</p>
@@ -1011,7 +993,7 @@ defined in SETTINGS.ini</p>
 
 <dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.save_binned">
-<code class="sig-name descname">save_binned</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">binnedData</span></em>, <em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'w'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.save_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.save_binned" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">save_binned</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">binnedData</span></em>, <em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">saveFrames</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'w'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.save_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.save_binned" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save a binned numpy array to h5 file. The file includes the axes
 (taken from the scheduled bins) and the delay stage histogram, if it exists.</p>
 <p><strong>Parameters</strong></p>
@@ -1023,6 +1005,25 @@ defined in SETTINGS.ini</p>
 <dt>path: str | None</dt><dd><p>File path.</p>
 </dd>
 <dt>mode: str | 'w'</dt><dd><p>Write mode of h5 file ('w' = write).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.setDefaultSettings">
+<code class="sig-name descname">setDefaultSettings</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings_file_name</span></em>, <em class="sig-param"><span class="n">preserve_path</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.setDefaultSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.setDefaultSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load settings from an other saved setting file.</p>
+<p>To save settings simply copy paste the SETTINGS.ini file to the
+utilities/settings folder, and rename it. Use this name in this method
+to then load its content to the SETTINGS.ini file.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>settings_file_name: str</dt><dd><p>Name of the settings file to load.
+This file must be in the folder &quot;hextof-processor/utilities/settings&quot;.</p>
+</dd>
+<dt>preserve_path: bool | True</dt><dd><p>Disables overwriting local file saving paths. Defaults to True.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
