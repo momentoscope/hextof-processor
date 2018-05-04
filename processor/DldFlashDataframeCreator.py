@@ -14,6 +14,7 @@ _VERBOSE = False
 # If fails, load a vanilla python equivalent (Steinn Y. Agustsson)
 try:
     import processor.cscripts.DldFlashProcessorCy as DldFlashProcessorCy
+
     if _VERBOSE:
         print('loaded cython module')
 except ImportError as e:
@@ -71,7 +72,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
     """
 
     def __init__(self):
-        
+
         super().__init__()
 
         self.runNumber = None
@@ -90,7 +91,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         This is a union of the readRun and readInterval methods defined in previous versions.
         """
-        
+
         # check inputs:
         if runNumber is None:
             runNumber = self.runNumber
@@ -116,11 +117,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
         section = 'DAQ address - used'
-        daqAddresses = []
+        self.daqAddresses = []
         for entry in settings[section]:
             name = utils.camelCaseIt(entry)
             val = str(settings[section][entry])
-            daqAddresses.append(name)
+            self.daqAddresses.append(name)
             if _VERBOSE:
                 print('assigning address: {}: {}'.format(name.ljust(20), val))
             setattr(self, name, val)
@@ -131,10 +132,15 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         if pulseIdInterval is None:
             print('Reading DAQ data from run {}... Please wait...'.format(runNumber))
 
-            for address_name in daqAddresses:
+            for address_name in self.daqAddresses:
                 if _VERBOSE:
-                    print('Reading address: {}'.format(address_name))
-                values, otherStuff = daqAccess.allValuesOfRun(getattr(self, address_name), runNumber)
+                    print('reading address: {}'.format(address_name))
+                try:
+                    attrVal = getattr(self, address_name)
+                    values, otherStuff = daqAccess.allValuesOfRun(attrVal, runNumber)
+                except AssertionError:
+                    pass
+
                 setattr(self, address_name, values)
                 if address_name == 'macroBunchPulseId':  # catch the value of the first macrobunchID
                     pulseIdInterval = (otherStuff[0], otherStuff[-1])
@@ -147,7 +153,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         else:
             print('reading DAQ data from interval {}'.format(pulseIdInterval))
             self.pulseIdInterval = pulseIdInterval
-            for address_name in daqAddresses:
+            for address_name in self.daqAddresses:
                 if _VERBOSE:
                     print('reading address: {}'.format(address_name))
                 setattr(self, address_name, daqAccess.valuesOfInterval(getattr(self, address_name), pulseIdInterval))
@@ -169,7 +175,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         numOfElectrons = len(electronsToCount)
         electronsPerMacrobunch = int(numOfElectrons / numOfMacrobunches)
         print("Number of electrons: {0:,}; {1:,} e/Mb ".format(numOfElectrons, electronsPerMacrobunch))
-        
+
         print("Creating dataframes... Please wait...")
         with ProgressBar():
             self.createDataframePerElectron()
@@ -181,60 +187,87 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         """Create a numpy array indexed by photoelectron events for a given range
         of electron macrobunch ID.
         """
-        
         # the chunk size here is too large in order to do the chunking by the loop around it.
 
-        daX = self.dldPosX[mbIndexStart:mbIndexEnd, :].flatten()
-        daY = self.dldPosY[mbIndexStart:mbIndexEnd, :].flatten()
+        # Here all the columns to be stored in the dd dataframe are created from the raw h5 file
+        # Each columns requires an ad hoc treatment, so they all need to be done individually
+        arrayCols = []  # TODO: find less ad hoc solution
 
-        dldDetectorId = (self.dldTime[mbIndexStart:mbIndexEnd, :].copy()).astype(int) % 2
-        daDetectorId = dldDetectorId.flatten()
+        if 'dldPosX' in self.daqAddresses:
+            daX = self.dldPosX[mbIndexStart:mbIndexEnd, :].flatten()
+            arrayCols.append(daX)
 
-        daTime = self.dldTime[mbIndexStart:mbIndexEnd, :].flatten()
+        if 'dldPosY' in self.daqAddresses:
+            daY = self.dldPosY[mbIndexStart:mbIndexEnd, :].flatten()
+            arrayCols.append(daY)
 
-        # convert the bam data to electron format
-        bamArray = assignToMircobunch(
-            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
-            self.bam[mbIndexStart:mbIndexEnd, :].astype(np.float64))
-        daBam = bamArray.flatten()
+        if 'dldTime' in self.daqAddresses:
+            daTime = self.dldTime[mbIndexStart:mbIndexEnd, :].flatten()
+            arrayCols.append(daTime)
 
-        # convert the delay stage position to the electron format
-        delayStageArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
-        delayStageArray[:, :] = (self.delayStage[mbIndexStart:mbIndexEnd])[:, None]
-        daDelaystage = delayStageArray.flatten()
+        if 'delayStage' in self.daqAddresses:
+            delayStageArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+            delayStageArray[:, :] = (self.delayStage[mbIndexStart:mbIndexEnd])[:, None]
+            daDelaystage = delayStageArray.flatten()
+            arrayCols.append(daDelaystage)
 
-        daMicrobunchId = self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].flatten()
+        if 'bam' in self.daqAddresses:
+            bamArray = assignToMircobunch(
+                self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+                self.bam[mbIndexStart:mbIndexEnd, :].astype(np.float64))
+            daBam = bamArray.flatten()
+            arrayCols.append(daBam)
 
-        # convert the MacroBunchPulseId to the electron format
-        macroBunchPulseIdArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
-        macroBunchPulseIdArray[:, :] = (self.macroBunchPulseId[mbIndexStart:mbIndexEnd, 0])[:, None]
-        daMacroBunchPulseId = macroBunchPulseIdArray.flatten()
+        if 'dldMicrobunchId' in self.daqAddresses:
+            daMicrobunchId = self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].flatten()
+            arrayCols.append(daMicrobunchId)
+
+        if 'dldDetectorId' in self.daqAddresses:
+            dldDetectorId = (self.dldDetectorId[mbIndexStart:mbIndexEnd, :].copy()).astype(int) % 2
+            daDetectorId = dldDetectorId.flatten()
+            arrayCols.append(daDetectorId)
+
+        if 'bunchCharge' in self.daqAddresses:
+            bunchChargeArray = assignToMircobunch(
+                self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+                self.bunchCharge[mbIndexStart:mbIndexEnd, :].astype(np.float64))
+            daBunchCharge = bunchChargeArray.flatten()
+            arrayCols.append(daBunchCharge)
+
+        if 'opticalDiode' in self.daqAddresses:
+            opticalDiodeArray = assignToMircobunch(
+                self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+                self.opticalDiode[mbIndexStart:mbIndexEnd, :].astype(np.float64))
+            daOpticalDiode = opticalDiodeArray.flatten()
+            arrayCols.append(daOpticalDiode)
+
+        if 'gmdTunnel' in self.daqAddresses:
+            gmdTunnelArray = assignToMircobunch(
+                self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+                self.gmdTunnel[mbIndexStart:mbIndexEnd, :].astype(np.float64))
+            daGmdTunnel = gmdTunnelArray.flatten()
+            arrayCols.append(daGmdTunnel)
+
+        if 'gmdBda' in self.daqAddresses:
+            gmdBdaArray = assignToMircobunch(
+                self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+                self.gmdBda[mbIndexStart:mbIndexEnd, :].astype(np.float64))
+            daGmdBda = gmdBdaArray.flatten()
+            arrayCols.append(daGmdBda)
 
         # convert the laser polarization motor position to the electron format
-        pumpPolArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
-        pumpPolArray[:,:] = (self.pumpPol[mbIndexStart:mbIndexEnd,0])[:, None]
-        daPumpPol = pumpPolArray.flatten()
+        if 'pumpPol' in self.daqAddresses:
+            pumpPolArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+            pumpPolArray[:, :] = (self.pumpPol[mbIndexStart:mbIndexEnd, 0])[:, None]
+            daPumpPol = pumpPolArray.flatten()
+            arrayCols.append(daPumpPol)
 
-        bunchChargeArray = assignToMircobunch(
-            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
-            self.bunchCharge[mbIndexStart:mbIndexEnd, :].astype(np.float64))
-        daBunchCharge = bunchChargeArray.flatten()
-
-        opticalDiodeArray = assignToMircobunch(
-            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
-            self.opticalDiode[mbIndexStart:mbIndexEnd, :].astype(np.float64))
-        daOpticalDiode = opticalDiodeArray.flatten()
-
-        gmdTunnelArray = assignToMircobunch(
-            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
-            self.gmdTunnel[mbIndexStart:mbIndexEnd, :].astype(np.float64))
-        daGmdTunnel = gmdTunnelArray.flatten()
-
-        gmdBdaArray = assignToMircobunch(
-            self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
-            self.gmdBda[mbIndexStart:mbIndexEnd, :].astype(np.float64))
-        daGmdBda = gmdBdaArray.flatten()
-
+        # convert the MacroBunchPulseId to the electron format. No check because this surely exists
+        if 'macroBunchPulseId' in self.daqAddresses:
+            macroBunchPulseIdArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+            macroBunchPulseIdArray[:, :] = (self.macroBunchPulseId[mbIndexStart:mbIndexEnd, 0])[:, None]
+            daMacroBunchPulseId = macroBunchPulseIdArray.flatten()
+            arrayCols.append(daMacroBunchPulseId)
 
         # the Aux channel: aux0:
         # aux0Arr= assignToMircobunch(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64), self.dldAux[mbIndexStart:mbIndexEnd, 0].astype(np.float64))
@@ -248,10 +281,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         # da = dask.array.stack([daX, daY, daTime, daDelaystage, daBam, daMicrobunchId,
         #                       daDetectorId, daBunchCharge, daOpticalDiode,
         #                       daGmdTunnel, daMacroBunchPulseId])
-        da = np.stack([daX, daY, daTime, daDelaystage, daBam, daMicrobunchId,
-                          daDetectorId, daBunchCharge, daOpticalDiode,
-                          daGmdTunnel, daGmdBda, daPumpPol, daMacroBunchPulseId])
-
+        da = np.stack(arrayCols)
         return da
 
     def createDataframePerElectron(self):
@@ -262,7 +292,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         # self.dldTime=self.dldTime*self.dldTimeStep
         if _VERBOSE:
             print('creating electron dataframe...')
-        
+
         maxIndex = self.dldTime.shape[0]
         chunkSize = min(self.CHUNK_SIZE, maxIndex / self.N_CORES)  # ensure minimum one chunk per core.
         numOfPartitions = int(maxIndex / chunkSize) + 1
@@ -274,77 +304,92 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             result = dask.delayed(self.createDataframePerElectronRange)(indexFrom, indexTo)
             daList.append(result)
         # self.dd = self.createDataframePerElectronRange(0, maxIndex)
-        
+
         # Create the electron-indexed dataframe
         self.daListResult = dask.compute(*daList)
 
         a = np.concatenate(self.daListResult, axis=1)
         da = dask.array.from_array(a.T, chunks=self.CHUNK_SIZE)
 
-        self.dd = dask.dataframe.from_array(da, columns=('posX', 'posY', 'dldTime', 'delayStageTime', 'bam',
-                                                             'microbunchId', 'dldDetectorId',
-                                                             'bunchCharge', 'opticalDiode', 'gmdTunnel', 'gmdBda','pumpPol', 
-                                                             'macroBunchPulseId'))
-        # TODO: choose columns from SETTINGS
+        cols = ('dldPosX', 'dldPosY', 'dldTime', 'delayStage', 'bam', 'dldMicrobunchId', 'dldDetectorId', 'bunchCharge',
+                'opticalDiode', 'gmdTunnel', 'gmdBda', 'pumpPol', 'macroBunchPulseId')
 
-        self.dd = self.dd[self.dd['microbunchId'] > -1] # needed as negative values are used to mark bad data
-        self.dd['dldTime'] = self.dd[
-                                 'dldTime'] * self.TOF_STEP_TO_NS  # TODO: change to eV? no! this is more Dima friendly
+        cols = tuple(x for x in cols if x in self.daqAddresses)
+        self.dd = dask.dataframe.from_array(da, columns=cols)
+        # needed as negative values are used to mark bad data
+        self.dd = self.dd[self.dd['dldMicrobunchId'] > -1]
+        # I propose leaving it like this, since energy calibration depends on microscope parameters and photon energy
+        self.dd['dldTime'] = self.dd['dldTime'] * self.TOF_STEP_TO_NS
 
     def createDataframePerMicrobunch(self):
         """Create a dataframe indexed by the microbunch ID
         """
-        
+
         if _VERBOSE:
             print('creating microbunch dataframe...')
 
-        numOfMacrobunches = self.bam.shape[0]
-
-        # convert the delay stage position to the uBunch format
-        delayStageArray = np.zeros_like(self.bam)
-        delayStageArray[:, :] = (self.delayStage[:])[:, None]
-        daDelayStage = dask.array.from_array(delayStageArray.flatten(), chunks=self.CHUNK_SIZE)
-
-        # convert the MacroBunchPulseId to the uBunch format
-        macroBunchPulseIdArray = np.zeros_like(self.bam)
-        macroBunchPulseIdArray[:, :] = (self.macroBunchPulseId[:, 0])[:, None]
-        daMacroBunchPulseId = dask.array.from_array(macroBunchPulseIdArray.flatten(), chunks=(self.CHUNK_SIZE))
-
-        # convert the laser polarization motor position to the uBunch format
-        pumpPolArray = np.zeros_like(self.bam)
-        pumpPolArray[:] = (self.pumpPol[:,0])[:, None]
-        daPumpPol = dask.array.from_array(pumpPolArray.flatten(), chunks=self.CHUNK_SIZE)
-
-        daBam = dask.array.from_array(self.bam.flatten(), chunks=(self.CHUNK_SIZE))
+        arrayCols = []
         numOfMicrobunches = self.bam.shape[1]
-
-        # the Aux channel: aux0:
-        dldAux0 = self.dldAux[:, 0]
-        aux0 = np.ones(self.bam.shape) * dldAux0[:, None]
-        daAux0 = dask.array.from_array(aux0.flatten(), chunks=(self.CHUNK_SIZE))
-        # the Aux channel: aux1:
-        dldAux1 = self.dldAux[:, 1]
-        aux1 = np.ones(self.bam.shape) * dldAux1[:, None]
-        daAux1 = dask.array.from_array(aux1.flatten(), chunks=(self.CHUNK_SIZE))
-
-        daBunchCharge = dask.array.from_array(self.bunchCharge[:, 0:numOfMicrobunches].flatten(),
-                                              chunks=(self.CHUNK_SIZE))
-
         lengthToPad = numOfMicrobunches - self.opticalDiode.shape[1]
-        
-        try:
-            paddedOpticalDiode = np.pad(self.opticalDiode, ((0, 0), (0, lengthToPad)), 'constant', constant_values=(0, 0))
-            daOpticalDiode = dask.array.from_array(paddedOpticalDiode.flatten(), chunks=(self.CHUNK_SIZE))
-        except:
-            print('fix optical diode DAQ: Langth: ' + str( self.opticalDiode.shape[1]))
-            daOpticalDiode = dask.array.from_array(self.opticalDiode[:,0:numOfMicrobunches].flatten(), chunks=(self.CHUNK_SIZE))                        
 
-        da = dask.array.stack([daDelayStage, daBam, daAux0, daAux1, daBunchCharge, daOpticalDiode, daPumpPol, daMacroBunchPulseId])
+        if 'delayStage' in self.daqAddresses:
+            delayStageArray = np.zeros_like(self.bam)
+            delayStageArray[:, :] = (self.delayStage[:])[:, None]
+            daDelayStage = dask.array.from_array(delayStageArray.flatten(), chunks=self.CHUNK_SIZE)
+            arrayCols.append(daDelayStage)
+
+        if 'bam' in self.daqAddresses:
+            daBam = dask.array.from_array(self.bam.flatten(), chunks=(self.CHUNK_SIZE))
+            arrayCols.append(daBam)
+
+        if 'dldAux0' in self.daqAddresses:
+            dldAux0 = self.dldAux0[:, 0]
+            aux0 = np.ones(self.bam.shape) * dldAux0[:, None]
+            daAux0 = dask.array.from_array(aux0.flatten(), chunks=(self.CHUNK_SIZE))
+            arrayCols.append(daAux0)
+
+        if 'dldAux1' in self.daqAddresses:
+            dldAux1 = self.dldAux1[:, 1]
+            aux1 = np.ones(self.bam.shape) * dldAux1[:, None]
+            daAux1 = dask.array.from_array(aux1.flatten(), chunks=(self.CHUNK_SIZE))
+            arrayCols.append(daAux1)
+
+        if 'bunchCharge' in self.daqAddresses:
+            daBunchCharge = dask.array.from_array(self.bunchCharge[:, 0:numOfMicrobunches].flatten(),
+                                                  chunks=(self.CHUNK_SIZE))
+            arrayCols.append(daBunchCharge)
+
+        if 'opticalDiode' in self.daqAddresses:
+            try:
+                paddedOpticalDiode = np.pad(self.opticalDiode, ((0, 0), (0, lengthToPad)), 'constant',
+                                            constant_values=(0, 0))
+                daOpticalDiode = dask.array.from_array(paddedOpticalDiode.flatten(), chunks=self.CHUNK_SIZE)
+            except:
+                print('fix optical diode DAQ: Length: ' + str(self.opticalDiode.shape[1]))
+                daOpticalDiode = dask.array.from_array(self.opticalDiode[:, 0:numOfMicrobunches].flatten(),
+                                                       chunks=self.CHUNK_SIZE)
+            arrayCols.append(daOpticalDiode)
+
+        if 'pumpPol' in self.daqAddresses:
+            pumpPolArray = np.zeros_like(self.bam)
+            pumpPolArray[:] = (self.pumpPol[:, 0])[:, None]
+            daPumpPol = dask.array.from_array(pumpPolArray.flatten(), chunks=self.CHUNK_SIZE)
+            arrayCols.append(daPumpPol)
+
+        if 'macroBunchPulseId' in self.daqAddresses:
+            macroBunchPulseIdArray = np.zeros_like(self.bam)
+            macroBunchPulseIdArray[:, :] = (self.macroBunchPulseId[:, 0])[:, None]
+            daMacroBunchPulseId = dask.array.from_array(macroBunchPulseIdArray.flatten(), chunks=(self.CHUNK_SIZE))
+            arrayCols.append(daMacroBunchPulseId)
+
+        da = dask.array.stack(arrayCols)
 
         # Create the microbunch-indexed dataframe
-        self.ddMicrobunches = dask.dataframe.from_array(da.T,
-                                                        columns=('delayStageTime', 'bam', 'aux0', 'aux1', 'bunchCharge',
-                                                                 'opticalDiode', 'pumpPol', 'macroBunchPulseId'))
+        cols = (
+            'delayStage', 'bam', 'dldAux0', 'dldAux1', 'bunchCharge', 'opticalDiode', 'pumpPol', 'macroBunchPulseId')
+        cols = tuple(x for x in cols if x in self.daqAddresses)
+
+        self.ddMicrobunches = dask.dataframe.from_array(da.T, columns=cols)
 
     def storeDataframes(self, fileName=None, path=None, format='parquet', append=False):
         """ Save imported dask dataframe as a parquet or hdf5 file.
@@ -422,7 +467,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
     # ==================
     # DEPRECATED METHODS
     # ==================
-    
+
     def readRun(self, runNumber=None, path=None):
         """ Read a run
 
@@ -442,7 +487,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             processor.readRun(19059)
 
         """
-        
+
         print('WARNING: readRun method is obsolete. Please use readData(runNumber=xxx).')
 
         if path is None:  # allow for using the default path, which can be redefined as class variable.
@@ -528,7 +573,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             pulseIdInterval ():
             path (str): path to location where raw HDF5 files are stored
         """
-        
+
         # allow for using the default path, which can be redefined as class variable. leaving retrocompatibility
         print('WARNING: readInterval method is obsolete. Please use readData(pulseIdInterval=xxx).')
 

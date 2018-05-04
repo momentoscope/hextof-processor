@@ -1,7 +1,7 @@
 "@author: Steinn Ymir Agustsson"
 
 import os
-import configparser
+from configparser import ConfigParser
 import psutil
 
 """Create a SETTINGS.ini file
@@ -17,8 +17,8 @@ This was created to allow this code to be machine and OS agnostic.
 """
 
 
-def make_new_settings():
-    config = configparser.ConfigParser()
+def make_new_settings(updating=True):
+    config = ConfigParser()
 
     settings_dict = {
         'paths': {
@@ -43,8 +43,10 @@ def make_new_settings():
             'dld_pos_x': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset",
             'dld_pos_y': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:1/dset",
             'dld_time': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset",
+            'dld_detector_id': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset",
             'dld_microbunch_id': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:2/dset",
-            'dld_aux': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset",
+            'dld_aux_0': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset",
+            'dld_aux_1': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset",
             'delay_stage': "/Experiment/Pump probe laser/delay line IK220.0/ENC",
             'bam': '/Electron Diagnostic/BAM/4DBC3/electron bunch arrival time (low charge)',
             'bunch_charge': '/Electron Diagnostic/Bunch charge/after undulator',
@@ -52,7 +54,7 @@ def make_new_settings():
             'optical_diode': '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD',
             'gmd_tunnel': '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel',
             'gmd_bda': '/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA',
-            'pump_pol' : '/uncategorised/FLASH1_USER2/FLASH.EXP/NF.ESP301/PG2/MOTOR3.POS/dset',
+            'pump_pol': '/uncategorised/FLASH1_USER2/FLASH.EXP/NF.ESP301/PG2/MOTOR3.POS/dset',
         },
         'DAQ address - not used': {}
     }
