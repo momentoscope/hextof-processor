@@ -1,4 +1,5 @@
-# List of terms and abbreviations
+List of terms and abbreviations
+===================================
 
 **BAM** = beam arrival monitor, monitors the time when the FEL beam arrives.
 
@@ -24,9 +25,12 @@
 
 **file number** -- integer label of a file in an experimental run.
 
-```
-<br><br>
-```
+
+
+
+
+
+
 
 ### Bibliography
 
