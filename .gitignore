@@ -18,7 +18,7 @@ SETTINGS.ini
 \.DS_Store
 
 # ignore cython builds
-./build/
+/build/
 *.so
 *.pyd
 
