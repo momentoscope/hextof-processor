@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from configparser import ConfigParser
+import warnings
+
 import matplotlib.pyplot as plt
 
 _VERBOSE = False
@@ -251,9 +253,9 @@ class DldProcessor:
                 Avoid using -1 unless debugging
         """
 
-        self.dd['pumpProbeTime'] = self.dd['delayStageTime'] - \
+        self.dd['pumpProbeTime'] = self.dd['delayStage'] - \
                                    self.dd['bam'] * sign
-        self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStageTime'] - \
+        self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStage'] - \
                                                self.ddMicrobunches['bam'] * sign
 
     def createPolarCoordinates(self, kCenter=(250, 250)):
@@ -589,9 +591,9 @@ class DldProcessor:
                 [delaystageHistBinner])
             self.pumpProbeHistogram = delaystageHistGrouped.count(
             ).compute()['bam'].to_xarray().values.astype(np.float64)
-        if (name == 'delayStageTime'):
+        if (name == 'delayStage'):
             # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['delayStageTime'].map_partitions(
+            delaystageHistBinner = self.ddMicrobunches['delayStage'].map_partitions(
                 pd.cut, bins)
             delaystageHistGrouped = self.ddMicrobunches.groupby(
                 [delaystageHistBinner])
@@ -677,29 +679,36 @@ class DldProcessor:
 
         # prepare the partitions for the calculation in parallel
         calculatedResults = []
-        for i in tqdm(range(0, self.dd.npartitions, self.N_CORES)):
-            resultsToCalculate = []
-            # process the data in blocks of n partitions (given by the number
-            # of cores):
-            for j in range(0, self.N_CORES):
-                if (i + j) >= self.dd.npartitions:
-                    break
-                part = self.dd.get_partition(i + j)
-                resultsToCalculate.append(dask.delayed(analyzePartNumpy)(part))
 
-            # now do the calculation on each partition (using the dask
-            # framework):
-            if len(resultsToCalculate) > 0:
-                #                print("computing partitions " + str(i) + " to " + str(i + j) + " of " + str(
-                #                    self.dd.npartitions) + ". partitions calculated in parallel: " + str(
-                #                    len(resultsToCalculate)))
-                results = dask.compute(*resultsToCalculate)
-                total = np.zeros_like(results[0])
-                for result in results:
-                    total = total + result
-                calculatedResults.append(total)
-                del total
-            del resultsToCalculate
+        if _VERBOSE:
+            warnString="always"
+        else:
+            warnString="ignore"
+        with warnings.catch_warnings():
+            warnings.simplefilter(warnString)
+            for i in tqdm(range(0, self.dd.npartitions, self.N_CORES)):
+                resultsToCalculate = []
+                # process the data in blocks of n partitions (given by the number
+                # of cores):
+                for j in range(0, self.N_CORES):
+                    if (i + j) >= self.dd.npartitions:
+                        break
+                    part = self.dd.get_partition(i + j)
+                    resultsToCalculate.append(dask.delayed(analyzePartNumpy)(part))
+
+                # now do the calculation on each partition (using the dask
+                # framework):
+                if len(resultsToCalculate) > 0:
+                    #                print("computing partitions " + str(i) + " to " + str(i + j) + " of " + str(
+                    #                    self.dd.npartitions) + ". partitions calculated in parallel: " + str(
+                    #                    len(resultsToCalculate)))
+                    results = dask.compute(*resultsToCalculate)
+                    total = np.zeros_like(results[0])
+                    for result in results:
+                        total = total + result
+                    calculatedResults.append(total)
+                    del total
+                del resultsToCalculate
 
         # we now need to add them all up (single core):
         result = np.zeros_like(calculatedResults[0])
