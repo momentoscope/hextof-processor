@@ -119,16 +119,21 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
         section = 'DAQ address - used'
+
+        daqAccess = BeamtimeDaqAccess.create(path)
+
         self.daqAddresses = []
         for entry in settings[section]:
             name = utils.camelCaseIt(entry)
             val = str(settings[section][entry])
-            self.daqAddresses.append(name)
-            if _VERBOSE:
-                print('assigning address: {}: {}'.format(name.ljust(20), val))
-            setattr(self, name, val)
-
-        daqAccess = BeamtimeDaqAccess.create(path)
+            if daqAccess.isChannelAvailable(val,self.getIds(runNumber)):
+                self.daqAddresses.append(name)
+                if _VERBOSE:
+                    print('assigning address: {}: {}'.format(name.ljust(20), val))
+                setattr(self, name, val)
+            else:
+                # if _VERBOSE:
+                print('skipping address missing from data: {}: {}'.format(name.ljust(20), val))
 
         # TODO: get the available pulse id from PAH
         if pulseIdInterval is None:
