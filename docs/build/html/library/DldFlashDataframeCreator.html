@@ -1,0 +1,264 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="English">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>1. Dataframe creator class (DldFlashDataframeCreator) &#8212; HextofOfflineAnalyzer 0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2. DldProcessor class (DldProcessor)" href="DldProcessor.html" />
+    <link rel="prev" title="HextofOfflineAnalyzer&#39;s documentation" href="../index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DldProcessor.html" title="2. DldProcessor class (DldProcessor)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="HextofOfflineAnalyzer&#39;s documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">HextofOfflineAnalyzer 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<p class="caption"><span class="caption-text">Library</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pah.html">3. Interfacing external pah library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">4. Utility functions (utils)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../example/binning.html">1. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/corrections.html">2. Corrections to FEL pulse timing</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">HextofOfflineAnalyzer's documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="DldProcessor.html"
+                        title="next chapter">2. DldProcessor class (DldProcessor)</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/library/DldFlashDataframeCreator.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-processor.DldFlashDataframeCreator">
+<span id="dataframe-creator-class-dldflashdataframecreator"></span><h1>1. Dataframe creator class (DldFlashDataframeCreator)<a class="headerlink" href="#module-processor.DldFlashDataframeCreator" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="processor.DldFlashDataframeCreator.DldFlashProcessor">
+<em class="property">class </em><code class="descclassname">processor.DldFlashDataframeCreator.</code><code class="descname">DldFlashProcessor</code><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class reads an existing run and allows to generated binned multidimensional arrays.
+Such arrays can be used directly or saved as HDF5 dataframes..</p>
+<p>This class reads an existing run and generates a hdf5 file containing the dask data frames.
+It is intended to be used with data generated from August 31, 2017 to September 19, 2017.
+Version 4 enables read out of macrobunchID. For evaluation the start ID is set to zero.
+version 5 :
+- introduces overwriting of PAH classes for correct handling of macrobunchID
+- introduces writeRunToMultipleParquet function, for parquet file generation on machines with low ram
+- changed variables to class variables for easier implementation on different machines
+- added some print functions with information about the run that is being imported.</p>
+<p>Had to change the delay stage channel, as the old one (.../ENC.DELAY) stored groups of ~10 times the same value
+(is probably read out with 10 Hz. The new channel is the column (index!) one of .../ENC.
+This change makes the treatment of problematic runs obsolete.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd><p class="first">runNumber (int): number of the run from which data is taken.
+pulseIdInterval (int): macrobunch ID corresponding to the interval of data</p>
+<blockquote>
+<div>read from the given run.</div></blockquote>
+<dl class="last docutils">
+<dt>dd (pd.DataFrame): dataframe containing chosen channel information from</dt>
+<dd>the given run</dd>
+<dt>dd_microbunch (pd.DataFrame): dataframe containing chosen channel</dt>
+<dd>information from the given run.</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerElectron">
+<code class="descname">createDataframePerElectron</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.createDataframePerElectron"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerElectron" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dataframe indexed by photoelectron events from
+the read arrays (either from the test file or the run number)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerElectronRange">
+<code class="descname">createDataframePerElectronRange</code><span class="sig-paren">(</span><em>mbIndexStart</em>, <em>mbIndexEnd</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.createDataframePerElectronRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerElectronRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a numpy array indexed by photoelectron events for a given range
+of electron macrobunch ID.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerMicrobunch">
+<code class="descname">createDataframePerMicrobunch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.createDataframePerMicrobunch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerMicrobunch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dataframe indexed by the microbunch ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.getIds">
+<code class="descname">getIds</code><span class="sig-paren">(</span><em>runNumber=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.getIds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.getIds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the initial and the final MBunchIDs of runNumber</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>runNumber (int): number of the run from which to read id interval.
+path (str): path to location where raw HDF5 files are stored</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.readData">
+<code class="descname">readData</code><span class="sig-paren">(</span><em>runNumber=None</em>, <em>pulseIdInterval=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.readData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.readData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data by run number or macrobunch pulseID interval.</p>
+<p>Useful for scans that would otherwise hit the machine's memory limit.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><p class="first">runNumber (int): number of the run from which to read data. If None, requires pulseIdInterval.
+pulseIdInterval (int,int): first and last macrobunches of selected data range. If None, the whole run</p>
+<blockquote>
+<div>defined by runNumber will be taken.</div></blockquote>
+<p class="last">path (str): path to location where raw HDF5 files are stored</p>
+</dd>
+</dl>
+<p>This is a union of the readRun and readInterval methods defined in previous versions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.readInterval">
+<code class="descname">readInterval</code><span class="sig-paren">(</span><em>pulseIdInterval</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.readInterval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.readInterval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access to data by macrobunch pulseID intervall.</p>
+<p>Usefull for scans that would otherwise hit the machine's memory limit.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>pulseIdInterval ():
+path (str): path to location where raw HDF5 files are stored</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.readRun">
+<code class="descname">readRun</code><span class="sig-paren">(</span><em>runNumber=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.readRun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.readRun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a run</p>
+<p>Generates dd and dd_micrubunches attributes as pd.DataFrame
+containing data from the given run.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first docutils">
+<dt>runNumber (int, optional): number corresponding to the rung to read data from. if None, it uses the value</dt>
+<dd>defined in the runNumber attribute.</dd>
+</dl>
+<p class="last">path (str): path to location where raw HDF5 files are stored. If None, it uses the value from SETTINGS.ini.</p>
+</dd>
+<dt>Raises:</dt>
+<dd>AttributeError: if runNumber is not given and</dd>
+<dt>Example:</dt>
+<dd>processor = DldFlashProcessor()
+processor.readRun(19059)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.storeDataframes">
+<code class="descname">storeDataframes</code><span class="sig-paren">(</span><em>fileName=None</em>, <em>path=None</em>, <em>format='parquet'</em>, <em>append=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.storeDataframes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.storeDataframes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save imported dask dataframe as a parquet or hdf5 file.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><p class="first">fileName (string): name of the file where to save data.
+path (str): path to the folder where to save the parquet or hdf5 files.
+format (string, optional): accepts: 'parquet' and 'hdf5'. Choose output file format.</p>
+<blockquote class="last">
+<div>Default value makes a dask parquet file.
+append (bool): when using parquet file, allows to append the data to a pre-existing file.</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DldProcessor.html" title="2. DldProcessor class (DldProcessor)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="HextofOfflineAnalyzer&#39;s documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">HextofOfflineAnalyzer 0.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, momentoscope team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.
+    </div>
+  </body>
+</html>
