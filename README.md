@@ -297,13 +297,15 @@ plt.imshow(result)
 
 **(1)** ToF to binding energy conversion
 
-The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)
+The functions (t2e and e2t) convert between binding energy (E<sub>b</sub>) in eV (negative convention)
 and time of flight (ToF) in ns.
 
-The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
-binding energy Eb is given by
-$-Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V$
-With W the work function, hv the photon energy, V the electrostatic potential applied to
+The formula used is based on the ToF for an electron with a kinetic energy E<sub>k</sub>. Then the
+binding energy E<sub>b</sub> is given by
+
+-E<sub>b</sub> = E<sub>k</sub> + W - hv - V = 1/2 m v<sup>2</sup> + W - hν - V
+
+With W the work function, hν the photon energy, V the electrostatic potential applied to
 the sample with respect to the drift section voltage, v the velocity of the electrons in the drift tube, 
 m the mass of the electron.
 
@@ -318,9 +320,9 @@ value:
 2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum
 3.  Imposing some calibrated spacing between features in a spectrum
 
-eoffset is supposed to include $-W+hv+V$. It mainly affects absolute position of the peaks, and
+eoffset is supposed to include -W+hν+V. It mainly affects absolute position of the peaks, and
 there are several strategies for calibrating this value:
-1.  By getting the correct values for W, hv, and V
+1.  By getting the correct values for W, hν, and V
 2.  It can be calibrated by imposing peak position
 
 
