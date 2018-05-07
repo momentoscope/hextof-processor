@@ -89,9 +89,9 @@ class DldProcessor:
 
         settings = ConfigParser()
         if os.path.isfile(
-            os.path.join(
-                os.path.dirname(__file__),
-                'SETTINGS.ini')):
+                os.path.join(
+                    os.path.dirname(__file__),
+                    'SETTINGS.ini')):
             settings.read(
                 os.path.join(
                     os.path.dirname(__file__),
@@ -252,9 +252,9 @@ class DldProcessor:
         """
 
         self.dd['pumpProbeTime'] = self.dd['delayStageTime'] - \
-            self.dd['bam'] * sign
+                                   self.dd['bam'] * sign
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStageTime'] - \
-            self.ddMicrobunches['bam'] * sign
+                                               self.ddMicrobunches['bam'] * sign
 
     def createPolarCoordinates(self, kCenter=(250, 250)):
         """ Define polar coordinates for k-space values.
@@ -266,7 +266,7 @@ class DldProcessor:
 
         def radius(df):
             return np.sqrt(np.square(df.posX - kCenter[0]) +
-                np.square(df.posY - kCenter[1]))
+                           np.square(df.posY - kCenter[1]))
 
         def angle(df):
             return np.arctan2(df.posY - kCenter[1], df.posX - kCenter[0])
@@ -389,7 +389,7 @@ class DldProcessor:
         return data, axes, hists
 
     def addBinningOld(self, name, start, end, steps, useStepSize=True,
-        include_last=True, force_legacy=False):
+                      include_last=True, force_legacy=False):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -469,7 +469,7 @@ class DldProcessor:
                 self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[colname] < ub]
 
     def genBins(self, start, end, steps, useStepSize=True,
-            forceEnds=False, include_last=True, force_legacy=False):
+                forceEnds=False, include_last=True, force_legacy=False):
         """Creates bins for use by binning functions. Can also be used to generate x axes.
 
         Binning is created using np.linspace (formerly was done with np.arange).
@@ -538,7 +538,7 @@ class DldProcessor:
         return bins
 
     def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False,
-            include_last=True, force_legacy=False):
+                   include_last=True, force_legacy=False):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -566,7 +566,8 @@ class DldProcessor:
             force_legacy (bool): if true, imposes old method for generating binns,
                 based on np.arange instead of linspace.
         Returns:
-            axes (np.array): axis of the binned dimesion. The points defined on this axis are the middle points of each bin.
+            axes (np.array): axis of the binned dimesion. The points defined on this axis are the middle points of
+            each bin.
 
         See also:
             computeBinnedData : Method to compute all bins created with this function.
@@ -579,7 +580,7 @@ class DldProcessor:
         bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
         self.binNameList.append(name)
         self.binRangeList.append(bins)
-        
+
         if (name == 'pumpProbeTime'):
             # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
             delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(
@@ -600,7 +601,7 @@ class DldProcessor:
             stepSize = steps
         else:
             stepSize = (end - start) / steps
-        
+
         axes = self.genBins(
             start + stepSize / 2,
             end - stepSize / 2,
@@ -713,7 +714,7 @@ class DldProcessor:
         return result
 
     def computeBinnedDataMulti(self, saveName=None, savePath=None,
-            saveMode='w', rank=None, size=None):
+                               saveMode='w', rank=None, size=None):
         """ Use the bin list to bin the data.
 
         Returns:
@@ -744,7 +745,7 @@ class DldProcessor:
             # vals = part.values
             # cols = part.columns.values
             # create array of columns to be used for binning
-            
+
             colsToBin = []
             for binName in self.binNameList:
                 idx = cols.tolist().index(binName)
@@ -800,7 +801,7 @@ class DldProcessor:
     # ==================
 
     def save2hdf5(self, binnedData, path=None, filename='default.hdf5',
-            normalizedData=None, overwrite=False):
+                  normalizedData=None, overwrite=False):
         """ Store the binned data in a hdf5 file.
 
         Parameters:
@@ -809,7 +810,8 @@ class DldProcessor:
             filename (string): name of the file,
             path (string, optional): path to the location where to save the hdf5 file. If None, uses the default value
                 defined in SETTINGS.ini
-            normalizedData (bool): Normalized data for both detector, so it should be a 3d array (posX, posY,detectorID).
+            normalizedData (bool): Normalized data for both detector, so it should be a 3d array (posX, posY,
+            detectorID).
             overwrite (bool): if True, overwrites existing files with matching name.
 
         Example:
@@ -847,7 +849,7 @@ class DldProcessor:
                 data2hdf5[i, :, :] = binnedData[i, :, :, 0].transpose(
                 ) / normalizedData[:, :, 0].transpose()
                 data2hdf5[i, :, :] += binnedData[i, :, :,
-                                                 1].transpose() / normalizedData[:, :, 1].transpose()
+                                      1].transpose() / normalizedData[:, :, 1].transpose()
         else:
             # detector binned? -> sum together
             if binnedData.ndim == 4:
@@ -892,7 +894,8 @@ class DldProcessor:
         # TODO: remove this function once retro-compatibility is ensured
 
         print(
-            'WARNING: readDataframesParquet is being removed.\nUse readDataframes instead: Default behaviour is now parqet.\n',
+            'WARNING: readDataframesParquet is being removed.\nUse readDataframes instead: Default behaviour is now '
+            'parqet.\n',
             ' Specify format="h5" for legacy use.')
         self.readDataframes(fileName)
 
