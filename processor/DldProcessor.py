@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import dask
 import dask.dataframe
@@ -20,7 +22,8 @@ def main():
     processor.readData()
     processor.postProcess()
     pptime = processor.addBinning('pumpProbeTime', -54, -44, .1)
-    ToF = processor.addBinning('dldTime', 630, 670, 10 * processor.TOF_STEP_TO_NS)
+    ToF = processor.addBinning(
+        'dldTime', 630, 670, 10 * processor.TOF_STEP_TO_NS)
 
     result = processor.computeBinnedData(saveName='test2')
     # processor.save_array(result,'test')
@@ -54,7 +57,8 @@ class DldProcessor:
         """
 
         self.resetBins()
-        # initialize attributes to their type. Values are then taken from SETTINGS.ini through initialize_attributes()
+        # initialize attributes to their type. Values are then taken from
+        # SETTINGS.ini through initialize_attributes()
         self.N_CORES = int
         self.UBID_OFFSET = int
         self.CHUNK_SIZE = int
@@ -70,7 +74,9 @@ class DldProcessor:
         self.DATA_RESULTS_DIR = str
         self.initAttributes()
 
-        self._LEGACY_BINNING = False  # set true to use the old binning method with arange, instead of linspace
+        # set true to use the old binning method with arange, instead of
+        # linspace
+        self._LEGACY_BINNING = False
 
     def initAttributes(self, import_all=False):
         """ Parse settings file and assign the variables.
@@ -82,20 +88,38 @@ class DldProcessor:
         """
 
         settings = ConfigParser()
-        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-            settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+        if os.path.isfile(
+            os.path.join(
+                os.path.dirname(__file__),
+                'SETTINGS.ini')):
+            settings.read(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    'SETTINGS.ini'))
         else:
-            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+            settings.read(
+                os.path.join(
+                    os.path.dirname(
+                        os.path.dirname(__file__)),
+                    'SETTINGS.ini'))
 
         for section in settings:
             for entry in settings[section]:
-                if _VERBOSE: print('trying: {} {}'.format(entry.upper(), settings[section][entry]))
+                if _VERBOSE:
+                    print(
+                        'trying: {} {}'.format(
+                            entry.upper(),
+                            settings[section][entry]))
                 try:
                     _type = getattr(self, entry.upper())
-                    setattr(self, entry.upper(), _type(settings[section][entry]))
-                    if _VERBOSE: print(entry.upper(), _type(settings[section][entry]))
+                    setattr(
+                        self, entry.upper(), _type(
+                            settings[section][entry]))
+                    if _VERBOSE:
+                        print(entry.upper(), _type(settings[section][entry]))
                 except AttributeError as e:
-                    if _VERBOSE: print('attribute error: {}'.format(e))
+                    if _VERBOSE:
+                        print('attribute error: {}'.format(e))
                     if import_all:  # old method
                         try:  # assign the attribute to the best fitting type between float, int and string
                             f = float(settings[section][entry])
@@ -106,7 +130,9 @@ class DldProcessor:
                                 val = f  # assign Float
                             setattr(self, entry.upper(), val)
                         except ValueError:  # assign String
-                            setattr(self, entry.upper(), str(settings[section][entry]))
+                            setattr(
+                                self, entry.upper(), str(
+                                    settings[section][entry]))
                     else:
                         pass
 
@@ -124,7 +150,8 @@ class DldProcessor:
         """
 
         format = format.lower()
-        assert format in ['parquet', 'h5', 'hdf5'], 'Invalid format for data input. Please select between parquet or h5'
+        assert format in [
+            'parquet', 'h5', 'hdf5'], 'Invalid format for data input. Please select between parquet or h5'
 
         if path is None:
             if format == 'parquet':
@@ -133,7 +160,8 @@ class DldProcessor:
                 path = self.DATA_H5_DIR
         if fileName is None:
             if self.runNumber is None:
-                fileName = 'mb{}to{}'.format(self.pulseIdInterval[0], self.pulseIdInterval[1])
+                fileName = 'mb{}to{}'.format(
+                    self.pulseIdInterval[0], self.pulseIdInterval[1])
             else:
                 fileName = 'run{}'.format(self.runNumber)
         fileName = path + fileName  # TODO: test if naming is correct
@@ -142,9 +170,10 @@ class DldProcessor:
             self.dd = dask.dataframe.read_parquet(fileName + "_el")
             self.ddMicrobunches = dask.dataframe.read_parquet(fileName + "_mb")
         else:
-            self.dd = dask.dataframe.read_hdf(fileName, '/electrons', mode='r', chunksize=self.CHUNK_SIZE)
-            self.ddMicrobunches = dask.dataframe.read_hdf(fileName, '/microbunches', mode='r',
-                                                          chunksize=self.CHUNK_SIZE)
+            self.dd = dask.dataframe.read_hdf(
+                fileName, '/electrons', mode='r', chunksize=self.CHUNK_SIZE)
+            self.ddMicrobunches = dask.dataframe.read_hdf(
+                fileName, '/microbunches', mode='r', chunksize=self.CHUNK_SIZE)
 
         # self.postProcess()
 
@@ -163,7 +192,8 @@ class DldProcessor:
         newdd = dask.dataframe.read_parquet(fileName + "_el")
         print(len(newdd.divisions))
         self.dd = self.dd.append(newdd)
-        self.ddMicrobunches = self.ddMicrobunches.append(dask.dataframe.read_parquet(fileName + "_mb"))
+        self.ddMicrobunches = self.ddMicrobunches.append(
+            dask.dataframe.read_parquet(fileName + "_mb"))
 
     def postProcess(self, bamCorrectionSign=0, kCenter=None):
         """ Apply corrections to the dataframe.
@@ -221,9 +251,10 @@ class DldProcessor:
                 Avoid using -1 unless debugging
         """
 
-        self.dd['pumpProbeTime'] = self.dd['delayStageTime'] - self.dd['bam'] * sign
-        self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStageTime'] - self.ddMicrobunches[
-            'bam'] * sign
+        self.dd['pumpProbeTime'] = self.dd['delayStageTime'] - \
+            self.dd['bam'] * sign
+        self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStageTime'] - \
+            self.ddMicrobunches['bam'] * sign
 
     def createPolarCoordinates(self, kCenter=(250, 250)):
         """ Define polar coordinates for k-space values.
@@ -234,7 +265,8 @@ class DldProcessor:
         """
 
         def radius(df):
-            return np.sqrt(np.square(df.posX - kCenter[0]) + np.square(df.posY - kCenter[1]))
+            return np.sqrt(np.square(df.posX - kCenter[0]) +
+                np.square(df.posY - kCenter[1]))
 
         def angle(df):
             return np.arctan2(df.posY - kCenter[1], df.posX - kCenter[0])
@@ -274,15 +306,16 @@ class DldProcessor:
             return data_array_normalized
 
         except ValueError:
-            raise ValueError('No pump probe time bin, could not normalize to delay stage histogram.')
+            raise ValueError(
+                'No pump probe time bin, could not normalize to delay stage histogram.')
 
     def save_binned(self, binnedData, name, path=None, mode='w'):
         """ Save a binned array to h5 file. The file includes the axes (taken from the scheduled bins)
         and the delay histograms, if present.
 
         Parameters:
-        
-            binnedData : 
+
+            binnedData :
                 binned data
             name : str
                 extra name tag in the filename
@@ -309,17 +342,21 @@ class DldProcessor:
         # Saving delay histograms
         hh = h5File.create_group("histograms")
         if hasattr(self, 'delaystageHistogram'):
-            hh.create_dataset('delaystageHistogram', data=self.delaystageHistogram)
+            hh.create_dataset(
+                'delaystageHistogram',
+                data=self.delaystageHistogram)
         if hasattr(self, 'pumpProbeHistogram'):
-            hh.create_dataset('pumpProbeHistogram', data=self.pumpProbeHistogram)
+            hh.create_dataset(
+                'pumpProbeHistogram',
+                data=self.pumpProbeHistogram)
 
         h5File.close()
 
     def load_binned(self, name, path=None, mode='r'):
         """ load an h5 file saved with save_array.
-        
+
         Parameters:
-        
+
                 name : str
                     extra name tag in the filename
                 path : str | None
@@ -351,7 +388,8 @@ class DldProcessor:
 
         return data, axes, hists
 
-    def addBinningOld(self, name, start, end, steps, useStepSize=True, include_last=True, force_legacy=False, ):
+    def addBinningOld(self, name, start, end, steps, useStepSize=True,
+        include_last=True, force_legacy=False):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -365,14 +403,13 @@ class DldProcessor:
 
         Parameters:
             name (string): Name of the column to bin to. Possible column names are:
-                posX, posY, dldTime, pumpProbeTime, dldDetector, etc...
+                posX, posY, dldTime, pumpProbeTime, dldDetector, etc.
             start (float): position of first bin
             end (float): position of last bin (not included!)
             steps (float): define the bin size: if useStepSize=True (default),
                 this is the step size, while if useStepSize=False, then this is the
                 number of bins. In Legacy mode (force_legacy=True, or
                 processor._LEGACY_MODE=True)
-
             force_legacy (bool): if true, imposes old method for generating binns,
                 based on np.arange instead of linspace.
 
@@ -395,7 +432,8 @@ class DldProcessor:
                 n_bins -= 1
             bins = np.linspace(start, end, n_bins, endpoint=include_last)
         else:
-            assert isinstance(steps, int) and steps > 0, 'number of steps must be a positive integer number'
+            assert isinstance(
+                steps, int) and steps > 0, 'number of steps must be a positive integer number'
             bins = np.linspace(start, end, steps, endpoint=include_last)
 
         # write the parameters to the bin list:
@@ -403,14 +441,16 @@ class DldProcessor:
         self.binRangeList.append(bins)
         if (name == 'pumpProbeTime'):
             # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(pd.cut, bins)
-            delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
+            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(
+                pd.cut, bins)
+            delaystageHistGrouped = self.ddMicrobunches.groupby(
+                [delaystageHistBinner])
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
 
     def addFilter(self, colname, lb=None, ub=None):
         """ Filters the dataframes contained in the current processor
-        
+
         Parameters:
             colname (str): name of the column in the dask dataframes
             lb (float64): lower boundary of the filter
@@ -428,7 +468,8 @@ class DldProcessor:
             if ub is not None:
                 self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[colname] < ub]
 
-    def genBins(self, start, end, steps, useStepSize=True, forceEnds=False, include_last=True, force_legacy=False):
+    def genBins(self, start, end, steps, useStepSize=True,
+            forceEnds=False, include_last=True, force_legacy=False):
         """Creates bins for use by binning functions. Can also be used to generate x axes.
 
         Binning is created using np.linspace (formerly was done with np.arange).
@@ -473,11 +514,14 @@ class DldProcessor:
         # needs Decimal library for dealing with float representation issues
         elif useStepSize:
             if not forceEnds:
-                if (abs(float(Decimal(str(abs(end - start))) % Decimal(str(steps)))) > 0):
+                if (abs(float(Decimal(str(abs(end - start))) %
+                              Decimal(str(steps)))) > 0):
                     if include_last:
-                        end += float(Decimal(str(steps)) - (Decimal(str(abs(end - start))) % Decimal(str(steps))))
+                        end += float(Decimal(str(steps)) - \
+                                     (Decimal(str(abs(end - start))) % Decimal(str(steps))))
                     else:
-                        end -= float((Decimal(str(abs(end - start))) % Decimal(str(steps))))
+                        end -= float((Decimal(str(abs(end - start))) %
+                                      Decimal(str(steps))))
                         include_last = True
             n_bins = round((abs(end - start)) / steps) + 1
             if not include_last:
@@ -487,13 +531,14 @@ class DldProcessor:
         # non default interpretation of steps as the number of steps
         # /!\ remember to use n+1 if including the end point (default)
         else:
-            assert isinstance(steps, int) and steps > 0, 'number of steps must be a positive integer number'
+            assert isinstance(
+                steps, int) and steps > 0, 'number of steps must be a positive integer number'
             bins = np.linspace(start, end, steps, endpoint=include_last)
 
         return bins
 
-    def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False, include_last=True,
-                   force_legacy=False):
+    def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False,
+            include_last=True, force_legacy=False):
         """ Add binning of one dimension, to be then computed with computeBinnedData method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -503,7 +548,7 @@ class DldProcessor:
 
         Parameters:
             name (string): Name of the column to bin to. Possible column names are:
-                posX, posY, dldTime, pumpProbeTime, dldDetector, etc...
+                posX, posY, dldTime, pumpProbeTime, dldDetector, etc.
             start (float): position of first bin
             end (float): position of last bin (not included!)
             steps (float): define the bin size: if useStepSize=True (default),
@@ -521,8 +566,7 @@ class DldProcessor:
             force_legacy (bool): if true, imposes old method for generating binns,
                 based on np.arange instead of linspace.
         Returns:
-            axes (np.array): axis of the binned dimesion. The points defined on this axis are the middle points of each
-                bin.
+            axes (np.array): axis of the binned dimesion. The points defined on this axis are the middle points of each bin.
 
         See also:
             computeBinnedData : Method to compute all bins created with this function.
@@ -535,24 +579,36 @@ class DldProcessor:
         bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
         self.binNameList.append(name)
         self.binRangeList.append(bins)
+        
         if (name == 'pumpProbeTime'):
             # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(pd.cut, bins)
-            delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
-            self.pumpProbeHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
-                np.float64)
+            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(
+                pd.cut, bins)
+            delaystageHistGrouped = self.ddMicrobunches.groupby(
+                [delaystageHistBinner])
+            self.pumpProbeHistogram = delaystageHistGrouped.count(
+            ).compute()['bam'].to_xarray().values.astype(np.float64)
         if (name == 'delayStageTime'):
             # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['delayStageTime'].map_partitions(pd.cut, bins)
-            delaystageHistGrouped = self.ddMicrobunches.groupby([delaystageHistBinner])
-            self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
-                np.float64)
+            delaystageHistBinner = self.ddMicrobunches['delayStageTime'].map_partitions(
+                pd.cut, bins)
+            delaystageHistGrouped = self.ddMicrobunches.groupby(
+                [delaystageHistBinner])
+            self.delaystageHistogram = delaystageHistGrouped.count(
+            ).compute()['bam'].to_xarray().values.astype(np.float64)
         if useStepSize:
             stepSize = steps
         else:
             stepSize = (end - start) / steps
-        axes = self.genBins(start + stepSize / 2, end - stepSize / 2, stepSize, useStepSize, forceEnds, include_last,
-                            force_legacy)
+        
+        axes = self.genBins(
+            start + stepSize / 2,
+            end - stepSize / 2,
+            stepSize,
+            useStepSize,
+            forceEnds,
+            include_last,
+            force_legacy)
 
         return axes
 
@@ -581,13 +637,15 @@ class DldProcessor:
 
             grouperList = []
             for i in range(len(self.binNameList)):
-                grouperList.append(pd.cut(part[self.binNameList[i]], self.binRangeList[i]))
+                grouperList.append(
+                    pd.cut(part[self.binNameList[i]], self.binRangeList[i]))
             grouped = part.groupby(grouperList)
             result = (grouped.count())['microbunchId'].to_xarray().values
 
             return np.nan_to_num(result)
 
-        # new binner for a partition, not using the Pandas framework. It should be faster!
+        # new binner for a partition, not using the Pandas framework. It should
+        # be faster!
         def analyzePartNumpy(part):
             """ Function called by each thread of the analysis. This now should be faster.
             """
@@ -607,9 +665,12 @@ class DldProcessor:
             for i in range(0, len(colsToBin)):
                 # need to subtract 1 from the number of bin ranges
                 numBins.append(len(self.binRangeList[i]) - 1)
-                ranges.append((self.binRangeList[i].min(), self.binRangeList[i].max()))
+                ranges.append(
+                    (self.binRangeList[i].min(),
+                     self.binRangeList[i].max()))
             # now we are ready for the analysis with numpy:
-            res, edges = np.histogramdd(vals[:, colsToBin], bins=numBins, range=ranges)
+            res, edges = np.histogramdd(
+                vals[:, colsToBin], bins=numBins, range=ranges)
 
             return res
 
@@ -617,14 +678,16 @@ class DldProcessor:
         calculatedResults = []
         for i in tqdm(range(0, self.dd.npartitions, self.N_CORES)):
             resultsToCalculate = []
-            # process the data in blocks of n partitions (given by the number of cores):
+            # process the data in blocks of n partitions (given by the number
+            # of cores):
             for j in range(0, self.N_CORES):
                 if (i + j) >= self.dd.npartitions:
                     break
                 part = self.dd.get_partition(i + j)
                 resultsToCalculate.append(dask.delayed(analyzePartNumpy)(part))
 
-            # now do the calculation on each partition (using the dask framework):
+            # now do the calculation on each partition (using the dask
+            # framework):
             if len(resultsToCalculate) > 0:
                 #                print("computing partitions " + str(i) + " to " + str(i + j) + " of " + str(
                 #                    self.dd.npartitions) + ". partitions calculated in parallel: " + str(
@@ -649,7 +712,8 @@ class DldProcessor:
 
         return result
 
-    def computeBinnedDataMulti(self, saveName=None, savePath=None, saveMode='w', rank=None, size=None):
+    def computeBinnedDataMulti(self, saveName=None, savePath=None,
+            saveMode='w', rank=None, size=None):
         """ Use the bin list to bin the data.
 
         Returns:
@@ -665,19 +729,22 @@ class DldProcessor:
             """ Function called by each thread of the analysis."""
             grouperList = []
             for i in range(len(self.binNameList)):
-                grouperList.append(pd.cut(part[self.binNameList[i]], self.binRangeList[i]))
+                grouperList.append(
+                    pd.cut(part[self.binNameList[i]], self.binRangeList[i]))
             grouped = part.groupby(grouperList)
             result = (grouped.count())['microbunchId'].to_xarray().values
 
             return np.nan_to_num(result)
 
-        # new binner for a partition, not using the Pandas framework. It should be faster!
+        # new binner for a partition, not using the Pandas framework. It should
+        # be faster!
         def analyzePartNumpy(vals, cols):
             """ Function called by each thread of the analysis. This now should be faster. """
             # get the data as numpy:
             # vals = part.values
             # cols = part.columns.values
             # create array of columns to be used for binning
+            
             colsToBin = []
             for binName in self.binNameList:
                 idx = cols.tolist().index(binName)
@@ -688,13 +755,16 @@ class DldProcessor:
             ranges = []
             for i in range(0, len(colsToBin)):
                 numBins.append(len(self.binRangeList[i]))
-                ranges.append((self.binRangeList[i].min(), self.binRangeList[i].max()))
+                ranges.append(
+                    (self.binRangeList[i].min(),
+                     self.binRangeList[i].max()))
             # now we are ready for the analysis with numpy:
-            res, edges = np.histogramdd(vals[:, colsToBin], bins=numBins, range=ranges)
+            res, edges = np.histogramdd(
+                vals[:, colsToBin], bins=numBins, range=ranges)
 
             return res
 
-        # prepare the partitions for the calculation in parallel    
+        # prepare the partitions for the calculation in parallel
         calculatedResults = []
         results = []
         print(rank, size)
@@ -710,8 +780,13 @@ class DldProcessor:
                 results = analyzePartNumpy(partval, partcol)
             else:
                 results += analyzePartNumpy(partval, partcol)
-            print("computing partitions " + str(i + rank) + " of " + str(
-                self.dd.npartitions) + ". partitions calculated in parallel: " + str(size))
+            print("computing partitions " +
+                  str(i +
+                      rank) +
+                  " of " +
+                  str(self.dd.npartitions) +
+                  ". partitions calculated in parallel: " +
+                  str(size))
 
         results = np.nan_to_num(results)
         results = results.astype(np.float64)
@@ -724,7 +799,8 @@ class DldProcessor:
     # DEPRECATED METHODS
     # ==================
 
-    def save2hdf5(self, binnedData, path=None, filename='default.hdf5', normalizedData=None, overwrite=False):
+    def save2hdf5(self, binnedData, path=None, filename='default.hdf5',
+            normalizedData=None, overwrite=False):
         """ Store the binned data in a hdf5 file.
 
         Parameters:
@@ -754,7 +830,8 @@ class DldProcessor:
                 Exception Wrong dimension: if data from binnedData has dimensions different from 4
         """
 
-        # TODO: generalise this function for different data input shapes or bin orders
+        # TODO: generalise this function for different data input shapes or bin
+        # orders
         if path is None:
             path = self.DATA_H5_DIR
 
@@ -767,8 +844,10 @@ class DldProcessor:
             for i in range(binnedData.shape[0]):
                 # normalize for both detectors (0 and 1)
 
-                data2hdf5[i, :, :] = binnedData[i, :, :, 0].transpose() / normalizedData[:, :, 0].transpose()
-                data2hdf5[i, :, :] += binnedData[i, :, :, 1].transpose() / normalizedData[:, :, 1].transpose()
+                data2hdf5[i, :, :] = binnedData[i, :, :, 0].transpose(
+                ) / normalizedData[:, :, 0].transpose()
+                data2hdf5[i, :, :] += binnedData[i, :, :,
+                                                 1].transpose() / normalizedData[:, :, 1].transpose()
         else:
             # detector binned? -> sum together
             if binnedData.ndim == 4:
@@ -785,7 +864,10 @@ class DldProcessor:
             mode = "w"
 
         f = h5py.File(path + filename, mode)
-        dset = f.create_dataset("experiment/xyt_data", data2hdf5.shape, dtype='float64')
+        dset = f.create_dataset(
+            "experiment/xyt_data",
+            data2hdf5.shape,
+            dtype='float64')
 
         dset[...] = data2hdf5
         f.close()

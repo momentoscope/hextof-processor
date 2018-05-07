@@ -1,7 +1,7 @@
 # HextofOfflineAnalyzer
 This code is used to analyze data measured at FLASH using the HEXTOF instrument. The HEXTOF uses a delay line detector (DLD) to measure the position and arrival time of single electron events.
 
-The analysis of the data is based on clean tables as dask dataframes. The main table contains all detected electrons and can be binned according to the needs of the experiment. The second dataframe contains the FEL pulses needed for normalization.
+The analysis of the data is based on clean tables as dask dataframes. The main dataframe contains all detected electrons and can be binned according to the needs of the experiment. The second dataframe contains the FEL pulses needed for normalization.
 
 The class `DldProcessor` contains the dask dataframes as well as the methods to do the binning in the parallelized fashion.
 
@@ -136,19 +136,19 @@ result = processor.ComputeBinnedData()
 ```
 where the resulting np.array of float64 values will have the axis order same as the order in which we generated the bins. Other binning axes commonly used are,
 
-|          name          |       string        | typical values | units |
-| :--------------------: | :-----------------: | :------------: | ----: |
-|     ToF delay (ns)     |      'dldTime'      |  620,670,10 *  |    ns |
-| pump-probe time delay  |  'pumpProbeDelay'   |    -10,10,1    |    ps |
-| separate dld detectors |   'dldDetectors'    |     -1,2,1     |    ID |
-| microbunch (pulse) ID  |   'microbunchId'    |   0,500,1 **   |    ID |
-|       Auxiliary        |      'dldAux'       |                |       |
-|  Beam Arrival Monitor  |        'bam'        |                |    fs |
-|    FEL Bunch Charge    |    'bunchCharge'    |                |       |
-|     macrobunch ID      | 'macroBunchPulseId' |                |    ID |
-|      laser diode       |   'opticalDiode'    | 1000,2000,100  |       |
-|           ?            |     'gmdTunnel'     |                |       |
-|           ?            |      'gmdBda'       |                |       |
+|      Proper name      |     Namestring      | Typical values | Units |
+| :-------------------: | :-----------------: | :------------: | ----: |
+|    ToF delay (ns)     |      'dldTime'      |  620,670,10 *  |    ns |
+| Pump-probe time delay |  'pumpProbeDelay'   |    -10,10,1    |    ps |
+|     Separate DLDs     |   'dldDetectors'    |     -1,2,1     |    ID |
+| Microbunch (pulse) ID |   'microbunchId'    |   0,500,1 **   |    ID |
+|   Auxiliary channel   |      'dldAux'       |                |       |
+| Beam arrival monitor  |        'bam'        |                |    fs |
+|   FEL bunch charge    |    'bunchCharge'    |                |       |
+|     Macrobunch ID     | 'macroBunchPulseId' |                |    ID |
+|  Laser diode reading  |   'opticalDiode'    | 1000,2000,100  |       |
+|           ?           |     'gmdTunnel'     |                |       |
+|           ?           |      'gmdBda'       |                |       |
 
 
 
@@ -165,13 +165,13 @@ In general, it is not possible to satisfy all 3 parameters: start, end, steps. F
 Sometimes it is not necessary to bin the electrons to extract the data. It is actually possible to directly extract data from the appropriate dataframe. This is useful if, for example, you just want to plot some parameters, not involving the number of electrons that happen to have such a value (this would require
 binning).
 
-Because of the structure of the dataframe, which is divided in dd and ddMicrobunches, it is possible to get electron-resolved data (the electron number will be on the x axis), or `uBunchID` resolved data (the `uBid` will be on the x axis).
+Because of the structure of the dataframe, which is divided in dd and ddMicrobunches, it is possible to get electron-resolved data (the electron number will be on the x axis), or microbunch-resolved data (the microbunch ID, or `uBid`, will be on the x axis).
 
 The data you can get from the dd dataframe (electron-resolved) includes:
 
-|            name            | string |
-| :------------------------: | :----: |
-| x position of the electron | 'posX' |
+|        Proper name         | Namestring |
+| :------------------------: | :--------: |
+| x position of the electron |   'posX'   |
 |x position of the electron| 'posY'
 |time of flight| 'dldTime'|
 |pump probe delay stage reading| 'delayStageTime'
@@ -186,7 +186,7 @@ The data you can get from the dd dataframe (electron-resolved) includes:
 
 The data you can get from the `ddMicrobunches` (uBID-resolved) dataframe includes:
 
-| name                   | string                   |
+| Proper name                   | Namestring                   |
 |:----------------------:|:------------------------:|
 |pump probe delay stage reading| 'delayStageTime'
 |beam arrival monitor jitter|    'bam'
