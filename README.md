@@ -190,8 +190,8 @@ The data you can get from the `ddMicrobunches` (uBID-resolved) dataframe include
 |:----------------------:|:------------------------:|
 |pump probe delay stage reading| 'delayStageTime'
 |beam arrival monitor jitter|    'bam'
-|auxillarey channel 0| 'aux0'
-|auxillarey channel 1| 'aux1'
+|auxillary channel 0| 'aux0'
+|auxillary channel 1| 'aux1'
 |electron bunch charge|  'bunchCharge'
 |pump laser optical diode reading|  'opticalDiode'
 |macrobunch ID| 'macroBunchPulseId'
@@ -329,5 +329,4 @@ there are several strategies for calibrating this value:
 FLASH DAQ info
 --
 
-A brief information about each channel of the DAQ can be found at this link:
-http://www.desy.de/~wwwuser/hdf5main.html
+A brief information about each channel of the DAQ can be found [here.](https://goo.gl/MMgbZP)
