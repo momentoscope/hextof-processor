@@ -92,6 +92,7 @@
 <span class="kn">import</span> <span class="nn">configparser</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span><span class="p">,</span> <span class="n">cm</span>
 
+
 <span class="c1"># ================================================================================</span>
 
 
@@ -134,7 +135,6 @@
 
 
 <span class="k">def</span> <span class="nf">radius</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
-
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">posX</span> <span class="o">-</span> <span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">posY</span> <span class="o">-</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
@@ -265,34 +265,37 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="t2e"><a class="viewcode-back" href="../../library/utils.html#processor.utils.t2e">[docs]</a><span class="k">def</span> <span class="nf">t2e</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oo</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="t2e"><a class="viewcode-back" href="../../library/utils.html#processor.utils.t2e">[docs]</a><span class="k">def</span> <span class="nf">t2e</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">toffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Transform ToF to eV.</span>
 
 <span class="sd">    The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)</span>
 <span class="sd">    and time of flight (ToF) in ns.</span>
 <span class="sd">    The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the</span>
 <span class="sd">    binding energy Eb is given by</span>
-<span class="sd">    Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V</span>
+<span class="sd">    -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V</span>
 <span class="sd">    With W the work function, hv the photon energy, V the electrostatic potential applied to</span>
-<span class="sd">    the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.</span>
+<span class="sd">    the sample with respect to the drift section voltage, v the velocity of the electrons in the drift tube,</span>
+<span class="sd">    m the mass of the electron.</span>
 <span class="sd">    The velocity v in the drift tube can be calculated knowing the length (1m) and the flight</span>
 <span class="sd">    time in the drift tube. The measured ToF, however, has some offset due to clock start not</span>
 <span class="sd">    coinciding with entry in the drift section.</span>
 
-<span class="sd">    offs is supposed to include the time offset for when the electrons enter the drift section.</span>
+<span class="sd">    toffset is supposed to include the time offset for when the electrons enter the drift section.</span>
 <span class="sd">    Its main mainly affects peak spacing, and there are several strategies for calibrating this</span>
 <span class="sd">    value:</span>
 <span class="sd">        1.  By measuring the photon peak and correcting by some extractor voltage-dependent offset</span>
 <span class="sd">        2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum</span>
 <span class="sd">        3.  Imposing some calibrated spacing between features in a spectrum</span>
 
-<span class="sd">    oo is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and</span>
+<span class="sd">    eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and</span>
 <span class="sd">    there are several strategies for calibrating this value:</span>
 <span class="sd">        1.  By getting the correct values for W, hv, and V</span>
 <span class="sd">        2.  It can be calibrated by imposing peak position</span>
 
 <span class="sd">    Parameters:</span>
 <span class="sd">        t (float) the ToF</span>
+<span class="sd">        toffset (float) the time offset from thedld clock start to when the fastest photoelectrons reach the detector</span>
+<span class="sd">        eoffset (float) the energy offset given by W-hv-V</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        e (float) the binding energy</span>
@@ -307,23 +310,23 @@
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">offset</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">][</span><span class="s1">&#39;ET_CONV_T_OFFSET&#39;</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">oo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">oo</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">][</span><span class="s1">&#39;ET_CONV_E_OFFSET&#39;</span><span class="p">])</span>
-    <span class="n">e</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="mf">1e18</span> <span class="o">*</span> <span class="mf">9.10938e-31</span> <span class="o">/</span> <span class="p">(((</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span> <span class="o">*</span>
-                                    <span class="p">((</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">offset</span><span class="p">))</span> <span class="o">/</span> <span class="mf">1.602177e-19</span> <span class="o">-</span> <span class="n">oo</span>
+    <span class="k">if</span> <span class="n">toffset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">toffset</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">][</span><span class="s1">&#39;ET_CONV_T_OFFSET&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">eoffset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">eoffset</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">][</span><span class="s1">&#39;ET_CONV_E_OFFSET&#39;</span><span class="p">])</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="mf">1e18</span> <span class="o">*</span> <span class="mf">9.10938e-31</span> <span class="o">/</span> <span class="p">(((</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">toffset</span><span class="p">)</span> <span class="o">*</span>
+                                    <span class="p">((</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">toffset</span><span class="p">))</span> <span class="o">/</span> <span class="mf">1.602177e-19</span> <span class="o">-</span> <span class="n">eoffset</span>
     <span class="k">return</span> <span class="n">e</span></div>
 
 
-<div class="viewcode-block" id="e2t"><a class="viewcode-back" href="../../library/utils.html#processor.utils.e2t">[docs]</a><span class="k">def</span> <span class="nf">e2t</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oo</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="e2t"><a class="viewcode-back" href="../../library/utils.html#processor.utils.e2t">[docs]</a><span class="k">def</span> <span class="nf">e2t</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">toffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Transform eV to ToF.</span>
 
 <span class="sd">    The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)</span>
 <span class="sd">    and time of flight (ToF) in ns.</span>
 <span class="sd">    The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the</span>
 <span class="sd">    binding energy Eb is given by</span>
-<span class="sd">    Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V</span>
+<span class="sd">    -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V</span>
 <span class="sd">    With W the work function, hv the photon energy, V the electrostatic potential applied to</span>
 <span class="sd">    the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.</span>
 <span class="sd">    The velocity v in the drift tube can be calculated knowing the length (1m) and the flight</span>
@@ -336,13 +339,15 @@
 <span class="sd">        2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum</span>
 <span class="sd">        3.  Imposing some calibrated spacing between features in a spectrum</span>
 
-<span class="sd">    oo is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and</span>
+<span class="sd">    eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and</span>
 <span class="sd">    there are several strategies for calibrating this value:</span>
 <span class="sd">        1.  By getting the correct values for W, hv, and V</span>
 <span class="sd">        2.  It can be calibrated by imposing peak position</span>
 
 <span class="sd">    Parameter:</span>
 <span class="sd">        e (float): the binding energy</span>
+<span class="sd">        toffset (float) the time offset from thedld clock start to when the fastest photoelectrons reach the detector</span>
+<span class="sd">        eoffset (float) the energy offset given by W-hv-V</span>
 
 <span class="sd">    Return:</span>
 <span class="sd">        t (float): the ToF</span>
@@ -357,11 +362,11 @@
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">offset</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">][</span><span class="s1">&#39;ET_CONV_T_OFFSET&#39;</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">oo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">oo</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">][</span><span class="s1">&#39;ET_CONV_E_OFFSET&#39;</span><span class="p">])</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="mf">1e18</span> <span class="o">*</span> <span class="mf">9.10938e-31</span> <span class="o">/</span> <span class="mf">1.602177e-19</span> <span class="o">/</span> <span class="p">(</span><span class="n">e</span> <span class="o">+</span> <span class="n">oo</span><span class="p">))</span> <span class="o">+</span> <span class="n">offset</span>
+    <span class="k">if</span> <span class="n">toffset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">toffset</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">][</span><span class="s1">&#39;ET_CONV_T_OFFSET&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">eoffset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">eoffset</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">][</span><span class="s1">&#39;ET_CONV_E_OFFSET&#39;</span><span class="p">])</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="mf">1e18</span> <span class="o">*</span> <span class="mf">9.10938e-31</span> <span class="o">/</span> <span class="mf">1.602177e-19</span> <span class="o">/</span> <span class="p">(</span><span class="n">e</span> <span class="o">+</span> <span class="n">eoffset</span><span class="p">))</span> <span class="o">+</span> <span class="n">toffset</span>
     <span class="k">return</span> <span class="n">t</span></div>
 
 

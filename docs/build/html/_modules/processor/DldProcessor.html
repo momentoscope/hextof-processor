@@ -90,6 +90,8 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span> <span class="nn">configparser</span> <span class="k">import</span> <span class="n">ConfigParser</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="n">_VERBOSE</span> <span class="o">=</span> <span class="kc">False</span>
@@ -170,9 +172,9 @@
 
         <span class="n">settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span>
-                <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span>
+                    <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)):</span>
             <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span>
@@ -332,10 +334,10 @@
 <span class="sd">                Avoid using -1 unless debugging</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;delayStageTime&#39;</span><span class="p">]</span> <span class="o">-</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;bam&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">sign</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;delayStageTime&#39;</span><span class="p">]</span> <span class="o">-</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;bam&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">sign</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;delayStage&#39;</span><span class="p">]</span> <span class="o">-</span> \
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;bam&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">sign</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;delayStage&#39;</span><span class="p">]</span> <span class="o">-</span> \
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;bam&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">sign</span></div>
 
 <div class="viewcode-block" id="DldProcessor.createPolarCoordinates"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.createPolarCoordinates">[docs]</a>    <span class="k">def</span> <span class="nf">createPolarCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kCenter</span><span class="o">=</span><span class="p">(</span><span class="mi">250</span><span class="p">,</span> <span class="mi">250</span><span class="p">)):</span>
         <span class="sd">&quot;&quot;&quot; Define polar coordinates for k-space values.</span>
@@ -346,13 +348,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">radius</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span>
-                    <span class="n">df</span><span class="o">.</span><span class="n">posX</span> <span class="o">-</span>
-                    <span class="n">kCenter</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span>
-                    <span class="n">df</span><span class="o">.</span><span class="n">posY</span> <span class="o">-</span>
-                    <span class="n">kCenter</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">posX</span> <span class="o">-</span> <span class="n">kCenter</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span>
+                           <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">posY</span> <span class="o">-</span> <span class="n">kCenter</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
         <span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">posY</span> <span class="o">-</span> <span class="n">kCenter</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">df</span><span class="o">.</span><span class="n">posX</span> <span class="o">-</span> <span class="n">kCenter</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -475,7 +472,7 @@
         <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">hists</span></div>
 
     <span class="k">def</span> <span class="nf">addBinningOld</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">useStepSize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">include_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                      <span class="n">include_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Add binning of one dimension, to be then computed with computeBinnedData method.</span>
 
 <span class="sd">        Creates a list of bin names, (binNameList) to identify the axis on</span>
@@ -555,7 +552,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ub</span><span class="p">]</span></div>
 
     <span class="k">def</span> <span class="nf">genBins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">useStepSize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">forceEnds</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">include_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                <span class="n">forceEnds</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">include_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates bins for use by binning functions. Can also be used to generate x axes.</span>
 
 <span class="sd">        Binning is created using np.linspace (formerly was done with np.arange).</span>
@@ -624,7 +621,7 @@
         <span class="k">return</span> <span class="n">bins</span>
 
 <div class="viewcode-block" id="DldProcessor.addBinning"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.addBinning">[docs]</a>    <span class="k">def</span> <span class="nf">addBinning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">useStepSize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">forceEnds</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">include_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                   <span class="n">include_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Add binning of one dimension, to be then computed with computeBinnedData method.</span>
 
 <span class="sd">        Creates a list of bin names, (binNameList) to identify the axis on</span>
@@ -652,7 +649,8 @@
 <span class="sd">            force_legacy (bool): if true, imposes old method for generating binns,</span>
 <span class="sd">                based on np.arange instead of linspace.</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            axes (np.array): axis of the binned dimesion. The points defined on this axis are the middle points of each bin.</span>
+<span class="sd">            axes (np.array): axis of the binned dimesion. The points defined on this axis are the middle points of</span>
+<span class="sd">            each bin.</span>
 
 <span class="sd">        See also:</span>
 <span class="sd">            computeBinnedData : Method to compute all bins created with this function.</span>
@@ -662,16 +660,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># write the parameters to the bin list:</span>
-        <span class="n">bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">genBins</span><span class="p">(</span>
-            <span class="n">start</span><span class="p">,</span>
-            <span class="n">end</span><span class="p">,</span>
-            <span class="n">steps</span><span class="p">,</span>
-            <span class="n">useStepSize</span><span class="p">,</span>
-            <span class="n">forceEnds</span><span class="p">,</span>
-            <span class="n">include_last</span><span class="p">,</span>
-            <span class="n">force_legacy</span><span class="p">)</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">genBins</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">useStepSize</span><span class="p">,</span> <span class="n">forceEnds</span><span class="p">,</span> <span class="n">include_last</span><span class="p">,</span> <span class="n">force_legacy</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">binRangeList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">):</span>
             <span class="c1"># self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]</span>
             <span class="n">delaystageHistBinner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map_partitions</span><span class="p">(</span>
@@ -680,9 +672,9 @@
                 <span class="p">[</span><span class="n">delaystageHistBinner</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pumpProbeHistogram</span> <span class="o">=</span> <span class="n">delaystageHistGrouped</span><span class="o">.</span><span class="n">count</span><span class="p">(</span>
             <span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()[</span><span class="s1">&#39;bam&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;delayStageTime&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">):</span>
             <span class="c1"># self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]</span>
-            <span class="n">delaystageHistBinner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;delayStageTime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map_partitions</span><span class="p">(</span>
+            <span class="n">delaystageHistBinner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;delayStage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map_partitions</span><span class="p">(</span>
                 <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
             <span class="n">delaystageHistGrouped</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">delaystageHistBinner</span><span class="p">])</span>
@@ -692,6 +684,7 @@
             <span class="n">stepSize</span> <span class="o">=</span> <span class="n">steps</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">stepSize</span> <span class="o">=</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="n">steps</span>
+
         <span class="n">axes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">genBins</span><span class="p">(</span>
             <span class="n">start</span> <span class="o">+</span> <span class="n">stepSize</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">end</span> <span class="o">-</span> <span class="n">stepSize</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
@@ -767,29 +760,36 @@
 
         <span class="c1"># prepare the partitions for the calculation in parallel</span>
         <span class="n">calculatedResults</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">npartitions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N_CORES</span><span class="p">)):</span>
-            <span class="n">resultsToCalculate</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="c1"># process the data in blocks of n partitions (given by the number</span>
-            <span class="c1"># of cores):</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N_CORES</span><span class="p">):</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">npartitions</span><span class="p">:</span>
-                    <span class="k">break</span>
-                <span class="n">part</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">get_partition</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span>
-                <span class="n">resultsToCalculate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dask</span><span class="o">.</span><span class="n">delayed</span><span class="p">(</span><span class="n">analyzePartNumpy</span><span class="p">)(</span><span class="n">part</span><span class="p">))</span>
 
-            <span class="c1"># now do the calculation on each partition (using the dask</span>
-            <span class="c1"># framework):</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resultsToCalculate</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="c1">#                print(&quot;computing partitions &quot; + str(i) + &quot; to &quot; + str(i + j) + &quot; of &quot; + str(</span>
-                <span class="c1">#                    self.dd.npartitions) + &quot;. partitions calculated in parallel: &quot; + str(</span>
-                <span class="c1">#                    len(resultsToCalculate)))</span>
-                <span class="n">results</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="o">*</span><span class="n">resultsToCalculate</span><span class="p">)</span>
-                <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
-                    <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">+</span> <span class="n">result</span>
-                <span class="n">calculatedResults</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
-                <span class="k">del</span> <span class="n">total</span>
-            <span class="k">del</span> <span class="n">resultsToCalculate</span>
+        <span class="k">if</span> <span class="n">_VERBOSE</span><span class="p">:</span>
+            <span class="n">warnString</span><span class="o">=</span><span class="s2">&quot;always&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnString</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">warnString</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">npartitions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N_CORES</span><span class="p">)):</span>
+                <span class="n">resultsToCalculate</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1"># process the data in blocks of n partitions (given by the number</span>
+                <span class="c1"># of cores):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N_CORES</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">npartitions</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="n">part</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">get_partition</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span>
+                    <span class="n">resultsToCalculate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dask</span><span class="o">.</span><span class="n">delayed</span><span class="p">(</span><span class="n">analyzePartNumpy</span><span class="p">)(</span><span class="n">part</span><span class="p">))</span>
+
+                <span class="c1"># now do the calculation on each partition (using the dask</span>
+                <span class="c1"># framework):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resultsToCalculate</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1">#                print(&quot;computing partitions &quot; + str(i) + &quot; to &quot; + str(i + j) + &quot; of &quot; + str(</span>
+                    <span class="c1">#                    self.dd.npartitions) + &quot;. partitions calculated in parallel: &quot; + str(</span>
+                    <span class="c1">#                    len(resultsToCalculate)))</span>
+                    <span class="n">results</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="o">*</span><span class="n">resultsToCalculate</span><span class="p">)</span>
+                    <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                        <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">+</span> <span class="n">result</span>
+                    <span class="n">calculatedResults</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">total</span>
+                <span class="k">del</span> <span class="n">resultsToCalculate</span>
 
         <span class="c1"># we now need to add them all up (single core):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">calculatedResults</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -804,7 +804,7 @@
         <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="DldProcessor.computeBinnedDataMulti"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.computeBinnedDataMulti">[docs]</a>    <span class="k">def</span> <span class="nf">computeBinnedDataMulti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">savePath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">saveMode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                               <span class="n">saveMode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Use the bin list to bin the data.</span>
 
 <span class="sd">        Returns:</span>
@@ -835,6 +835,7 @@
             <span class="c1"># vals = part.values</span>
             <span class="c1"># cols = part.columns.values</span>
             <span class="c1"># create array of columns to be used for binning</span>
+
             <span class="n">colsToBin</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">binName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="p">:</span>
                 <span class="n">idx</span> <span class="o">=</span> <span class="n">cols</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">binName</span><span class="p">)</span>
@@ -890,7 +891,7 @@
     <span class="c1"># ==================</span>
 
     <span class="k">def</span> <span class="nf">save2hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binnedData</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;default.hdf5&#39;</span><span class="p">,</span>
-            <span class="n">normalizedData</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                  <span class="n">normalizedData</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Store the binned data in a hdf5 file.</span>
 
 <span class="sd">        Parameters:</span>
@@ -899,7 +900,8 @@
 <span class="sd">            filename (string): name of the file,</span>
 <span class="sd">            path (string, optional): path to the location where to save the hdf5 file. If None, uses the default value</span>
 <span class="sd">                defined in SETTINGS.ini</span>
-<span class="sd">            normalizedData (bool): Normalized data for both detector, so it should be a 3d array (posX, posY,detectorID).</span>
+<span class="sd">            normalizedData (bool): Normalized data for both detector, so it should be a 3d array (posX, posY,</span>
+<span class="sd">            detectorID).</span>
 <span class="sd">            overwrite (bool): if True, overwrites existing files with matching name.</span>
 
 <span class="sd">        Example:</span>
@@ -937,7 +939,7 @@
                 <span class="n">data2hdf5</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">binnedData</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
                 <span class="p">)</span> <span class="o">/</span> <span class="n">normalizedData</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
                 <span class="n">data2hdf5</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="n">binnedData</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span>
-                                                 <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">/</span> <span class="n">normalizedData</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+                                      <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">/</span> <span class="n">normalizedData</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># detector binned? -&gt; sum together</span>
             <span class="k">if</span> <span class="n">binnedData</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
@@ -982,7 +984,8 @@
         <span class="c1"># TODO: remove this function once retro-compatibility is ensured</span>
 
         <span class="nb">print</span><span class="p">(</span>
-            <span class="s1">&#39;WARNING: readDataframesParquet is being removed.</span><span class="se">\n</span><span class="s1">Use readDataframes instead: Default behaviour is now parqet.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;WARNING: readDataframesParquet is being removed.</span><span class="se">\n</span><span class="s1">Use readDataframes instead: Default behaviour is now &#39;</span>
+            <span class="s1">&#39;parqet.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
             <span class="s1">&#39; Specify format=&quot;h5&quot; for legacy use.&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">readDataframes</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span></div></div>
 

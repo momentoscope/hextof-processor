@@ -1,5 +1,5 @@
 # HextofOfflineAnalyzer
-This code is used to analyze data measured at FLASH using the HEXTOF instrument. The HEXTOF uses a delay line detector (DLD) to measure the position and arrival time of single electron events.
+This code is used to analyze data measured at FLASH using the HEXTOF (high energy X-ray time of flight) instrument. The HEXTOF uses a delay line detector (DLD) to measure the position and arrival time of single electron events.
 
 The analysis of the data is based on clean tables as dask dataframes. The main dataframe contains all detected electrons and can be binned according to the needs of the experiment. The second dataframe contains the FEL pulses needed for normalization.
 
@@ -127,8 +127,8 @@ processor.readDataframes('path/to/file/name')
 ```
 This can be also done from direct raw data read with `readData` To create the bin array structure, run
 ```python
-processor.addBinning('posX',480,980,10)
-processor.addBinning('posY',480,980,10)
+processor.addBinning('dldPosX',480,980,10)
+processor.addBinning('dldPosY',480,980,10)
 ```
 This adds binning along the kx and ky directions, from point 480 to point 980 with bin size of 10. Bins can be created defining start and end points and either step size or number of steps. The resulting array can be obtained using
 ```python
@@ -171,8 +171,8 @@ The data you can get from the dd dataframe (electron-resolved) includes:
 
 |        Proper name         | Namestring |
 | :------------------------: | :--------: |
-| x position of the electron |   'posX'   |
-|x position of the electron| 'posY'
+| x position of the electron | 'dldPosX'  |
+|y position of the electron| 'dldPosY'
 |time of flight| 'dldTime'|
 |pump probe delay stage reading| 'delayStageTime'
 |beam arrival monitor jitter|    'bam'
@@ -285,8 +285,8 @@ else:
     processor.readDataframes()
 
 #start binning procedure
-processor.addBinning('posX',480,980,10)
-processor.addBinning('posY',480,980,10)
+processor.addBinning('dldPosX',480,980,10)
+processor.addBinning('dldPosY',480,980,10)
 
 result = processor.ComputeBinnedData()
 result = nan_to_num(result)
