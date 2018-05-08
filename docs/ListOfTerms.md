@@ -13,6 +13,8 @@ List of terms and abbreviations
 
 **FEL** = free electron laser
 
+**HEXTOF analyzer** = high energy X-ray time of flight analyzer. A measurement device that records simultaneously the (kx, ky, E) coordinates of the photoelectrons emitted within the X-ray photoemission horizon. It is later rebranded and sold by SPECS GmbH under the name METIS.
+
 **SASE** = self-amplified spontaneous emission
 
 **macrobunch** -- a macroscopic bunch of electrons which can possess substructures (i.e. microbunches). It is the operating unit of a high-gain FEL and also referred to colloquially as a pulse train. Each macrobunch of electrons is tagged by the macrobunch ID.
@@ -27,7 +29,7 @@ List of terms and abbreviations
 
 
 
-
+  
 
 
 

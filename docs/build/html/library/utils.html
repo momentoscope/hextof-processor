@@ -64,7 +64,7 @@
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
 <h3><a href="../index.html">Table Of Contents</a></h3>
-<p class="caption"><span class="caption-text">Library</span></p>
+<p class="caption"><span class="caption-text">Processor library</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
@@ -165,13 +165,13 @@ um for beam diameter, uJ/cm^2 for energy density.</p>
 
 <dl class="function">
 <dt id="processor.utils.e2t">
-<code class="descclassname">processor.utils.</code><code class="descname">e2t</code><span class="sig-paren">(</span><em>e</em>, <em>offset=None</em>, <em>oo=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#e2t"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.e2t" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">processor.utils.</code><code class="descname">e2t</code><span class="sig-paren">(</span><em>e</em>, <em>toffset=None</em>, <em>eoffset=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#e2t"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.e2t" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform eV to ToF.</p>
 <p>The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)
 and time of flight (ToF) in ns.
 The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
 binding energy Eb is given by
-Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+-Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
 With W the work function, hv the photon energy, V the electrostatic potential applied to
 the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
 The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
@@ -186,7 +186,7 @@ Its main mainly affects peak spacing, and there are several strategies for calib
 <li>Imposing some calibrated spacing between features in a spectrum</li>
 </ol>
 </div></blockquote>
-<p>oo is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
+<p>eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
 there are several strategies for calibrating this value:</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -196,7 +196,9 @@ there are several strategies for calibrating this value:</p>
 </div></blockquote>
 <dl class="docutils">
 <dt>Parameter:</dt>
-<dd>e (float): the binding energy</dd>
+<dd>e (float): the binding energy
+toffset (float) the time offset from thedld clock start to when the fastest photoelectrons reach the detector
+eoffset (float) the energy offset given by W-hv-V</dd>
 <dt>Return:</dt>
 <dd>t (float): the ToF</dd>
 </dl>
@@ -232,19 +234,20 @@ there are several strategies for calibrating this value:</p>
 
 <dl class="function">
 <dt id="processor.utils.t2e">
-<code class="descclassname">processor.utils.</code><code class="descname">t2e</code><span class="sig-paren">(</span><em>t</em>, <em>offset=None</em>, <em>oo=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#t2e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.t2e" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">processor.utils.</code><code class="descname">t2e</code><span class="sig-paren">(</span><em>t</em>, <em>toffset=None</em>, <em>eoffset=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#t2e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.t2e" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform ToF to eV.</p>
 <p>The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)
 and time of flight (ToF) in ns.
 The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
 binding energy Eb is given by
-Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+-Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
 With W the work function, hv the photon energy, V the electrostatic potential applied to
-the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
+the sample with respect to the drift section voltage, v the velocity of the electrons in the drift tube,
+m the mass of the electron.
 The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
 time in the drift tube. The measured ToF, however, has some offset due to clock start not
 coinciding with entry in the drift section.</p>
-<p>offs is supposed to include the time offset for when the electrons enter the drift section.
+<p>toffset is supposed to include the time offset for when the electrons enter the drift section.
 Its main mainly affects peak spacing, and there are several strategies for calibrating this
 value:</p>
 <blockquote>
@@ -254,7 +257,7 @@ value:</p>
 <li>Imposing some calibrated spacing between features in a spectrum</li>
 </ol>
 </div></blockquote>
-<p>oo is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
+<p>eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
 there are several strategies for calibrating this value:</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -264,7 +267,9 @@ there are several strategies for calibrating this value:</p>
 </div></blockquote>
 <dl class="docutils">
 <dt>Parameters:</dt>
-<dd>t (float) the ToF</dd>
+<dd>t (float) the ToF
+toffset (float) the time offset from thedld clock start to when the fastest photoelectrons reach the detector
+eoffset (float) the energy offset given by W-hv-V</dd>
 <dt>Returns:</dt>
 <dd>e (float) the binding energy</dd>
 </dl>
