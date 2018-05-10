@@ -23,3 +23,5 @@ SETTINGS.ini
 *.pyd
 
 *.ini
+
+docs/build/
