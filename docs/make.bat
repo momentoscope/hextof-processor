@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=source
 set BUILDDIR=build
-set SPHINXPROJ=HextofOfflineAnalyzer
+set SPHINXPROJ=hextof-processor
 
 if "%1" == "" goto help
 
