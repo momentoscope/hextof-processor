@@ -1,0 +1,419 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>4. Utility functions (utils) &mdash; hextof-processor 0.9.5 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
+        <link rel="next" title="1. Binning multidimensional data" href="../example/binning.html"/>
+        <link rel="prev" title="3. Interfacing external pah library" href="pah.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pah.html">3. Interfacing external pah library</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4. Utility functions (utils)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../example/binning.html">1. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/corrections.html">2. Corrections to FEL pulse timing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>4. Utility functions (utils)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/library/utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-processor.utils">
+<span id="utility-functions-utils"></span><h1>4. Utility functions (utils)<a class="headerlink" href="#module-processor.utils" title="Permalink to this headline">¶</a></h1>
+<p>Functions for calculation of pulse energy and pulse energy density of optical laser.
+Calibration values taken from Pump beam energy converter 800 400.xls
+Units are uJ for energy, um for beam diameter, uJ/cm^2 for energy density (and arb. for diode signal)</p>
+<dl class="function">
+<dt id="processor.utils.EnergyDensity400">
+<code class="descclassname">processor.utils.</code><code class="descname">EnergyDensity400</code><span class="sig-paren">(</span><em>Diode</em>, <em>Diameter=600</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#EnergyDensity400"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.EnergyDensity400" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the pulse energy density of 400nm laser in uJ/cm^2.
+:param Diode: value from photodiode (arb. units)
+um for beam diameter, uJ/cm^2 for energy density.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="processor.utils.EnergyDensity800">
+<code class="descclassname">processor.utils.</code><code class="descname">EnergyDensity800</code><span class="sig-paren">(</span><em>Diode</em>, <em>Diameter=600</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#EnergyDensity800"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.EnergyDensity800" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the pulse energy density of 800nm laser in uJ/cm^2.
+:param Diode: value from photodiode (arb. units)
+um for beam diameter, uJ/cm^2 for energy density</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="processor.utils.PulseEnergy400">
+<code class="descclassname">processor.utils.</code><code class="descname">PulseEnergy400</code><span class="sig-paren">(</span><em>Diode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#PulseEnergy400"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.PulseEnergy400" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the pulse energy of 400nm laser in uJ.
+:param Diode: value from photodiode (arb. units)
+um for beam diameter, uJ/cm^2 for energy density.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="processor.utils.PulseEnergy800">
+<code class="descclassname">processor.utils.</code><code class="descname">PulseEnergy800</code><span class="sig-paren">(</span><em>Diode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#PulseEnergy800"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.PulseEnergy800" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the pulse energy of 800nm laser in uJ.
+:param Diode: value from photodiode (arb. units)
+um for beam diameter, uJ/cm^2 for energy density.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="processor.utils.argnearest">
+<code class="descclassname">processor.utils.</code><code class="descname">argnearest</code><span class="sig-paren">(</span><em>array</em>, <em>val</em>, <em>rettype='vectorized'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#argnearest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.argnearest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the coordinates of the nD array element nearest to a specified value</p>
+<p><strong>Parameters</strong></p>
+<dl class="docutils">
+<dt>array <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>Numeric array</dd>
+<dt>val <span class="classifier-delimiter">:</span> <span class="classifier">numeric</span></dt>
+<dd>Look-up value</dd>
+<dt>rettype <span class="classifier-delimiter">:</span> <span class="classifier">str | 'vectorized'</span></dt>
+<dd>return type specification
+'vectorized' denotes vectorized coordinates (integer)
+'coordinates' denotes multidimensional coordinates (tuple)</dd>
+</dl>
+<p><strong>Return</strong></p>
+<dl class="docutils">
+<dt>argval <span class="classifier-delimiter">:</span> <span class="classifier">numeric</span></dt>
+<dd>coordinate position</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="processor.utils.camelCaseIt">
+<code class="descclassname">processor.utils.</code><code class="descname">camelCaseIt</code><span class="sig-paren">(</span><em>snake_case_string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#camelCaseIt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.camelCaseIt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format a string in camel case</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="processor.utils.e2t">
+<code class="descclassname">processor.utils.</code><code class="descname">e2t</code><span class="sig-paren">(</span><em>e</em>, <em>toffset=None</em>, <em>eoffset=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#e2t"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.e2t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform eV to ToF.</p>
+<p>The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)
+and time of flight (ToF) in ns.
+The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
+binding energy Eb is given by
+-Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+With W the work function, hv the photon energy, V the electrostatic potential applied to
+the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
+The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
+time in the drift tube. The measured ToF, however, has some offset due to clock start not
+coinciding with entry in the drift section.</p>
+<p>offs is supposed to include the time offset for when the electrons enter the drift section.
+Its main mainly affects peak spacing, and there are several strategies for calibrating this value:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>By measuring the photon peak and correcting by some extractor voltage-dependent offset</li>
+<li>Shifting the potential by 1V and imposing the same shift in the measured spectrum</li>
+<li>Imposing some calibrated spacing between features in a spectrum</li>
+</ol>
+</div></blockquote>
+<p>eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
+there are several strategies for calibrating this value:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>By getting the correct values for W, hv, and V</li>
+<li>It can be calibrated by imposing peak position</li>
+</ol>
+</div></blockquote>
+<dl class="docutils">
+<dt>Parameter:</dt>
+<dd>e (float): the binding energy
+toffset (float) the time offset from thedld clock start to when the fastest photoelectrons reach the detector
+eoffset (float) the energy offset given by W-hv-V</dd>
+<dt>Return:</dt>
+<dd>t (float): the ToF</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="processor.utils.load_results">
+<code class="descclassname">processor.utils.</code><code class="descname">load_results</code><span class="sig-paren">(</span><em>filename</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#load_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.load_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>load the data saved with processor.save_array()</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="processor.utils.plot_lines">
+<code class="descclassname">processor.utils.</code><code class="descname">plot_lines</code><span class="sig-paren">(</span><em>data</em>, <em>normalization='None'</em>, <em>range=None</em>, <em>color_range=(0</em>, <em>1)</em>, <em>x_label=''</em>, <em>y_label=''</em>, <em>xlim=None</em>, <em>ylim=None</em>, <em>savefig=False</em>, <em>save_dir='E:/data/FLASH/'</em>, <em>save_name='fig'</em>, <em>static_curve=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#plot_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.plot_lines" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> -- </li>
+<li><strong>normalization</strong> -- </li>
+<li><strong>range</strong> -- </li>
+<li><strong>color_range</strong> -- </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="processor.utils.t2e">
+<code class="descclassname">processor.utils.</code><code class="descname">t2e</code><span class="sig-paren">(</span><em>t</em>, <em>toffset=None</em>, <em>eoffset=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#t2e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.t2e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform ToF to eV.</p>
+<p>The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)
+and time of flight (ToF) in ns.
+The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
+binding energy Eb is given by
+-Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+With W the work function, hv the photon energy, V the electrostatic potential applied to
+the sample with respect to the drift section voltage, v the velocity of the electrons in the drift tube,
+m the mass of the electron.
+The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
+time in the drift tube. The measured ToF, however, has some offset due to clock start not
+coinciding with entry in the drift section.</p>
+<p>toffset is supposed to include the time offset for when the electrons enter the drift section.
+Its main mainly affects peak spacing, and there are several strategies for calibrating this
+value:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>By measuring the photon peak and correcting by some extractor voltage-dependent offset</li>
+<li>Shifting the potential by 1V and imposing the same shift in the measured spectrum</li>
+<li>Imposing some calibrated spacing between features in a spectrum</li>
+</ol>
+</div></blockquote>
+<p>eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
+there are several strategies for calibrating this value:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>By getting the correct values for W, hv, and V</li>
+<li>It can be calibrated by imposing peak position</li>
+</ol>
+</div></blockquote>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>t (float) the ToF
+toffset (float) the time offset from thedld clock start to when the fastest photoelectrons reach the detector
+eoffset (float) the energy offset given by W-hv-V</dd>
+<dt>Returns:</dt>
+<dd>e (float) the binding energy</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../example/binning.html" class="btn btn-neutral float-right" title="1. Binning multidimensional data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pah.html" class="btn btn-neutral" title="3. Interfacing external pah library" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

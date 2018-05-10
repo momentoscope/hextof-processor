@@ -8,7 +8,8 @@ if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
 set SOURCEDIR=source
-set BUILDDIR=build
+REM set BUILDDIR=build
+set BUILDDIR=..
 set SPHINXPROJ=hextof-processor
 
 if "%1" == "" goto help

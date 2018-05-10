@@ -1,0 +1,535 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>2. DldProcessor class (DldProcessor) &mdash; hextof-processor 0.9.5 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
+        <link rel="next" title="3. Interfacing external pah library" href="pah.html"/>
+        <link rel="prev" title="1. Dataframe creator class (DldFlashDataframeCreator)" href="DldFlashDataframeCreator.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pah.html">3. Interfacing external pah library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">4. Utility functions (utils)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../example/binning.html">1. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/corrections.html">2. Corrections to FEL pulse timing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>2. DldProcessor class (DldProcessor)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/library/DldProcessor.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-processor.DldProcessor">
+<span id="dldprocessor-class-dldprocessor"></span><h1>2. DldProcessor class (DldProcessor)<a class="headerlink" href="#module-processor.DldProcessor" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="processor.DldProcessor.DldProcessor">
+<em class="property">class </em><code class="descclassname">processor.DldProcessor.</code><code class="descname">DldProcessor</code><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class simplifies the analysis of data files recorded during the
+beamtime of August 2017. It converts the electrons from the DLD into
+a clean table and uses DASK for binning and further analysis.</p>
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.addBinning">
+<code class="descname">addBinning</code><span class="sig-paren">(</span><em>name</em>, <em>start</em>, <em>end</em>, <em>steps</em>, <em>useStepSize=True</em>, <em>forceEnds=False</em>, <em>include_last=True</em>, <em>force_legacy=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.addBinning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.addBinning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add binning of one dimension, to be then computed with computeBinnedData method.</p>
+<p>Creates a list of bin names, (binNameList) to identify the axis on
+which to bin the data. Output array dimensions order will be the same
+as in this list. The attribute binRangeList will contain the ranges of
+the binning used for the corresponding dimension.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first docutils">
+<dt>name (string): Name of the column to bin to. Possible column names are:</dt>
+<dd>posX, posY, dldTime, pumpProbeTime, dldDetector, etc.</dd>
+</dl>
+<p>start (float): position of first bin
+end (float): position of last bin (not included!)
+steps (float): define the bin size: if useStepSize=True (default),</p>
+<blockquote>
+<div>this is the step size, while if useStepSize=False, then this is the
+number of bins. In Legacy mode (force_legacy=True, or
+processor._LEGACY_MODE=True)</div></blockquote>
+<dl class="last docutils">
+<dt>useStepSize (bool): tells python to interpret steps as a step size if</dt>
+<dd>True, or as the number of steps if False</dd>
+<dt>forceEnds (bool): tells python to give priority to the end parameter</dt>
+<dd>rather than the step parameter (see genBins for more info)</dd>
+<dt>include_last (bool): closes the interval on the right when true. If</dt>
+<dd>using step size priority, will expand the interval to include
+the next value when true, will shrink the interval to contain all
+points within the bounds if false.</dd>
+<dt>force_legacy (bool): if true, imposes old method for generating binns,</dt>
+<dd>based on np.arange instead of linspace.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>axes (np.array): axis of the binned dimesion. The points defined on this axis are the middle points of
+each bin.</dd>
+<dt>See also:</dt>
+<dd>computeBinnedData : Method to compute all bins created with this function.</dd>
+<dt>Notes:</dt>
+<dd>If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.addFilter">
+<code class="descname">addFilter</code><span class="sig-paren">(</span><em>colname</em>, <em>lb=None</em>, <em>ub=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.addFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.addFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters the dataframes contained in the current processor</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>colname (str): name of the column in the dask dataframes
+lb (float64): lower boundary of the filter
+ub (float64): upper bounday of the filter</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.appendDataframeParquet">
+<code class="descname">appendDataframeParquet</code><span class="sig-paren">(</span><em>fileName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.appendDataframeParquet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.appendDataframeParquet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append data to an existing dask Parquet dataframe.</p>
+<p>This can be used to concatenate multiple DAQ runs in one dataframe.
+Data is taken from the dd and dd_microbunch dataframe attributes.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>fileName (str): name (including path) of the folder containing</dt>
+<dd>parquet files where to append the new data.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.computeBinnedData">
+<code class="descname">computeBinnedData</code><span class="sig-paren">(</span><em>saveName=None</em>, <em>savePath=None</em>, <em>saveMode='w'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the bin list to bin the data.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>result (np.array): It returns a numpy array of float64 values. Number of bins defined will define the
+dimensions of such array.</dd>
+<dt>Notes:</dt>
+<dd>postProcess method must be used before computing the binned data if binning along pumpProbeDelay or polar
+k-space coordinates.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.computeBinnedDataMulti">
+<code class="descname">computeBinnedDataMulti</code><span class="sig-paren">(</span><em>saveName=None</em>, <em>savePath=None</em>, <em>saveMode='w'</em>, <em>rank=None</em>, <em>size=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedDataMulti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedDataMulti" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the bin list to bin the data.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>result (np.array): It returns a numpy array of float64 values. Number of bins defined will define the
+dimensions of such array.</dd>
+<dt>Notes:</dt>
+<dd>postProcess method must be used before computing the binned data if binning along pumpProbeDelay or polar
+k-space coordinates.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.correctBAM">
+<code class="descname">correctBAM</code><span class="sig-paren">(</span><em>sign=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.correctBAM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.correctBAM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Correct pump probe time by BAM.</p>
+<p>Corrects the pulse to pulse jitter, and changes name from
+delayStageTime to pumpProbeTime. BAM correction shifts the time delay
+by a constant value.</p>
+<p>/!BAM correction is tricky and will mess up the delay histogram.
+This is because of strong correlation with micro bunch ID of both the
+BAM value and the photoemission yield, i.e. photons at the end of a
+Macro bunch give more photoelectrons while systematically being
+shifted in time.</p>
+<p>Default value is 1 since the BAM measures the delay between the master
+clock start and the arrival of the beam.
+On the other hand, more positive delay stage values are for when the FEL
+arrives earlier (FEL before pump is on the more positive side of t0).
+A bigger delay in beam arrival for an FEL pulse means that the photoelectrons
+actually had a more negative delay (probe later than pump) than what the delay stage
+measured, and should therefore be moved to more negative values.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>sign (int): sign multiplier for BAM correction</dt>
+<dd>accepted values: 0, 1, -1
+Avoid using -1 unless debugging</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.createPolarCoordinates">
+<code class="descname">createPolarCoordinates</code><span class="sig-paren">(</span><em>kCenter=(250</em>, <em>250)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.createPolarCoordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.createPolarCoordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define polar coordinates for k-space values.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>kCenter (int,int): position of the center of k-space in the dld</dt>
+<dd>detector array</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.deleteBinners">
+<code class="descname">deleteBinners</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.deleteBinners"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.deleteBinners" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEPRECATED in favour of resetBins</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.initAttributes">
+<code class="descname">initAttributes</code><span class="sig-paren">(</span><em>import_all=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.initAttributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.initAttributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse settings file and assign the variables.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>import_all (bool): if True, imports all entries in settings.ini under section [processor] and [paths].</dt>
+<dd>if False, only imports those that match existing attribute names.
+False is the better choice, since it keeps better track of attributes.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.load_binned">
+<code class="descname">load_binned</code><span class="sig-paren">(</span><em>name</em>, <em>path=None</em>, <em>mode='r'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.load_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.load_binned" title="Permalink to this definition">¶</a></dt>
+<dd><p>load an h5 file saved with save_array.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>extra name tag in the filename</dd>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
+<dd>file path</dd>
+<dt>mode <span class="classifier-delimiter">:</span> <span class="classifier">str | 'r' (read)</span></dt>
+<dd>read mode of h5 file</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.normalizePumpProbeTime">
+<code class="descname">normalizePumpProbeTime</code><span class="sig-paren">(</span><em>data_array</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.normalizePumpProbeTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.normalizePumpProbeTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalise data to the delay stage histogram.</p>
+<p>Normalises the data array to the number of counts per delay stage step.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>data_array (np.array): data array containing binned data, as
+created by the computeBinnedData method.</dd>
+<dt>Raises:</dt>
+<dd>ValueError: when no pump probe time delay axis is available.</dd>
+<dt>Returns:</dt>
+<dd>data_array_normalized: normalized version of the input array.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.postProcess">
+<code class="descname">postProcess</code><span class="sig-paren">(</span><em>bamCorrectionSign=0</em>, <em>kCenter=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.postProcess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.postProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply corrections to the dataframe.</p>
+<p>Runs the methods to post process the dataframe. Includes BAM sign
+correction and polar coordinates axes generation.</p>
+<p>/!BAM correction is tricky and will mess up the delay histogram.
+This is because of strong correlation with micro bunch ID of both the
+BAM value and the photoemission yield, i.e. photons at the end of a
+Macro bunch give more photoelectrons while systematically being
+shifted in time.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>bamCorrectionSign (int): used to apply sign to the bam correction: accepted values are 0,1,-1</dt>
+<dd>set to 0 to avoid applying bam correction, set to None to leave
+unchanged the pump probe delay information (doesnt change name).
+See correctBAM for details.</dd>
+<dt>kCenter (int,int):  position of the center of k-space in the dld</dt>
+<dd>detector array. If set to None, no polar coordinates are added.
+See createPolarCoordinates for details.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.readDataframes">
+<code class="descname">readDataframes</code><span class="sig-paren">(</span><em>fileName=None</em>, <em>path=None</em>, <em>format='parquet'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.readDataframes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.readDataframes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load data from a parquet or HDF5 dataframe.</p>
+<p>Access the data as hdf5 file (this is the format used internally,
+NOT the FLASH HDF5-files from the DAQ system!)</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>fileName (str): name (including path) of the folder containing hdf5</dt>
+<dd>files where the data was saved.</dd>
+<dt>format (str): either 'parquet' to load a parquet type of dataframe,</dt>
+<dd>or 'h5' or 'hdf5' to load hdf5 dataframes</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.readDataframesParquet">
+<code class="descname">readDataframesParquet</code><span class="sig-paren">(</span><em>fileName=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.readDataframesParquet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.readDataframesParquet" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEPRECATED: load data from a dask Parquet dataframe.</p>
+<p>DEPRECATED, use readDataframesParquet instead.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>fileName (str): name (including path) of the folder containing</dt>
+<dd>parquet files where the data was saved.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.resetBins">
+<code class="descname">resetBins</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.resetBins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.resetBins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the bin list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.save_binned">
+<code class="descname">save_binned</code><span class="sig-paren">(</span><em>binnedData</em>, <em>name</em>, <em>path=None</em>, <em>mode='w'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.save_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.save_binned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a binned array to h5 file. The file includes the axes (taken from the scheduled bins)
+and the delay histograms, if present.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>binnedData :</dt>
+<dd>binned data</dd>
+<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>extra name tag in the filename</dd>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
+<dd>file path</dd>
+<dt>mode <span class="classifier-delimiter">:</span> <span class="classifier">str | 'w' (write)</span></dt>
+<dd>write mode of h5 file</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pah.html" class="btn btn-neutral float-right" title="3. Interfacing external pah library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="DldFlashDataframeCreator.html" class="btn btn-neutral" title="1. Dataframe creator class (DldFlashDataframeCreator)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
