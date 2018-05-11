@@ -1,5 +1,4 @@
-List of terms and abbreviations
-===================================
+## List of terms and abbreviations
 
 **BAM** = beam arrival monitor, monitors the time when the FEL beam arrives.
 
@@ -27,13 +26,8 @@ List of terms and abbreviations
 
 **file number** -- integer label of a file in an experimental run.
 
+$$~$$  
 
+**Bibliography**
 
-  
-
-
-
-
-### Bibliography
-
-[Tiedke08] Gas-detector for X-ray lasers. [pdf](http://bib-pubdb1.desy.de/record/85584/files/GetPDFServlet.pdf)
+`[Tiedke08]` Gas-detector for X-ray lasers. [pdf](http://bib-pubdb1.desy.de/record/85584/files/GetPDFServlet.pdf)
