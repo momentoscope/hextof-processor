@@ -1,6 +1,6 @@
-.. HextofOfflineAnalyzer documentation master file
+.. hextof-processor documentation master file
 
-HextofOfflineAnalyzer documentation
+hextof-processor documentation
 =================================================
 
 .. toctree::
@@ -18,5 +18,9 @@ HextofOfflineAnalyzer documentation
    :numbered:
    :caption: Examples
    
-   example/binning
+   example/readdaq.md
+   example/parquet.md
+   example/binning.md
+   example/nobinning.md
    example/corrections
+   example/fullexample.md

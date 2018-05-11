@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>5. Corrections to FEL pulse timing &mdash; hextof-processor 0.9.5 documentation</title>
+  <title>1. Read DAQ data &mdash; hextof-processor 0.9.5 documentation</title>
   
 
   
@@ -36,8 +36,8 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
-        <link rel="next" title="6. Complete code examples" href="fullexample.html"/>
-        <link rel="prev" title="4. Processing data without binning" href="nobinning.html"/> 
+        <link rel="next" title="2. Save dataset to dask parquet files" href="parquet.html"/>
+        <link rel="prev" title="4. Utility functions (utils)" href="../library/utils.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -99,11 +99,11 @@
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Read DAQ data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parquet.html">2. Save dataset to dask parquet files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">3. Binning multidimensional data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nobinning.html">4. Processing data without binning</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="corrections.html">5. Corrections to FEL pulse timing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fullexample.html">6. Complete code examples</a></li>
 </ul>
 
@@ -149,13 +149,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>5. Corrections to FEL pulse timing</li>
+      <li>1. Read DAQ data</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/example/corrections.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/example/readdaq.md.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -168,9 +168,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="corrections-to-fel-pulse-timing">
-<span id="corrections-to-fel-pulse-timing"></span><h1>5. Corrections to FEL pulse timing<a class="headerlink" href="#corrections-to-fel-pulse-timing" title="Permalink to this headline">¶</a></h1>
-<p>...to be finished</p>
+  <div class="section" id="read-daq-data">
+<span id="read-daq-data"></span><h1>1. Read DAQ data<a class="headerlink" href="#read-daq-data" title="Permalink to this headline">¶</a></h1>
+<p><strong>(1)</strong> Load the data with a given DAQ run number</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># create a processor isntance</span>
+<span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
+<span class="c1"># assign a run number</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="mi">18843</span>
+</pre></div>
+</div>
+<p>The data can now be loaded from either a full DAQ run:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#read the data from the DAQ hdf5 dataframes</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">readData</span><span class="p">(</span><span class="n">runNumber</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or from a selected range of the <code class="docutils literal"><span class="pre">pulseIdInterval</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">mbFrom</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c1"># first macrobunch</span>
+<span class="n">mbTo</span> <span class="o">=</span> <span class="mi">2000</span> <span class="c1"># last macrobunch</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">readData</span><span class="p">(</span><span class="n">pulseIdInterval</span><span class="o">=</span><span class="p">(</span><span class="n">mbFrom</span><span class="p">,</span><span class="n">mbTo</span><span class="p">))</span>
+</pre></div>
+</div>
+<p><strong>(2)</strong> Run the <code class="docutils literal"><span class="pre">postProcess</span></code> method, which generates a BAM-corrected <code class="docutils literal"><span class="pre">pumpProbeDelay</span></code> array, together with polar coordinates for the momentum axes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The dask dataframe is now created and can be used directly or stored in parquet format (optimized for speed) for future use. A shorter code summary is in the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="mi">18843</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">readData</span><span class="p">(</span><span class="n">runNumber</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span><span class="p">)</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
+</pre></div>
+</div>
 </div>
 
 
@@ -183,10 +211,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="fullexample.html" class="btn btn-neutral float-right" title="6. Complete code examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="parquet.html" class="btn btn-neutral float-right" title="2. Save dataset to dask parquet files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="nobinning.html" class="btn btn-neutral" title="4. Processing data without binning" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../library/utils.html" class="btn btn-neutral" title="4. Utility functions (utils)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
