@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2. Save dataset to dask parquet files &mdash; hextof-processor 0.9.5 documentation</title>
+  <title>7. List of terms and abbreviations &mdash; hextof-processor 0.9.5 documentation</title>
   
 
   
@@ -36,8 +36,7 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
-        <link rel="next" title="3. Binning multidimensional data" href="binning.html"/>
-        <link rel="prev" title="1. Read DAQ data" href="readdaq.html"/> 
+        <link rel="prev" title="6. Complete code examples" href="fullexample.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -100,12 +99,12 @@
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readdaq.html">1. Read DAQ data</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parquet.html">2. Save dataset to dask parquet files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">3. Binning multidimensional data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nobinning.html">4. Processing data without binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="corrections.html">5. Corrections to FEL pulse timing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fullexample.html">6. Complete code examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="listofterms.html">7. List of terms and abbreviations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">7. List of terms and abbreviations</a></li>
 </ul>
 
             
@@ -150,13 +149,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>2. Save dataset to dask parquet files</li>
+      <li>7. List of terms and abbreviations</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/example/parquet.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/example/listofterms.md.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -169,24 +168,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="save-dataset-to-dask-parquet-files">
-<span id="save-dataset-to-dask-parquet-files"></span><h1>2. Save dataset to dask parquet files<a class="headerlink" href="#save-dataset-to-dask-parquet-files" title="Permalink to this headline">¶</a></h1>
-<p>For faster access to these dataframes in extended offline analysis, it is convenient to store the datasets in dask parquet dataframes. This is done using</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">storeDataframes</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>This saves two folders in path/to/file: <strong>name_el</strong> and <strong>name_mb</strong>. These are the two datasets <code class="docutils literal"><span class="pre">processor.dd</span></code> and <code class="docutils literal"><span class="pre">processor.ddMicrobunches</span></code>. If <code class="docutils literal"><span class="pre">'filename'</span></code> is not specified, it uses either <code class="docutils literal"><span class="pre">'run{runNumber}'</span></code> or <code class="docutils literal"><span class="pre">'mb{firstMacrobunch}to{lastMacrobunch}'</span></code>, for example, <code class="docutils literal"><span class="pre">run18843</span></code>, or <code class="docutils literal"><span class="pre">mb90000000to900000500</span></code>.</p>
-<p>Datasets in parquet format can be loaded back into the processor using the <code class="docutils literal"><span class="pre">readDataframes</span></code> method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
-<span class="n">processor</span><span class="o">.</span><span class="n">readDataframes</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>An optional parameter for both <code class="docutils literal"><span class="pre">storeDataframes</span></code> and <code class="docutils literal"><span class="pre">readDataframes</span></code> is <code class="docutils literal"><span class="pre">path=''</span></code>. If it is unspecified, (left as default None) the values from<code class="docutils literal"><span class="pre">DATA_PARQUET_DIR</span></code> or <code class="docutils literal"><span class="pre">DATA_H5_DIR</span></code> in <strong>SETTINGS.ini</strong> is used.</p>
-<p>Alternatively, it is possible to store these datasets similarly in hdf5 format, using the same function,</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">storeDataframes</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;hdf5&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>However, this is NOT advised, since the parquet format outperforms the hdf5 in reading and data manipulation. This functionality is mainly kept for retro-compatibility with older datasets.</p>
+  <div class="section" id="list-of-terms-and-abbreviations">
+<span id="list-of-terms-and-abbreviations"></span><h1>7. List of terms and abbreviations<a class="headerlink" href="#list-of-terms-and-abbreviations" title="Permalink to this headline">¶</a></h1>
+<p><strong>BAM</strong> = beam arrival monitor, monitors the time when the FEL beam arrives.</p>
+<p><strong>bunch charge</strong> -- the total charge of an electron macrobunch</p>
+<p><strong>CAMP chamber</strong> -- CFEL ASG multipurpose chamber</p>
+<p><strong>DLD</strong> = delay line detector, measures the (x,y) positions of electrons by two pairs of timing difference measurements.</p>
+<p><strong>GMD</strong> = gas monitor detector, measures the intensity of the FEL beam before and after the gas attenuator. It contains the parts before (<strong>GMD_Tunnel</strong>) and after (<strong>GMD_BDA</strong>) the FEL undulator tunnel. Technical details of the detector see <code class="docutils literal"><span class="pre">[Tiedke08]</span></code>.</p>
+<p><strong>FEL</strong> = free electron laser</p>
+<p><strong>HEXTOF analyzer</strong> = high energy X-ray time of flight analyzer. A measurement device that records simultaneously the (kx, ky, E) coordinates of the photoelectrons emitted within the X-ray photoemission horizon. It is later rebranded and sold by SPECS GmbH under the name METIS.</p>
+<p><strong>SASE</strong> = self-amplified spontaneous emission</p>
+<p><strong>macrobunch</strong> -- a macroscopic bunch of electrons which can possess substructures (i.e. microbunches). It is the operating unit of a high-gain FEL and also referred to colloquially as a pulse train. Each macrobunch of electrons is tagged by the macrobunch ID.</p>
+<p><strong>microbunch</strong> -- a subunit of a high-gain FEL pulse train due to spatial redistribution and localization of electrons within a macrobunch -- a phenomenon called <a class="reference external" href="http://photon-science.desy.de/facilities/flash/the_free_electron_laser/how_it_works/high_gain_fel/index_eng.html">micronbunching</a>. Each microbunch of electrons is tagged by a microbunch ID. A well-behaving FEL has a stable number of microbunches within a macrobunch, although the total microbunch number can vary between beam time slots due to change in the machine parameters.</p>
+<p><strong>dd</strong> = <a class="reference external" href="http://dask.pydata.org/en/latest/dataframe.html">dask dataframe</a> -- a parallelized version of the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html">pandas dataframe</a></p>
+<p><strong>run number</strong> -- integer label of an experimental run. Every scan shares a single run number.</p>
+<p><strong>file number</strong> -- integer label of a file in an experimental run.</p>
+<p>$$~$$</p>
+<p><strong>Bibliography</strong></p>
+<p><code class="docutils literal"><span class="pre">[Tiedke08]</span></code> Gas-detector for X-ray lasers. <a class="reference external" href="http://bib-pubdb1.desy.de/record/85584/files/GetPDFServlet.pdf">pdf</a></p>
 </div>
 
 
@@ -199,10 +198,8 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="binning.html" class="btn btn-neutral float-right" title="3. Binning multidimensional data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-      
-        <a href="readdaq.html" class="btn btn-neutral" title="1. Read DAQ data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="fullexample.html" class="btn btn-neutral" title="6. Complete code examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

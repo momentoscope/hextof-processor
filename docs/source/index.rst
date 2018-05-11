@@ -24,3 +24,4 @@ hextof-processor documentation
    example/nobinning.md
    example/corrections.md
    example/fullexample.md
+   example/listofterms.md
