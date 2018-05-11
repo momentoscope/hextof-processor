@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>5. Corrections to FEL pulse timing &mdash; hextof-processor 0.9.5 documentation</title>
+  <title>2. Save dataset to dask parquet files &mdash; hextof-processor 0.9.5 documentation</title>
   
 
   
@@ -36,8 +36,8 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
-        <link rel="next" title="6. Complete code examples" href="fullexample.html"/>
-        <link rel="prev" title="4. Processing data without binning" href="nobinning.html"/> 
+        <link rel="next" title="3. Binning multidimensional data" href="binning.html"/>
+        <link rel="prev" title="1. Read DAQ data" href="readdaq.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -100,10 +100,10 @@
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readdaq.html">1. Read DAQ data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Save dataset to dask parquet files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">3. Binning multidimensional data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nobinning.html">4. Processing data without binning</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="corrections.html">5. Corrections to FEL pulse timing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fullexample.html">6. Complete code examples</a></li>
 </ul>
 
@@ -149,13 +149,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>5. Corrections to FEL pulse timing</li>
+      <li>2. Save dataset to dask parquet files</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/example/corrections.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/example/parquet.md.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -168,9 +168,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="corrections-to-fel-pulse-timing">
-<span id="corrections-to-fel-pulse-timing"></span><h1>5. Corrections to FEL pulse timing<a class="headerlink" href="#corrections-to-fel-pulse-timing" title="Permalink to this headline">¶</a></h1>
-<p>...to be finished</p>
+  <div class="section" id="save-dataset-to-dask-parquet-files">
+<span id="save-dataset-to-dask-parquet-files"></span><h1>2. Save dataset to dask parquet files<a class="headerlink" href="#save-dataset-to-dask-parquet-files" title="Permalink to this headline">¶</a></h1>
+<p>For faster access to these dataframes in extended offline analysis, it is convenient to store the datasets in dask parquet dataframes. This is done using</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">storeDataframes</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This saves two folders in path/to/file: <strong>name_el</strong> and <strong>name_mb</strong>. These are the two datasets <code class="docutils literal"><span class="pre">processor.dd</span></code> and <code class="docutils literal"><span class="pre">processor.ddMicrobunches</span></code>. If <code class="docutils literal"><span class="pre">'filename'</span></code> is not specified, it uses either <code class="docutils literal"><span class="pre">'run{runNumber}'</span></code> or <code class="docutils literal"><span class="pre">'mb{firstMacrobunch}to{lastMacrobunch}'</span></code>, for example, <code class="docutils literal"><span class="pre">run18843</span></code>, or <code class="docutils literal"><span class="pre">mb90000000to900000500</span></code>.</p>
+<p>Datasets in parquet format can be loaded back into the processor using the <code class="docutils literal"><span class="pre">readDataframes</span></code> method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">readDataframes</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>An optional parameter for both <code class="docutils literal"><span class="pre">storeDataframes</span></code> and <code class="docutils literal"><span class="pre">readDataframes</span></code> is <code class="docutils literal"><span class="pre">path=''</span></code>. If it is unspecified, (left as default None) the values from<code class="docutils literal"><span class="pre">DATA_PARQUET_DIR</span></code> or <code class="docutils literal"><span class="pre">DATA_H5_DIR</span></code> in <strong>SETTINGS.ini</strong> is used.</p>
+<p>Alternatively, it is possible to store these datasets similarly in hdf5 format, using the same function,</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">storeDataframes</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;hdf5&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>However, this is NOT advised, since the parquet format outperforms the hdf5 in reading and data manipulation. This functionality is mainly kept for retro-compatibility with older datasets.</p>
 </div>
 
 
@@ -183,10 +198,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="fullexample.html" class="btn btn-neutral float-right" title="6. Complete code examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="binning.html" class="btn btn-neutral float-right" title="3. Binning multidimensional data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="nobinning.html" class="btn btn-neutral" title="4. Processing data without binning" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="readdaq.html" class="btn btn-neutral" title="1. Read DAQ data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

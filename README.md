@@ -10,6 +10,10 @@ The `DldFlashDataframeCreator` class is used for creating the dataframes from th
 The data obtained from the DAQ system is read through the **pah** package provided by FLASH, which is accessible on bitbucket at https://stash.desy.de/projects/CS . The location of the downloaded repo must be set in the **SETTINGS.ini** file, under `PAH_MODULE_DIR`. This will be contained in the processor object as
 `processor.PAH_MODULE_DIR`.
 
+# Documentation
+
+The documentation of the package can be found [here](https://momentoscope.github.io/HextofOfflineAnalyzer/).
+
 # Settings
 
 To initialize the code correctly on a new machine, run the **InitializeSettings.py** file in the terminal using
@@ -94,7 +98,7 @@ processor.postProcess()
 ## 2. Save dataset to dask parquet files
 
 For faster access to these dataframes in extended offline analysis, it is convenient to store the datasets in dask parquet dataframes. This is done using
-```pthon
+```python
 processor.storeDataframes('filename')
 ```
 
@@ -112,7 +116,7 @@ processor.readDataframes('filename')
 An optional parameter for both `storeDataframes` and `readDataframes` is `path=''`. If it is unspecified, (left as default None) the values from`DATA_PARQUET_DIR` or `DATA_H5_DIR` in **SETTINGS.ini** is used.
 
 Alternatively, it is possible to store these datasets similarly in hdf5 format, using the same function,
-```pthon
+```python
 processor.storeDataframes('filename', format='hdf5')
 ```
 However, this is NOT advised, since the parquet format outperforms the hdf5 in reading and data manipulation. This functionality is mainly kept for retro-compatibility with older datasets.

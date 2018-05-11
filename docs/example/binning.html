@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1. Binning multidimensional data &mdash; hextof-processor 0.9.5 documentation</title>
+  <title>3. Binning multidimensional data &mdash; hextof-processor 0.9.5 documentation</title>
   
 
   
@@ -36,8 +36,8 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
-        <link rel="next" title="2. Corrections to FEL pulse timing" href="corrections.html"/>
-        <link rel="prev" title="4. Utility functions (utils)" href="../library/utils.html"/> 
+        <link rel="next" title="4. Processing data without binning" href="nobinning.html"/>
+        <link rel="prev" title="2. Save dataset to dask parquet files" href="parquet.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -99,8 +99,12 @@
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Binning multidimensional data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="corrections.html">2. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fullexample.html">6. Complete code examples</a></li>
 </ul>
 
             
@@ -145,13 +149,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>1. Binning multidimensional data</li>
+      <li>3. Binning multidimensional data</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/example/binning.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/example/binning.md.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -165,8 +169,99 @@
            <div itemprop="articleBody">
             
   <div class="section" id="binning-multidimensional-data">
-<h1>1. Binning multidimensional data<a class="headerlink" href="#binning-multidimensional-data" title="Permalink to this headline">¶</a></h1>
-<p>...to be finished</p>
+<span id="binning-multidimensional-data"></span><h1>3. Binning multidimensional data<a class="headerlink" href="#binning-multidimensional-data" title="Permalink to this headline">¶</a></h1>
+<p>In order to get n-dimensional numpy array from the generated datasets, it is necessary to bin data along the desired axes. An example starting from loading parquet data is in the following,</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="mi">18843</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">readDataframes</span><span class="p">(</span><span class="s1">&#39;path/to/file/name&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This can be also done from direct raw data read with <code class="docutils literal"><span class="pre">readData</span></code> To create the bin array structure, run</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">addBinning</span><span class="p">(</span><span class="s1">&#39;dldPosX&#39;</span><span class="p">,</span><span class="mi">480</span><span class="p">,</span><span class="mi">980</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">addBinning</span><span class="p">(</span><span class="s1">&#39;dldPosY&#39;</span><span class="p">,</span><span class="mi">480</span><span class="p">,</span><span class="mi">980</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This adds binning along the kx and ky directions, from point 480 to point 980 with bin size of 10. Bins can be created defining start and end points and either step size or number of steps. The resulting array can be obtained using</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">ComputeBinnedData</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>where the resulting numpy array with float64-typed values will have the axes in the same order as binning assignments. Other binning axes commonly used are,</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="31%" />
+<col width="24%" />
+<col width="12%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Proper name</th>
+<th class="head">Namestring</th>
+<th class="head">Typical values</th>
+<th class="head">Units</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>ToF delay (ns)</td>
+<td>'dldTime'</td>
+<td>620,670,10 *</td>
+<td>ns</td>
+</tr>
+<tr class="row-odd"><td>Pump-probe time delay</td>
+<td>'pumpProbeDelay'</td>
+<td>-10,10,1</td>
+<td>ps</td>
+</tr>
+<tr class="row-even"><td>Separate DLDs</td>
+<td>'dldDetectors'</td>
+<td>-1,2,1</td>
+<td>ID</td>
+</tr>
+<tr class="row-odd"><td>Microbunch (pulse) ID</td>
+<td>'microbunchId'</td>
+<td>0,500,1 **</td>
+<td>ID</td>
+</tr>
+<tr class="row-even"><td>Auxiliary channel</td>
+<td>'dldAux'</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>Beam arrival monitor</td>
+<td>'bam'</td>
+<td>&#160;</td>
+<td>fs</td>
+</tr>
+<tr class="row-even"><td>FEL bunch charge</td>
+<td>'bunchCharge'</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>Macrobunch ID</td>
+<td>'macroBunchPulseId'</td>
+<td>&#160;</td>
+<td>ID</td>
+</tr>
+<tr class="row-even"><td>Laser diode reading</td>
+<td>'opticalDiode'</td>
+<td>1000,2000,100</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>?</td>
+<td>'gmdTunnel'</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>?</td>
+<td>'gmdBda'</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+<p>* ToF delay bin size needs to be multiplied by <code class="docutils literal"><span class="pre">processor.TOF_STEP_TO_NS</span></code> in order to avoid artifacts.</p>
+<p>** binning on microbunch works only when not binning on any other dimension</p>
+<p>Binning is created using np.linspace (formerly was done with <code class="docutils literal"><span class="pre">np.arange</span></code>). The implementation allows to choose between setting a step size (<code class="docutils literal"><span class="pre">useStepSize=True,</span> <span class="pre">default</span></code>) or using a number of bins (<code class="docutils literal"><span class="pre">useStepSize=False</span></code>).</p>
+<p>In general, it is not possible to satisfy all 3 parameters: start, end, steps. For this reason, you can choose to give priority to the step size or to the interval size. In the case of <code class="docutils literal"><span class="pre">forceEnds=False</span></code>, the steps parameter is given priority and the end parameter is redefined, so the interval can actually be larger than expected. In the case of <code class="docutils literal"><span class="pre">forceEnds</span> <span class="pre">=</span> <span class="pre">true</span></code>, the stepSize is not enforced, and the interval is divided by the closest step that divides it cleanly. This of course only has meaning when choosing steps that do not cleanly divide the interval.</p>
 </div>
 
 
@@ -179,10 +274,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="corrections.html" class="btn btn-neutral float-right" title="2. Corrections to FEL pulse timing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="nobinning.html" class="btn btn-neutral float-right" title="4. Processing data without binning" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../library/utils.html" class="btn btn-neutral" title="4. Utility functions (utils)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="parquet.html" class="btn btn-neutral" title="2. Save dataset to dask parquet files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
