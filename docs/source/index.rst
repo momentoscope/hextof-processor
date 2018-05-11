@@ -22,5 +22,5 @@ hextof-processor documentation
    example/parquet.md
    example/binning.md
    example/nobinning.md
-   example/corrections
+   example/corrections.md
    example/fullexample.md
