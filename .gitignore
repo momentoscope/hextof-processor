@@ -24,4 +24,5 @@ SETTINGS.ini
 
 *.ini
 
-docs/build/
+# ignore old docs build
+# docs/build/
