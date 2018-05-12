@@ -218,7 +218,7 @@ tiff stack formats etc.</p>
 <dl class="method">
 <dt id="processor.DldProcessor.DldProcessor.addBinning">
 <code class="descname">addBinning</code><span class="sig-paren">(</span><em>name</em>, <em>start</em>, <em>end</em>, <em>steps</em>, <em>useStepSize=True</em>, <em>forceEnds=False</em>, <em>include_last=True</em>, <em>force_legacy=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.addBinning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.addBinning" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add binning of one dimension, to be then computed with computeBinnedData method.</p>
+<dd><p>Add binning of one dimension, to be then computed with <code class="docutils literal"><span class="pre">computeBinnedData</span></code> method.</p>
 <p>Creates a list of bin names, (binNameList) to identify the axis on
 which to bin the data. Output array dimensions order will be the same
 as in this list. The attribute binRangeList will contain the ranges of
@@ -229,7 +229,7 @@ the binning used for the corresponding dimension.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
 <dt>name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Name of the column to bin to. Possible column names are:
+<dd><p class="first last">Name of the column to apply binning to. Possible column names are`:`
 posX, posY, dldTime, pumpProbeTime, dldDetector, etc.</p>
 </dd>
 <dt>start <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
@@ -244,28 +244,45 @@ this is the step size, while if useStepSize=False, then this is the
 number of bins. In Legacy mode (force_legacy=True, or
 processor._LEGACY_MODE=True)</p>
 </dd>
-<dt>useStepSize <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd><p class="first last">Tells python to interpret steps as a step size if
-True, or as the number of steps if False</p>
+<dt>useStepSize <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
+<dd><p class="first">Tells Python how to interpret steps.</p>
+<table class="last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">True:</th><td class="field-body">interpret steps as a step size.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">False:</th><td class="field-body">interpret steps as the number of steps.</td>
+</tr>
+</tbody>
+</table>
 </dd>
-<dt>forceEnds <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dt>forceEnds <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
 <dd><p class="first last">Tells python to give priority to the end parameter
 rather than the step parameter (see genBins for more info)</p>
 </dd>
-<dt>include_last <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dt>include_last <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
 <dd><p class="first last">Closes the interval on the right when true. If
 using step size priority, will expand the interval to include
 the next value when true, will shrink the interval to contain all
 points within the bounds if false.</p>
 </dd>
-<dt>force_legacy <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd><p class="first last">If true, imposes old method for generating binns,
-based on np.arange instead of np.linspace.</p>
+<dt>force_legacy <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">True:</th><td class="field-body">use np.arange method to generate bins.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">False:</th><td class="field-body">use np.linspace method to generate bins.</td>
+</tr>
+</tbody>
+</table>
 </dd>
 </dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><dl class="first docutils">
 <dt>axes <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
 <dd><p class="first last">axis of the binned dimesion. The points defined on this axis are the middle points of
 each bin.</p>
@@ -273,25 +290,26 @@ each bin.</p>
 </dl>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name">Note:</th><td class="field-body"><p class="first last">If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.</p>
+</td>
+</tr>
 </tbody>
 </table>
-<dl class="docutils">
-<dt>See also:</dt>
-<dd>computeBinnedData : Method to compute all bins created with this function.</dd>
-<dt>Notes:</dt>
-<dd>If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.</dd>
-</dl>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="docutils literal"><span class="pre">computeBinnedData</span></code> Method to compute all bins created with this function.</p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="processor.DldProcessor.DldProcessor.addFilter">
 <code class="descname">addFilter</code><span class="sig-paren">(</span><em>colname</em>, <em>lb=None</em>, <em>ub=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.addFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.addFilter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Filters the dataframes contained in the current processor</p>
+<dd><p>Filters the dataframes contained in the processor instance</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
 <dt>colname <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd><p class="first last">name of the column in the dask dataframes</p>
 </dd>
@@ -302,6 +320,9 @@ each bin.</p>
 <dd><p class="first last">upper bounday of the filter</p>
 </dd>
 </dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Effect:</th><td class="field-body"><p class="first last">Filters the columns of <code class="docutils literal"><span class="pre">dd</span></code> and <code class="docutils literal"><span class="pre">ddMicrobunches</span></code> dataframes in place.</p>
 </td>
 </tr>
 </tbody>
@@ -318,7 +339,7 @@ Data is taken from the dd and dd_microbunch dataframe attributes.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first last docutils">
 <dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd><p class="first last">name (including path) of the folder containing the
 parquet files to append the new data.</p>
@@ -332,39 +353,23 @@ parquet files to append the new data.</p>
 
 <dl class="method">
 <dt id="processor.DldProcessor.DldProcessor.computeBinnedData">
-<code class="descname">computeBinnedData</code><span class="sig-paren">(</span><em>saveName=None</em>, <em>savePath=None</em>, <em>saveMode='w'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">computeBinnedData</code><span class="sig-paren">(</span><em>saveName=None</em>, <em>savePath=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use the bin list to bin the data.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first docutils">
-<dt>result <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
-<dd><p class="first last">A numpy array of float64 values. Number of bins defined will define the
-dimensions of such array.</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>saveName <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
+<dd><p class="first last">filename</p>
+</dd>
+<dt>savePath <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
+<dd><p class="first last">file path</p>
 </dd>
 </dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Notes:</th><td class="field-body"><p class="first last">postProcess method must be used before computing the binned data if binning
-along pumpProbeDelay or polar k-space coordinates.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="processor.DldProcessor.DldProcessor.computeBinnedDataMulti">
-<code class="descname">computeBinnedDataMulti</code><span class="sig-paren">(</span><em>saveName=None</em>, <em>savePath=None</em>, <em>saveMode='w'</em>, <em>rank=None</em>, <em>size=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedDataMulti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedDataMulti" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use the bin list to bin the data. Cluster-compatible version (Maciej Dendzik)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first docutils">
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first docutils">
 <dt>result <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
 <dd><p class="first last">A numpy array of float64 values. Number of bins defined will define the
 dimensions of such array.</p>
@@ -381,20 +386,60 @@ along pumpProbeDelay or polar k-space coordinates.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.computeBinnedDataMulti">
+<code class="descname">computeBinnedDataMulti</code><span class="sig-paren">(</span><em>saveName=None</em>, <em>savePath=None</em>, <em>rank=None</em>, <em>size=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedDataMulti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedDataMulti" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the bin list to bin the data. Cluster-compatible version (Maciej Dendzik)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>saveName <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
+<dd><p class="first last">filename</p>
+</dd>
+<dt>savePath <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
+<dd><p class="first last">file path</p>
+</dd>
+<dt>rank <span class="classifier-delimiter">:</span> <span class="classifier">int | None</span></dt>
+<dd><p class="first last">Rank number of cluster computer</p>
+</dd>
+<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">int | None</span></dt>
+<dd><p class="first last">Size of partition</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first docutils">
+<dt>result <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
+<dd><p class="first last">A numpy array of float64 values. The number of bins determines the
+dimensionality of the output array.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Notes:</th><td class="field-body"><p class="first last">postProcess method must be used before computing the binned data if binning
+is applied along pumpProbeDelay or polar k-space coordinates.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="processor.DldProcessor.DldProcessor.correctBAM">
 <code class="descname">correctBAM</code><span class="sig-paren">(</span><em>sign=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.correctBAM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.correctBAM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Correct pump probe time by BAM.</p>
+<dd><p>Correct pump probe time by BAM (beam arrival monitor) data.</p>
 <p>Corrects the pulse to pulse jitter, and changes name from
 delayStageTime to pumpProbeTime. BAM correction shifts the time delay
 by a constant value.</p>
 <p><code class="docutils literal"><span class="pre">/!\</span></code> BAM correction is tricky and will mess up the delay histogram.
-This is because of strong correlation with micro bunch ID of both the
+This is because of strong correlation with the microbunch ID of both the
 BAM value and the photoemission yield, i.e. photons at the end of a
-Macro bunch give more photoelectrons while systematically being
+macrobunch give more photoelectrons while becoming systematically
 shifted in time.</p>
 <p>Default value is 1 since the BAM measures the delay between the master
-clock start and the arrival of the beam.
-On the other hand, more positive delay stage values are for when the FEL
+clock start and the arrival of the beam.</p>
+<p>On the other hand, more positive delay stage values are for when the FEL
 arrives earlier (FEL before pump is on the more positive side of t0).
 A bigger delay in beam arrival for an FEL pulse means that the photoelectrons
 actually had a more negative delay (probe later than pump) than what the delay stage
@@ -403,11 +448,31 @@ measured, and should therefore be moved to more negative values.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first last docutils">
 <dt>sign <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">sign multiplier for BAM correction
-accepted values: 0, 1, -1
-Avoid using -1 unless debugging</p>
+<dd><p class="first">Sign multiplier for BAM correction. Avoid using -1 unless debugging.</p>
+<table border="1" class="last docutils">
+<colgroup>
+<col width="16%" />
+<col width="84%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Value</th>
+<th class="head">Operation</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0</td>
+<td>no correction</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>pumpProbeTime = delayStage - bam</td>
+</tr>
+<tr class="row-even"><td>-1</td>
+<td>pumpProbeTime = delayStage + bam</td>
+</tr>
+</tbody>
+</table>
 </dd>
 </dl>
 </td>
@@ -419,14 +484,14 @@ Avoid using -1 unless debugging</p>
 <dl class="method">
 <dt id="processor.DldProcessor.DldProcessor.createPolarCoordinates">
 <code class="descname">createPolarCoordinates</code><span class="sig-paren">(</span><em>kCenter=(250</em>, <em>250)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.createPolarCoordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.createPolarCoordinates" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define polar coordinates for k-space values.</p>
+<dd><p>Calculate polar coordinates for k-space values.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>kCenter <span class="classifier-delimiter">:</span> <span class="classifier">(int,int)</span></dt>
-<dd><p class="first last">position of the center of k-space in the DLD detector array</p>
+<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first last docutils">
+<dt>kCenter <span class="classifier-delimiter">:</span> <span class="classifier">(int,int) | (250, 250)</span></dt>
+<dd><p class="first last">Pixel position of the k-space center in the DLD array</p>
 </dd>
 </dl>
 </td>
@@ -508,8 +573,8 @@ based on np.arange instead of np.inspace.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body">import_all : bool
-if True, imports all entries in settings.ini under section [processor] and [paths].
-if False, only imports those that match existing attribute names.
+<code class="docutils literal"><span class="pre">True</span></code> -- imports all entries in SETTINGS.ini under section [processor] and [paths].
+<code class="docutils literal"><span class="pre">False</span></code> -- only imports those that match existing attribute names.
 False is the better choice, since it keeps better track of attributes.</td>
 </tr>
 </tbody>
@@ -518,21 +583,34 @@ False is the better choice, since it keeps better track of attributes.</td>
 
 <dl class="method">
 <dt id="processor.DldProcessor.DldProcessor.load_binned">
-<code class="descname">load_binned</code><span class="sig-paren">(</span><em>name</em>, <em>path=None</em>, <em>mode='r'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.load_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.load_binned" title="Permalink to this definition">¶</a></dt>
-<dd><p>load an h5 file saved with save_array.</p>
+<code class="descname">load_binned</code><span class="sig-paren">(</span><em>namestr</em>, <em>path=None</em>, <em>mode='r'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.load_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.load_binned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an HDF5 file saved with <code class="docutils literal"><span class="pre">save_binned()</span></code> method.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">extra name tag in the filename</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>namestr <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Extra namestring tag in the filename.</p>
 </dd>
 <dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
-<dd><p class="first last">file path</p>
+<dd><p class="first last">File path.</p>
 </dd>
-<dt>mode <span class="classifier-delimiter">:</span> <span class="classifier">str | 'r' (read)</span></dt>
-<dd><p class="first last">read mode of h5 file</p>
+<dt>mode <span class="classifier-delimiter">:</span> <span class="classifier">str | 'r'</span></dt>
+<dd><p class="first last">Read mode of h5 file ('r' = read).</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
+<dd><p class="first last">Multidimensional data read from h5 file.</p>
+</dd>
+<dt>axes <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
+<dd><p class="first last">The axes values associated with the read data.</p>
+</dd>
+<dt>hist <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
+<dd><p class="first last">Histogram values associated with the read data.</p>
 </dd>
 </dl>
 </td>
@@ -552,7 +630,7 @@ False is the better choice, since it keeps better track of attributes.</td>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first docutils">
 <dt>data_array <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
-<dd><p class="first last">data array containing binned data, as created by the computeBinnedData method.</p>
+<dd><p class="first last">data array containing binned data, as created by the <code class="docutils literal"><span class="pre">computeBinnedData</span></code> method.</p>
 </dd>
 </dl>
 </td>
@@ -575,10 +653,10 @@ False is the better choice, since it keeps better track of attributes.</td>
 <dt id="processor.DldProcessor.DldProcessor.postProcess">
 <code class="descname">postProcess</code><span class="sig-paren">(</span><em>bamCorrectionSign=0</em>, <em>kCenter=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.postProcess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.postProcess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply corrections to the dataframe.</p>
-<p>Runs the methods to post process the dataframe. Includes BAM sign
+<p>Runs the methods to post-process the dataframe. Includes BAM sign
 correction and polar coordinates axes generation.</p>
 <p><code class="docutils literal"><span class="pre">/!\</span></code> BAM correction is tricky and will mess up the delay histogram.
-This is because of strong correlation with micro bunch ID of both the
+This is because of strong correlation with microbunch ID of both the
 BAM value and the photoemission yield, i.e. photons at the end of a
 macrobunch give more photoelectrons while being systematically
 shifted in time.</p>
@@ -587,13 +665,12 @@ shifted in time.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>bamCorrectionSign <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">used to apply sign to the BAM correction: accepted values are 0,1,-1
-set to 0 to avoid applying BAM correction, set to None to leave
-unchanged the pump probe delay information (doesn't change name).
-See correctBAM for details.</p>
+<dt>bamCorrectionSign <span class="classifier-delimiter">:</span> <span class="classifier">int | 0</span></dt>
+<dd><p class="first last">Sign of to the BAM correction.
+Use None to have no correction and no name change.
+See <code class="docutils literal"><span class="pre">correctBAM</span></code> for details.</p>
 </dd>
-<dt>kCenter <span class="classifier-delimiter">:</span> <span class="classifier">(int, int)</span></dt>
+<dt>kCenter <span class="classifier-delimiter">:</span> <span class="classifier">(int, int) | None</span></dt>
 <dd><p class="first last">position of the center of k-space in the DLD detector array.
 If set to None, no polar coordinates are added.
 See createPolarCoordinates for details.</p>
@@ -610,7 +687,7 @@ See createPolarCoordinates for details.</p>
 <code class="descname">readDataframes</code><span class="sig-paren">(</span><em>fileName=None</em>, <em>path=None</em>, <em>format='parquet'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.readDataframes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.readDataframes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load data from a parquet or HDF5 dataframe.</p>
 <p>Access the data as hdf5 file (this is the format used internally,
-NOT the FLASH HDF5-files from the DAQ system!)</p>
+NOT the FLASH HDF5 files obtained from the DAQ system!)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -620,9 +697,8 @@ NOT the FLASH HDF5-files from the DAQ system!)</p>
 <dd><p class="first last">name (including path) of the folder containing hdf5
 files where the data was saved.</p>
 </dd>
-<dt>format <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">either 'parquet' to load a parquet type of dataframe,
-or 'h5' or 'hdf5' to load hdf5 dataframes</p>
+<dt>format <span class="classifier-delimiter">:</span> <span class="classifier">str | 'parquet'</span></dt>
+<dd><p class="first last">file format, 'parquet' (parquet file), 'h5' or 'hdf5' (hdf5 file).</p>
 </dd>
 </dl>
 </td>
@@ -640,8 +716,8 @@ Use readDataframesParquet instead.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first last docutils">
+<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
 <dd><p class="first last">name (including path) of the folder containing
 parquet files where the data was saved.</p>
 </dd>
@@ -671,24 +747,33 @@ parquet files where the data was saved.</p>
 <dd><p class="first last">binned data with bins in dldTime, posX, and posY (and if to be
 normalized, binned in detectors).</p>
 </dd>
-<dt>filename <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dt>filename <span class="classifier-delimiter">:</span> <span class="classifier">str | 'default.hdf5'</span></dt>
 <dd><p class="first last">name of the file.</p>
 </dd>
-<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">path to the location where to save the hdf5 file. If None, uses the default value
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None | None</span></dt>
+<dd><p class="first last">path to the location where to save the hdf5 file. If <cite>None</cite>, uses the default value
 defined in SETTINGS.ini</p>
 </dd>
-<dt>normalizedData <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dt>normalizedData <span class="classifier-delimiter">:</span> <span class="classifier">bool | None</span></dt>
 <dd><p class="first last">Normalized data for both detector, so it should be a 3D array
 (posX, posY, detectorID).</p>
 </dd>
-<dt>overwrite <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd><p class="first last">if True, overwrites existing files with matching name.</p>
+<dt>overwrite <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">True:</th><td class="field-body">overwrites existing files with matching filename.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">False:</th><td class="field-body">no overwriting of files</td>
+</tr>
+</tbody>
+</table>
 </dd>
 </dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"><p class="first last">Normalization given, for example take it from run 18440.</p>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last">Normalization given, for example take it from run 18440.</p>
 </td>
 </tr>
 </tbody>
@@ -712,25 +797,25 @@ defined in SETTINGS.ini</p>
 
 <dl class="method">
 <dt id="processor.DldProcessor.DldProcessor.save_binned">
-<code class="descname">save_binned</code><span class="sig-paren">(</span><em>binnedData</em>, <em>name</em>, <em>path=None</em>, <em>mode='w'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.save_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.save_binned" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save a binned array to h5 file. The file includes the axes (taken from the scheduled bins)
-and the delay histograms, if present.</p>
+<code class="descname">save_binned</code><span class="sig-paren">(</span><em>binnedData</em>, <em>namestr</em>, <em>path=None</em>, <em>mode='w'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.save_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.save_binned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a binned numpy array to h5 file. The file includes the axes
+(taken from the scheduled bins) and the delay stage histogram, if it exists.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>binnedData :</dt>
-<dd><p class="first last">binned data</p>
+<dt>binnedData <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
+<dd><p class="first last">Binned multidimensional data.</p>
 </dd>
-<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">extra name tag in the filename</p>
+<dt>namestr <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Extra namestring tag in the filename.</p>
 </dd>
 <dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
-<dd><p class="first last">file path</p>
+<dd><p class="first last">File path.</p>
 </dd>
-<dt>mode <span class="classifier-delimiter">:</span> <span class="classifier">str | 'w' (write)</span></dt>
-<dd><p class="first last">write mode of h5 file</p>
+<dt>mode <span class="classifier-delimiter">:</span> <span class="classifier">str | 'w'</span></dt>
+<dd><p class="first last">Write mode of h5 file ('w' = write).</p>
 </dd>
 </dl>
 </td>

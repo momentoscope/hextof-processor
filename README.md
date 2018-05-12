@@ -14,25 +14,32 @@ The data obtained from the DAQ system is read through the **pah** package provid
 
 The documentation of the package can be found [here](https://momentoscope.github.io/HextofOfflineAnalyzer/).
 
-# Settings
+# Installation and initialization
 
+Download the package by cloning to a local folder.
+```bash
+git clone https://github.com/momentoscope/HextofOfflineAnalyzer.git
+```
+Install by running the setup.py. To do this, cd to your repo folder and run the following commands,
+```bash
+python setup.py build_ext --inplace
+```
 To initialize the code correctly on a new machine, run the **InitializeSettings.py** file in the terminal using
 
-Also, run the setup.py. To do this, cd to your repo folder and run the following commands,
-```bash 
-python setup.py build_ext --inplace
+```bash
 python InitializeSettings.py
 ```
 
-This creates the **SETTINGS.ini** file where local settings are stored. It contains the file paths and the parallelization parameters, which can be modified by the user externally. The ini file is not synced (git-ignored) in the git repository to allow the code to adapt to different computing environments.
+The last step creates the **SETTINGS.ini** file where the local settings are stored. It contains the file paths and the parallelization parameters, which can be modified by the user externally. The ini file is not synced (git-ignored) in the git repository to allow the code to adapt to different computing environments.
 
 # Versions and package structure
 
+* **docs** and **doctrees** folders -- contain the documentation built in html.
 * **processor** folder -- contains the latest version of the processor.
 * **lib** folder -- contains the legacy version of the processor, retained for retro-compatibility.
 * **XPSdoniachs** folder -- contains the Doniach-Sunjic lineshape function in C++ for fitting.
 
-# How to use
+# How to import
 
 To use this offline analysis package, first, import the dependent modules. Add the folders of the relevant repos to the system path,
 ```python
