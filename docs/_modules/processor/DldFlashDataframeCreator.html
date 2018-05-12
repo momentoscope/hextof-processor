@@ -193,11 +193,13 @@
 <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Failed loading Cython script. Using Python version instead. TODO: FIX IT!!#n Error msg: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
     <span class="kn">import</span> <span class="nn">processor.cscripts.DldFlashProcessorNotCy</span> <span class="k">as</span> <span class="nn">DldFlashProcessorCy</span>
+
 <span class="n">assignToMircobunch</span> <span class="o">=</span> <span class="n">DldFlashProcessorCy</span><span class="o">.</span><span class="n">assignToMircobunch</span>
 
 
 <span class="c1"># For code testing (Steinn Y. Agustsson)</span>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+
     <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
     <span class="n">t0</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
     <span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
@@ -216,32 +218,35 @@
 
 
 <div class="viewcode-block" id="DldFlashProcessor"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor">[docs]</a><span class="k">class</span> <span class="nc">DldFlashProcessor</span><span class="p">(</span><span class="n">DldProcessor</span><span class="o">.</span><span class="n">DldProcessor</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; This class reads an existing run and allows to generated binned multidimensional arrays.</span>
-<span class="sd">    Such arrays can be used directly or saved as HDF5 dataframes..</span>
-
-<span class="sd">    This class reads an existing run and generates a hdf5 file containing the dask data frames.</span>
+    <span class="sd">&quot;&quot;&quot;  </span>
+<span class="sd">    The class reads an existing run and allows to generated binned multidimensional arrays,</span>
+<span class="sd">    which can be used directly or saved as HDF5 dataframes.</span>
+<span class="sd">    </span>
+<span class="sd">    This class reads an existing run and generates a hdf5 file containing the dask dataframes.</span>
 <span class="sd">    It is intended to be used with data generated from August 31, 2017 to September 19, 2017.</span>
-<span class="sd">    Version 4 enables read out of macrobunchID. For evaluation the start ID is set to zero.</span>
-<span class="sd">    version 5 :</span>
-<span class="sd">    - introduces overwriting of PAH classes for correct handling of macrobunchID</span>
-<span class="sd">    - introduces writeRunToMultipleParquet function, for parquet file generation on machines with low ram</span>
-<span class="sd">    - changed variables to class variables for easier implementation on different machines</span>
-<span class="sd">    - added some print functions with information about the run that is being imported.</span>
+<span class="sd">    Version 4 enables read out of macrobunch ID. For evaluation the start ID is set to zero.</span>
+<span class="sd">    </span>
+<span class="sd">    **Version 5**</span>
+<span class="sd">    </span>
+<span class="sd">    * introduces overwriting of PAH classes for correct handling of macrobunchID</span>
+<span class="sd">    * introduces writeRunToMultipleParquet function, for parquet file generation on machines with low ram</span>
+<span class="sd">    * changed variables to class variables for easier implementation on different machines</span>
+<span class="sd">    * added some print functions with information about the run that is being imported.</span>
 
-<span class="sd">    Had to change the delay stage channel, as the old one (.../ENC.DELAY) stored groups of ~10 times the same value</span>
+<span class="sd">    Had to change the delay stage channel, as the old one (.../ENC.DELAY) stored groups of ~ 10 times the same value</span>
 <span class="sd">    (is probably read out with 10 Hz. The new channel is the column (index!) one of .../ENC.</span>
 <span class="sd">    This change makes the treatment of problematic runs obsolete.</span>
 
 
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        runNumber (int): number of the run from which data is taken.</span>
-<span class="sd">        pulseIdInterval (int): macrobunch ID corresponding to the interval of data</span>
-<span class="sd">            read from the given run.</span>
-<span class="sd">        dd (pd.DataFrame): dataframe containing chosen channel information from</span>
-<span class="sd">            the given run</span>
-<span class="sd">        dd_microbunch (pd.DataFrame): dataframe containing chosen channel</span>
-<span class="sd">            information from the given run.</span>
+<span class="sd">    :Attributes:</span>
+<span class="sd">        runNumber : int</span>
+<span class="sd">            number of the run from which data is taken.</span>
+<span class="sd">        pulseIdInterval : int</span>
+<span class="sd">            macrobunch ID corresponding to the interval of data read from the given run.</span>
+<span class="sd">        dd : dask dataframe</span>
+<span class="sd">            dataframe containing chosen channel information from the given run</span>
+<span class="sd">        dd_microbunch : dask dataframe</span>
+<span class="sd">            dataframe containing chosen channel information from the given run.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -256,11 +261,14 @@
 
 <span class="sd">        Useful for scans that would otherwise hit the machine&#39;s memory limit.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            runNumber (int): number of the run from which to read data. If None, requires pulseIdInterval.</span>
-<span class="sd">            pulseIdInterval (int,int): first and last macrobunches of selected data range. If None, the whole run</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            runNumber : int</span>
+<span class="sd">                number of the run from which to read data. If None, requires pulseIdInterval.</span>
+<span class="sd">            pulseIdInterval : (int, int)</span>
+<span class="sd">                first and last macrobunches of selected data range. If None, the whole run</span>
 <span class="sd">                defined by runNumber will be taken.</span>
-<span class="sd">            path (str): path to location where raw HDF5 files are stored</span>
+<span class="sd">            path : str</span>
+<span class="sd">                path to location where raw HDF5 files are stored</span>
 
 <span class="sd">        This is a union of the readRun and readInterval methods defined in previous versions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -362,8 +370,18 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Microbunch dataframe created.&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DldFlashProcessor.createDataframePerElectronRange"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerElectronRange">[docs]</a>    <span class="k">def</span> <span class="nf">createDataframePerElectronRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mbIndexStart</span><span class="p">,</span> <span class="n">mbIndexEnd</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create a numpy array indexed by photoelectron events for a given range</span>
-<span class="sd">        of electron macrobunch ID.</span>
+        <span class="sd">&quot;&quot;&quot;Create a numpy array indexed by photoelectron events for a given range,</span>
+<span class="sd">        [start, end), of electron macrobunch IDs.</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            mbIndexStart : int</span>
+<span class="sd">                The starting (inclusive) macrobunch ID.</span>
+<span class="sd">            mbIndexEnd : int</span>
+<span class="sd">                The ending (non-inclusive) macrobunch ID.</span>
+<span class="sd">        </span>
+<span class="sd">        :Return:</span>
+<span class="sd">            da : numpy array</span>
+<span class="sd">                Indexed photoelectron events</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># the chunk size here is too large in order to do the chunking by the loop around it.</span>
 
@@ -463,8 +481,8 @@
         <span class="k">return</span> <span class="n">da</span></div>
 
 <div class="viewcode-block" id="DldFlashProcessor.createDataframePerElectron"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerElectron">[docs]</a>    <span class="k">def</span> <span class="nf">createDataframePerElectron</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create a dataframe indexed by photoelectron events from</span>
-<span class="sd">        the read arrays (either from the test file or the run number)</span>
+        <span class="sd">&quot;&quot;&quot;Create a dataframe indexed by photoelectron events from the read arrays</span>
+<span class="sd">        (either from the test file or the run number). The method needs no input parameters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># self.dldTime=self.dldTime*self.dldTimeStep</span>
@@ -500,7 +518,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">TOF_STEP_TO_NS</span></div>
 
 <div class="viewcode-block" id="DldFlashProcessor.createDataframePerMicrobunch"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerMicrobunch">[docs]</a>    <span class="k">def</span> <span class="nf">createDataframePerMicrobunch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create a dataframe indexed by the microbunch ID</span>
+        <span class="sd">&quot;&quot;&quot;Create a dataframe indexed by the microbunch ID. The method needs no input parameters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">_VERBOSE</span><span class="p">:</span>
@@ -572,12 +590,15 @@
 <div class="viewcode-block" id="DldFlashProcessor.storeDataframes"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.storeDataframes">[docs]</a>    <span class="k">def</span> <span class="nf">storeDataframes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;parquet&#39;</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Save imported dask dataframe as a parquet or hdf5 file.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            fileName (string): name of the file where to save data.</span>
-<span class="sd">            path (str): path to the folder where to save the parquet or hdf5 files.</span>
-<span class="sd">            format (string, optional): accepts: &#39;parquet&#39; and &#39;hdf5&#39;. Choose output file format.</span>
-<span class="sd">                Default value makes a dask parquet file.</span>
-<span class="sd">                append (bool): when using parquet file, allows to append the data to a pre-existing file.</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            fileName : str</span>
+<span class="sd">                The name of the file where to save data.</span>
+<span class="sd">            path : str</span>
+<span class="sd">                The path to the folder where to save the parquet or hdf5 files.</span>
+<span class="sd">            format : str | &#39;parquet&#39;</span>
+<span class="sd">                The output file format, possible choices are &#39;parquet&#39;, &#39;h5&#39; and &#39;hdf5&#39;.</span>
+<span class="sd">            append : bool</span>
+<span class="sd">                When using parquet file, allows to append the data to a pre-existing file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">format</span> <span class="o">=</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -608,11 +629,17 @@
             <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">to_hdf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;/microbunches&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DldFlashProcessor.getIds"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.getIds">[docs]</a>    <span class="k">def</span> <span class="nf">getIds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runNumber</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Returns the initial and the final MBunchIDs of runNumber</span>
+        <span class="sd">&quot;&quot;&quot; Returns the initial and the final macrobunch IDs of a given run number</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            runNumber (int): number of the run from which to read id interval.</span>
-<span class="sd">            path (str): path to location where raw HDF5 files are stored</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            runNumber : int</span>
+<span class="sd">                The run number from which to read the macrobunch ID interval.</span>
+<span class="sd">            path : str</span>
+<span class="sd">                The path to location where raw HDF5 files are stored.</span>
+<span class="sd">        </span>
+<span class="sd">        :Return:</span>
+<span class="sd">            pulseIdInterval : (int, int)</span>
+<span class="sd">                The macrobunch ID range for a given run number</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">runNumber</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -647,20 +674,22 @@
     <span class="c1"># ==================</span>
 
 <div class="viewcode-block" id="DldFlashProcessor.readRun"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.readRun">[docs]</a>    <span class="k">def</span> <span class="nf">readRun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runNumber</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Read a run</span>
+        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Read a run. Generates dd and dd_micrubunches attributes</span>
+<span class="sd">        as pd.DataFrame containing data from the given run.</span>
 
-<span class="sd">        Generates dd and dd_micrubunches attributes as pd.DataFrame</span>
-<span class="sd">        containing data from the given run.</span>
-
-<span class="sd">        Parameters:</span>
-<span class="sd">            runNumber (int, optional): number corresponding to the rung to read data from. if None, it uses the value</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            runNumber : int</span>
+<span class="sd">                number corresponding to the rung to read data from. if None, it uses the value</span>
 <span class="sd">                defined in the runNumber attribute.</span>
-<span class="sd">            path (str): path to location where raw HDF5 files are stored. If None, it uses the value from SETTINGS.ini.</span>
+<span class="sd">            path : str</span>
+<span class="sd">                path to location where raw HDF5 files are stored. If None, it uses the value from SETTINGS.ini.</span>
 
-<span class="sd">        Raises:</span>
-<span class="sd">            AttributeError: if runNumber is not given and</span>
+<span class="sd">        :Raise:</span>
+<span class="sd">            Throws AttributeError if the run number is not given</span>
 
-<span class="sd">        Example:</span>
+<span class="sd">        :Example:</span>
+<span class="sd">        ::</span>
+<span class="sd">        </span>
 <span class="sd">            processor = DldFlashProcessor()</span>
 <span class="sd">            processor.readRun(19059)</span>
 
@@ -743,13 +772,14 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;dataframe created&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DldFlashProcessor.readInterval"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.readInterval">[docs]</a>    <span class="k">def</span> <span class="nf">readInterval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pulseIdInterval</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Access to data by macrobunch pulseID intervall.</span>
+        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Access to data by an macrobunch ID interval.</span>
+<span class="sd">        Useful for scans that would otherwise hit the machine&#39;s memory limit.</span>
 
-<span class="sd">        Usefull for scans that would otherwise hit the machine&#39;s memory limit.</span>
-
-<span class="sd">        Parameters:</span>
-<span class="sd">            pulseIdInterval ():</span>
-<span class="sd">            path (str): path to location where raw HDF5 files are stored</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            pulseIdInterval : (int, int)</span>
+<span class="sd">                The starting and ending macrobunch IDs, [start, end).</span>
+<span class="sd">            path : str</span>
+<span class="sd">                The path to location where raw HDF5 files are stored.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># allow for using the default path, which can be redefined as class variable. leaving retrocompatibility</span>

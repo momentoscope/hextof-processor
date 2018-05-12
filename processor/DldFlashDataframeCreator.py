@@ -22,11 +22,13 @@ try:
 except ImportError as e:
     print('Failed loading Cython script. Using Python version instead. TODO: FIX IT!!#n Error msg: {}'.format(e))
     import processor.cscripts.DldFlashProcessorNotCy as DldFlashProcessorCy
+
 assignToMircobunch = DldFlashProcessorCy.assignToMircobunch
 
 
 # For code testing (Steinn Y. Agustsson)
 def main():
+
     from datetime import datetime
     t0 = datetime.now()
     processor = DldFlashProcessor()
@@ -45,32 +47,35 @@ def main():
 
 
 class DldFlashProcessor(DldProcessor.DldProcessor):
-    """ This class reads an existing run and allows to generated binned multidimensional arrays.
-    Such arrays can be used directly or saved as HDF5 dataframes..
-
-    This class reads an existing run and generates a hdf5 file containing the dask data frames.
+    """  
+    The class reads an existing run and allows to generated binned multidimensional arrays,
+    which can be used directly or saved as HDF5 dataframes.
+    
+    This class reads an existing run and generates a hdf5 file containing the dask dataframes.
     It is intended to be used with data generated from August 31, 2017 to September 19, 2017.
-    Version 4 enables read out of macrobunchID. For evaluation the start ID is set to zero.
-    version 5 :
-    - introduces overwriting of PAH classes for correct handling of macrobunchID
-    - introduces writeRunToMultipleParquet function, for parquet file generation on machines with low ram
-    - changed variables to class variables for easier implementation on different machines
-    - added some print functions with information about the run that is being imported.
+    Version 4 enables read out of macrobunch ID. For evaluation the start ID is set to zero.
+    
+    **Version 5**
+    
+    * introduces overwriting of PAH classes for correct handling of macrobunchID
+    * introduces writeRunToMultipleParquet function, for parquet file generation on machines with low ram
+    * changed variables to class variables for easier implementation on different machines
+    * added some print functions with information about the run that is being imported.
 
-    Had to change the delay stage channel, as the old one (.../ENC.DELAY) stored groups of ~10 times the same value
+    Had to change the delay stage channel, as the old one (.../ENC.DELAY) stored groups of ~ 10 times the same value
     (is probably read out with 10 Hz. The new channel is the column (index!) one of .../ENC.
     This change makes the treatment of problematic runs obsolete.
 
 
-
-    Attributes:
-        runNumber (int): number of the run from which data is taken.
-        pulseIdInterval (int): macrobunch ID corresponding to the interval of data
-            read from the given run.
-        dd (pd.DataFrame): dataframe containing chosen channel information from
-            the given run
-        dd_microbunch (pd.DataFrame): dataframe containing chosen channel
-            information from the given run.
+    :Attributes:
+        runNumber : int
+            number of the run from which data is taken.
+        pulseIdInterval : int
+            macrobunch ID corresponding to the interval of data read from the given run.
+        dd : dask dataframe
+            dataframe containing chosen channel information from the given run
+        dd_microbunch : dask dataframe
+            dataframe containing chosen channel information from the given run.
     """
 
     def __init__(self):
@@ -85,11 +90,14 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         Useful for scans that would otherwise hit the machine's memory limit.
 
-        Parameters:
-            runNumber (int): number of the run from which to read data. If None, requires pulseIdInterval.
-            pulseIdInterval (int,int): first and last macrobunches of selected data range. If None, the whole run
+        :Parameters:
+            runNumber : int
+                number of the run from which to read data. If None, requires pulseIdInterval.
+            pulseIdInterval : (int, int)
+                first and last macrobunches of selected data range. If None, the whole run
                 defined by runNumber will be taken.
-            path (str): path to location where raw HDF5 files are stored
+            path : str
+                path to location where raw HDF5 files are stored
 
         This is a union of the readRun and readInterval methods defined in previous versions.
         """
@@ -191,8 +199,18 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             print('Microbunch dataframe created.')
 
     def createDataframePerElectronRange(self, mbIndexStart, mbIndexEnd):
-        """Create a numpy array indexed by photoelectron events for a given range
-        of electron macrobunch ID.
+        """Create a numpy array indexed by photoelectron events for a given range,
+        [start, end), of electron macrobunch IDs.
+        
+        :Parameters:
+            mbIndexStart : int
+                The starting (inclusive) macrobunch ID.
+            mbIndexEnd : int
+                The ending (non-inclusive) macrobunch ID.
+        
+        :Return:
+            da : numpy array
+                Indexed photoelectron events
         """
         # the chunk size here is too large in order to do the chunking by the loop around it.
 
@@ -292,8 +310,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         return da
 
     def createDataframePerElectron(self):
-        """Create a dataframe indexed by photoelectron events from
-        the read arrays (either from the test file or the run number)
+        """Create a dataframe indexed by photoelectron events from the read arrays
+        (either from the test file or the run number). The method needs no input parameters.
         """
 
         # self.dldTime=self.dldTime*self.dldTimeStep
@@ -329,7 +347,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.dd['dldTime'] = self.dd['dldTime'] * self.TOF_STEP_TO_NS
 
     def createDataframePerMicrobunch(self):
-        """Create a dataframe indexed by the microbunch ID
+        """Create a dataframe indexed by the microbunch ID. The method needs no input parameters.
         """
 
         if _VERBOSE:
@@ -401,12 +419,15 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
     def storeDataframes(self, fileName=None, path=None, format='parquet', append=False):
         """ Save imported dask dataframe as a parquet or hdf5 file.
 
-        Parameters:
-            fileName (string): name of the file where to save data.
-            path (str): path to the folder where to save the parquet or hdf5 files.
-            format (string, optional): accepts: 'parquet' and 'hdf5'. Choose output file format.
-                Default value makes a dask parquet file.
-                append (bool): when using parquet file, allows to append the data to a pre-existing file.
+        :Parameters:
+            fileName : str
+                The name of the file where to save data.
+            path : str
+                The path to the folder where to save the parquet or hdf5 files.
+            format : str | 'parquet'
+                The output file format, possible choices are 'parquet', 'h5' and 'hdf5'.
+            append : bool
+                When using parquet file, allows to append the data to a pre-existing file.
         """
 
         format = format.lower()
@@ -437,11 +458,17 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             dask.dataframe.to_hdf(self.ddMicrobunches, fileName, '/microbunches')
 
     def getIds(self, runNumber=None, path=None):
-        """ Returns the initial and the final MBunchIDs of runNumber
+        """ Returns the initial and the final macrobunch IDs of a given run number
 
-        Parameters:
-            runNumber (int): number of the run from which to read id interval.
-            path (str): path to location where raw HDF5 files are stored
+        :Parameters:
+            runNumber : int
+                The run number from which to read the macrobunch ID interval.
+            path : str
+                The path to location where raw HDF5 files are stored.
+        
+        :Return:
+            pulseIdInterval : (int, int)
+                The macrobunch ID range for a given run number
         """
 
         if runNumber is None:
@@ -476,20 +503,22 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
     # ==================
 
     def readRun(self, runNumber=None, path=None):
-        """ Read a run
+        """ **[DEPRECATED]** Read a run. Generates dd and dd_micrubunches attributes
+        as pd.DataFrame containing data from the given run.
 
-        Generates dd and dd_micrubunches attributes as pd.DataFrame
-        containing data from the given run.
-
-        Parameters:
-            runNumber (int, optional): number corresponding to the rung to read data from. if None, it uses the value
+        :Parameters:
+            runNumber : int
+                number corresponding to the rung to read data from. if None, it uses the value
                 defined in the runNumber attribute.
-            path (str): path to location where raw HDF5 files are stored. If None, it uses the value from SETTINGS.ini.
+            path : str
+                path to location where raw HDF5 files are stored. If None, it uses the value from SETTINGS.ini.
 
-        Raises:
-            AttributeError: if runNumber is not given and
+        :Raise:
+            Throws AttributeError if the run number is not given
 
-        Example:
+        :Example:
+        ::
+        
             processor = DldFlashProcessor()
             processor.readRun(19059)
 
@@ -572,13 +601,14 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         print('dataframe created')
 
     def readInterval(self, pulseIdInterval, path=None):
-        """Access to data by macrobunch pulseID intervall.
+        """ **[DEPRECATED]** Access to data by an macrobunch ID interval.
+        Useful for scans that would otherwise hit the machine's memory limit.
 
-        Usefull for scans that would otherwise hit the machine's memory limit.
-
-        Parameters:
-            pulseIdInterval ():
-            path (str): path to location where raw HDF5 files are stored
+        :Parameters:
+            pulseIdInterval : (int, int)
+                The starting and ending macrobunch IDs, [start, end).
+            path : str
+                The path to location where raw HDF5 files are stored.
         """
 
         # allow for using the default path, which can be redefined as class variable. leaving retrocompatibility
