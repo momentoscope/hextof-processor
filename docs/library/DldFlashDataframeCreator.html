@@ -174,62 +174,113 @@
 <dl class="class">
 <dt id="processor.DldFlashDataframeCreator.DldFlashProcessor">
 <em class="property">class </em><code class="descclassname">processor.DldFlashDataframeCreator.</code><code class="descname">DldFlashProcessor</code><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class reads an existing run and allows to generated binned multidimensional arrays.
-Such arrays can be used directly or saved as HDF5 dataframes..</p>
-<p>This class reads an existing run and generates a hdf5 file containing the dask data frames.
+<dd><p>The class reads an existing run and allows to generated binned multidimensional arrays,
+which can be used directly or saved as HDF5 dataframes.</p>
+<p>This class reads an existing run and generates a hdf5 file containing the dask dataframes.
 It is intended to be used with data generated from August 31, 2017 to September 19, 2017.
-Version 4 enables read out of macrobunchID. For evaluation the start ID is set to zero.
-version 5 :
-- introduces overwriting of PAH classes for correct handling of macrobunchID
-- introduces writeRunToMultipleParquet function, for parquet file generation on machines with low ram
-- changed variables to class variables for easier implementation on different machines
-- added some print functions with information about the run that is being imported.</p>
-<p>Had to change the delay stage channel, as the old one (.../ENC.DELAY) stored groups of ~10 times the same value
+Version 4 enables read out of macrobunch ID. For evaluation the start ID is set to zero.</p>
+<p><strong>Version 5</strong></p>
+<ul class="simple">
+<li>introduces overwriting of PAH classes for correct handling of macrobunchID</li>
+<li>introduces writeRunToMultipleParquet function, for parquet file generation on machines with low ram</li>
+<li>changed variables to class variables for easier implementation on different machines</li>
+<li>added some print functions with information about the run that is being imported.</li>
+</ul>
+<p>Had to change the delay stage channel, as the old one (.../ENC.DELAY) stored groups of ~ 10 times the same value
 (is probably read out with 10 Hz. The new channel is the column (index!) one of .../ENC.
 This change makes the treatment of problematic runs obsolete.</p>
-<dl class="docutils">
-<dt>Attributes:</dt>
-<dd><p class="first">runNumber (int): number of the run from which data is taken.
-pulseIdInterval (int): macrobunch ID corresponding to the interval of data</p>
-<blockquote>
-<div>read from the given run.</div></blockquote>
-<dl class="last docutils">
-<dt>dd (pd.DataFrame): dataframe containing chosen channel information from</dt>
-<dd>the given run</dd>
-<dt>dd_microbunch (pd.DataFrame): dataframe containing chosen channel</dt>
-<dd>information from the given run.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
+<dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">number of the run from which data is taken.</p>
+</dd>
+<dt>pulseIdInterval <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">macrobunch ID corresponding to the interval of data read from the given run.</p>
+</dd>
+<dt>dd <span class="classifier-delimiter">:</span> <span class="classifier">dask dataframe</span></dt>
+<dd><p class="first last">dataframe containing chosen channel information from the given run</p>
+</dd>
+<dt>dd_microbunch <span class="classifier-delimiter">:</span> <span class="classifier">dask dataframe</span></dt>
+<dd><p class="first last">dataframe containing chosen channel information from the given run.</p>
 </dd>
 </dl>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerElectron">
 <code class="descname">createDataframePerElectron</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.createDataframePerElectron"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerElectron" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a dataframe indexed by photoelectron events from
-the read arrays (either from the test file or the run number)</p>
+<dd><p>Create a dataframe indexed by photoelectron events from the read arrays
+(either from the test file or the run number). The method needs no input parameters.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerElectronRange">
 <code class="descname">createDataframePerElectronRange</code><span class="sig-paren">(</span><em>mbIndexStart</em>, <em>mbIndexEnd</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.createDataframePerElectronRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerElectronRange" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a numpy array indexed by photoelectron events for a given range
-of electron macrobunch ID.</p>
+<dd><p>Create a numpy array indexed by photoelectron events for a given range,
+[start, end), of electron macrobunch IDs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>mbIndexStart <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">The starting (inclusive) macrobunch ID.</p>
+</dd>
+<dt>mbIndexEnd <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">The ending (non-inclusive) macrobunch ID.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
+<dt>da <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
+<dd><p class="first last">Indexed photoelectron events</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerMicrobunch">
 <code class="descname">createDataframePerMicrobunch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.createDataframePerMicrobunch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerMicrobunch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a dataframe indexed by the microbunch ID</p>
+<dd><p>Create a dataframe indexed by the microbunch ID. The method needs no input parameters.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.getIds">
 <code class="descname">getIds</code><span class="sig-paren">(</span><em>runNumber=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.getIds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.getIds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initial and the final MBunchIDs of runNumber</p>
-<dl class="docutils">
-<dt>Parameters:</dt>
-<dd>runNumber (int): number of the run from which to read id interval.
-path (str): path to location where raw HDF5 files are stored</dd>
+<dd><p>Returns the initial and the final macrobunch IDs of a given run number</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">The run number from which to read the macrobunch ID interval.</p>
+</dd>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">The path to location where raw HDF5 files are stored.</p>
+</dd>
 </dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
+<dt>pulseIdInterval <span class="classifier-delimiter">:</span> <span class="classifier">(int, int)</span></dt>
+<dd><p class="first last">The macrobunch ID range for a given run number</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -237,66 +288,111 @@ path (str): path to location where raw HDF5 files are stored</dd>
 <code class="descname">readData</code><span class="sig-paren">(</span><em>runNumber=None</em>, <em>pulseIdInterval=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.readData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.readData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read data by run number or macrobunch pulseID interval.</p>
 <p>Useful for scans that would otherwise hit the machine's memory limit.</p>
-<dl class="docutils">
-<dt>Parameters:</dt>
-<dd><p class="first">runNumber (int): number of the run from which to read data. If None, requires pulseIdInterval.
-pulseIdInterval (int,int): first and last macrobunches of selected data range. If None, the whole run</p>
-<blockquote>
-<div>defined by runNumber will be taken.</div></blockquote>
-<p class="last">path (str): path to location where raw HDF5 files are stored</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">number of the run from which to read data. If None, requires pulseIdInterval.</p>
+</dd>
+<dt>pulseIdInterval <span class="classifier-delimiter">:</span> <span class="classifier">(int, int)</span></dt>
+<dd><p class="first last">first and last macrobunches of selected data range. If None, the whole run
+defined by runNumber will be taken.</p>
+</dd>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">path to location where raw HDF5 files are stored</p>
 </dd>
 </dl>
+</td>
+</tr>
+</tbody>
+</table>
 <p>This is a union of the readRun and readInterval methods defined in previous versions.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.readInterval">
 <code class="descname">readInterval</code><span class="sig-paren">(</span><em>pulseIdInterval</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.readInterval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.readInterval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Access to data by macrobunch pulseID intervall.</p>
-<p>Usefull for scans that would otherwise hit the machine's memory limit.</p>
-<dl class="docutils">
-<dt>Parameters:</dt>
-<dd>pulseIdInterval ():
-path (str): path to location where raw HDF5 files are stored</dd>
+<dd><p><strong>[DEPRECATED]</strong> Access to data by an macrobunch ID interval.
+Useful for scans that would otherwise hit the machine's memory limit.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt>pulseIdInterval <span class="classifier-delimiter">:</span> <span class="classifier">(int, int)</span></dt>
+<dd><p class="first last">The starting and ending macrobunch IDs, [start, end).</p>
+</dd>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">The path to location where raw HDF5 files are stored.</p>
+</dd>
 </dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.readRun">
 <code class="descname">readRun</code><span class="sig-paren">(</span><em>runNumber=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.readRun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.readRun" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read a run</p>
-<p>Generates dd and dd_micrubunches attributes as pd.DataFrame
-containing data from the given run.</p>
-<dl class="docutils">
-<dt>Parameters:</dt>
-<dd><dl class="first docutils">
-<dt>runNumber (int, optional): number corresponding to the rung to read data from. if None, it uses the value</dt>
-<dd>defined in the runNumber attribute.</dd>
-</dl>
-<p class="last">path (str): path to location where raw HDF5 files are stored. If None, it uses the value from SETTINGS.ini.</p>
+<dd><p><strong>[DEPRECATED]</strong> Read a run. Generates dd and dd_micrubunches attributes
+as pd.DataFrame containing data from the given run.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">number corresponding to the rung to read data from. if None, it uses the value
+defined in the runNumber attribute.</p>
 </dd>
-<dt>Raises:</dt>
-<dd>AttributeError: if runNumber is not given and</dd>
-<dt>Example:</dt>
-<dd>processor = DldFlashProcessor()
-processor.readRun(19059)</dd>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">path to location where raw HDF5 files are stored. If None, it uses the value from SETTINGS.ini.</p>
+</dd>
 </dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raise:</th><td class="field-body"><p class="first">Throws AttributeError if the run number is not given</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">readRun</span><span class="p">(</span><span class="mi">19059</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.storeDataframes">
 <code class="descname">storeDataframes</code><span class="sig-paren">(</span><em>fileName=None</em>, <em>path=None</em>, <em>format='parquet'</em>, <em>append=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.storeDataframes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.storeDataframes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save imported dask dataframe as a parquet or hdf5 file.</p>
-<dl class="docutils">
-<dt>Parameters:</dt>
-<dd><p class="first">fileName (string): name of the file where to save data.
-path (str): path to the folder where to save the parquet or hdf5 files.
-format (string, optional): accepts: 'parquet' and 'hdf5'. Choose output file format.</p>
-<blockquote class="last">
-<div>Default value makes a dask parquet file.
-append (bool): when using parquet file, allows to append the data to a pre-existing file.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">The name of the file where to save data.</p>
+</dd>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">The path to the folder where to save the parquet or hdf5 files.</p>
+</dd>
+<dt>format <span class="classifier-delimiter">:</span> <span class="classifier">str | 'parquet'</span></dt>
+<dd><p class="first last">The output file format, possible choices are 'parquet', 'h5' and 'hdf5'.</p>
+</dd>
+<dt>append <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd><p class="first last">When using parquet file, allows to append the data to a pre-existing file.</p>
 </dd>
 </dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

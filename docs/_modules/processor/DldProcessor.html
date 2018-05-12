@@ -189,6 +189,7 @@
 
 <span class="c1"># For code testing (Steinn Y. Agustsson)</span>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+
     <span class="kn">from</span> <span class="nn">processor.DldFlashDataframeCreator</span> <span class="k">import</span> <span class="n">DldFlashProcessor</span>
     <span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
     <span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="mi">19135</span>
@@ -204,29 +205,34 @@
 
 <div class="viewcode-block" id="DldProcessor"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor">[docs]</a><span class="k">class</span> <span class="nc">DldProcessor</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">      This class simplifies the analysis of data files recorded during the</span>
-<span class="sd">      beamtime of August 2017. It converts the electrons from the DLD into</span>
-<span class="sd">      a clean table and uses DASK for binning and further analysis.</span>
+<span class="sd">    This class simplifies the analysis of data files recorded during the</span>
+<span class="sd">    beamtime of August 2017. It converts the electrons from the DLD into</span>
+<span class="sd">    a clean table and uses DASK for binning and further analysis.</span>
+<span class="sd">    </span>
+<span class="sd">    :Attributes (loaded from SETTINGS.ini):</span>
+<span class="sd">        N_CORES : int</span>
+<span class="sd">            The number of available CPU cores to use.</span>
+<span class="sd">        CHUNK_SIZE : int</span>
+<span class="sd">            Size of the chunks in which a parquet file will be divided.</span>
+<span class="sd">        TOF_STEP_NS : float</span>
+<span class="sd">            The step size in ns of the dldTime. Used to convert the</span>
+<span class="sd">            step number to the ToF time in the delay line detector.</span>
+<span class="sd">        TOF_STEP_EV : float</span>
+<span class="sd">            The step size in eV of the dldTime. Used to convert the</span>
+<span class="sd">            step number to energy of the photoemitted electrons.</span>
+<span class="sd">        DATA_RAW_DIR : str</span>
+<span class="sd">            Path to raw data hdf5 files output by FLASH</span>
+<span class="sd">        DATA_PARQUET_DIR : str</span>
+<span class="sd">            Path to where parquet files are stored.</span>
+<span class="sd">        DATA_H5_DIR : str</span>
+<span class="sd">            Path to where hdf5 files containing binned data are stored.</span>
+<span class="sd">        DATA_RESULTS_DIR : str</span>
+<span class="sd">            Path to default saving location for results in np.array,</span>
+<span class="sd">            tiff stack formats etc.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Create and manage a DASK DataFrame from the data recorded at FLASH.</span>
-
-<span class="sd">        Attributes (loaded from SETTINGS.ini):</span>
-<span class="sd">            N_CORES (int): number of available CPU cores to use.</span>
-<span class="sd">            CHUNK_SIZE (int): Size of the chunks in which a parquet file will</span>
-<span class="sd">                be divided.</span>
-<span class="sd">            TOF_STEP_NS (float): step size in ns of the dldTime. Used to</span>
-<span class="sd">                convert the step number to the ToF time in the delay line</span>
-<span class="sd">                detector.</span>
-<span class="sd">            TOF_STEP_EV (float): step size in eV of the dldTime. Used to</span>
-<span class="sd">                convert the step number to energy of the photoemitted electrons.</span>
-<span class="sd">            DATA_RAW_DIR (str): Path to raw data hdf5 files output by FLASH</span>
-<span class="sd">            DATA_PARQUET_DIR (str): Path to where parquet files are stored.</span>
-<span class="sd">            DATA_H5_DIR (str): Path to where hdf5 files containing binned data</span>
-<span class="sd">                are stored.</span>
-<span class="sd">            DATA_RESULTS_DIR (str): Path to default saving location for results</span>
-<span class="sd">                in np.array, tiff stack formats etc...</span>
+        <span class="sd">&quot;&quot;&quot; Create and manage a dask DataFrame from the data recorded at FLASH.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">resetBins</span><span class="p">()</span>
@@ -254,10 +260,11 @@
 <div class="viewcode-block" id="DldProcessor.initAttributes"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.initAttributes">[docs]</a>    <span class="k">def</span> <span class="nf">initAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">import_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Parse settings file and assign the variables.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            import_all (bool): if True, imports all entries in settings.ini under section [processor] and [paths].</span>
-<span class="sd">                if False, only imports those that match existing attribute names.</span>
-<span class="sd">                False is the better choice, since it keeps better track of attributes.</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            import_all : bool</span>
+<span class="sd">            if True, imports all entries in settings.ini under section [processor] and [paths].</span>
+<span class="sd">            if False, only imports those that match existing attribute names.</span>
+<span class="sd">            False is the better choice, since it keeps better track of attributes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
@@ -315,10 +322,12 @@
 <span class="sd">        Access the data as hdf5 file (this is the format used internally,</span>
 <span class="sd">        NOT the FLASH HDF5-files from the DAQ system!)</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            fileName (str): name (including path) of the folder containing hdf5</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            fileName : str</span>
+<span class="sd">                name (including path) of the folder containing hdf5</span>
 <span class="sd">                files where the data was saved.</span>
-<span class="sd">            format (str): either &#39;parquet&#39; to load a parquet type of dataframe,</span>
+<span class="sd">            format : str</span>
+<span class="sd">                either &#39;parquet&#39; to load a parquet type of dataframe,</span>
 <span class="sd">                or &#39;h5&#39; or &#39;hdf5&#39; to load hdf5 dataframes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -356,9 +365,10 @@
 <span class="sd">        This can be used to concatenate multiple DAQ runs in one dataframe.</span>
 <span class="sd">        Data is taken from the dd and dd_microbunch dataframe attributes.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            fileName (str): name (including path) of the folder containing</span>
-<span class="sd">                parquet files where to append the new data.</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            fileName : str</span>
+<span class="sd">                name (including path) of the folder containing the</span>
+<span class="sd">                parquet files to append the new data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">divisions</span><span class="p">))</span>
@@ -374,19 +384,21 @@
 <span class="sd">        Runs the methods to post process the dataframe. Includes BAM sign</span>
 <span class="sd">        correction and polar coordinates axes generation.</span>
 
-<span class="sd">        /!\ BAM correction is tricky and will mess up the delay histogram.</span>
+<span class="sd">        ``/!\`` BAM correction is tricky and will mess up the delay histogram.</span>
 <span class="sd">        This is because of strong correlation with micro bunch ID of both the</span>
 <span class="sd">        BAM value and the photoemission yield, i.e. photons at the end of a</span>
-<span class="sd">        Macro bunch give more photoelectrons while systematically being</span>
+<span class="sd">        macrobunch give more photoelectrons while being systematically</span>
 <span class="sd">        shifted in time.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            bamCorrectionSign (int): used to apply sign to the bam correction: accepted values are 0,1,-1</span>
-<span class="sd">                set to 0 to avoid applying bam correction, set to None to leave</span>
-<span class="sd">                unchanged the pump probe delay information (doesnt change name).</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            bamCorrectionSign : int</span>
+<span class="sd">                used to apply sign to the BAM correction: accepted values are 0,1,-1</span>
+<span class="sd">                set to 0 to avoid applying BAM correction, set to None to leave</span>
+<span class="sd">                unchanged the pump probe delay information (doesn&#39;t change name).</span>
 <span class="sd">                See correctBAM for details.</span>
-<span class="sd">            kCenter (int,int):  position of the center of k-space in the dld</span>
-<span class="sd">                detector array. If set to None, no polar coordinates are added.</span>
+<span class="sd">            kCenter : (int, int)</span>
+<span class="sd">                position of the center of k-space in the DLD detector array.</span>
+<span class="sd">                If set to None, no polar coordinates are added.</span>
 <span class="sd">                See createPolarCoordinates for details.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -404,7 +416,7 @@
 <span class="sd">        delayStageTime to pumpProbeTime. BAM correction shifts the time delay</span>
 <span class="sd">        by a constant value.</span>
 
-<span class="sd">        /!\ BAM correction is tricky and will mess up the delay histogram.</span>
+<span class="sd">        ``/!\`` BAM correction is tricky and will mess up the delay histogram.</span>
 <span class="sd">        This is because of strong correlation with micro bunch ID of both the</span>
 <span class="sd">        BAM value and the photoemission yield, i.e. photons at the end of a</span>
 <span class="sd">        Macro bunch give more photoelectrons while systematically being</span>
@@ -418,8 +430,9 @@
 <span class="sd">        actually had a more negative delay (probe later than pump) than what the delay stage</span>
 <span class="sd">        measured, and should therefore be moved to more negative values.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            sign (int): sign multiplier for BAM correction</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            sign : int</span>
+<span class="sd">                sign multiplier for BAM correction</span>
 <span class="sd">                accepted values: 0, 1, -1</span>
 <span class="sd">                Avoid using -1 unless debugging</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -432,9 +445,9 @@
 <div class="viewcode-block" id="DldProcessor.createPolarCoordinates"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.createPolarCoordinates">[docs]</a>    <span class="k">def</span> <span class="nf">createPolarCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kCenter</span><span class="o">=</span><span class="p">(</span><span class="mi">250</span><span class="p">,</span> <span class="mi">250</span><span class="p">)):</span>
         <span class="sd">&quot;&quot;&quot; Define polar coordinates for k-space values.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            kCenter (int,int): position of the center of k-space in the dld</span>
-<span class="sd">                detector array</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            kCenter : (int,int)</span>
+<span class="sd">                position of the center of k-space in the DLD detector array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">radius</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
@@ -449,19 +462,20 @@
 
 <div class="viewcode-block" id="DldProcessor.normalizePumpProbeTime"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.normalizePumpProbeTime">[docs]</a>    <span class="k">def</span> <span class="nf">normalizePumpProbeTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_array</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># TODO: work on better implementation and accessibility for this method</span>
-        <span class="sd">&quot;&quot;&quot; Normalise data to the delay stage histogram.</span>
+        <span class="sd">&quot;&quot;&quot; Normalize data to the delay stage histogram.</span>
 
-<span class="sd">        Normalises the data array to the number of counts per delay stage step.</span>
+<span class="sd">        Normalizes the data array to the number of counts per delay stage step.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            data_array (np.array): data array containing binned data, as</span>
-<span class="sd">            created by the computeBinnedData method.</span>
+<span class="sd">        :Parameter:</span>
+<span class="sd">            data_array : numpy array</span>
+<span class="sd">                data array containing binned data, as created by the computeBinnedData method.</span>
 
-<span class="sd">        Raises:</span>
-<span class="sd">            ValueError: when no pump probe time delay axis is available.</span>
+<span class="sd">        :Raise:</span>
+<span class="sd">            Throw a ValueError when no pump probe time delay axis is available.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            data_array_normalized: normalized version of the input array.</span>
+<span class="sd">        :Return:</span>
+<span class="sd">            data_array_normalized : numpy array</span>
+<span class="sd">                normalized version of the input array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -486,8 +500,7 @@
         <span class="sd">&quot;&quot;&quot; Save a binned array to h5 file. The file includes the axes (taken from the scheduled bins)</span>
 <span class="sd">        and the delay histograms, if present.</span>
 
-<span class="sd">        Parameters:</span>
-
+<span class="sd">        :Parameters:</span>
 <span class="sd">            binnedData :</span>
 <span class="sd">                binned data</span>
 <span class="sd">            name : str</span>
@@ -528,14 +541,13 @@
 <div class="viewcode-block" id="DldProcessor.load_binned"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.load_binned">[docs]</a>    <span class="k">def</span> <span class="nf">load_binned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; load an h5 file saved with save_array.</span>
 
-<span class="sd">        Parameters:</span>
-
-<span class="sd">                name : str</span>
-<span class="sd">                    extra name tag in the filename</span>
-<span class="sd">                path : str | None</span>
-<span class="sd">                    file path</span>
-<span class="sd">                mode : str | &#39;r&#39; (read)</span>
-<span class="sd">                    read mode of h5 file</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            name : str</span>
+<span class="sd">                extra name tag in the filename</span>
+<span class="sd">            path : str | None</span>
+<span class="sd">                file path</span>
+<span class="sd">            mode : str | &#39;r&#39; (read)</span>
+<span class="sd">                read mode of h5 file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -574,17 +586,22 @@
 <span class="sd">        The implementation allows to choose between setting a step size</span>
 <span class="sd">        (useStepSize=True, default) or using a number of bins (useStepSize=False).</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            name (string): Name of the column to bin to. Possible column names are:</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            name : str</span>
+<span class="sd">                Name of the column to bin to. Possible column names are:</span>
 <span class="sd">                posX, posY, dldTime, pumpProbeTime, dldDetector, etc.</span>
-<span class="sd">            start (float): position of first bin</span>
-<span class="sd">            end (float): position of last bin (not included!)</span>
-<span class="sd">            steps (float): define the bin size: if useStepSize=True (default),</span>
+<span class="sd">            start : float</span>
+<span class="sd">                Position of first bin</span>
+<span class="sd">            end : float</span>
+<span class="sd">                Position of last bin (not included!)</span>
+<span class="sd">            steps : float</span>
+<span class="sd">                Define the bin size. If useStepSize=True (default),</span>
 <span class="sd">                this is the step size, while if useStepSize=False, then this is the</span>
 <span class="sd">                number of bins. In Legacy mode (force_legacy=True, or</span>
 <span class="sd">                processor._LEGACY_MODE=True)</span>
-<span class="sd">            force_legacy (bool): if true, imposes old method for generating binns,</span>
-<span class="sd">                based on np.arange instead of linspace.</span>
+<span class="sd">            force_legacy : bool</span>
+<span class="sd">                if true, imposes old method for generating bins,</span>
+<span class="sd">                based on np.arange instead of np.linspace.</span>
 
 <span class="sd">        See also:</span>
 <span class="sd">            computeBinnedData : Method to compute all bins created with this function.</span>
@@ -624,10 +641,13 @@
 <div class="viewcode-block" id="DldProcessor.addFilter"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.addFilter">[docs]</a>    <span class="k">def</span> <span class="nf">addFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colname</span><span class="p">,</span> <span class="n">lb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Filters the dataframes contained in the current processor</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            colname (str): name of the column in the dask dataframes</span>
-<span class="sd">            lb (float64): lower boundary of the filter</span>
-<span class="sd">            ub (float64): upper bounday of the filter</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            colname : str</span>
+<span class="sd">                name of the column in the dask dataframes</span>
+<span class="sd">            lb : float64</span>
+<span class="sd">                lower boundary of the filter</span>
+<span class="sd">            ub : float64</span>
+<span class="sd">                upper bounday of the filter</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">colname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -641,9 +661,10 @@
             <span class="k">if</span> <span class="n">ub</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ub</span><span class="p">]</span></div>
 
-    <span class="k">def</span> <span class="nf">genBins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">useStepSize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<div class="viewcode-block" id="DldProcessor.genBins"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.genBins">[docs]</a>    <span class="k">def</span> <span class="nf">genBins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">useStepSize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">forceEnds</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">include_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Creates bins for use by binning functions. Can also be used to generate x axes.</span>
+        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Creates bins for use by binning functions.</span>
+<span class="sd">        Can also be used to generate x axes.</span>
 
 <span class="sd">        Binning is created using np.linspace (formerly was done with np.arange).</span>
 <span class="sd">        The implementation allows to choose between setting a step size</span>
@@ -658,23 +679,30 @@
 <span class="sd">        cleanly. This of course only has meaning when choosing steps that do not</span>
 <span class="sd">        cleanly divide the interval.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            start (float): position of first bin</span>
-<span class="sd">            end (float): position of last bin (not included!)</span>
-<span class="sd">            steps (float): define the bin size: if useStepSize=True (default),</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            start : float</span>
+<span class="sd">                Position of first bin</span>
+<span class="sd">            end : float</span>
+<span class="sd">                Position of last bin (not included!)</span>
+<span class="sd">            steps : float</span>
+<span class="sd">                Define the bin size. If useStepSize=True (default),</span>
 <span class="sd">                this is the step size, while if useStepSize=False, then this is the</span>
 <span class="sd">                number of bins. In Legacy mode (force_legacy=True, or</span>
 <span class="sd">                processor._LEGACY_MODE=True)</span>
-<span class="sd">            useStepSize (bool): tells python to interpret steps as a step size if</span>
+<span class="sd">            useStepSize : bool</span>
+<span class="sd">                Tells python to interpret steps as a step size if</span>
 <span class="sd">                True, or as the number of steps if False</span>
-<span class="sd">            forceEnds (bool): tells python to give priority to the end parameter</span>
+<span class="sd">            forceEnds : bool</span>
+<span class="sd">                Tells python to give priority to the end parameter</span>
 <span class="sd">                rather than the step parameter (see above for more info)</span>
-<span class="sd">            include_last (bool): closes the interval on the right when true. If</span>
+<span class="sd">            include_last : bool</span>
+<span class="sd">                Closes the interval on the right when true. If</span>
 <span class="sd">                using step size priority, will expand the interval to include</span>
 <span class="sd">                the next value when true, will shrink the interval to contain all</span>
 <span class="sd">                points within the bounds if false.</span>
-<span class="sd">            force_legacy (bool): if true, imposes old method for generating binns,</span>
-<span class="sd">                based on np.arange instead of linspace.</span>
+<span class="sd">            force_legacy : bool</span>
+<span class="sd">                If true, imposes old method for generating bins,</span>
+<span class="sd">                based on np.arange instead of np.inspace.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">decimal</span> <span class="k">import</span> <span class="n">Decimal</span>
 
@@ -708,7 +736,7 @@
                 <span class="n">steps</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;number of steps must be a positive integer number&#39;</span>
             <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">include_last</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">bins</span>
+        <span class="k">return</span> <span class="n">bins</span></div>
 
 <div class="viewcode-block" id="DldProcessor.addBinning"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.addBinning">[docs]</a>    <span class="k">def</span> <span class="nf">addBinning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">useStepSize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">forceEnds</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                    <span class="n">include_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -719,28 +747,37 @@
 <span class="sd">        as in this list. The attribute binRangeList will contain the ranges of</span>
 <span class="sd">        the binning used for the corresponding dimension.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            name (string): Name of the column to bin to. Possible column names are:</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            name : str</span>
+<span class="sd">                Name of the column to bin to. Possible column names are:</span>
 <span class="sd">                posX, posY, dldTime, pumpProbeTime, dldDetector, etc.</span>
-<span class="sd">            start (float): position of first bin</span>
-<span class="sd">            end (float): position of last bin (not included!)</span>
-<span class="sd">            steps (float): define the bin size: if useStepSize=True (default),</span>
+<span class="sd">            start : float</span>
+<span class="sd">                Position of first bin</span>
+<span class="sd">            end : float</span>
+<span class="sd">                Position of last bin (not included!)</span>
+<span class="sd">            steps : float</span>
+<span class="sd">                The bin size, if useStepSize=True (default),</span>
 <span class="sd">                this is the step size, while if useStepSize=False, then this is the</span>
 <span class="sd">                number of bins. In Legacy mode (force_legacy=True, or</span>
 <span class="sd">                processor._LEGACY_MODE=True)</span>
-<span class="sd">            useStepSize (bool): tells python to interpret steps as a step size if</span>
+<span class="sd">            useStepSize : bool</span>
+<span class="sd">                Tells python to interpret steps as a step size if</span>
 <span class="sd">                True, or as the number of steps if False</span>
-<span class="sd">            forceEnds (bool): tells python to give priority to the end parameter</span>
+<span class="sd">            forceEnds : bool</span>
+<span class="sd">                Tells python to give priority to the end parameter</span>
 <span class="sd">                rather than the step parameter (see genBins for more info)</span>
-<span class="sd">            include_last (bool): closes the interval on the right when true. If</span>
+<span class="sd">            include_last : bool</span>
+<span class="sd">                Closes the interval on the right when true. If</span>
 <span class="sd">                using step size priority, will expand the interval to include</span>
 <span class="sd">                the next value when true, will shrink the interval to contain all</span>
 <span class="sd">                points within the bounds if false.</span>
-<span class="sd">            force_legacy (bool): if true, imposes old method for generating binns,</span>
-<span class="sd">                based on np.arange instead of linspace.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            axes (np.array): axis of the binned dimesion. The points defined on this axis are the middle points of</span>
-<span class="sd">            each bin.</span>
+<span class="sd">            force_legacy : bool</span>
+<span class="sd">                If true, imposes old method for generating binns,</span>
+<span class="sd">                based on np.arange instead of np.linspace.</span>
+<span class="sd">        :Returns:</span>
+<span class="sd">            axes : numpy array</span>
+<span class="sd">                axis of the binned dimesion. The points defined on this axis are the middle points of</span>
+<span class="sd">                each bin.</span>
 
 <span class="sd">        See also:</span>
 <span class="sd">            computeBinnedData : Method to compute all bins created with this function.</span>
@@ -796,13 +833,14 @@
 <div class="viewcode-block" id="DldProcessor.computeBinnedData"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.computeBinnedData">[docs]</a>    <span class="k">def</span> <span class="nf">computeBinnedData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">savePath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">saveMode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Use the bin list to bin the data.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            result (np.array): It returns a numpy array of float64 values. Number of bins defined will define the</span>
-<span class="sd">            dimensions of such array.</span>
+<span class="sd">        :Returns:</span>
+<span class="sd">            result : numpy array</span>
+<span class="sd">                A numpy array of float64 values. Number of bins defined will define the</span>
+<span class="sd">                dimensions of such array.</span>
 
-<span class="sd">        Notes:</span>
-<span class="sd">            postProcess method must be used before computing the binned data if binning along pumpProbeDelay or polar</span>
-<span class="sd">            k-space coordinates.</span>
+<span class="sd">        :Notes:</span>
+<span class="sd">            postProcess method must be used before computing the binned data if binning</span>
+<span class="sd">            along pumpProbeDelay or polar k-space coordinates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">analyzePart</span><span class="p">(</span><span class="n">part</span><span class="p">):</span>
@@ -895,15 +933,18 @@
 
 <div class="viewcode-block" id="DldProcessor.computeBinnedDataMulti"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.computeBinnedDataMulti">[docs]</a>    <span class="k">def</span> <span class="nf">computeBinnedDataMulti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">savePath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                <span class="n">saveMode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Use the bin list to bin the data.</span>
+        <span class="sd">&quot;&quot;&quot; Use the bin list to bin the data. Cluster-compatible version (Maciej Dendzik)</span>
+<span class="sd">        </span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">        </span>
+<span class="sd">        :Return:</span>
+<span class="sd">            result : numpy array</span>
+<span class="sd">                A numpy array of float64 values. Number of bins defined will define the</span>
+<span class="sd">                dimensions of such array.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            result (np.array): It returns a numpy array of float64 values. Number of bins defined will define the</span>
-<span class="sd">            dimensions of such array.</span>
-
-<span class="sd">        Notes:</span>
-<span class="sd">            postProcess method must be used before computing the binned data if binning along pumpProbeDelay or polar</span>
-<span class="sd">            k-space coordinates.</span>
+<span class="sd">        :Notes:</span>
+<span class="sd">            postProcess method must be used before computing the binned data if binning</span>
+<span class="sd">            along pumpProbeDelay or polar k-space coordinates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">analyzePart</span><span class="p">(</span><span class="n">part</span><span class="p">):</span>
@@ -980,23 +1021,29 @@
     <span class="c1"># DEPRECATED METHODS</span>
     <span class="c1"># ==================</span>
 
-    <span class="k">def</span> <span class="nf">save2hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binnedData</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;default.hdf5&#39;</span><span class="p">,</span>
+<div class="viewcode-block" id="DldProcessor.save2hdf5"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.save2hdf5">[docs]</a>    <span class="k">def</span> <span class="nf">save2hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binnedData</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;default.hdf5&#39;</span><span class="p">,</span>
                   <span class="n">normalizedData</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Store the binned data in a hdf5 file.</span>
+        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Store the binned data in a hdf5 file.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">            binneddata (pd.DataFrame): binned data with bins in dldTime, posX, and posY</span>
-<span class="sd">                (and if to be normalized, binned in detectors)</span>
-<span class="sd">            filename (string): name of the file,</span>
-<span class="sd">            path (string, optional): path to the location where to save the hdf5 file. If None, uses the default value</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            binneddata : pd.DataFrame</span>
+<span class="sd">                binned data with bins in dldTime, posX, and posY (and if to be</span>
+<span class="sd">                normalized, binned in detectors).</span>
+<span class="sd">            filename : str</span>
+<span class="sd">                name of the file.</span>
+<span class="sd">            path : str</span>
+<span class="sd">                path to the location where to save the hdf5 file. If None, uses the default value</span>
 <span class="sd">                defined in SETTINGS.ini</span>
-<span class="sd">            normalizedData (bool): Normalized data for both detector, so it should be a 3d array (posX, posY,</span>
-<span class="sd">            detectorID).</span>
-<span class="sd">            overwrite (bool): if True, overwrites existing files with matching name.</span>
+<span class="sd">            normalizedData : bool</span>
+<span class="sd">                Normalized data for both detector, so it should be a 3D array</span>
+<span class="sd">                (posX, posY, detectorID).</span>
+<span class="sd">            overwrite : bool</span>
+<span class="sd">                if True, overwrites existing files with matching name.</span>
 
-<span class="sd">        Example:</span>
+<span class="sd">        :Example:</span>
 <span class="sd">            Normalization given, for example take it from run 18440.</span>
-
+<span class="sd">        ::</span>
+<span class="sd">        </span>
 <span class="sd">            processor.readRun(18440)</span>
 <span class="sd">            processor.addBinning(&#39;posX&#39;, 500, 1000, 2)</span>
 <span class="sd">            processor.addBinning(&#39;posY&#39;, 500, 1000, 2)</span>
@@ -1012,8 +1059,7 @@
 <span class="sd">                Exception Wrong dimension: if data from binnedData has dimensions different from 4</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># TODO: generalise this function for different data input shapes or bin</span>
-        <span class="c1"># orders</span>
+        <span class="c1"># TODO: generalise this function for different data input shapes or bin orders</span>
         <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_H5_DIR</span>
 
@@ -1053,22 +1099,22 @@
 
         <span class="n">dset</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">data2hdf5</span>
         <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Created file &quot;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Created file &quot;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DldProcessor.deleteBinners"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.deleteBinners">[docs]</a>    <span class="k">def</span> <span class="nf">deleteBinners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; DEPRECATED in favour of resetBins</span>
+        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** use resetBins() instead</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: deleteBinners method has been renamed to resetBins.&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resetBins</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="DldProcessor.readDataframesParquet"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.readDataframesParquet">[docs]</a>    <span class="k">def</span> <span class="nf">readDataframesParquet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; DEPRECATED: load data from a dask Parquet dataframe.</span>
+        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Load data from a dask Parquet dataframe.</span>
+<span class="sd">        Use readDataframesParquet instead.</span>
 
-<span class="sd">        DEPRECATED, use readDataframesParquet instead.</span>
-
-<span class="sd">        Parameters:</span>
-<span class="sd">            fileName (str): name (including path) of the folder containing</span>
+<span class="sd">        :Parameters:</span>
+<span class="sd">            fileName : str</span>
+<span class="sd">                name (including path) of the folder containing</span>
 <span class="sd">                parquet files where the data was saved.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO: remove this function once retro-compatibility is ensured</span>

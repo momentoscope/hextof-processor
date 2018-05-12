@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""Functions for calculation of pulse energy and pulse energy density of optical laser.
-Calibration values taken from Pump beam energy converter 800 400.xls
-Units are uJ for energy, um for beam diameter, uJ/cm^2 for energy density (and arb. for diode signal)"""
-
 import sys
 import os
 import numpy as np
@@ -13,38 +9,55 @@ from matplotlib import pyplot as plt, cm
 
 
 # ================================================================================
-
+"""Functions for calculation of pulse energy and pulse energy density of optical laser.
+Calibration values taken from Pump beam energy converter 800 400.xls
+Units are uJ for energy, um for beam diameter, uJ/cm^2 for energy density (and arb. for diode signal)
+"""
 
 def PulseEnergy400(Diode):
-    """ Returns the pulse energy of 400nm laser in uJ.
-    :param Diode: value from photodiode (arb. units)
-    um for beam diameter, uJ/cm^2 for energy density.
+    """Calculate the pulse energy of 400nm laser in uJ. The unit is um for beam diameter.
+    
+        :Parameter:
+            Diode : numeric
+                Measured value from photodiode (arb. units)
     """
     return 0.86 * (Diode * 0.0008010439 + 0.0352573)
 
 
 def PulseEnergy800(Diode):
-    """ Returns the pulse energy of 800nm laser in uJ.
-    :param Diode: value from photodiode (arb. units)
-    um for beam diameter, uJ/cm^2 for energy density.
+    """Calculate the pulse energy of 800nm laser in uJ. The unit is um for beam diameter.
+    
+        :Parameter:
+            Diode : numeric
+                Meausred value from photodiode (arb. units)
     """
 
     return 0.86 * (Diode * 0.0009484577 + 0.1576)
 
 
 def EnergyDensity400(Diode, Diameter=600):
-    """ Returns the pulse energy density of 400nm laser in uJ/cm^2.
-    :param Diode: value from photodiode (arb. units)
-    um for beam diameter, uJ/cm^2 for energy density.
+    """Calculate the pulse energy density of 400nm laser in uJ/cm^2.
+    The units are um for beam diameter, uJ/cm^2 for energy density.
+    
+    :Parameters:
+        Diode : numeric
+            Measured value from photodiode (arb. units)
+        Diameter : numeric
+            Beam diameter
     """
 
     return PulseEnergy400(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
 
 
 def EnergyDensity800(Diode, Diameter=600):
-    """ Returns the pulse energy density of 800nm laser in uJ/cm^2.
-    :param Diode: value from photodiode (arb. units)
-    um for beam diameter, uJ/cm^2 for energy density
+    """Calculate the pulse energy density of 800nm laser in uJ/cm^2.
+    The units are um for beam diameter, uJ/cm^2 for energy density.
+    
+    :Parameters:
+        Diode : numeric
+            Measured value from photodiode (arb. units)
+        Diameter : numeric
+            Beam diameter
     """
 
     return PulseEnergy800(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
@@ -54,28 +67,27 @@ def EnergyDensity800(Diode, Diameter=600):
 
 
 def radius(df, center=(0, 0)):
-    return np.sqrt(
-        np.square(df.posX - center[0]) + np.square(df.posY - center[1]))
+    """ Calculate the radius
+    """
+
+    return np.sqrt(np.square(df.posX - center[0]) + np.square(df.posY - center[1]))
 
 
 def argnearest(array, val, rettype='vectorized'):
     """Find the coordinates of the nD array element nearest to a specified value
 
-    **Parameters**
-
-    array : ndarray
-        Numeric array
-    val : numeric
-        Look-up value
-    rettype : str | 'vectorized'
-        return type specification
-        'vectorized' denotes vectorized coordinates (integer)
-        'coordinates' denotes multidimensional coordinates (tuple)
-
-    **Return**
-
-    argval : numeric
-        coordinate position
+    :Parameters:
+        array : numpy array
+            Numeric data array
+        val : numeric
+            Look-up value
+        rettype : str | 'vectorized'
+            return type specification
+            'vectorized' denotes vectorized coordinates (integer)
+            'coordinates' denotes multidimensional coordinates (tuple)
+    :Return:
+        argval : numeric
+            coordinate position
     """
 
     vnz = np.abs(array - val)
@@ -88,16 +100,21 @@ def argnearest(array, val, rettype='vectorized'):
 
 
 # ================================================================================
-
+"""Output ImageJ/Fiji-compatible format
+"""
 
 def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
     """ Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI
 
-    Parameters:
-        data_array (np.array): 4D data array, order must be Kx,Ky,Energy,Time
-        filename (str): name of the file to save
-        path (str, optional): path to where to save hdf5 file. If None, uses the "results" folder from SETTINGS.ini
-        overwrite (str): if true, it overwrites existing file with the same
+    :Parameters:
+        data_array : numpy array
+            4D data array, order must be Kx,Ky,Energy,Time
+        filename : str
+            The name of the file to save
+        path : str
+            The path to where to save hdf5 file. If None, uses the "results" folder from SETTINGS.ini
+        overwrite : str
+            If true, it overwrites existing file with the same
             name. Otherwise raises and error.
     """
 
@@ -135,6 +152,7 @@ def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
             xyeData.shape,
             dtype='float64')
         dset[...] = xyeData
+    
     print("Created file " + filepath)
 
 
@@ -151,15 +169,19 @@ def camelCaseIt(snake_case_string):
 
     titleCaseVersion = snake_case_string.title().replace("_", "")
     camelCaseVersion = titleCaseVersion[0].lower() + titleCaseVersion[1:]
+    
     return camelCaseVersion
 
 
 # ================================================================================
 """ The following functions convert between binding energy (Eb) in eV (negative convention)
     and time of flight (ToF) in ns.
+    
     The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
     binding energy Eb is given by
+    
     Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+    
     With W the work function, hv the photon energy, V the electrostatic potential applied to
     the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
     The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
@@ -187,37 +209,46 @@ Parameters:
 def t2e(t, toffset=None, eoffset=None):
     """ Transform ToF to eV.
 
-    The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)
+    The functions (t2e and e2t) convert between binding energy (:math:`E_b`) in eV (negative convention)
     and time of flight (ToF) in ns.
-    The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
-    binding energy Eb is given by
+    
+    The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the
+    binding energy :math:`E_b` is given by
+    
     -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+    
     With W the work function, hv the photon energy, V the electrostatic potential applied to
     the sample with respect to the drift section voltage, v the velocity of the electrons in the drift tube,
     m the mass of the electron.
+    
     The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
     time in the drift tube. The measured ToF, however, has some offset due to clock start not
     coinciding with entry in the drift section.
 
     toffset is supposed to include the time offset for when the electrons enter the drift section.
-    Its main mainly affects peak spacing, and there are several strategies for calibrating this
-    value:
-        1.  By measuring the photon peak and correcting by some extractor voltage-dependent offset
-        2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum
-        3.  Imposing some calibrated spacing between features in a spectrum
+    Its main mainly affects peak spacing, and there are several strategies for calibrating this value,
+    
+    1.  By measuring the photon peak and correcting by some extractor voltage-dependent offset
+    2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum
+    3.  Imposing some calibrated spacing between features in a spectrum
 
     eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
-    there are several strategies for calibrating this value:
-        1.  By getting the correct values for W, hv, and V
-        2.  It can be calibrated by imposing peak position
+    there are several strategies for calibrating this value,
+    
+    1.  By getting the correct values for W, hv, and V
+    2.  It can be calibrated by imposing peak position
 
-    Parameters:
-        t (float) the ToF
-        toffset (float) the time offset from thedld clock start to when the fastest photoelectrons reach the detector
-        eoffset (float) the energy offset given by W-hv-V
+    :Parameters:
+        t : float
+            The time of flight
+        toffset : float
+            The time offset from thedld clock start to when the fastest photoelectrons reach the detector
+        eoffset : float
+            The energy offset given by W-hv-V
 
-    Returns:
-        e (float) the binding energy
+    :Return:
+        e : float
+            The binding energy
     """
 
     from configparser import ConfigParser
@@ -239,13 +270,16 @@ def t2e(t, toffset=None, eoffset=None):
 
 
 def e2t(e, toffset=None, eoffset=None):
-    """ Transform eV to ToF.
+    """ Transform eV to time of flight (ToF).
 
-    The functions (t2e and e2t) convert between binding energy (Eb) in eV (negative convention)
+    The functions (t2e and e2t) convert between binding energy (:math:`E_b`) in eV (negative convention)
     and time of flight (ToF) in ns.
-    The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
-    binding energy Eb is given by
+    
+    The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the
+    binding energy :math:`E_b` is given by
+    
     -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+    
     With W the work function, hv the photon energy, V the electrostatic potential applied to
     the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
     The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
@@ -253,23 +287,29 @@ def e2t(e, toffset=None, eoffset=None):
     coinciding with entry in the drift section.
 
     offs is supposed to include the time offset for when the electrons enter the drift section.
-    Its main mainly affects peak spacing, and there are several strategies for calibrating this value:
-        1.  By measuring the photon peak and correcting by some extractor voltage-dependent offset
-        2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum
-        3.  Imposing some calibrated spacing between features in a spectrum
+    Its main mainly affects peak spacing, and there are several strategies for calibrating this value,
+    
+    1.  By measuring the photon peak and correcting by some extractor voltage-dependent offset
+    2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum
+    3.  Imposing some calibrated spacing between features in a spectrum
 
     eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
-    there are several strategies for calibrating this value:
-        1.  By getting the correct values for W, hv, and V
-        2.  It can be calibrated by imposing peak position
+    there are several strategies for calibrating this value,
+    
+    1.  By getting the correct values for W, hv, and V
+    2.  It can be calibrated by imposing peak position
 
-    Parameter:
-        e (float): the binding energy
-        toffset (float) the time offset from thedld clock start to when the fastest photoelectrons reach the detector
-        eoffset (float) the energy offset given by W-hv-V
+    :Parameters:
+        e : float
+            The binding energy
+        toffset : float
+            The time offset from thedld clock start to when the fastest photoelectrons reach the detector
+        eoffset : float
+            The energy offset given by W-hv-V
 
-    Return:
-        t (float): the ToF
+    :Return:
+        t : float
+            The time of flight
     """
 
     from configparser import ConfigParser
@@ -307,11 +347,15 @@ def plot_lines(data,
                static_curve=None):
     """
 
-    :param data:
-    :param normalization:
-    :param range:
-    :param color_range:
-    :return:
+    :Parameters:
+        data :
+            
+        normalization :
+            
+        range :
+            
+        color_range :
+            
     """
 
     f, axis = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
@@ -368,8 +412,12 @@ def plot_lines(data,
 
 
 def get_idx(array, value):
+    """ **[DEPRECATED]** Use argnearest
+    """
     return (np.abs(array - value)).argmin()
 
 
 def load_results(filename, path=None):
-    """ load the data saved with processor.save_array()"""
+    # load the data saved with processor.save_array()
+    
+    pass
