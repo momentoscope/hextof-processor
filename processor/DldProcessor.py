@@ -10,7 +10,6 @@ import pandas as pd
 from tqdm import tqdm
 from configparser import ConfigParser
 import warnings
-
 import matplotlib.pyplot as plt
 
 _VERBOSE = False
@@ -91,8 +90,8 @@ class DldProcessor:
 
         :Parameters:
             import_all : bool
-            if True, imports all entries in settings.ini under section [processor] and [paths].
-            if False, only imports those that match existing attribute names.
+            ``True`` -- imports all entries in SETTINGS.ini under section [processor] and [paths].
+            ``False`` -- only imports those that match existing attribute names.
             False is the better choice, since it keeps better track of attributes.
         """
 
@@ -149,15 +148,14 @@ class DldProcessor:
         """ Load data from a parquet or HDF5 dataframe.
 
         Access the data as hdf5 file (this is the format used internally,
-        NOT the FLASH HDF5-files from the DAQ system!)
+        NOT the FLASH HDF5 files obtained from the DAQ system!)
 
         :Parameters:
             fileName : str
                 name (including path) of the folder containing hdf5
                 files where the data was saved.
-            format : str
-                either 'parquet' to load a parquet type of dataframe,
-                or 'h5' or 'hdf5' to load hdf5 dataframes
+            format : str | 'parquet'
+                file format, 'parquet' (parquet file), 'h5' or 'hdf5' (hdf5 file).
         """
 
         format = format.lower()
@@ -186,7 +184,6 @@ class DldProcessor:
             self.ddMicrobunches = dask.dataframe.read_hdf(
                 fileName, '/microbunches', mode='r', chunksize=self.CHUNK_SIZE)
 
-        # self.postProcess()
 
     def appendDataframeParquet(self, fileName):
         """ Append data to an existing dask Parquet dataframe.
@@ -194,7 +191,7 @@ class DldProcessor:
         This can be used to concatenate multiple DAQ runs in one dataframe.
         Data is taken from the dd and dd_microbunch dataframe attributes.
 
-        :Parameters:
+        :Parameter:
             fileName : str
                 name (including path) of the folder containing the
                 parquet files to append the new data.
@@ -210,22 +207,21 @@ class DldProcessor:
     def postProcess(self, bamCorrectionSign=0, kCenter=None):
         """ Apply corrections to the dataframe.
 
-        Runs the methods to post process the dataframe. Includes BAM sign
+        Runs the methods to post-process the dataframe. Includes BAM sign
         correction and polar coordinates axes generation.
 
         ``/!\`` BAM correction is tricky and will mess up the delay histogram.
-        This is because of strong correlation with micro bunch ID of both the
+        This is because of strong correlation with microbunch ID of both the
         BAM value and the photoemission yield, i.e. photons at the end of a
         macrobunch give more photoelectrons while being systematically
         shifted in time.
 
         :Parameters:
-            bamCorrectionSign : int
-                used to apply sign to the BAM correction: accepted values are 0,1,-1
-                set to 0 to avoid applying BAM correction, set to None to leave
-                unchanged the pump probe delay information (doesn't change name).
-                See correctBAM for details.
-            kCenter : (int, int)
+            bamCorrectionSign : int | 0
+                Sign of to the BAM correction.
+                Use None to have no correction and no name change.
+                See ``correctBAM`` for details.
+            kCenter : (int, int) | None
                 position of the center of k-space in the DLD detector array.
                 If set to None, no polar coordinates are added.
                 See createPolarCoordinates for details.
@@ -239,31 +235,38 @@ class DldProcessor:
             self.createPolarCoordinates(kCenter)
 
     def correctBAM(self, sign=1):
-        """ Correct pump probe time by BAM.
+        """ Correct pump probe time by BAM (beam arrival monitor) data.
 
         Corrects the pulse to pulse jitter, and changes name from
         delayStageTime to pumpProbeTime. BAM correction shifts the time delay
         by a constant value.
 
         ``/!\`` BAM correction is tricky and will mess up the delay histogram.
-        This is because of strong correlation with micro bunch ID of both the
+        This is because of strong correlation with the microbunch ID of both the
         BAM value and the photoemission yield, i.e. photons at the end of a
-        Macro bunch give more photoelectrons while systematically being
+        macrobunch give more photoelectrons while becoming systematically
         shifted in time.
 
         Default value is 1 since the BAM measures the delay between the master
         clock start and the arrival of the beam.
+        
         On the other hand, more positive delay stage values are for when the FEL
         arrives earlier (FEL before pump is on the more positive side of t0).
         A bigger delay in beam arrival for an FEL pulse means that the photoelectrons
         actually had a more negative delay (probe later than pump) than what the delay stage
         measured, and should therefore be moved to more negative values.
 
-        :Parameters:
+        :Parameter:
             sign : int
-                sign multiplier for BAM correction
-                accepted values: 0, 1, -1
-                Avoid using -1 unless debugging
+                Sign multiplier for BAM correction. Avoid using -1 unless debugging.
+                
+                =======  =====================================
+                Value    Operation    
+                =======  =====================================
+                 0       no correction  
+                 1       pumpProbeTime = delayStage - bam
+                -1       pumpProbeTime = delayStage + bam
+                =======  =====================================
         """
 
         self.dd['pumpProbeTime'] = self.dd['delayStage'] - \
@@ -272,11 +275,11 @@ class DldProcessor:
                                                self.ddMicrobunches['bam'] * sign
 
     def createPolarCoordinates(self, kCenter=(250, 250)):
-        """ Define polar coordinates for k-space values.
+        """ Calculate polar coordinates for k-space values.
 
-        :Parameters:
-            kCenter : (int,int)
-                position of the center of k-space in the DLD detector array
+        :Parameter:
+            kCenter : (int,int) | (250, 250)
+                Pixel position of the k-space center in the DLD array
         """
 
         def radius(df):
@@ -297,7 +300,7 @@ class DldProcessor:
 
         :Parameter:
             data_array : numpy array
-                data array containing binned data, as created by the computeBinnedData method.
+                data array containing binned data, as created by the ``computeBinnedData`` method.
 
         :Raise:
             Throw a ValueError when no pump probe time delay axis is available.
@@ -312,38 +315,42 @@ class DldProcessor:
                 idx = self.binNameList.index('pumpProbeTime')
             else:
                 idx = ax
+            
             data_array_normalized = np.swapaxes(data_array, 0, idx)
             norm_array = self.delaystageHistogram
+            
             for i in range(np.ndim(data_array_normalized) - 1):
                 norm_array = norm_array[:, None]
             print('normalized pumpProbe data found along axis {}'.format(idx))
+            
             data_array_normalized = data_array_normalized / norm_array
             data_array_normalized = np.swapaxes(data_array_normalized, idx, 0)
+            
             return data_array_normalized
 
         except ValueError:
             raise ValueError(
                 'No pump probe time bin, could not normalize to delay stage histogram.')
 
-    def save_binned(self, binnedData, name, path=None, mode='w'):
-        """ Save a binned array to h5 file. The file includes the axes (taken from the scheduled bins)
-        and the delay histograms, if present.
+    def save_binned(self, binnedData, namestr, path=None, mode='w'):
+        """ Save a binned numpy array to h5 file. The file includes the axes
+        (taken from the scheduled bins) and the delay stage histogram, if it exists.
 
         :Parameters:
-            binnedData :
-                binned data
-            name : str
-                extra name tag in the filename
+            binnedData : numpy array
+                Binned multidimensional data.
+            namestr : str
+                Extra namestring tag in the filename.
             path : str | None
-                file path
-            mode : str | 'w' (write)
-                write mode of h5 file
+                File path.
+            mode : str | 'w'
+                Write mode of h5 file ('w' = write).
         """
 
         if path is None:
             path = self.DATA_RESULTS_DIR
 
-        filename = 'run{}_{}.h5'.format(self.runNumber, name)
+        filename = 'run{}_{}.h5'.format(self.runNumber, namestr)
         h5File = h5py.File(path + filename, mode)
 
         # Saving data
@@ -367,22 +374,30 @@ class DldProcessor:
 
         h5File.close()
 
-    def load_binned(self, name, path=None, mode='r'):
-        """ load an h5 file saved with save_array.
+    def load_binned(self, namestr, path=None, mode='r'):
+        """ Load an HDF5 file saved with ``save_binned()`` method.
 
         :Parameters:
-            name : str
-                extra name tag in the filename
+            namestr : str
+                Extra namestring tag in the filename.
             path : str | None
-                file path
-            mode : str | 'r' (read)
-                read mode of h5 file
+                File path.
+            mode : str | 'r'
+                Read mode of h5 file ('r' = read).
+        
+        :Returns:
+            data : numpy array
+                Multidimensional data read from h5 file.
+            axes : numpy array
+                The axes values associated with the read data.
+            hist : numpy array
+                Histogram values associated with the read data.
         """
 
         if path is None:
             path = self.DATA_RESULTS_DIR
 
-        filename = 'run{}_{}.h5'.format(self.runNumber, name)
+        filename = 'run{}_{}.h5'.format(self.runNumber, namestr)
         h5File = h5py.File(path + filename, mode)
 
         # Retrieving binned data
@@ -404,7 +419,8 @@ class DldProcessor:
 
     def addBinningOld(self, name, start, end, steps, useStepSize=True,
                       include_last=True, force_legacy=False):
-        """ Add binning of one dimension, to be then computed with computeBinnedData method.
+        """ **[DEPRECATED]** Add binning of one dimension,
+        to be then computed with ``computeBinnedData`` method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
         which to bin the data. Output array dimensions order will be the same
@@ -468,7 +484,7 @@ class DldProcessor:
                 np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
 
     def addFilter(self, colname, lb=None, ub=None):
-        """ Filters the dataframes contained in the current processor
+        """ Filters the dataframes contained in the processor instance
 
         :Parameters:
             colname : str
@@ -477,6 +493,9 @@ class DldProcessor:
                 lower boundary of the filter
             ub : float64
                 upper bounday of the filter
+        
+        :Effect:
+            Filters the columns of ``dd`` and ``ddMicrobunches`` dataframes in place.
         """
 
         if colname in self.dd.columns:
@@ -533,6 +552,7 @@ class DldProcessor:
                 If true, imposes old method for generating bins,
                 based on np.arange instead of np.inspace.
         """
+        
         from decimal import Decimal
 
         _LEGACY_BINNING = False
@@ -569,7 +589,7 @@ class DldProcessor:
 
     def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False,
                    include_last=True, force_legacy=False):
-        """ Add binning of one dimension, to be then computed with computeBinnedData method.
+        """ Add binning of one dimension, to be then computed with ``computeBinnedData`` method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
         which to bin the data. Output array dimensions order will be the same
@@ -578,7 +598,7 @@ class DldProcessor:
 
         :Parameters:
             name : str
-                Name of the column to bin to. Possible column names are:
+                Name of the column to apply binning to. Possible column names are`:`
                 posX, posY, dldTime, pumpProbeTime, dldDetector, etc.
             start : float
                 Position of first bin
@@ -589,30 +609,35 @@ class DldProcessor:
                 this is the step size, while if useStepSize=False, then this is the
                 number of bins. In Legacy mode (force_legacy=True, or
                 processor._LEGACY_MODE=True)
-            useStepSize : bool
-                Tells python to interpret steps as a step size if
-                True, or as the number of steps if False
-            forceEnds : bool
+            useStepSize : bool | True
+                Tells Python how to interpret steps.
+                
+                :True: interpret steps as a step size.
+                :False: interpret steps as the number of steps.
+            forceEnds : bool | False
                 Tells python to give priority to the end parameter
                 rather than the step parameter (see genBins for more info)
-            include_last : bool
+            include_last : bool | True
                 Closes the interval on the right when true. If
                 using step size priority, will expand the interval to include
                 the next value when true, will shrink the interval to contain all
                 points within the bounds if false.
-            force_legacy : bool
-                If true, imposes old method for generating binns,
-                based on np.arange instead of np.linspace.
-        :Returns:
+            force_legacy : bool | False
+                :True: use np.arange method to generate bins.
+                :False: use np.linspace method to generate bins.
+                
+        :Return:
             axes : numpy array
                 axis of the binned dimesion. The points defined on this axis are the middle points of
                 each bin.
-
-        See also:
-            computeBinnedData : Method to compute all bins created with this function.
-
-        Notes:
+                
+        :Note:
             If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.
+        
+        .. seealso::
+        
+          ``computeBinnedData`` Method to compute all bins created with this function.
+
         """
 
         # write the parameters to the bin list:
@@ -659,8 +684,14 @@ class DldProcessor:
         self.binNameList = []
         self.binRangeList = []
 
-    def computeBinnedData(self, saveName=None, savePath=None, saveMode='w'):
+    def computeBinnedData(self, saveName=None, savePath=None):
         """ Use the bin list to bin the data.
+        
+        :Parameters:
+            saveName : str | None
+                filename
+            savePath : str | None
+                file path
 
         :Returns:
             result : numpy array
@@ -724,6 +755,7 @@ class DldProcessor:
             warnString="ignore"
         with warnings.catch_warnings():
             warnings.simplefilter(warnString)
+            
             for i in tqdm(range(0, self.dd.npartitions, self.N_CORES)):
                 resultsToCalculate = []
                 # process the data in blocks of n partitions (given by the number
@@ -756,24 +788,32 @@ class DldProcessor:
         result = result.astype(np.float64)
 
         if saveName is not None:
-            self.save_binned(result, saveName, path=savePath, mode=saveMode)
+            self.save_binned(result, saveName, path=savePath, mode='w')
 
         return result
 
     def computeBinnedDataMulti(self, saveName=None, savePath=None,
-                               saveMode='w', rank=None, size=None):
+                               rank=None, size=None):
         """ Use the bin list to bin the data. Cluster-compatible version (Maciej Dendzik)
         
         :Parameters:
+            saveName : str | None
+                filename
+            savePath : str | None
+                file path
+            rank : int | None
+                Rank number of cluster computer
+            size : int | None
+                Size of partition
         
         :Return:
             result : numpy array
-                A numpy array of float64 values. Number of bins defined will define the
-                dimensions of such array.
+                A numpy array of float64 values. The number of bins determines the
+                dimensionality of the output array.
 
         :Notes:
             postProcess method must be used before computing the binned data if binning
-            along pumpProbeDelay or polar k-space coordinates.
+            is applied along pumpProbeDelay or polar k-space coordinates.
         """
 
         def analyzePart(part):
@@ -842,7 +882,7 @@ class DldProcessor:
         results = np.nan_to_num(results)
         results = results.astype(np.float64)
         if saveName is not None:
-            self.save_binned(results, saveName, path=savePath, mode=saveMode)
+            self.save_binned(results, saveName, path=savePath, mode='w')
 
         return results
 
@@ -858,16 +898,17 @@ class DldProcessor:
             binneddata : pd.DataFrame
                 binned data with bins in dldTime, posX, and posY (and if to be
                 normalized, binned in detectors).
-            filename : str
+            filename : str | 'default.hdf5'
                 name of the file.
-            path : str
-                path to the location where to save the hdf5 file. If None, uses the default value
+            path : str | None | None
+                path to the location where to save the hdf5 file. If `None`, uses the default value
                 defined in SETTINGS.ini
-            normalizedData : bool
+            normalizedData : bool | None
                 Normalized data for both detector, so it should be a 3D array
                 (posX, posY, detectorID).
-            overwrite : bool
-                if True, overwrites existing files with matching name.
+            overwrite : bool | False
+                :True: overwrites existing files with matching filename.
+                :False: no overwriting of files
 
         :Example:
             Normalization given, for example take it from run 18440.
@@ -941,8 +982,8 @@ class DldProcessor:
         """ **[DEPRECATED]** Load data from a dask Parquet dataframe.
         Use readDataframesParquet instead.
 
-        :Parameters:
-            fileName : str
+        :Parameter:
+            fileName : str | None
                 name (including path) of the folder containing
                 parquet files where the data was saved.
         """
