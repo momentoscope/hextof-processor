@@ -12,7 +12,7 @@ The data obtained from the DAQ system is read through the **pah** package provid
 
 # Documentation
 
-The documentation of the package can be found [here](https://momentoscope.github.io/HextofOfflineAnalyzer/).
+The documentation of the package can be found [here](https://momentoscope.github.io/hextof-processor/).
 
 # Installation and initialization
 
