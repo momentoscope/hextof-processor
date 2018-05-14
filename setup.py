@@ -24,8 +24,8 @@ setup(
     name="HextofOfflineAnalyzer",
     version='0.9.0',
     description='Hextof Offline Analyzer',
-    author=['Yves Acremann','Steinn Agustsson','Davide Curcio','Patrick Xian'],
-    url='https://github.com/momentoscope/HextofOfflineAnalyzer/',
+    author=['Yves Acremann','Steinn Ymir Agustsson','Davide Curcio','Patrick Xian'],
+    url='https://github.com/momentoscope/hextof-processor',
     packages=['distutils', 'distutils.command'],
     ext_modules=cythonize(extensions)
 )
