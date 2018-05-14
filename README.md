@@ -1,4 +1,4 @@
-# HextofOfflineAnalyzer
+# hextof-processor
 This code is used to analyze data measured at FLASH using the HEXTOF (high energy X-ray time of flight) instrument. The HEXTOF uses a delay line detector (DLD) to measure the position and arrival time of single electron events.
 
 The analysis of the data is based on clean tables as dask dataframes. The main dataframe contains all detected electrons and can be binned according to the needs of the experiment. The second dataframe contains the FEL pulses needed for normalization.
@@ -18,7 +18,7 @@ The documentation of the package can be found [here](https://momentoscope.github
 
 Download the package by cloning to a local folder.
 ```bash
-git clone https://github.com/momentoscope/HextofOfflineAnalyzer.git
+git clone https://github.com/momentoscope/hextof-processor.git
 ```
 Install by running the setup.py. To do this, cd to your repo folder and run the following commands,
 ```bash
@@ -44,7 +44,7 @@ The last step creates the **SETTINGS.ini** file where the local settings are sto
 To use this offline analysis package, first, import the dependent modules. Add the folders of the relevant repos to the system path,
 ```python
 import sys,os
-sys.path.append('/path/to/HextofOfflineAnalyzer/')
+sys.path.append('/path/to/hextof-processor/')
 
 from processor.DldFlashDataframeCreator import DldFlashProcessor
 ```
