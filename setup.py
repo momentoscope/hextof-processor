@@ -8,7 +8,7 @@ from Cython.Build import cythonize
 import numpy
 import os
 
-build_doniachs = False
+build_doniachs = False # TODO: make if statement to build doniachs, and add this as option in SETTINGS.ini
 
 extensions = [
     Extension("processor.cscripts.DldFlashProcessorCy", [os.path.join("processor", "cscripts", "DldFlashProcessorCy.pyx")],
