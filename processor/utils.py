@@ -421,3 +421,46 @@ def load_results(filename, path=None):
     # load the data saved with processor.save_array()
     
     pass
+
+def get_available_runs(rootpath): # TODO: store the resulting dictionary to improve performance.
+    """ returns a dictionary with paths to the data of available runs.
+
+    :parameters:
+        rootpath : str
+            path where to look for data (recursive in subdirectories)
+    :return:
+        available_runs : dict
+            dict with run numbers as keys (eg: 'run12345') and path where to load data from as str.
+    """
+    available_runs = {}
+    for dir in os.walk(rootpath):
+        if 'fl1user2' in dir[0]:
+            try:
+                run_path = dir[0][:-8]
+                for name in dir[2]:
+                    runNumber = name.split('_')[4]
+                    if runNumber not in available_runs:
+                        available_runs[runNumber] = run_path
+            except: # TODO: use an assertion method for more solid error tracking.
+                pass
+    return available_runs
+
+def get_path_to_run(runNumber, rootpath):
+    """ Returns the path to the raw data of given runNumber
+
+    :parameters:
+        runNumber : str or int
+            run number as integer or string.
+        rootpath : str
+            path where to look for data (recursive in subdirectories)
+
+
+    :return:
+        path : str
+            path to where the raw data of the given run number is stored.
+    """
+    available_runs = get_available_runs(rootpath)
+    try:
+        return(available_runs['run{}'.format(runNumber)])
+    except KeyError:
+        raise KeyError('No run number {} under path {}'.format(runNumber,rootpath))

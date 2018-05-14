@@ -118,6 +118,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         if path is None:
             path = self.DATA_RAW_DIR
+        self.path_to_run = utils.get_path_to_run(runNumber,path)
 
         # parse settings and set all dataset addresses as attributes.
         settings = ConfigParser()
@@ -128,7 +129,15 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         section = 'DAQ address - used'
 
-        daqAccess = BeamtimeDaqAccess.create(path)
+
+        # available_runs = utils.get_available_runs(path)
+        # try:
+        #     path_to_run = available_runs['run{}'.format(runNumber)]
+        # except KeyError:
+        #     raise ValueError('no data for run {}'.format(runNumber))
+        # print(path_to_run)
+        # daqAccess = BeamtimeDaqAccess.create(path_to_run)
+        daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
 
         self.daqAddresses = []
         for entry in settings[section]:
@@ -478,6 +487,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         if path is None:
             path = self.DATA_RAW_DIR
+        if not hasattr(self, 'path_to_run'):
+            self.path_to_run = utils.get_path_to_run(runNumber,path)
 
         # Gets paths from settings file.
         # Checks for SETTINGS.ini in processor folder.
@@ -493,7 +504,10 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         import sys
         sys.path.append(settings['paths']['PAH_MODULE_DIR'])
         from camp.pah.beamtimedaqaccess import H5FileDataAccess, H5FileManager
-        fileAccess = H5FileDataAccess(H5FileManager(path))
+
+
+
+        fileAccess = H5FileDataAccess(H5FileManager(self.path_to_run))
         pulseIdInterval = fileAccess.availablePulseIdInterval(runNumber)
 
         return pulseIdInterval
