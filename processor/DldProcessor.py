@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning) # avoid printing FutureWarnings from other packages
 import os
 import dask
 import dask.dataframe
@@ -9,8 +10,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from configparser import ConfigParser
-import warnings
 import matplotlib.pyplot as plt
+# warnings.resetwarnings()
 
 _VERBOSE = False
 
