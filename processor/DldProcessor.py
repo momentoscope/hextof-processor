@@ -185,7 +185,6 @@ class DldProcessor:
             self.ddMicrobunches = dask.dataframe.read_hdf(
                 fileName, '/microbunches', mode='r', chunksize=self.CHUNK_SIZE)
 
-
     def appendDataframeParquet(self, fileName):
         """ Append data to an existing dask Parquet dataframe.
 
@@ -354,14 +353,37 @@ class DldProcessor:
         filename = 'run{}_{}.h5'.format(self.runNumber, namestr)
         h5File = h5py.File(path + filename, mode)
 
+        print('saving data to {}'.format(path + filename))
+
+        if 'pumpProbeTime' in self.binNameList:
+            idx = self.binNameList.index('pumpProbeTime')
+            pp_data = np.swapaxes(binnedData, 0, idx)
+
+        elif 'delayStage' in self.binNameList:
+            idx = self.binNameList.index('delayStage')
+            pp_data = np.swapaxes(binnedData, 0, idx)
+
         # Saving data
-        h5File.create_dataset('binnedData', data=binnedData)
+        ff = h5File.create_group('frames')
+
+        try: # make a dataset for each time frame.
+            for i in range(pp_data.shape[0]):
+                ff.create_dataset('f{:04d}'.format(i), data=pp_data[i,...])
+        except AttributeError: # in case there is no time axis, make a single dataset
+            ff.create_dataset('f{:04d}'.format(0), data=binnedData)
 
         # Saving axes
         aa = h5File.create_group("axes")
+        # aa.create_dataset('axis_order', data=self.binNameList)
+        ax_n=0
         for i, binName in enumerate(self.binNameList):
-            aa.create_dataset(format(binName), data=self.binRangeList[i])
-
+            if binName in ['pumpProbeTime','delayStage']:
+                ds = aa.create_dataset('frames', data=self.binRangeList[i])
+                ds.attrs['name'] = binName
+            else:
+                ds = aa.create_dataset('ax{} - {}'.format(ax_n,binName), data=self.binRangeList[i])
+                ds.attrs['name'] = binName
+                ax_n+=1
         # Saving delay histograms
         hh = h5File.create_group("histograms")
         if hasattr(self, 'delaystageHistogram'):
@@ -374,6 +396,40 @@ class DldProcessor:
                 data=self.pumpProbeHistogram)
 
         h5File.close()
+
+
+    def read_h5(self,h5FilePath):
+        """ resad the h5 file at given path and return the contained data.
+
+        :parameters:
+            h5FilePaht : str
+                Path to the h5 file to read.
+
+        :returns:
+            result : np.ndarray
+                array containing binned data
+            axes : dict
+                dictionary with axes data labeled by axes name
+            histogram : np.array
+                array of time normalization data.
+        """
+        with h5py.File(h5FilePath,'r') as f:
+            result = []
+            for frame in f['frames']:
+                result.append(f['frames'][frame][...])
+            result = np.concatenate(result, axis=0)
+
+            histogram = None
+            if 'pumpProbeHistogram' in f['histograms']:
+                histogram = f['histograms']['pumpProbeHistogram'][...]
+            elif 'delaystageHistogram' in f['histograms']:
+                histogram = f['histograms']['delaystageHistogram'][...]
+            axes = {}
+            for ax_label in f['axes']:
+                ax_name = ax_label.split(' ')[-1]
+                axes[ax_name] = f['axes'][ax_label][...]
+
+        return result, axes, histogram
 
     def load_binned(self, namestr, path=None, mode='r'):
         """ Load an HDF5 file saved with ``save_binned()`` method.
@@ -418,72 +474,6 @@ class DldProcessor:
 
         return data, axes, hists
 
-    def addBinningOld(self, name, start, end, steps, useStepSize=True,
-                      include_last=True, force_legacy=False):
-        """ **[DEPRECATED]** Add binning of one dimension,
-        to be then computed with ``computeBinnedData`` method.
-
-        Creates a list of bin names, (binNameList) to identify the axis on
-        which to bin the data. Output array dimensions order will be the same
-        as in this list. The attribute binRangeList will contain the ranges of
-        the binning used for the corresponding dimension.
-
-        Binning is created using np.linspace (formerly was done with np.arange).
-        The implementation allows to choose between setting a step size
-        (useStepSize=True, default) or using a number of bins (useStepSize=False).
-
-        :Parameters:
-            name : str
-                Name of the column to bin to. Possible column names are:
-                posX, posY, dldTime, pumpProbeTime, dldDetector, etc.
-            start : float
-                Position of first bin
-            end : float
-                Position of last bin (not included!)
-            steps : float
-                Define the bin size. If useStepSize=True (default),
-                this is the step size, while if useStepSize=False, then this is the
-                number of bins. In Legacy mode (force_legacy=True, or
-                processor._LEGACY_MODE=True)
-            force_legacy : bool
-                if true, imposes old method for generating bins,
-                based on np.arange instead of np.linspace.
-
-        See also:
-            computeBinnedData : Method to compute all bins created with this function.
-
-        Notes:
-            If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.
-        """
-
-        _LEGACY_BINNING = False
-        if _LEGACY_BINNING or force_legacy:
-            bins = np.arange(start, end, steps)
-
-        elif useStepSize:
-            rest = abs(end - start) % steps
-            n_bins = int((abs(end - start) - rest) / steps) + 1
-
-            if not include_last:
-                n_bins -= 1
-            bins = np.linspace(start, end, n_bins, endpoint=include_last)
-        else:
-            assert isinstance(
-                steps, int) and steps > 0, 'number of steps must be a positive integer number'
-            bins = np.linspace(start, end, steps, endpoint=include_last)
-
-        # write the parameters to the bin list:
-        self.binNameList.append(name)
-        self.binRangeList.append(bins)
-        if (name == 'pumpProbeTime'):
-            # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(
-                pd.cut, bins)
-            delaystageHistGrouped = self.ddMicrobunches.groupby(
-                [delaystageHistBinner])
-            self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
-                np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
-
     def addFilter(self, colname, lb=None, ub=None):
         """ Filters the dataframes contained in the processor instance
 
@@ -512,7 +502,7 @@ class DldProcessor:
 
     def genBins(self, start, end, steps, useStepSize=True,
                 forceEnds=False, include_last=True, force_legacy=False):
-        """ **[DEPRECATED]** Creates bins for use by binning functions.
+        """ Creates bins for use by binning functions.
         Can also be used to generate x axes.
 
         Binning is created using np.linspace (formerly was done with np.arange).
@@ -887,6 +877,30 @@ class DldProcessor:
 
         return results
 
+    def deleteBinners(self):
+        """ **[DEPRECATED]** use resetBins() instead
+        """
+
+        print('WARNING: deleteBinners method has been renamed to resetBins.')
+        self.resetBins()
+
+    def readDataframesParquet(self, fileName=None):
+        """ **[DEPRECATED]** Load data from a dask Parquet dataframe.
+        Use readDataframesParquet instead.
+
+        :Parameter:
+            fileName : str | None
+                name (including path) of the folder containing
+                parquet files where the data was saved.
+        """
+        # TODO: remove this function once retro-compatibility is ensured
+
+        print(
+            'WARNING: readDataframesParquet is being removed.\nUse readDataframes instead: Default behaviour is now '
+            'parqet.\n',
+            ' Specify format="h5" for legacy use.')
+        self.readDataframes(fileName)
+
     # ==================
     # DEPRECATED METHODS
     # ==================
@@ -914,7 +928,7 @@ class DldProcessor:
         :Example:
             Normalization given, for example take it from run 18440.
         ::
-        
+
             processor.readRun(18440)
             processor.addBinning('posX', 500, 1000, 2)
             processor.addBinning('posY', 500, 1000, 2)
@@ -972,30 +986,71 @@ class DldProcessor:
         f.close()
         print("Created file " + filename)
 
-    def deleteBinners(self):
-        """ **[DEPRECATED]** use resetBins() instead
+    def addBinningOld(self, name, start, end, steps, useStepSize=True,
+                      include_last=True, force_legacy=False):
+        """ **[DEPRECATED]** Add binning of one dimension,
+        to be then computed with ``computeBinnedData`` method.
+
+        Creates a list of bin names, (binNameList) to identify the axis on
+        which to bin the data. Output array dimensions order will be the same
+        as in this list. The attribute binRangeList will contain the ranges of
+        the binning used for the corresponding dimension.
+
+        Binning is created using np.linspace (formerly was done with np.arange).
+        The implementation allows to choose between setting a step size
+        (useStepSize=True, default) or using a number of bins (useStepSize=False).
+
+        :Parameters:
+            name : str
+                Name of the column to bin to. Possible column names are:
+                posX, posY, dldTime, pumpProbeTime, dldDetector, etc.
+            start : float
+                Position of first bin
+            end : float
+                Position of last bin (not included!)
+            steps : float
+                Define the bin size. If useStepSize=True (default),
+                this is the step size, while if useStepSize=False, then this is the
+                number of bins. In Legacy mode (force_legacy=True, or
+                processor._LEGACY_MODE=True)
+            force_legacy : bool
+                if true, imposes old method for generating bins,
+                based on np.arange instead of np.linspace.
+
+        See also:
+            computeBinnedData : Method to compute all bins created with this function.
+
+        Notes:
+            If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.
         """
 
-        print('WARNING: deleteBinners method has been renamed to resetBins.')
-        self.resetBins()
+        _LEGACY_BINNING = False
+        if _LEGACY_BINNING or force_legacy:
+            bins = np.arange(start, end, steps)
 
-    def readDataframesParquet(self, fileName=None):
-        """ **[DEPRECATED]** Load data from a dask Parquet dataframe.
-        Use readDataframesParquet instead.
+        elif useStepSize:
+            rest = abs(end - start) % steps
+            n_bins = int((abs(end - start) - rest) / steps) + 1
 
-        :Parameter:
-            fileName : str | None
-                name (including path) of the folder containing
-                parquet files where the data was saved.
-        """
-        # TODO: remove this function once retro-compatibility is ensured
+            if not include_last:
+                n_bins -= 1
+            bins = np.linspace(start, end, n_bins, endpoint=include_last)
+        else:
+            assert isinstance(
+                steps, int) and steps > 0, 'number of steps must be a positive integer number'
+            bins = np.linspace(start, end, steps, endpoint=include_last)
 
-        print(
-            'WARNING: readDataframesParquet is being removed.\nUse readDataframes instead: Default behaviour is now '
-            'parqet.\n',
-            ' Specify format="h5" for legacy use.')
-        self.readDataframes(fileName)
-
+        # write the parameters to the bin list:
+        self.binNameList.append(name)
+        self.binRangeList.append(bins)
+        if (name == 'pumpProbeTime'):
+            # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
+            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(
+                pd.cut, bins)
+            delaystageHistGrouped = self.ddMicrobunches.groupby(
+                [delaystageHistBinner])
+            self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
+                np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
 
 if __name__ == "__main__":
     main()
