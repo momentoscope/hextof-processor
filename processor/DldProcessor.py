@@ -90,10 +90,12 @@ class DldProcessor:
         """ Parse settings file and assign the variables.
 
         :Parameters:
-            import_all : bool
-            ``True`` -- imports all entries in SETTINGS.ini under section [processor] and [paths].
-            ``False`` -- only imports those that match existing attribute names.
-            False is the better choice, since it keeps better track of attributes.
+            import_all : bool | False
+                ``True`` -- imports all entries in SETTINGS.ini from the sections [processor] and [paths].
+                
+                ``False`` -- only imports those that match existing attribute names.
+                
+            Here ``False`` is the better choice, since it keeps better track of attributes.
         """
 
         settings = ConfigParser()
