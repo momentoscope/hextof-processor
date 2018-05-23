@@ -170,7 +170,8 @@
             
   <h1>Source code for processor.DldProcessor</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">)</span> <span class="c1"># avoid printing FutureWarnings from other packages</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">dask</span>
 <span class="kn">import</span> <span class="nn">dask.dataframe</span>
@@ -180,8 +181,8 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span> <span class="nn">configparser</span> <span class="k">import</span> <span class="n">ConfigParser</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="c1"># warnings.resetwarnings()</span>
 
 <span class="n">_VERBOSE</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -260,10 +261,12 @@
         <span class="sd">&quot;&quot;&quot; Parse settings file and assign the variables.</span>
 
 <span class="sd">        :Parameters:</span>
-<span class="sd">            import_all : bool</span>
-<span class="sd">            ``True`` -- imports all entries in SETTINGS.ini under section [processor] and [paths].</span>
-<span class="sd">            ``False`` -- only imports those that match existing attribute names.</span>
-<span class="sd">            False is the better choice, since it keeps better track of attributes.</span>
+<span class="sd">            import_all : bool | False</span>
+<span class="sd">                ``True`` -- imports all entries in SETTINGS.ini from the sections [processor] and [paths].</span>
+<span class="sd">                </span>
+<span class="sd">                ``False`` -- only imports those that match existing attribute names.</span>
+<span class="sd">                </span>
+<span class="sd">            Here ``False`` is the better choice, since it keeps better track of attributes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
@@ -354,7 +357,6 @@
                 <span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;/electrons&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_hdf</span><span class="p">(</span>
                 <span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;/microbunches&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span></div>
-
 
 <div class="viewcode-block" id="DldProcessor.appendDataframeParquet"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.appendDataframeParquet">[docs]</a>    <span class="k">def</span> <span class="nf">appendDataframeParquet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Append data to an existing dask Parquet dataframe.</span>
@@ -524,14 +526,37 @@
         <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;run</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">.h5&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">namestr</span><span class="p">)</span>
         <span class="n">h5File</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
 
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;saving data to </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="n">filename</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="s1">&#39;pumpProbeTime&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">)</span>
+            <span class="n">pp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">binnedData</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="s1">&#39;delayStage&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;delayStage&#39;</span><span class="p">)</span>
+            <span class="n">pp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">binnedData</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+
         <span class="c1"># Saving data</span>
-        <span class="n">h5File</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;binnedData&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">binnedData</span><span class="p">)</span>
+        <span class="n">ff</span> <span class="o">=</span> <span class="n">h5File</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s1">&#39;frames&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span> <span class="c1"># make a dataset for each time frame.</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pp_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">ff</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;f</span><span class="si">{:04d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">pp_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="o">...</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span> <span class="c1"># in case there is no time axis, make a single dataset</span>
+            <span class="n">ff</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;f</span><span class="si">{:04d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">binnedData</span><span class="p">)</span>
 
         <span class="c1"># Saving axes</span>
         <span class="n">aa</span> <span class="o">=</span> <span class="n">h5File</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;axes&quot;</span><span class="p">)</span>
+        <span class="c1"># aa.create_dataset(&#39;axis_order&#39;, data=self.binNameList)</span>
+        <span class="n">ax_n</span><span class="o">=</span><span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">binName</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="p">):</span>
-            <span class="n">aa</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">binName</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">binRangeList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
+            <span class="k">if</span> <span class="n">binName</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">,</span><span class="s1">&#39;delayStage&#39;</span><span class="p">]:</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="n">aa</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;frames&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">binRangeList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binName</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="n">aa</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;ax</span><span class="si">{}</span><span class="s1"> - </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ax_n</span><span class="p">,</span><span class="n">binName</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">binRangeList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binName</span>
+                <span class="n">ax_n</span><span class="o">+=</span><span class="mi">1</span>
         <span class="c1"># Saving delay histograms</span>
         <span class="n">hh</span> <span class="o">=</span> <span class="n">h5File</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;histograms&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;delaystageHistogram&#39;</span><span class="p">):</span>
@@ -544,6 +569,40 @@
                 <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pumpProbeHistogram</span><span class="p">)</span>
 
         <span class="n">h5File</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DldProcessor.read_h5"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.read_h5">[docs]</a>    <span class="k">def</span> <span class="nf">read_h5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">h5FilePath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; resad the h5 file at given path and return the contained data.</span>
+
+<span class="sd">        :parameters:</span>
+<span class="sd">            h5FilePaht : str</span>
+<span class="sd">                Path to the h5 file to read.</span>
+
+<span class="sd">        :returns:</span>
+<span class="sd">            result : np.ndarray</span>
+<span class="sd">                array containing binned data</span>
+<span class="sd">            axes : dict</span>
+<span class="sd">                dictionary with axes data labeled by axes name</span>
+<span class="sd">            histogram : np.array</span>
+<span class="sd">                array of time normalization data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">h5FilePath</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;frames&#39;</span><span class="p">]:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;frames&#39;</span><span class="p">][</span><span class="n">frame</span><span class="p">][</span><span class="o">...</span><span class="p">])</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">histogram</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="s1">&#39;pumpProbeHistogram&#39;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;histograms&#39;</span><span class="p">]:</span>
+                <span class="n">histogram</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;histograms&#39;</span><span class="p">][</span><span class="s1">&#39;pumpProbeHistogram&#39;</span><span class="p">][</span><span class="o">...</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="s1">&#39;delaystageHistogram&#39;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;histograms&#39;</span><span class="p">]:</span>
+                <span class="n">histogram</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;histograms&#39;</span><span class="p">][</span><span class="s1">&#39;delaystageHistogram&#39;</span><span class="p">][</span><span class="o">...</span><span class="p">]</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">ax_label</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;axes&#39;</span><span class="p">]:</span>
+                <span class="n">ax_name</span> <span class="o">=</span> <span class="n">ax_label</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;axes&#39;</span><span class="p">][</span><span class="n">ax_label</span><span class="p">][</span><span class="o">...</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">histogram</span></div>
 
 <div class="viewcode-block" id="DldProcessor.load_binned"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.load_binned">[docs]</a>    <span class="k">def</span> <span class="nf">load_binned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namestr</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Load an HDF5 file saved with ``save_binned()`` method.</span>
@@ -588,72 +647,6 @@
 
         <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">hists</span></div>
 
-    <span class="k">def</span> <span class="nf">addBinningOld</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">useStepSize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                      <span class="n">include_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Add binning of one dimension,</span>
-<span class="sd">        to be then computed with ``computeBinnedData`` method.</span>
-
-<span class="sd">        Creates a list of bin names, (binNameList) to identify the axis on</span>
-<span class="sd">        which to bin the data. Output array dimensions order will be the same</span>
-<span class="sd">        as in this list. The attribute binRangeList will contain the ranges of</span>
-<span class="sd">        the binning used for the corresponding dimension.</span>
-
-<span class="sd">        Binning is created using np.linspace (formerly was done with np.arange).</span>
-<span class="sd">        The implementation allows to choose between setting a step size</span>
-<span class="sd">        (useStepSize=True, default) or using a number of bins (useStepSize=False).</span>
-
-<span class="sd">        :Parameters:</span>
-<span class="sd">            name : str</span>
-<span class="sd">                Name of the column to bin to. Possible column names are:</span>
-<span class="sd">                posX, posY, dldTime, pumpProbeTime, dldDetector, etc.</span>
-<span class="sd">            start : float</span>
-<span class="sd">                Position of first bin</span>
-<span class="sd">            end : float</span>
-<span class="sd">                Position of last bin (not included!)</span>
-<span class="sd">            steps : float</span>
-<span class="sd">                Define the bin size. If useStepSize=True (default),</span>
-<span class="sd">                this is the step size, while if useStepSize=False, then this is the</span>
-<span class="sd">                number of bins. In Legacy mode (force_legacy=True, or</span>
-<span class="sd">                processor._LEGACY_MODE=True)</span>
-<span class="sd">            force_legacy : bool</span>
-<span class="sd">                if true, imposes old method for generating bins,</span>
-<span class="sd">                based on np.arange instead of np.linspace.</span>
-
-<span class="sd">        See also:</span>
-<span class="sd">            computeBinnedData : Method to compute all bins created with this function.</span>
-
-<span class="sd">        Notes:</span>
-<span class="sd">            If the name is &#39;pumpProbeTime&#39;: sets self.delaystageHistogram for normalization.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">_LEGACY_BINNING</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="n">_LEGACY_BINNING</span> <span class="ow">or</span> <span class="n">force_legacy</span><span class="p">:</span>
-            <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
-
-        <span class="k">elif</span> <span class="n">useStepSize</span><span class="p">:</span>
-            <span class="n">rest</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">%</span> <span class="n">steps</span>
-            <span class="n">n_bins</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">abs</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">-</span> <span class="n">rest</span><span class="p">)</span> <span class="o">/</span> <span class="n">steps</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">include_last</span><span class="p">:</span>
-                <span class="n">n_bins</span> <span class="o">-=</span> <span class="mi">1</span>
-            <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">include_last</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="n">steps</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;number of steps must be a positive integer number&#39;</span>
-            <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">include_last</span><span class="p">)</span>
-
-        <span class="c1"># write the parameters to the bin list:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">binRangeList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">):</span>
-            <span class="c1"># self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]</span>
-            <span class="n">delaystageHistBinner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map_partitions</span><span class="p">(</span>
-                <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
-            <span class="n">delaystageHistGrouped</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
-                <span class="p">[</span><span class="n">delaystageHistBinner</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">delaystageHistogram</span> <span class="o">=</span> <span class="n">delaystageHistGrouped</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()[</span><span class="s1">&#39;bam&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>  <span class="c1"># TODO: discuss and improve the delay stage histogram normalization.</span>
-
 <div class="viewcode-block" id="DldProcessor.addFilter"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.addFilter">[docs]</a>    <span class="k">def</span> <span class="nf">addFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colname</span><span class="p">,</span> <span class="n">lb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Filters the dataframes contained in the processor instance</span>
 
@@ -682,7 +675,7 @@
 
 <div class="viewcode-block" id="DldProcessor.genBins"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.genBins">[docs]</a>    <span class="k">def</span> <span class="nf">genBins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">useStepSize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">forceEnds</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">include_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Creates bins for use by binning functions.</span>
+        <span class="sd">&quot;&quot;&quot; Creates bins for use by binning functions.</span>
 <span class="sd">        Can also be used to generate x axes.</span>
 
 <span class="sd">        Binning is created using np.linspace (formerly was done with np.arange).</span>
@@ -1057,6 +1050,30 @@
 
         <span class="k">return</span> <span class="n">results</span></div>
 
+<div class="viewcode-block" id="DldProcessor.deleteBinners"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.deleteBinners">[docs]</a>    <span class="k">def</span> <span class="nf">deleteBinners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** use resetBins() instead</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: deleteBinners method has been renamed to resetBins.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetBins</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DldProcessor.readDataframesParquet"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.readDataframesParquet">[docs]</a>    <span class="k">def</span> <span class="nf">readDataframesParquet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Load data from a dask Parquet dataframe.</span>
+<span class="sd">        Use readDataframesParquet instead.</span>
+
+<span class="sd">        :Parameter:</span>
+<span class="sd">            fileName : str | None</span>
+<span class="sd">                name (including path) of the folder containing</span>
+<span class="sd">                parquet files where the data was saved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: remove this function once retro-compatibility is ensured</span>
+
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s1">&#39;WARNING: readDataframesParquet is being removed.</span><span class="se">\n</span><span class="s1">Use readDataframes instead: Default behaviour is now &#39;</span>
+            <span class="s1">&#39;parqet.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39; Specify format=&quot;h5&quot; for legacy use.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readDataframes</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span></div>
+
     <span class="c1"># ==================</span>
     <span class="c1"># DEPRECATED METHODS</span>
     <span class="c1"># ==================</span>
@@ -1084,7 +1101,7 @@
 <span class="sd">        :Example:</span>
 <span class="sd">            Normalization given, for example take it from run 18440.</span>
 <span class="sd">        ::</span>
-<span class="sd">        </span>
+
 <span class="sd">            processor.readRun(18440)</span>
 <span class="sd">            processor.addBinning(&#39;posX&#39;, 500, 1000, 2)</span>
 <span class="sd">            processor.addBinning(&#39;posY&#39;, 500, 1000, 2)</span>
@@ -1142,30 +1159,71 @@
         <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Created file &quot;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DldProcessor.deleteBinners"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.deleteBinners">[docs]</a>    <span class="k">def</span> <span class="nf">deleteBinners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** use resetBins() instead</span>
+    <span class="k">def</span> <span class="nf">addBinningOld</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">useStepSize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">include_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Add binning of one dimension,</span>
+<span class="sd">        to be then computed with ``computeBinnedData`` method.</span>
+
+<span class="sd">        Creates a list of bin names, (binNameList) to identify the axis on</span>
+<span class="sd">        which to bin the data. Output array dimensions order will be the same</span>
+<span class="sd">        as in this list. The attribute binRangeList will contain the ranges of</span>
+<span class="sd">        the binning used for the corresponding dimension.</span>
+
+<span class="sd">        Binning is created using np.linspace (formerly was done with np.arange).</span>
+<span class="sd">        The implementation allows to choose between setting a step size</span>
+<span class="sd">        (useStepSize=True, default) or using a number of bins (useStepSize=False).</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">            name : str</span>
+<span class="sd">                Name of the column to bin to. Possible column names are:</span>
+<span class="sd">                posX, posY, dldTime, pumpProbeTime, dldDetector, etc.</span>
+<span class="sd">            start : float</span>
+<span class="sd">                Position of first bin</span>
+<span class="sd">            end : float</span>
+<span class="sd">                Position of last bin (not included!)</span>
+<span class="sd">            steps : float</span>
+<span class="sd">                Define the bin size. If useStepSize=True (default),</span>
+<span class="sd">                this is the step size, while if useStepSize=False, then this is the</span>
+<span class="sd">                number of bins. In Legacy mode (force_legacy=True, or</span>
+<span class="sd">                processor._LEGACY_MODE=True)</span>
+<span class="sd">            force_legacy : bool</span>
+<span class="sd">                if true, imposes old method for generating bins,</span>
+<span class="sd">                based on np.arange instead of np.linspace.</span>
+
+<span class="sd">        See also:</span>
+<span class="sd">            computeBinnedData : Method to compute all bins created with this function.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            If the name is &#39;pumpProbeTime&#39;: sets self.delaystageHistogram for normalization.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: deleteBinners method has been renamed to resetBins.&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">resetBins</span><span class="p">()</span></div>
+        <span class="n">_LEGACY_BINNING</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">_LEGACY_BINNING</span> <span class="ow">or</span> <span class="n">force_legacy</span><span class="p">:</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DldProcessor.readDataframesParquet"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.readDataframesParquet">[docs]</a>    <span class="k">def</span> <span class="nf">readDataframesParquet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Load data from a dask Parquet dataframe.</span>
-<span class="sd">        Use readDataframesParquet instead.</span>
+        <span class="k">elif</span> <span class="n">useStepSize</span><span class="p">:</span>
+            <span class="n">rest</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">%</span> <span class="n">steps</span>
+            <span class="n">n_bins</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">abs</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">-</span> <span class="n">rest</span><span class="p">)</span> <span class="o">/</span> <span class="n">steps</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 
-<span class="sd">        :Parameter:</span>
-<span class="sd">            fileName : str | None</span>
-<span class="sd">                name (including path) of the folder containing</span>
-<span class="sd">                parquet files where the data was saved.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># TODO: remove this function once retro-compatibility is ensured</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">include_last</span><span class="p">:</span>
+                <span class="n">n_bins</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">include_last</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">steps</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;number of steps must be a positive integer number&#39;</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">include_last</span><span class="p">)</span>
 
-        <span class="nb">print</span><span class="p">(</span>
-            <span class="s1">&#39;WARNING: readDataframesParquet is being removed.</span><span class="se">\n</span><span class="s1">Use readDataframes instead: Default behaviour is now &#39;</span>
-            <span class="s1">&#39;parqet.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="s1">&#39; Specify format=&quot;h5&quot; for legacy use.&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">readDataframes</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span></div></div>
-
+        <span class="c1"># write the parameters to the bin list:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binRangeList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">):</span>
+            <span class="c1"># self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]</span>
+            <span class="n">delaystageHistBinner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map_partitions</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
+            <span class="n">delaystageHistGrouped</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">delaystageHistBinner</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">delaystageHistogram</span> <span class="o">=</span> <span class="n">delaystageHistGrouped</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()[</span><span class="s1">&#39;bam&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>  <span class="c1"># TODO: discuss and improve the delay stage histogram normalization.</span></div>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>

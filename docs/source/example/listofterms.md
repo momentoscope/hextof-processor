@@ -2,7 +2,9 @@
 
 **BAM** = beam arrival monitor, monitors the time when the FEL beam arrives.
 
-**bunch charge** -- the total charge of an electron macrobunch
+**BDA** = beam distribution area (behind the gas monitor detector)
+
+**bunch charge** -- the total charge of an electron microbunch
 
 **CAMP chamber** -- CFEL ASG multipurpose chamber
 

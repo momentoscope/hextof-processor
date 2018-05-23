@@ -36,7 +36,6 @@ The last step creates the **SETTINGS.ini** file where the local settings are sto
 
 * **docs** and **doctrees** folders -- contain the documentation built in html.
 * **processor** folder -- contains the latest version of the processor.
-* **lib** folder -- contains the legacy version of the processor, retained for retro-compatibility.
 * **XPSdoniachs** folder -- contains the Doniach-Sunjic lineshape function in C++ for fitting.
 
 # How to import

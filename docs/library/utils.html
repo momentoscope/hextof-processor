@@ -351,9 +351,65 @@ there are several strategies for calibrating this value,</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="processor.utils.get_available_runs">
+<code class="descclassname">processor.utils.</code><code class="descname">get_available_runs</code><span class="sig-paren">(</span><em>rootpath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#get_available_runs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.get_available_runs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects the filepaths to the available experimental run data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>rootpath <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">path where to look for data (recursive in subdirectories)</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>available_runs <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd><p class="first last">dict with run numbers as keys (eg: 'run12345') and path where to load data from as str.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="processor.utils.get_idx">
 <code class="descclassname">processor.utils.</code><code class="descname">get_idx</code><span class="sig-paren">(</span><em>array</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#get_idx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.get_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>[DEPRECATED]</strong> Use argnearest</p>
+<dd><p><strong>[DEPRECATED]</strong> Use <cite>utils.argnearest</cite></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="processor.utils.get_path_to_run">
+<code class="descclassname">processor.utils.</code><code class="descname">get_path_to_run</code><span class="sig-paren">(</span><em>runNumber</em>, <em>rootpath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#get_path_to_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.get_path_to_run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the path to the data of a given run number</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">str or int</span></dt>
+<dd><p class="first last">run number as integer or string.</p>
+</dd>
+<dt>rootpath <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">path where to look for data (recursive in subdirectories)</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">path to where the raw data of the given run number is stored.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">

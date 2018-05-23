@@ -509,7 +509,7 @@ measured, and should therefore be moved to more negative values.</p>
 <dl class="method">
 <dt id="processor.DldProcessor.DldProcessor.genBins">
 <code class="descname">genBins</code><span class="sig-paren">(</span><em>start</em>, <em>end</em>, <em>steps</em>, <em>useStepSize=True</em>, <em>forceEnds=False</em>, <em>include_last=True</em>, <em>force_legacy=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.genBins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.genBins" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>[DEPRECATED]</strong> Creates bins for use by binning functions.
+<dd><p>Creates bins for use by binning functions.
 Can also be used to generate x axes.</p>
 <p>Binning is created using np.linspace (formerly was done with np.arange).
 The implementation allows to choose between setting a step size
@@ -572,10 +572,14 @@ based on np.arange instead of np.inspace.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body">import_all : bool
-<code class="docutils literal"><span class="pre">True</span></code> -- imports all entries in SETTINGS.ini under section [processor] and [paths].
-<code class="docutils literal"><span class="pre">False</span></code> -- only imports those that match existing attribute names.
-False is the better choice, since it keeps better track of attributes.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>import_all <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
+<dd><p class="first"><code class="docutils literal"><span class="pre">True</span></code> -- imports all entries in SETTINGS.ini from the sections [processor] and [paths].</p>
+<p class="last"><code class="docutils literal"><span class="pre">False</span></code> -- only imports those that match existing attribute names.</p>
+</dd>
+</dl>
+<p class="last">Here <code class="docutils literal"><span class="pre">False</span></code> is the better choice, since it keeps better track of attributes.</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -722,6 +726,39 @@ Use readDataframesParquet instead.</p>
 parquet files where the data was saved.</p>
 </dd>
 </dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.read_h5">
+<code class="descname">read_h5</code><span class="sig-paren">(</span><em>h5FilePath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.read_h5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.read_h5" title="Permalink to this definition">¶</a></dt>
+<dd><p>resad the h5 file at given path and return the contained data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>h5FilePaht <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Path to the h5 file to read.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>result <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">array containing binned data</p>
+</dd>
+<dt>axes <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd><p class="first last">dictionary with axes data labeled by axes name</p>
+</dd>
+<dt>histogram <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span></dt>
+<dd><p class="first last">array of time normalization data.</p>
+</dd>
+</dl>
+</p>
 </td>
 </tr>
 </tbody>

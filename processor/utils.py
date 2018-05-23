@@ -412,8 +412,9 @@ def plot_lines(data,
 
 
 def get_idx(array, value):
-    """ **[DEPRECATED]** Use argnearest
+    """ **[DEPRECATED]** Use `utils.argnearest`
     """
+    
     return (np.abs(array - value)).argmin()
 
 
@@ -423,16 +424,19 @@ def load_results(filename, path=None):
     pass
 
 def get_available_runs(rootpath): # TODO: store the resulting dictionary to improve performance.
-    """ returns a dictionary with paths to the data of available runs.
+    """ Collects the filepaths to the available experimental run data.
 
-    :parameters:
+    :Parameters:
         rootpath : str
             path where to look for data (recursive in subdirectories)
+    
     :return:
         available_runs : dict
             dict with run numbers as keys (eg: 'run12345') and path where to load data from as str.
     """
+    
     available_runs = {}
+    
     for dir in os.walk(rootpath):
         if 'fl1user2' in dir[0]:
             try:
@@ -443,23 +447,26 @@ def get_available_runs(rootpath): # TODO: store the resulting dictionary to impr
                         available_runs[runNumber] = run_path
             except: # TODO: use an assertion method for more solid error tracking.
                 pass
+    
     return available_runs
 
 def get_path_to_run(runNumber, rootpath):
-    """ Returns the path to the raw data of given runNumber
+    """ Returns the path to the data of a given run number
 
-    :parameters:
+    :Parameters:
         runNumber : str or int
             run number as integer or string.
         rootpath : str
             path where to look for data (recursive in subdirectories)
 
 
-    :return:
+    :Return:
         path : str
             path to where the raw data of the given run number is stored.
     """
+    
     available_runs = get_available_runs(rootpath)
+    
     try:
         return(available_runs['run{}'.format(runNumber)])
     except KeyError:

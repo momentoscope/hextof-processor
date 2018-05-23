@@ -70,7 +70,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
     :Attributes:
         runNumber : int
             number of the run from which data is taken.
-        pulseIdInterval : int
+        pulseIdInterval : (int, int) tuple
             macrobunch ID corresponding to the interval of data read from the given run.
         dd : dask dataframe
             dataframe containing chosen channel information from the given run
@@ -91,30 +91,30 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         Useful for scans that would otherwise hit the machine's memory limit.
 
         :Parameters:
-            runNumber : int
+            runNumber : int | None (default to ``self.runNumber``)
                 number of the run from which to read data. If None, requires pulseIdInterval.
-            pulseIdInterval : (int, int)
+            pulseIdInterval : (int, int) | None (default to ``self.pulseIdInterval``)
                 first and last macrobunches of selected data range. If None, the whole run
                 defined by runNumber will be taken.
-            path : str
+            path : str | None (default to ``self.DATA_RAW_DIR``)
                 path to location where raw HDF5 files are stored
 
         This is a union of the readRun and readInterval methods defined in previous versions.
         """
 
-        # check inputs:
+        # Update instance attributes based on input parameters
         if runNumber is None:
             runNumber = self.runNumber
         else:
             self.runNumber = runNumber
+        
         if pulseIdInterval is None:
             pulseIdInterval = self.pulseIdInterval
         else:
             self.pulseIdInterval = pulseIdInterval
 
-        if pulseIdInterval is None:
-            if runNumber is None:
-                raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
+        if (pulseIdInterval is None) and (runNumber is None):
+            raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
 
         if path is None:
             path = self.DATA_RAW_DIR
@@ -170,10 +170,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                     pulseIdInterval = (otherStuff[0], otherStuff[-1])
                     macroBunchPulseId_correction = pulseIdInterval[0]
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
-            print('Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}'.format(runNumber,
-                                                                                    numOfMacrobunches,
-                                                                                    pulseIdInterval[0],
-                                                                                    pulseIdInterval[1]))
+            print('Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}'\
+                .format(runNumber, numOfMacrobunches, pulseIdInterval[0], pulseIdInterval[1]))
         else:
             print('reading DAQ data from interval {}'.format(pulseIdInterval))
             self.pulseIdInterval = pulseIdInterval
@@ -429,50 +427,49 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         """ Save imported dask dataframe as a parquet or hdf5 file.
 
         :Parameters:
-            fileName : str
-                The name of the file where to save data.
-            path : str
-                The path to the folder where to save the parquet or hdf5 files.
+            fileName : str | None
+                The file namestring.
+            path : str | None (default to ``self.DATA_PARQUET_DIR`` or ``self.DATA_H5_DIR``)
+                The path to the folder to save the format-converted data.
             format : str | 'parquet'
-                The output file format, possible choices are 'parquet', 'h5' and 'hdf5'.
-            append : bool
-                When using parquet file, allows to append the data to a pre-existing file.
+                The output file format, possible choices are 'parquet', 'h5' or 'hdf5'.
+            append : bool | False (disable data appending as default)
+                When using parquet file, allows to append the data to pre-existing files.
         """
 
         format = format.lower()
         assert format in ['parquet', 'h5', 'hdf5'], 'Invalid format for data input. Please select between parquet or h5'
-
+        
+        # Update instance attributes based on input parameters
         if path is None:
             if format == 'parquet':
                 path = self.DATA_PARQUET_DIR
-            else:
+            elif format in ['hdf5', 'h5']:
                 path = self.DATA_H5_DIR
+        
         if fileName is None:
             if self.runNumber is None:
-                fileName = 'mb{}to{}'.format(self.pulseIdInterval[0], self.pulseIdInterval[1])
+                fileName = 'mb{}to{}'.format(self.pulseIdInterval[0], self.pulseIdInterval[-1])
             else:
                 fileName = 'run{}'.format(self.runNumber)
         fileName = path + fileName  # TODO: test if naming is correct
 
         if format == 'parquet':
-            if append:
-                self.dd.to_parquet(fileName + "_el", compression="UNCOMPRESSED", append=True, ignore_divisions=True)
-                self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED", append=True,
-                                               ignore_divisions=True)
-            else:
-                self.dd.to_parquet(fileName + "_el", compression="UNCOMPRESSED")
-                self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED")
-        elif format == 'hdf5':
+            self.dd.to_parquet(fileName + "_el", compression="UNCOMPRESSED", \
+                               append=append, ignore_divisions=True)
+            self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED", \
+                                           append=append, ignore_divisions=True)
+        elif format in ['hdf5', 'h5']:
             dask.dataframe.to_hdf(self.dd, fileName, '/electrons')
             dask.dataframe.to_hdf(self.ddMicrobunches, fileName, '/microbunches')
 
     def getIds(self, runNumber=None, path=None):
-        """ Returns the initial and the final macrobunch IDs of a given run number
+        """ Returns the first and the last macrobunch IDs of a given run number
 
         :Parameters:
-            runNumber : int
+            runNumber : int | None (default to ``self.runNumber``)
                 The run number from which to read the macrobunch ID interval.
-            path : str
+            path : str | None (default to ``self.DATA_RAW_DIR``)
                 The path to location where raw HDF5 files are stored.
         
         :Return:
@@ -487,8 +484,9 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         if path is None:
             path = self.DATA_RAW_DIR
+        
         if not hasattr(self, 'path_to_run'):
-            self.path_to_run = utils.get_path_to_run(runNumber,path)
+            self.path_to_run = utils.get_path_to_run(runNumber, path)
 
         # Gets paths from settings file.
         # Checks for SETTINGS.ini in processor folder.
@@ -505,8 +503,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         sys.path.append(settings['paths']['PAH_MODULE_DIR'])
         from camp.pah.beamtimedaqaccess import H5FileDataAccess, H5FileManager
 
-
-
         fileAccess = H5FileDataAccess(H5FileManager(self.path_to_run))
         pulseIdInterval = fileAccess.availablePulseIdInterval(runNumber)
 
@@ -521,10 +517,10 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         as pd.DataFrame containing data from the given run.
 
         :Parameters:
-            runNumber : int
+            runNumber : int | None
                 number corresponding to the rung to read data from. if None, it uses the value
                 defined in the runNumber attribute.
-            path : str
+            path : str | None
                 path to location where raw HDF5 files are stored. If None, it uses the value from SETTINGS.ini.
 
         :Raise:
@@ -621,7 +617,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         :Parameters:
             pulseIdInterval : (int, int)
                 The starting and ending macrobunch IDs, [start, end).
-            path : str
+            path : str | None (default to ``self.DATA_RAW_DIR``)
                 The path to location where raw HDF5 files are stored.
         """
 
