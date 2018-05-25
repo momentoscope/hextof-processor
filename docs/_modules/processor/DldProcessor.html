@@ -104,7 +104,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../example/nobinning.html">4. Processing data without binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example/corrections.html">5. Corrections to FEL pulse timing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example/fullexample.html">6. Complete code examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example/listofterms.html">7. List of terms and abbreviations</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/howtomaintain.html">2. Package maintenance</a></li>
 </ul>
 
             
@@ -262,9 +266,9 @@
 
 <span class="sd">        :Parameters:</span>
 <span class="sd">            import_all : bool | False</span>
-<span class="sd">                ``True`` -- imports all entries in SETTINGS.ini from the sections [processor] and [paths].</span>
-<span class="sd">                </span>
-<span class="sd">                ``False`` -- only imports those that match existing attribute names.</span>
+<span class="sd">            </span>
+<span class="sd">                :True: imports all entries in SETTINGS.ini from the sections [processor] and [paths].</span>
+<span class="sd">                :False: only imports those that match existing attribute names.</span>
 <span class="sd">                </span>
 <span class="sd">            Here ``False`` is the better choice, since it keeps better track of attributes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -325,38 +329,40 @@
 <span class="sd">        NOT the FLASH HDF5 files obtained from the DAQ system!)</span>
 
 <span class="sd">        :Parameters:</span>
-<span class="sd">            fileName : str</span>
-<span class="sd">                name (including path) of the folder containing hdf5</span>
-<span class="sd">                files where the data was saved.</span>
+<span class="sd">            fileName : str | None</span>
+<span class="sd">                Shared namestring of data file.</span>
+<span class="sd">            path : str | None (default to ``self.DATA_PARQUET_DIR`` or ``self.DATA_H5_DIR``)</span>
+<span class="sd">                name of the filepath (down to the lowest-level folder)</span>
 <span class="sd">            format : str | &#39;parquet&#39;</span>
 <span class="sd">                file format, &#39;parquet&#39; (parquet file), &#39;h5&#39; or &#39;hdf5&#39; (hdf5 file).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">format</span> <span class="o">=</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">assert</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="s1">&#39;parquet&#39;</span><span class="p">,</span> <span class="s1">&#39;h5&#39;</span><span class="p">,</span> <span class="s1">&#39;hdf5&#39;</span><span class="p">],</span> <span class="s1">&#39;Invalid format for data input. Please select between parquet or h5&#39;</span>
+            <span class="s1">&#39;parquet&#39;</span><span class="p">,</span> <span class="s1">&#39;h5&#39;</span><span class="p">,</span> <span class="s1">&#39;hdf5&#39;</span><span class="p">],</span> <span class="s1">&#39;Invalid format for data input. Please select between parquet or h5.&#39;</span>
 
         <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
                 <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_PARQUET_DIR</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;h5&#39;</span><span class="p">]:</span>
                 <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_H5_DIR</span>
+        
         <span class="k">if</span> <span class="n">fileName</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">fileName</span> <span class="o">=</span> <span class="s1">&#39;mb</span><span class="si">{}</span><span class="s1">to</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">fileName</span> <span class="o">=</span> <span class="s1">&#39;run</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span><span class="p">)</span>
-        <span class="n">fileName</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">fileName</span>  <span class="c1"># TODO: test if naming is correct</span>
+        <span class="n">fullName</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">fileName</span>  <span class="c1"># TODO: test if naming is correct</span>
 
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">fileName</span> <span class="o">+</span> <span class="s2">&quot;_el&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">fileName</span> <span class="o">+</span> <span class="s2">&quot;_mb&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">fullName</span> <span class="o">+</span> <span class="s2">&quot;_el&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">fullName</span> <span class="o">+</span> <span class="s2">&quot;_mb&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;h5&#39;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_hdf</span><span class="p">(</span>
-                <span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;/electrons&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
+                <span class="n">fullName</span><span class="p">,</span> <span class="s1">&#39;/electrons&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">read_hdf</span><span class="p">(</span>
-                <span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;/microbunches&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span></div>
+                <span class="n">fullName</span><span class="p">,</span> <span class="s1">&#39;/microbunches&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DldProcessor.appendDataframeParquet"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.appendDataframeParquet">[docs]</a>    <span class="k">def</span> <span class="nf">appendDataframeParquet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Append data to an existing dask Parquet dataframe.</span>
@@ -465,16 +471,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;posR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">map_partitions</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;posT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">map_partitions</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DldProcessor.normalizePumpProbeTime"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.normalizePumpProbeTime">[docs]</a>    <span class="k">def</span> <span class="nf">normalizePumpProbeTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_array</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DldProcessor.normalizePumpProbeTime"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.normalizePumpProbeTime">[docs]</a>    <span class="k">def</span> <span class="nf">normalizePumpProbeTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_array</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">):</span>
         <span class="c1"># TODO: work on better implementation and accessibility for this method</span>
-        <span class="sd">&quot;&quot;&quot; Normalize data to the delay stage histogram.</span>
-
-<span class="sd">        Normalizes the data array to the number of counts per delay stage step.</span>
+        <span class="sd">&quot;&quot;&quot; Normalizes the data array to the number of counts per delay stage step.</span>
 
 <span class="sd">        :Parameter:</span>
 <span class="sd">            data_array : numpy array</span>
 <span class="sd">                data array containing binned data, as created by the ``computeBinnedData`` method.</span>
-
+<span class="sd">            ax : str | &#39;pumpProbeTime&#39;</span>
+<span class="sd">                axis name</span>
+<span class="sd">                </span>
 <span class="sd">        :Raise:</span>
 <span class="sd">            Throw a ValueError when no pump probe time delay axis is available.</span>
 
@@ -482,12 +488,10 @@
 <span class="sd">            data_array_normalized : numpy array</span>
 <span class="sd">                normalized version of the input array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
+                
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">idx</span> <span class="o">=</span> <span class="n">ax</span>
+            <span class="c1"># Find the index of the normalization axis</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
             
             <span class="n">data_array_normalized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">data_array</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
             <span class="n">norm_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delaystageHistogram</span>
@@ -653,10 +657,10 @@
 <span class="sd">        :Parameters:</span>
 <span class="sd">            colname : str</span>
 <span class="sd">                name of the column in the dask dataframes</span>
-<span class="sd">            lb : float64</span>
-<span class="sd">                lower boundary of the filter</span>
-<span class="sd">            ub : float64</span>
-<span class="sd">                upper bounday of the filter</span>
+<span class="sd">            lb : float64 | None</span>
+<span class="sd">                lower bound of the filter</span>
+<span class="sd">            ub : float64 | None</span>
+<span class="sd">                upper bound of the filter</span>
 <span class="sd">        </span>
 <span class="sd">        :Effect:</span>
 <span class="sd">            Filters the columns of ``dd`` and ``ddMicrobunches`` dataframes in place.</span>
@@ -667,6 +671,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">lb</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">ub</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ub</span><span class="p">]</span>
+        
         <span class="k">if</span> <span class="n">colname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">lb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">lb</span><span class="p">]</span>
@@ -701,18 +706,18 @@
 <span class="sd">                this is the step size, while if useStepSize=False, then this is the</span>
 <span class="sd">                number of bins. In Legacy mode (force_legacy=True, or</span>
 <span class="sd">                processor._LEGACY_MODE=True)</span>
-<span class="sd">            useStepSize : bool</span>
+<span class="sd">            useStepSize : bool | True</span>
 <span class="sd">                Tells python to interpret steps as a step size if</span>
 <span class="sd">                True, or as the number of steps if False</span>
-<span class="sd">            forceEnds : bool</span>
+<span class="sd">            forceEnds : bool | False</span>
 <span class="sd">                Tells python to give priority to the end parameter</span>
 <span class="sd">                rather than the step parameter (see above for more info)</span>
-<span class="sd">            include_last : bool</span>
+<span class="sd">            include_last : bool | True</span>
 <span class="sd">                Closes the interval on the right when true. If</span>
 <span class="sd">                using step size priority, will expand the interval to include</span>
 <span class="sd">                the next value when true, will shrink the interval to contain all</span>
 <span class="sd">                points within the bounds if false.</span>
-<span class="sd">            force_legacy : bool</span>
+<span class="sd">            force_legacy : bool | False</span>
 <span class="sd">                If true, imposes old method for generating bins,</span>
 <span class="sd">                based on np.arange instead of np.inspace.</span>
 <span class="sd">        &quot;&quot;&quot;</span>

@@ -430,9 +430,9 @@ def get_available_runs(rootpath): # TODO: store the resulting dictionary to impr
         rootpath : str
             path where to look for data (recursive in subdirectories)
     
-    :return:
+    :Return:
         available_runs : dict
-            dict with run numbers as keys (eg: 'run12345') and path where to load data from as str.
+            dict with run numbers as keys (e.g. 'run12345') and path where to load data from as str.
     """
     
     available_runs = {}
