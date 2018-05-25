@@ -91,9 +91,9 @@ class DldProcessor:
 
         :Parameters:
             import_all : bool | False
-                ``True`` -- imports all entries in SETTINGS.ini from the sections [processor] and [paths].
-                
-                ``False`` -- only imports those that match existing attribute names.
+            
+                :True: imports all entries in SETTINGS.ini from the sections [processor] and [paths].
+                :False: only imports those that match existing attribute names.
                 
             Here ``False`` is the better choice, since it keeps better track of attributes.
         """
@@ -154,38 +154,40 @@ class DldProcessor:
         NOT the FLASH HDF5 files obtained from the DAQ system!)
 
         :Parameters:
-            fileName : str
-                name (including path) of the folder containing hdf5
-                files where the data was saved.
+            fileName : str | None
+                Shared namestring of data file.
+            path : str | None (default to ``self.DATA_PARQUET_DIR`` or ``self.DATA_H5_DIR``)
+                name of the filepath (down to the lowest-level folder)
             format : str | 'parquet'
                 file format, 'parquet' (parquet file), 'h5' or 'hdf5' (hdf5 file).
         """
 
         format = format.lower()
         assert format in [
-            'parquet', 'h5', 'hdf5'], 'Invalid format for data input. Please select between parquet or h5'
+            'parquet', 'h5', 'hdf5'], 'Invalid format for data input. Please select between parquet or h5.'
 
         if path is None:
             if format == 'parquet':
                 path = self.DATA_PARQUET_DIR
-            else:
+            elif format in ['hdf5', 'h5']:
                 path = self.DATA_H5_DIR
+        
         if fileName is None:
             if self.runNumber is None:
                 fileName = 'mb{}to{}'.format(
                     self.pulseIdInterval[0], self.pulseIdInterval[1])
             else:
                 fileName = 'run{}'.format(self.runNumber)
-        fileName = path + fileName  # TODO: test if naming is correct
+        fullName = path + fileName  # TODO: test if naming is correct
 
         if format == 'parquet':
-            self.dd = dask.dataframe.read_parquet(fileName + "_el")
-            self.ddMicrobunches = dask.dataframe.read_parquet(fileName + "_mb")
-        else:
+            self.dd = dask.dataframe.read_parquet(fullName + "_el")
+            self.ddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
+        elif format in ['hdf5', 'h5']:
             self.dd = dask.dataframe.read_hdf(
-                fileName, '/electrons', mode='r', chunksize=self.CHUNK_SIZE)
+                fullName, '/electrons', mode='r', chunksize=self.CHUNK_SIZE)
             self.ddMicrobunches = dask.dataframe.read_hdf(
-                fileName, '/microbunches', mode='r', chunksize=self.CHUNK_SIZE)
+                fullName, '/microbunches', mode='r', chunksize=self.CHUNK_SIZE)
 
     def appendDataframeParquet(self, fileName):
         """ Append data to an existing dask Parquet dataframe.
@@ -294,16 +296,16 @@ class DldProcessor:
         self.dd['posR'] = self.dd.map_partitions(radius)
         self.dd['posT'] = self.dd.map_partitions(angle)
 
-    def normalizePumpProbeTime(self, data_array, ax=None):
+    def normalizePumpProbeTime(self, data_array, ax='pumpProbeTime'):
         # TODO: work on better implementation and accessibility for this method
-        """ Normalize data to the delay stage histogram.
-
-        Normalizes the data array to the number of counts per delay stage step.
+        """ Normalizes the data array to the number of counts per delay stage step.
 
         :Parameter:
             data_array : numpy array
                 data array containing binned data, as created by the ``computeBinnedData`` method.
-
+            ax : str | 'pumpProbeTime'
+                axis name
+                
         :Raise:
             Throw a ValueError when no pump probe time delay axis is available.
 
@@ -311,12 +313,10 @@ class DldProcessor:
             data_array_normalized : numpy array
                 normalized version of the input array.
         """
-
+                
         try:
-            if ax is None:
-                idx = self.binNameList.index('pumpProbeTime')
-            else:
-                idx = ax
+            # Find the index of the normalization axis
+            idx = self.binNameList.index(ax)
             
             data_array_normalized = np.swapaxes(data_array, 0, idx)
             norm_array = self.delaystageHistogram
@@ -482,10 +482,10 @@ class DldProcessor:
         :Parameters:
             colname : str
                 name of the column in the dask dataframes
-            lb : float64
-                lower boundary of the filter
-            ub : float64
-                upper bounday of the filter
+            lb : float64 | None
+                lower bound of the filter
+            ub : float64 | None
+                upper bound of the filter
         
         :Effect:
             Filters the columns of ``dd`` and ``ddMicrobunches`` dataframes in place.
@@ -496,6 +496,7 @@ class DldProcessor:
                 self.dd = self.dd[self.dd[colname] > lb]
             if ub is not None:
                 self.dd = self.dd[self.dd[colname] < ub]
+        
         if colname in self.ddMicrobunches.columns:
             if lb is not None:
                 self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[colname] > lb]
@@ -530,18 +531,18 @@ class DldProcessor:
                 this is the step size, while if useStepSize=False, then this is the
                 number of bins. In Legacy mode (force_legacy=True, or
                 processor._LEGACY_MODE=True)
-            useStepSize : bool
+            useStepSize : bool | True
                 Tells python to interpret steps as a step size if
                 True, or as the number of steps if False
-            forceEnds : bool
+            forceEnds : bool | False
                 Tells python to give priority to the end parameter
                 rather than the step parameter (see above for more info)
-            include_last : bool
+            include_last : bool | True
                 Closes the interval on the right when true. If
                 using step size priority, will expand the interval to include
                 the next value when true, will shrink the interval to contain all
                 points within the bounds if false.
-            force_legacy : bool
+            force_legacy : bool | False
                 If true, imposes old method for generating bins,
                 based on np.arange instead of np.inspace.
         """
