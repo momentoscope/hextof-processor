@@ -66,7 +66,7 @@ class DldProcessor:
 
         self.resetBins()
         # initialize attributes to their type. Values are then taken from
-        # SETTINGS.ini through initialize_attributes()
+        # SETTINGS.ini through initAttributes()
         self.N_CORES = int
         self.UBID_OFFSET = int
         self.CHUNK_SIZE = int
@@ -744,9 +744,9 @@ class DldProcessor:
         calculatedResults = []
 
         if _VERBOSE:
-            warnString="always"
+            warnString = "always"
         else:
-            warnString="ignore"
+            warnString = "ignore"
         with warnings.catch_warnings():
             warnings.simplefilter(warnString)
             
