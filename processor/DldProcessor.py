@@ -412,11 +412,11 @@ class DldProcessor:
                 File path.
             mode : str | 'r'
                 Read mode of h5 file ('r' = read).
-            ret_type: str | 'list'
+            ret_type: str | 'list','dict'
                 output format for axes and histograms:
-                'list' generates a list of arrays, ordered as the corresponding
-                dimensions in data. 'dict' generates a dictionary with the
-                names of each axis.
+                'list' generates a list of arrays, ordered as
+                the corresponding dimensions in data. 'dict'
+                generates a dictionary with the names of each axis.
 
         :Returns:
             data : numpy array
@@ -436,24 +436,26 @@ class DldProcessor:
             # Retrieving binned data
             frames = h5File['frames']
             data = []
-            for frame in frames:
-                data.append(np.array(frames[frame]))
-            data = np.array(data)
+            if len(frames) == 1:
+                data = np.array(frames['f0000'])
+
+            else:
+                for frame in frames:
+                    data.append(np.array(frames[frame]))
+                data = np.array(data)
 
             # Retrieving axes
-            if len(frames) == 1:  # in case there is no time axis
-                axes = [0 for i in range(len(data.shape) - 1)]
-            else:
-                axes = [0 for i in range(len(data.shape))]
+            axes = [0 for i in range(len(data.shape))]
             axes_d = {}
-
             for ax in h5File['axes/']:
                 vals = h5File['axes/' + ax][()]
-                axes_d[ax] = vals
+                #             axes_d[ax] = vals
                 idx = int(ax.split(' - ')[0][2:])
+                if len(frames) == 1:  # shift index to compensate missing time dimension
+                    idx -= 1
                 axes[idx] = vals
 
-            # Retrieving delay histograms
+                # Retrieving delay histograms
             hists = []
             hists_d = {}
             for hist in h5File['histograms/']:
