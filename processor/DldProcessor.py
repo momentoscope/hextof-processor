@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning) # avoid printing FutureWarnings from other packages
+
+warnings.simplefilter(action='ignore', category=FutureWarning)  # avoid printing FutureWarnings from other packages
 import os
 import dask
 import dask.dataframe
@@ -11,25 +12,10 @@ import pandas as pd
 from tqdm import tqdm
 from configparser import ConfigParser
 import matplotlib.pyplot as plt
+
 # warnings.resetwarnings()
 
 _VERBOSE = False
-
-
-# For code testing (Steinn Y. Agustsson)
-def main():
-
-    from processor.DldFlashDataframeCreator import DldFlashProcessor
-    processor = DldFlashProcessor()
-    processor.runNumber = 19135
-    processor.readData()
-    processor.postProcess()
-    pptime = processor.addBinning('pumpProbeTime', -54, -44, .1)
-    ToF = processor.addBinning(
-        'dldTime', 630, 670, 10 * processor.TOF_STEP_TO_NS)
-
-    result = processor.computeBinnedData(saveName='test2')
-    # processor.save_array(result,'test')
 
 
 class DldProcessor:
@@ -315,17 +301,17 @@ class DldProcessor:
                 idx = self.binNameList.index('pumpProbeTime')
             else:
                 idx = ax
-            
+
             data_array_normalized = np.swapaxes(data_array, 0, idx)
             norm_array = self.delaystageHistogram
-            
+
             for i in range(np.ndim(data_array_normalized) - 1):
                 norm_array = norm_array[:, None]
             print('normalized pumpProbe data found along axis {}'.format(idx))
-            
+
             data_array_normalized = data_array_normalized / norm_array
             data_array_normalized = np.swapaxes(data_array_normalized, idx, 0)
-            
+
             return data_array_normalized
 
         except ValueError:
@@ -346,90 +332,76 @@ class DldProcessor:
             mode : str | 'w'
                 Write mode of h5 file ('w' = write).
         """
-
+        _abort = False
         if path is None:
             path = self.DATA_RESULTS_DIR
-
-        filename = 'run{}_{}.h5'.format(self.runNumber, namestr)
-        h5File = h5py.File(path + filename, mode)
-
-        print('saving data to {}'.format(path + filename))
-
-        if 'pumpProbeTime' in self.binNameList:
-            idx = self.binNameList.index('pumpProbeTime')
-            pp_data = np.swapaxes(binnedData, 0, idx)
-
-        elif 'delayStage' in self.binNameList:
-            idx = self.binNameList.index('delayStage')
-            pp_data = np.swapaxes(binnedData, 0, idx)
-
-        # Saving data
-        ff = h5File.create_group('frames')
-
-        try: # make a dataset for each time frame.
-            for i in range(pp_data.shape[0]):
-                ff.create_dataset('f{:04d}'.format(i), data=pp_data[i,...])
-        except AttributeError: # in case there is no time axis, make a single dataset
-            ff.create_dataset('f{:04d}'.format(0), data=binnedData)
-
-        # Saving axes
-        aa = h5File.create_group("axes")
-        # aa.create_dataset('axis_order', data=self.binNameList)
-        ax_n=0
-        for i, binName in enumerate(self.binNameList):
-            if binName in ['pumpProbeTime','delayStage']:
-                ds = aa.create_dataset('frames', data=self.binRangeList[i])
-                ds.attrs['name'] = binName
+        if not os.path.isdir(path): # test if the path exists...
+            answer = input("The folder {} doesn't exist, do you want to create it? [y/n]")
+            if 'y' in answer:
+                os.makedirs(path)
             else:
-                ds = aa.create_dataset('ax{} - {}'.format(ax_n,binName), data=self.binRangeList[i])
-                ds.attrs['name'] = binName
-                ax_n+=1
-        # Saving delay histograms
-        hh = h5File.create_group("histograms")
-        if hasattr(self, 'delaystageHistogram'):
-            hh.create_dataset(
-                'delaystageHistogram',
-                data=self.delaystageHistogram)
-        if hasattr(self, 'pumpProbeHistogram'):
-            hh.create_dataset(
-                'pumpProbeHistogram',
-                data=self.pumpProbeHistogram)
-
-        h5File.close()
+                _abort = True
 
 
-    def read_h5(self,h5FilePath):
-        """ resad the h5 file at given path and return the contained data.
+        filename = '{}.h5'.format(namestr)
+        if os.path.isfile(path + filename):
+            answer = input("A file named {} already exists. Overwrite it? [y/n or r for rename]".format(filename))
+            if 'r' in answer:
+                filename = input("choose a new name:")
+            elif 'y' in answer:
+                pass
+            else:
+                _abort = True
 
-        :parameters:
-            h5FilePaht : str
-                Path to the h5 file to read.
+        if not _abort:
+            with h5py.File(path + filename, mode) as h5File:
 
-        :returns:
-            result : np.ndarray
-                array containing binned data
-            axes : dict
-                dictionary with axes data labeled by axes name
-            histogram : np.array
-                array of time normalization data.
-        """
-        with h5py.File(h5FilePath,'r') as f:
-            result = []
-            for frame in f['frames']:
-                result.append(f['frames'][frame][...])
-            result = np.concatenate(result, axis=0)
+                print('saving data to {}'.format(path + filename))
 
-            histogram = None
-            if 'pumpProbeHistogram' in f['histograms']:
-                histogram = f['histograms']['pumpProbeHistogram'][...]
-            elif 'delaystageHistogram' in f['histograms']:
-                histogram = f['histograms']['delaystageHistogram'][...]
-            axes = {}
-            for ax_label in f['axes']:
-                ax_name = ax_label.split(' ')[-1]
-                axes[ax_name] = f['axes'][ax_label][...]
+                if 'pumpProbeTime' in self.binNameList:
+                    idx = self.binNameList.index('pumpProbeTime')
+                    pp_data = np.swapaxes(binnedData, 0, idx)
 
-        return result, axes, histogram
+                elif 'delayStage' in self.binNameList:
+                    idx = self.binNameList.index('delayStage')
+                    pp_data = np.swapaxes(binnedData, 0, idx)
+                else:
+                    pp_data = None
+
+                # Saving data
+
+                ff = h5File.create_group('frames')
+
+                if pp_data is None:  # in case there is no time axis, make a single dataset
+                    ff.create_dataset('f{:04d}'.format(0), data=binnedData)
+                else:
+                    for i in range(pp_data.shape[0]): # otherwise make a dataset for each time frame.
+                        ff.create_dataset('f{:04d}'.format(i), data=pp_data[i, ...])
+
+
+                # Saving axes
+                aa = h5File.create_group("axes")
+                # aa.create_dataset('axis_order', data=self.binNameList)
+                ax_n = 1
+                for i, binName in enumerate(self.binNameList):
+                    if binName in ['pumpProbeTime', 'delayStage']:
+                        ds = aa.create_dataset('ax0 - {}'.format(binName), data=self.binAxesList[i])
+                        ds.attrs['name'] = binName
+                    else:
+                        ds = aa.create_dataset('ax{} - {}'.format(ax_n, binName), data=self.binAxesList[i])
+                        ds.attrs['name'] = binName
+                        ax_n += 1
+                # Saving delay histograms
+                hh = h5File.create_group("histograms")
+                if hasattr(self, 'delaystageHistogram'):
+                    hh.create_dataset(
+                        'delaystageHistogram',
+                        data=self.delaystageHistogram)
+                if hasattr(self, 'pumpProbeHistogram'):
+                    hh.create_dataset(
+                        'pumpProbeHistogram',
+                        data=self.pumpProbeHistogram)
+
 
     def load_binned(self, namestr, path=None, mode='r'):
         """ Load an HDF5 file saved with ``save_binned()`` method.
@@ -460,6 +432,7 @@ class DldProcessor:
         # Retrieving binned data
         data = h5File['binnedData'][()]
 
+
         # Retrieving axes from h5 file
         axes = []
         for ax in h5File['axes/']:
@@ -473,6 +446,39 @@ class DldProcessor:
         h5File.close()
 
         return data, axes, hists
+
+    def read_h5(self, h5FilePath):
+        """ resad the h5 file at given path and return the contained data.
+
+        :parameters:
+            h5FilePaht : str
+                Path to the h5 file to read.
+
+        :returns:
+            result : np.ndarray
+                array containing binned data
+            axes : dict
+                dictionary with axes data labeled by axes name
+            histogram : np.array
+                array of time normalization data.
+        """
+        with h5py.File(h5FilePath, 'r') as f:
+            result = []
+            for frame in f['frames']:
+                result.append(f['frames'][frame][...])
+            result = np.stack(result, axis=0)
+
+            histogram = None
+            if 'pumpProbeHistogram' in f['histograms']:
+                histogram = f['histograms']['pumpProbeHistogram'][...]
+            elif 'delaystageHistogram' in f['histograms']:
+                histogram = f['histograms']['delaystageHistogram'][...]
+            axes = {}
+            for ax_label in f['axes']:
+                ax_name = ax_label.split(' ')[-1]
+                axes[ax_name] = f['axes'][ax_label][...]
+
+        return result, axes, histogram
 
     def addFilter(self, colname, lb=None, ub=None):
         """ Filters the dataframes contained in the processor instance
@@ -543,7 +549,7 @@ class DldProcessor:
                 If true, imposes old method for generating bins,
                 based on np.arange instead of np.inspace.
         """
-        
+
         from decimal import Decimal
 
         _LEGACY_BINNING = False
@@ -665,7 +671,7 @@ class DldProcessor:
             forceEnds,
             include_last,
             force_legacy)
-
+        self.binAxesList.append(axes)
         return axes
 
     def resetBins(self):
@@ -674,6 +680,7 @@ class DldProcessor:
 
         self.binNameList = []
         self.binRangeList = []
+        self.binAxesList = []
 
     def computeBinnedData(self, saveName=None, savePath=None):
         """ Use the bin list to bin the data.
@@ -741,12 +748,12 @@ class DldProcessor:
         calculatedResults = []
 
         if _VERBOSE:
-            warnString="always"
+            warnString = "always"
         else:
-            warnString="ignore"
+            warnString = "ignore"
         with warnings.catch_warnings():
             warnings.simplefilter(warnString)
-            
+
             for i in tqdm(range(0, self.dd.npartitions, self.N_CORES)):
                 resultsToCalculate = []
                 # process the data in blocks of n partitions (given by the number
@@ -1051,6 +1058,3 @@ class DldProcessor:
                 [delaystageHistBinner])
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
-
-if __name__ == "__main__":
-    main()
