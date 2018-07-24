@@ -105,7 +105,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../example/nobinning.html">4. Processing data without binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../example/corrections.html">5. Corrections to FEL pulse timing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../example/fullexample.html">6. Complete code examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/listofterms.html">7. List of terms and abbreviations</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/howtomaintain.html">2. Package maintenance</a></li>
 </ul>
 
             
@@ -197,7 +201,7 @@ This change makes the treatment of problematic runs obsolete.</p>
 <dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd><p class="first last">number of the run from which data is taken.</p>
 </dd>
-<dt>pulseIdInterval <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dt>pulseIdInterval <span class="classifier-delimiter">:</span> <span class="classifier">(int, int) tuple</span></dt>
 <dd><p class="first last">macrobunch ID corresponding to the interval of data read from the given run.</p>
 </dd>
 <dt>dd <span class="classifier-delimiter">:</span> <span class="classifier">dask dataframe</span></dt>
@@ -257,16 +261,16 @@ This change makes the treatment of problematic runs obsolete.</p>
 <dl class="method">
 <dt id="processor.DldFlashDataframeCreator.DldFlashProcessor.getIds">
 <code class="descname">getIds</code><span class="sig-paren">(</span><em>runNumber=None</em>, <em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldFlashDataframeCreator.html#DldFlashProcessor.getIds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldFlashDataframeCreator.DldFlashProcessor.getIds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initial and the final macrobunch IDs of a given run number</p>
+<dd><p>Returns the first and the last macrobunch IDs of a given run number</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">int | None (default to <code class="docutils literal"><span class="pre">self.runNumber</span></code>)</span></dt>
 <dd><p class="first last">The run number from which to read the macrobunch ID interval.</p>
 </dd>
-<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None (default to <code class="docutils literal"><span class="pre">self.DATA_RAW_DIR</span></code>)</span></dt>
 <dd><p class="first last">The path to location where raw HDF5 files are stored.</p>
 </dd>
 </dl>
@@ -293,14 +297,14 @@ This change makes the treatment of problematic runs obsolete.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">int | None (default to <code class="docutils literal"><span class="pre">self.runNumber</span></code>)</span></dt>
 <dd><p class="first last">number of the run from which to read data. If None, requires pulseIdInterval.</p>
 </dd>
-<dt>pulseIdInterval <span class="classifier-delimiter">:</span> <span class="classifier">(int, int)</span></dt>
+<dt>pulseIdInterval <span class="classifier-delimiter">:</span> <span class="classifier">(int, int) | None (default to <code class="docutils literal"><span class="pre">self.pulseIdInterval</span></code>)</span></dt>
 <dd><p class="first last">first and last macrobunches of selected data range. If None, the whole run
 defined by runNumber will be taken.</p>
 </dd>
-<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None (default to <code class="docutils literal"><span class="pre">self.DATA_RAW_DIR</span></code>)</span></dt>
 <dd><p class="first last">path to location where raw HDF5 files are stored</p>
 </dd>
 </dl>
@@ -324,7 +328,7 @@ Useful for scans that would otherwise hit the machine's memory limit.</p>
 <dt>pulseIdInterval <span class="classifier-delimiter">:</span> <span class="classifier">(int, int)</span></dt>
 <dd><p class="first last">The starting and ending macrobunch IDs, [start, end).</p>
 </dd>
-<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None (default to <code class="docutils literal"><span class="pre">self.DATA_RAW_DIR</span></code>)</span></dt>
 <dd><p class="first last">The path to location where raw HDF5 files are stored.</p>
 </dd>
 </dl>
@@ -344,11 +348,11 @@ as pd.DataFrame containing data from the given run.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dt>runNumber <span class="classifier-delimiter">:</span> <span class="classifier">int | None</span></dt>
 <dd><p class="first last">number corresponding to the rung to read data from. if None, it uses the value
 defined in the runNumber attribute.</p>
 </dd>
-<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
 <dd><p class="first last">path to location where raw HDF5 files are stored. If None, it uses the value from SETTINGS.ini.</p>
 </dd>
 </dl>
@@ -376,17 +380,17 @@ defined in the runNumber attribute.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">The name of the file where to save data.</p>
+<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
+<dd><p class="first last">The file namestring.</p>
 </dd>
-<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">The path to the folder where to save the parquet or hdf5 files.</p>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None (default to <code class="docutils literal"><span class="pre">self.DATA_PARQUET_DIR</span></code> or <code class="docutils literal"><span class="pre">self.DATA_H5_DIR</span></code>)</span></dt>
+<dd><p class="first last">The path to the folder to save the format-converted data.</p>
 </dd>
 <dt>format <span class="classifier-delimiter">:</span> <span class="classifier">str | 'parquet'</span></dt>
-<dd><p class="first last">The output file format, possible choices are 'parquet', 'h5' and 'hdf5'.</p>
+<dd><p class="first last">The output file format, possible choices are 'parquet', 'h5' or 'hdf5'.</p>
 </dd>
-<dt>append <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd><p class="first last">When using parquet file, allows to append the data to a pre-existing file.</p>
+<dt>append <span class="classifier-delimiter">:</span> <span class="classifier">bool | False (disable data appending as default)</span></dt>
+<dd><p class="first last">When using parquet file, allows to append the data to pre-existing files.</p>
 </dd>
 </dl>
 </td>
