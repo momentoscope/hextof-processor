@@ -36,7 +36,6 @@ The last step creates the **SETTINGS.ini** file where the local settings are sto
 
 * **docs** and **doctrees** folders -- contain the documentation built in html.
 * **processor** folder -- contains the latest version of the processor.
-* **lib** folder -- contains the legacy version of the processor, retained for retro-compatibility.
 * **XPSdoniachs** folder -- contains the Doniach-Sunjic lineshape function in C++ for fitting.
 
 # How to import
@@ -87,7 +86,7 @@ mbFrom = 1000 # first macrobunch
 mbTo = 2000 # last macrobunch
 processor.readData(pulseIdInterval=(mbFrom,mbTo))
 ```
-**(2)** Run the `postProcess` method, which generates a BAM-corrected `pumpProbeDelay` array, together with polar coordinates for the momentum axes.
+**(2)** Run the `postProcess` method, which generates a BAM-corrected `pumpProbeTime` array, together with polar coordinates for the momentum axes.
 
 ```python
 processor.postProcess()
@@ -150,7 +149,7 @@ where the resulting np.array of float64 values will have the axis order same as 
 |      Proper name      |     Namestring      | Typical values | Units |
 | :-------------------: | :-----------------: | :------------: | ----: |
 |    ToF delay (ns)     |      'dldTime'      |  620,670,10 *  |    ns |
-| Pump-probe time delay |  'pumpProbeDelay'   |    -10,10,1    |    ps |
+| Pump-probe time delay |  'pumpProbeTime'    |    -10,10,1    |    ps |
 |     Separate DLDs     |   'dldDetectors'    |     -1,2,1     |    ID |
 | Microbunch (pulse) ID |   'microbunchId'    |   0,500,1 **   |    ID |
 |   Auxiliary channel   |      'dldAux'       |                |       |

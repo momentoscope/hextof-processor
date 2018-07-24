@@ -411,8 +411,9 @@ def plot_lines(data,
 
 
 def get_idx(array, value):
-    """ **[DEPRECATED]** Use argnearest
+    """ **[DEPRECATED]** Use `utils.argnearest`
     """
+    
     return (np.abs(array - value)).argmin()
 
 def load_results(filename, path=None):
@@ -421,16 +422,19 @@ def load_results(filename, path=None):
     pass
 
 def get_available_runs(rootpath): # TODO: store the resulting dictionary to improve performance.
-    """ returns a dictionary with paths to the data of available runs.
+    """ Collects the filepaths to the available experimental run data.
 
-    :parameters:
+    :Parameters:
         rootpath : str
             path where to look for data (recursive in subdirectories)
-    :return:
+    
+    :Return:
         available_runs : dict
-            dict with run numbers as keys (eg: 'run12345') and path where to load data from as str.
+            dict with run numbers as keys (e.g. 'run12345') and path where to load data from as str.
     """
+    
     available_runs = {}
+    
     for dir in os.walk(rootpath):
         if 'fl1user2' in dir[0]:
             try:
@@ -441,24 +445,89 @@ def get_available_runs(rootpath): # TODO: store the resulting dictionary to impr
                         available_runs[runNumber] = run_path
             except: # TODO: use an assertion method for more solid error tracking.
                 pass
+    
     return available_runs
 
 def get_path_to_run(runNumber, rootpath):
-    """ Returns the path to the raw data of given runNumber
+    """ Returns the path to the data of a given run number
 
-    :parameters:
+    :Parameters:
         runNumber : str or int
             run number as integer or string.
         rootpath : str
             path where to look for data (recursive in subdirectories)
 
 
-    :return:
+    :Return:
         path : str
             path to where the raw data of the given run number is stored.
     """
+    
     available_runs = get_available_runs(rootpath)
+    
     try:
         return(available_runs['run{}'.format(runNumber)])
     except KeyError:
         raise KeyError('No run number {} under path {}'.format(runNumber,rootpath))
+
+
+# ==================
+# Methods by Mac!
+# ==================
+
+
+def shiftQuadrants(self, shiftQ1=0.231725, shiftQ2=-0.221625, shiftQ3=0.096575, shiftQ4=-0.106675, xCenter=1350,
+                   yCenter=1440):
+    """ Apply corrections to the dataframe. (Maciej Dendzik)
+
+    Each quadrant of DLD is shifted in DLD time by shiftQn.
+    xCenter and yCenter are used to define the center of the division.
+
+         Q2     |     Q4
+    ------------|------------
+         Q1     |     Q3
+
+    this picture is upside-down in plt.imshow because it starts from 0 in top right corner
+    """
+    # Q1
+    # daskdataframe.where(condition,value) keeps the data where condition is True
+    # and changes them to value otherwise.
+    cond = ((self.dd['dldPosX'] > xCenter) | (self.dd['dldPosY'] > yCenter))
+    self.dd['dldTime'] = self.dd['dldTime'].where(cond, self.dd['dldTime'] + shiftQ1)
+    cond = ((self.dd['dldPosX'] > xCenter) | (self.dd['dldPosY'] < yCenter))
+    self.dd['dldTime'] = self.dd['dldTime'].where(cond, self.dd['dldTime'] + shiftQ2)
+    cond = ((self.dd['dldPosX'] < xCenter) | (self.dd['dldPosY'] > yCenter))
+    self.dd['dldTime'] = self.dd['dldTime'].where(cond, self.dd['dldTime'] + shiftQ3)
+    cond = ((self.dd['dldPosX'] < xCenter) | (self.dd['dldPosY'] < yCenter))
+    self.dd['dldTime'] = self.dd['dldTime'].where(cond, self.dd['dldTime'] + shiftQ4)
+
+
+def filterCircleDLDPos(self, xCenter=1334, yCenter=1426, radius=1250):
+    """ Apply corrections to the dataframe. (Maciej Dendzik)
+
+    Filters events with dldPosX and dldPosY within the radius from (xCenter,yCenter)
+
+    """
+
+    self.dd = self.dd[
+        (((self.dd['dldPosX'] - xCenter) ** 2 + (self.dd['dldPosY'] - yCenter) ** 2) ** 0.5 <= radius)]
+
+
+def correctOpticalPath(self, poly1=-0.00020578, poly2=4.6813e-7, xCenter=1334, yCenter=1426):
+    """ Apply corrections to the dataframe. (Maciej Dendzik)
+
+    Each DLD time is subtracted with a polynomial poly1*r + poly2*r^2,
+    where r=sqrt((posx-xCenter)^2+(posy-yCenter)^2)
+
+    This function makes corrections to the time of flight which take into account
+    the path difference between the center of the detector and the edges of the detector
+
+    """
+    # Q1
+    # daskdataframe.where(condition,value) keeps the data where condition is True
+    # and changes them to value otherwise.
+
+    self.dd['dldTime'] = self.dd['dldTime'] - \
+                         (poly1 * ((self.dd['dldPosX'] - xCenter) ** 2 + (
+                                     self.dd['dldPosY'] - yCenter) ** 2) ** 0.5 + \
+                          poly2 * ((self.dd['dldPosX'] - xCenter) ** 2 + (self.dd['dldPosY'] - yCenter) ** 2))

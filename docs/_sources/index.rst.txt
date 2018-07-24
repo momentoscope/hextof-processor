@@ -24,4 +24,11 @@ hextof-processor documentation
    example/nobinning.md
    example/corrections.md
    example/fullexample.md
-   example/listofterms.md
+   
+.. toctree::
+   :maxdepth: 1
+   :numbered:
+   :caption: Miscellaneous
+   
+   misc/listofterms.md
+   misc/howtomaintain.md

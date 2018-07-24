@@ -23,18 +23,20 @@ def make_new_settings(rebuilding=False, clean=False):
 
     settings_dict = {
         'paths': {
-            'DATA_RAW_DIR': 'D:/data/FLASH/_RAW/online-3/',
-            'DATA_H5_DIR': 'D:/data/FLASH/_processed/h5/',
-            'DATA_PARQUET_DIR': 'D:/data/FLASH/_processed/parquet/',
-            'DATA_RESULTS_DIR': 'D:/data/FLASH/Results/',
-            'PAH_MODULE_DIR': 'D:/py_code/FLASH/PAH/',
+            'DATA_RAW_DIR': os.getcwd()+'/Tutorial/raw/',
+            'DATA_H5_DIR': os.getcwd()+'/Tutorial/h5/',
+            'DATA_PARQUET_DIR': os.getcwd()+'/Tutorial/parquet/',
+            'DATA_RESULTS_DIR': os.getcwd()+'/Tutorial/results/',
+            'PAH_MODULE_DIR': os.path.dirname(os.getcwd())+'/PAH/',
         },
         'processor': {
             'N_CORES': psutil.cpu_count(),
             'UBID_OFFSET': 5,
             'CHUNK_SIZE': 1000000,
-            'TOF_STEP_TO_NS': 0.0205761316872428,
-            'TOF_STEP_TO_EV': 0.0205761316872428 * 0.22,
+            # new detector uses 0.006858710665255785
+            # old detector used 0.0205761316872428
+            'TOF_STEP_TO_NS': 0.006858710665255785,
+            'TOF_STEP_TO_EV': 0.006858710665255785 * 0.22,
             'TOF_NS_TO_EV': 0.22,
             'ET_CONV_E_OFFSET': 323.98,
             'ET_CONV_T_OFFSET': 371.258,

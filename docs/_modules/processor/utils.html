@@ -104,7 +104,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../example/nobinning.html">4. Processing data without binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example/corrections.html">5. Corrections to FEL pulse timing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../example/fullexample.html">6. Complete code examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example/listofterms.html">7. List of terms and abbreviations</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/howtomaintain.html">2. Package maintenance</a></li>
 </ul>
 
             
@@ -583,8 +587,9 @@
 
 
 <div class="viewcode-block" id="get_idx"><a class="viewcode-back" href="../../library/utils.html#processor.utils.get_idx">[docs]</a><span class="k">def</span> <span class="nf">get_idx</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Use argnearest</span>
+    <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Use `utils.argnearest`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">array</span> <span class="o">-</span> <span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span></div>
 
 
@@ -592,6 +597,55 @@
     <span class="c1"># load the data saved with processor.save_array()</span>
     
     <span class="k">pass</span>
+
+<div class="viewcode-block" id="get_available_runs"><a class="viewcode-back" href="../../library/utils.html#processor.utils.get_available_runs">[docs]</a><span class="k">def</span> <span class="nf">get_available_runs</span><span class="p">(</span><span class="n">rootpath</span><span class="p">):</span> <span class="c1"># TODO: store the resulting dictionary to improve performance.</span>
+    <span class="sd">&quot;&quot;&quot; Collects the filepaths to the available experimental run data.</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        rootpath : str</span>
+<span class="sd">            path where to look for data (recursive in subdirectories)</span>
+<span class="sd">    </span>
+<span class="sd">    :Return:</span>
+<span class="sd">        available_runs : dict</span>
+<span class="sd">            dict with run numbers as keys (e.g. &#39;run12345&#39;) and path where to load data from as str.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">available_runs</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">rootpath</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;fl1user2&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">run_path</span> <span class="o">=</span> <span class="nb">dir</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">8</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                    <span class="n">runNumber</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">4</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">runNumber</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_runs</span><span class="p">:</span>
+                        <span class="n">available_runs</span><span class="p">[</span><span class="n">runNumber</span><span class="p">]</span> <span class="o">=</span> <span class="n">run_path</span>
+            <span class="k">except</span><span class="p">:</span> <span class="c1"># TODO: use an assertion method for more solid error tracking.</span>
+                <span class="k">pass</span>
+    
+    <span class="k">return</span> <span class="n">available_runs</span></div>
+
+<div class="viewcode-block" id="get_path_to_run"><a class="viewcode-back" href="../../library/utils.html#processor.utils.get_path_to_run">[docs]</a><span class="k">def</span> <span class="nf">get_path_to_run</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">rootpath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Returns the path to the data of a given run number</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        runNumber : str or int</span>
+<span class="sd">            run number as integer or string.</span>
+<span class="sd">        rootpath : str</span>
+<span class="sd">            path where to look for data (recursive in subdirectories)</span>
+
+
+<span class="sd">    :Return:</span>
+<span class="sd">        path : str</span>
+<span class="sd">            path to where the raw data of the given run number is stored.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">available_runs</span> <span class="o">=</span> <span class="n">get_available_runs</span><span class="p">(</span><span class="n">rootpath</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">available_runs</span><span class="p">[</span><span class="s1">&#39;run</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">runNumber</span><span class="p">)])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;No run number </span><span class="si">{}</span><span class="s1"> under path </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span><span class="n">rootpath</span><span class="p">))</span></div>
 </pre></div>
 
            </div>
