@@ -26,26 +26,6 @@ except ImportError as e:
 assignToMircobunch = DldFlashProcessorCy.assignToMircobunch
 
 
-# For code testing (Steinn Y. Agustsson)
-def main():
-
-    from datetime import datetime
-    t0 = datetime.now()
-    processor = DldFlashProcessor()
-    processor.runNumber = 18843
-    # processor.pulseIdInterval =
-    processor.readData()
-    processor.postProcess()
-
-    processor.addBinning('dldTime', 620, 670, 1)
-
-    result = processor.computeBinnedData()
-    import matplotlib.pyplot as plt
-    plt.plot(result)
-    plt.show()
-    print("Computation time: {} s".format(datetime.now() - t0))
-
-
 class DldFlashProcessor(DldProcessor.DldProcessor):
     """  
     The class reads an existing run and allows to generated binned multidimensional arrays,
@@ -118,7 +98,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         if path is None:
             path = self.DATA_RAW_DIR
-        self.path_to_run = utils.get_path_to_run(runNumber,path)
+        print('searching for data...')
+        self.path_to_run = utils.get_path_to_run(runNumber, path)
 
         # parse settings and set all dataset addresses as attributes.
         settings = ConfigParser()
@@ -129,21 +110,13 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         section = 'DAQ address - used'
 
-
-        # available_runs = utils.get_available_runs(path)
-        # try:
-        #     path_to_run = available_runs['run{}'.format(runNumber)]
-        # except KeyError:
-        #     raise ValueError('no data for run {}'.format(runNumber))
-        # print(path_to_run)
-        # daqAccess = BeamtimeDaqAccess.create(path_to_run)
         daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
 
         self.daqAddresses = []
         for entry in settings[section]:
             name = utils.camelCaseIt(entry)
             val = str(settings[section][entry])
-            if daqAccess.isChannelAvailable(val,self.getIds(runNumber)):
+            if daqAccess.isChannelAvailable(val, self.getIds(runNumber)):
                 self.daqAddresses.append(name)
                 if _VERBOSE:
                     print('assigning address: {}: {}'.format(name.ljust(20), val))
@@ -488,7 +461,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         if path is None:
             path = self.DATA_RAW_DIR
         if not hasattr(self, 'path_to_run'):
-            self.path_to_run = utils.get_path_to_run(runNumber,path)
+            self.path_to_run = utils.get_path_to_run(runNumber, path)
 
         # Gets paths from settings file.
         # Checks for SETTINGS.ini in processor folder.
@@ -504,8 +477,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         import sys
         sys.path.append(settings['paths']['PAH_MODULE_DIR'])
         from camp.pah.beamtimedaqaccess import H5FileDataAccess, H5FileManager
-
-
 
         fileAccess = H5FileDataAccess(H5FileManager(self.path_to_run))
         pulseIdInterval = fileAccess.availablePulseIdInterval(runNumber)
@@ -694,7 +665,3 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.createDataframePerElectron()
         self.createDataframePerMicrobunch()
         print('dataframe created')
-
-
-if __name__ == '__main__':
-    main()
