@@ -666,11 +666,9 @@ class DldProcessor:
         axes = self.genBins(
             start + stepSize / 2,
             end - stepSize / 2,
-            stepSize,
-            useStepSize,
-            forceEnds,
-            include_last,
-            force_legacy)
+            stepSize, useStepSize, forceEnds, include_last, force_legacy)
+        if axes[-1]>end:
+            axes = axes[:-1]
         self.binAxesList.append(axes)
         return axes
 
