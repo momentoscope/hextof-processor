@@ -402,8 +402,7 @@ class DldProcessor:
                         'pumpProbeHistogram',
                         data=self.pumpProbeHistogram)
 
-
-    def load_binned(self, namestr, path=None, mode='r'):
+    def load_binned(namestr, path=None, mode='r', ret_type='list'):
         """ Load an HDF5 file saved with ``save_binned()`` method.
 
         :Parameters:
@@ -413,7 +412,12 @@ class DldProcessor:
                 File path.
             mode : str | 'r'
                 Read mode of h5 file ('r' = read).
-        
+            ret_type: str | 'list'
+                output format for axes and histograms:
+                'list' generates a list of arrays, ordered as the corresponding
+                dimensions in data. 'dict' generates a dictionary with the
+                names of each axis.
+
         :Returns:
             data : numpy array
                 Multidimensional data read from h5 file.
@@ -422,30 +426,44 @@ class DldProcessor:
             hist : numpy array
                 Histogram values associated with the read data.
         """
+        if namestr[-3:] == '.h5':
+            filename = namestr
+        else:
+            filename = '{}.h5'.format(namestr)
 
-        if path is None:
-            path = self.DATA_RESULTS_DIR
+        with h5py.File(path + filename, mode) as h5File:
 
-        filename = 'run{}_{}.h5'.format(self.runNumber, namestr)
-        h5File = h5py.File(path + filename, mode)
+            # Retrieving binned data
+            frames = h5File['frames']
+            data = []
+            for frame in frames:
+                data.append(np.array(frames[frame]))
+            data = np.array(data)
 
-        # Retrieving binned data
-        data = h5File['binnedData'][()]
+            # Retrieving axes
+            if len(frames) == 1:  # in case there is no time axis
+                axes = [0 for i in range(len(data.shape) - 1)]
+            else:
+                axes = [0 for i in range(len(data.shape))]
+            axes_d = {}
 
+            for ax in h5File['axes/']:
+                vals = h5File['axes/' + ax][()]
+                axes_d[ax] = vals
+                idx = int(ax.split(' - ')[0][2:])
+                axes[idx] = vals
 
-        # Retrieving axes from h5 file
-        axes = []
-        for ax in h5File['axes/']:
-            axes.append(h5File['axes/' + ax][()])
+            # Retrieving delay histograms
+            hists = []
+            hists_d = {}
+            for hist in h5File['histograms/']:
+                hists_d[hist] = h5File['histograms/' + hist][()]
+                hists.append(h5File['histograms/' + hist][()])
 
-        # Retrieving delay histograms
-        hists = []
-        for hist in h5File['histograms/']:
-            hists.append(h5File['histograms/' + hist][()])
-
-        h5File.close()
-
-        return data, axes, hists
+        if ret_type == 'list':
+            return data, axes, hists
+        elif ret_type == 'dict':
+            return data, axes_d, hists_d
 
     def read_h5(self, h5FilePath):
         """ resad the h5 file at given path and return the contained data.
