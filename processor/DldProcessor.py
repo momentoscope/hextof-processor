@@ -404,7 +404,7 @@ class DldProcessor:
                         'pumpProbeHistogram',
                         data=self.pumpProbeHistogram)
 
-    def load_binned(namestr, path=None, mode='r', ret_type='list'):
+    def load_binned(self, namestr, path=None, mode='r', ret_type='list'):
         """ Load an HDF5 file saved with ``save_binned()`` method.
 
         :Parameters:
