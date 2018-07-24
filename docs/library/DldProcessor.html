@@ -105,7 +105,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../example/nobinning.html">4. Processing data without binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../example/corrections.html">5. Corrections to FEL pulse timing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../example/fullexample.html">6. Complete code examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/listofterms.html">7. List of terms and abbreviations</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/howtomaintain.html">2. Package maintenance</a></li>
 </ul>
 
             
@@ -313,11 +317,11 @@ each bin.</p>
 <dt>colname <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd><p class="first last">name of the column in the dask dataframes</p>
 </dd>
-<dt>lb <span class="classifier-delimiter">:</span> <span class="classifier">float64</span></dt>
-<dd><p class="first last">lower boundary of the filter</p>
+<dt>lb <span class="classifier-delimiter">:</span> <span class="classifier">float64 | None</span></dt>
+<dd><p class="first last">lower bound of the filter</p>
 </dd>
-<dt>ub <span class="classifier-delimiter">:</span> <span class="classifier">float64</span></dt>
-<dd><p class="first last">upper bounday of the filter</p>
+<dt>ub <span class="classifier-delimiter">:</span> <span class="classifier">float64 | None</span></dt>
+<dd><p class="first last">upper bound of the filter</p>
 </dd>
 </dl>
 </td>
@@ -509,7 +513,7 @@ measured, and should therefore be moved to more negative values.</p>
 <dl class="method">
 <dt id="processor.DldProcessor.DldProcessor.genBins">
 <code class="descname">genBins</code><span class="sig-paren">(</span><em>start</em>, <em>end</em>, <em>steps</em>, <em>useStepSize=True</em>, <em>forceEnds=False</em>, <em>include_last=True</em>, <em>force_legacy=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.genBins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.genBins" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>[DEPRECATED]</strong> Creates bins for use by binning functions.
+<dd><p>Creates bins for use by binning functions.
 Can also be used to generate x axes.</p>
 <p>Binning is created using np.linspace (formerly was done with np.arange).
 The implementation allows to choose between setting a step size
@@ -539,21 +543,21 @@ this is the step size, while if useStepSize=False, then this is the
 number of bins. In Legacy mode (force_legacy=True, or
 processor._LEGACY_MODE=True)</p>
 </dd>
-<dt>useStepSize <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dt>useStepSize <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
 <dd><p class="first last">Tells python to interpret steps as a step size if
 True, or as the number of steps if False</p>
 </dd>
-<dt>forceEnds <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dt>forceEnds <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
 <dd><p class="first last">Tells python to give priority to the end parameter
 rather than the step parameter (see above for more info)</p>
 </dd>
-<dt>include_last <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dt>include_last <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
 <dd><p class="first last">Closes the interval on the right when true. If
 using step size priority, will expand the interval to include
 the next value when true, will shrink the interval to contain all
 points within the bounds if false.</p>
 </dd>
-<dt>force_legacy <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dt>force_legacy <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
 <dd><p class="first last">If true, imposes old method for generating bins,
 based on np.arange instead of np.inspace.</p>
 </dd>
@@ -572,10 +576,21 @@ based on np.arange instead of np.inspace.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body">import_all : bool
-<code class="docutils literal"><span class="pre">True</span></code> -- imports all entries in SETTINGS.ini under section [processor] and [paths].
-<code class="docutils literal"><span class="pre">False</span></code> -- only imports those that match existing attribute names.
-False is the better choice, since it keeps better track of attributes.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first">import_all : bool | False</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">True:</th><td class="field-body">imports all entries in SETTINGS.ini from the sections [processor] and [paths].</td>
+</tr>
+<tr class="field-even field"><th class="field-name">False:</th><td class="field-body">only imports those that match existing attribute names.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p class="last">Here <code class="docutils literal"><span class="pre">False</span></code> is the better choice, since it keeps better track of attributes.</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -621,9 +636,8 @@ False is the better choice, since it keeps better track of attributes.</td>
 
 <dl class="method">
 <dt id="processor.DldProcessor.DldProcessor.normalizePumpProbeTime">
-<code class="descname">normalizePumpProbeTime</code><span class="sig-paren">(</span><em>data_array</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.normalizePumpProbeTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.normalizePumpProbeTime" title="Permalink to this definition">¶</a></dt>
-<dd><p>Normalize data to the delay stage histogram.</p>
-<p>Normalizes the data array to the number of counts per delay stage step.</p>
+<code class="descname">normalizePumpProbeTime</code><span class="sig-paren">(</span><em>data_array</em>, <em>ax='pumpProbeTime'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.normalizePumpProbeTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.normalizePumpProbeTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes the data array to the number of counts per delay stage step.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -631,6 +645,9 @@ False is the better choice, since it keeps better track of attributes.</td>
 <tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first docutils">
 <dt>data_array <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
 <dd><p class="first last">data array containing binned data, as created by the <code class="docutils literal"><span class="pre">computeBinnedData</span></code> method.</p>
+</dd>
+<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">str | 'pumpProbeTime'</span></dt>
+<dd><p class="first last">axis name</p>
 </dd>
 </dl>
 </td>
@@ -693,9 +710,11 @@ NOT the FLASH HDF5 files obtained from the DAQ system!)</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">name (including path) of the folder containing hdf5
-files where the data was saved.</p>
+<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
+<dd><p class="first last">Shared namestring of data file.</p>
+</dd>
+<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None (default to <code class="docutils literal"><span class="pre">self.DATA_PARQUET_DIR</span></code> or <code class="docutils literal"><span class="pre">self.DATA_H5_DIR</span></code>)</span></dt>
+<dd><p class="first last">name of the filepath (down to the lowest-level folder)</p>
 </dd>
 <dt>format <span class="classifier-delimiter">:</span> <span class="classifier">str | 'parquet'</span></dt>
 <dd><p class="first last">file format, 'parquet' (parquet file), 'h5' or 'hdf5' (hdf5 file).</p>
@@ -722,6 +741,39 @@ Use readDataframesParquet instead.</p>
 parquet files where the data was saved.</p>
 </dd>
 </dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="processor.DldProcessor.DldProcessor.read_h5">
+<code class="descname">read_h5</code><span class="sig-paren">(</span><em>h5FilePath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.read_h5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.read_h5" title="Permalink to this definition">¶</a></dt>
+<dd><p>resad the h5 file at given path and return the contained data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>h5FilePaht <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Path to the h5 file to read.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>result <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
+<dd><p class="first last">array containing binned data</p>
+</dd>
+<dt>axes <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd><p class="first last">dictionary with axes data labeled by axes name</p>
+</dd>
+<dt>histogram <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span></dt>
+<dd><p class="first last">array of time normalization data.</p>
+</dd>
+</dl>
+</p>
 </td>
 </tr>
 </tbody>
