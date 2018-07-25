@@ -404,14 +404,13 @@ class DldProcessor:
                         'pumpProbeHistogram',
                         data=self.pumpProbeHistogram)
 
-    def load_binned(self, namestr, path=None, mode='r', ret_type='list'):
+    def load_binned(self, file_name, mode='r', ret_type='list'):
         """ Load an HDF5 file saved with ``save_binned()`` method.
 
         :Parameters:
-            namestr : str
-                Extra namestring tag in the filename.
-            path : str | None
-                File path.
+            file_name : str
+                name of the file to load, including full path
+
             mode : str | 'r'
                 Read mode of h5 file ('r' = read).
             ret_type: str | 'list','dict'
@@ -428,10 +427,10 @@ class DldProcessor:
             hist : numpy array
                 Histogram values associated with the read data.
         """
-        if namestr[-3:] == '.h5':
-            filename = namestr
+        if file_name[-3:] == '.h5':
+            filename = file_name
         else:
-            filename = '{}.h5'.format(namestr)
+            filename = '{}.h5'.format(file_name)
 
         with h5py.File(path + filename, mode) as h5File:
 
