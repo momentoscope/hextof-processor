@@ -432,7 +432,7 @@ class DldProcessor:
         else:
             filename = '{}.h5'.format(file_name)
 
-        with h5py.File(path + filename, mode) as h5File:
+        with h5py.File(filename, mode) as h5File:
 
             # Retrieving binned data
             frames = h5File['frames']
