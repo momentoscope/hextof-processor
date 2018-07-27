@@ -539,6 +539,8 @@ def correctOpticalPath(self, poly1=-0.00020578, poly2=4.6813e-7, xCenter=1334, y
 
 def reshape_binned(result, axes, hists, order_in='texy', order_out='etxy',
                    eoff=None, toff=None, t0=0, kx0=0, ky0=0, revert='te'):
+    """ attempt to make a reshaping function. Not to be used yet"""
+    print('using an unsafe function: reshape_binned')
     norm_array = hists[0] / max(hists[0])
     norm_array = norm_array[:, None, None, None]
     res_c = np.nan_to_num(result / norm_array)
@@ -547,21 +549,16 @@ def reshape_binned(result, axes, hists, order_in='texy', order_out='etxy',
     ax_order_out = list(order_out)
 
     axes_c = []
-    for axis in ax_order_out:
+    for axis in ax_order_out: # reorder and invert axes
         if axis in revert:
             axes_c.append(axes[ax_order_in.index(axis)][::-1])
         else:
             axes_c.append(axes[ax_order_in.index(axis)])
-    if ax_order_in[0] in revert:
-        res_c = res_c[::-1, :, :, :]
-    if ax_order_out[1] in revert:
-        res_c = res_c[:, ::-1, :, :]
-    if ax_order_out[2] in revert:
-        res_c = res_c[:, :, ::-1, :]
-    if ax_order_out[3] in revert:
-        res_c = res_c[:, :, :, ::-1]
+
+
+
     temp_order = ax_order_in[:]
-    for i, axis in enumerate(ax_order_out):
+    for i, axis in enumerate(ax_order_out): # reorder data array
         if temp_order[i] != axis:
             res_c = res_c.swapaxes(i, temp_order.index(axis))
             print(temp_order)
@@ -569,6 +566,15 @@ def reshape_binned(result, axes, hists, order_in='texy', order_out='etxy',
             temp_order[temp_order.index(axis)] = temp_order[i]
             temp_order[i] = axis
             print(temp_order)
+
+    if ax_order_out[0] in revert:
+        res_c = res_c[::-1, :, :, :]
+    if ax_order_out[1] in revert:
+        res_c = res_c[:, ::-1, :, :]
+    if ax_order_out[2] in revert:
+        res_c = res_c[:, :, ::-1, :]
+    if ax_order_out[3] in revert:
+        res_c = res_c[:, :, :, ::-1]
 
     for i, axis in enumerate(ax_order_out):
         if axis == 't':
