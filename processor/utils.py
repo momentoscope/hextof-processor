@@ -531,3 +531,54 @@ def correctOpticalPath(self, poly1=-0.00020578, poly2=4.6813e-7, xCenter=1334, y
                          (poly1 * ((self.dd['dldPosX'] - xCenter) ** 2 + (
                                      self.dd['dldPosY'] - yCenter) ** 2) ** 0.5 + \
                           poly2 * ((self.dd['dldPosX'] - xCenter) ** 2 + (self.dd['dldPosY'] - yCenter) ** 2))
+
+
+# ==================
+# Methods by Steinn!
+# ==================
+
+def reshape_binned(result, axes, hists, order_in='texy', order_out='etxy',
+                   eoff=None, toff=None, t0=0, kx0=0, ky0=0, revert='te'):
+    norm_array = hists[0] / max(hists[0])
+    norm_array = norm_array[:, None, None, None]
+    res_c = np.nan_to_num(result / norm_array)
+
+    ax_order_in = list(order_in)
+    ax_order_out = list(order_out)
+
+    axes_c = []
+    for axis in ax_order_out:
+        if axis in revert:
+            axes_c.append(axes[ax_order_in.index(axis)][::-1])
+        else:
+            axes_c.append(axes[ax_order_in.index(axis)])
+    if ax_order_in[0] in revert:
+        res_c = res_c[::-1, :, :, :]
+    if ax_order_out[1] in revert:
+        res_c = res_c[:, ::-1, :, :]
+    if ax_order_out[2] in revert:
+        res_c = res_c[:, :, ::-1, :]
+    if ax_order_out[3] in revert:
+        res_c = res_c[:, :, :, ::-1]
+    temp_order = ax_order_in[:]
+    for i, axis in enumerate(ax_order_out):
+        if temp_order[i] != axis:
+            res_c = res_c.swapaxes(i, temp_order.index(axis))
+            print(temp_order)
+            print('swapped axes {} and {}'.format(i, temp_order.index(axis)))
+            temp_order[temp_order.index(axis)] = temp_order[i]
+            temp_order[i] = axis
+            print(temp_order)
+
+    for i, axis in enumerate(ax_order_out):
+        if axis == 't':
+            axes[i] -= t0
+        elif axis == 'e':
+            if None not in [eoff, toff]:
+                axes[i] = t2e(axis[i], eoffset=eoff, toffset=toff)
+        elif axis == 'x':
+            axes[i] -= kx0
+        elif axis == 'y':
+            axes[i] -= ky0
+
+    return res_c, axes_c
