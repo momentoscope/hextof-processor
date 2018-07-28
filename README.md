@@ -222,9 +222,9 @@ value[int(uBid[j])]
 ```
 or to plot the values as a function of `uBid` by using
 ```python
-uBid=processor.dd['microbunchId'].values.compute()
-MBid=processor.dd['macroBunchPulseId'].values.compute()
-bam=processor.dd['bam'].values.compute()
+uBid = processor.dd['microbunchId'].values.compute()
+MBid = processor.dd['macroBunchPulseId'].values.compute()
+bam = processor.dd['bam'].values.compute()
 
 pl.plot(uBid+processor.bam.shape[1]*MBid,bam)
 ```
@@ -232,15 +232,15 @@ pl.plot(uBid+processor.bam.shape[1]*MBid,bam)
 The following code, as an example, averages `gmdTunnel` values for electrons that have the same `uBid` (it effectively also bins the electrons in `avgNorm` as a side effect):
 
 ```python
-uBid=processor.dd['microbunchId'].values.compute()
-pow=processor.dd['gmdBDA'].values.compute()
+uBid = processor.dd['microbunchId'].values.compute()
+pow = processor.dd['gmdBda'].values.compute()
 
-avgPow=np.zeros(500)
-avgNorm=np.zeros(500)
-for j in range(0,len(uBid)):
-    if(uBid[j]>0 and uBid[j]<500 and pow[j]>0):
-        avgNorm[int(uBid[j])]+=1
-        avgPow1[int(uBid[j])]=(avgPow1[int(uBid[j])]*(avgNorm[int(uBid[j])])+pow[j])/(avgNorm[int(uBid[j])]+1.0)
+avgPow = np.zeros(500)
+avgNorm = np.zeros(500)
+for j in range(0, len(uBid)):
+    if (uBid[j]>0 and uBid[j]<500 and pow[j]>0):
+        avgNorm[int(uBid[j])] += 1
+        avgPow1[int(uBid[j])] = (avgPow1[int(uBid[j])]*(avgNorm[int(uBid[j])])+pow[j])/(avgNorm[int(uBid[j])]+1.0)
 
 ```
 
