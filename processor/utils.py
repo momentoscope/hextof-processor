@@ -7,12 +7,12 @@ import h5py
 import configparser
 from matplotlib import pyplot as plt, cm
 
-
 # ================================================================================
 """Functions for calculation of pulse energy and pulse energy density of optical laser.
 Calibration values taken from Pump beam energy converter 800 400.xls
 Units are uJ for energy, um for beam diameter, uJ/cm^2 for energy density (and arb. for diode signal)
 """
+
 
 def PulseEnergy400(Diode):
     """Calculate the pulse energy of 400nm laser in uJ. The unit is um for beam diameter.
@@ -103,6 +103,7 @@ def argnearest(array, val, rettype='vectorized'):
 """Output ImageJ/Fiji-compatible format
 """
 
+
 def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
     """ Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI
 
@@ -152,7 +153,7 @@ def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
             xyeData.shape,
             dtype='float64')
         dset[...] = xyeData
-    
+
     print("Created file " + filepath)
 
 
@@ -169,7 +170,7 @@ def camelCaseIt(snake_case_string):
 
     titleCaseVersion = snake_case_string.title().replace("_", "")
     camelCaseVersion = titleCaseVersion[0].lower() + titleCaseVersion[1:]
-    
+
     return camelCaseVersion
 
 
@@ -328,6 +329,7 @@ def e2t(e, toffset=None, eoffset=None):
     t = np.sqrt(0.5 * 1e18 * 9.10938e-31 / 1.602177e-19 / (e + eoffset)) + toffset
     return t
 
+
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
@@ -413,15 +415,17 @@ def plot_lines(data,
 def get_idx(array, value):
     """ **[DEPRECATED]** Use `utils.argnearest`
     """
-    
+
     return (np.abs(array - value)).argmin()
+
 
 def load_results(filename, path=None):
     # load the data saved with processor.save_array()
-    
+
     pass
 
-def get_available_runs(rootpath): # TODO: store the resulting dictionary to improve performance.
+
+def get_available_runs(rootpath):  # TODO: store the resulting dictionary to improve performance.
     """ Collects the filepaths to the available experimental run data.
 
     :Parameters:
@@ -432,9 +436,9 @@ def get_available_runs(rootpath): # TODO: store the resulting dictionary to impr
         available_runs : dict
             dict with run numbers as keys (e.g. 'run12345') and path where to load data from as str.
     """
-    
+
     available_runs = {}
-    
+
     for dir in os.walk(rootpath):
         if 'fl1user2' in dir[0]:
             try:
@@ -443,10 +447,11 @@ def get_available_runs(rootpath): # TODO: store the resulting dictionary to impr
                     runNumber = name.split('_')[4]
                     if runNumber not in available_runs:
                         available_runs[runNumber] = run_path
-            except: # TODO: use an assertion method for more solid error tracking.
+            except:  # TODO: use an assertion method for more solid error tracking.
                 pass
-    
+
     return available_runs
+
 
 def get_path_to_run(runNumber, rootpath):
     """ Returns the path to the data of a given run number
@@ -462,13 +467,13 @@ def get_path_to_run(runNumber, rootpath):
         path : str
             path to where the raw data of the given run number is stored.
     """
-    
+
     available_runs = get_available_runs(rootpath)
-    
+
     try:
-        return(available_runs['run{}'.format(runNumber)])
+        return (available_runs['run{}'.format(runNumber)])
     except KeyError:
-        raise KeyError('No run number {} under path {}'.format(runNumber,rootpath))
+        raise KeyError('No run number {} under path {}'.format(runNumber, rootpath))
 
 
 # ==================
@@ -529,13 +534,78 @@ def correctOpticalPath(self, poly1=-0.00020578, poly2=4.6813e-7, xCenter=1334, y
 
     self.dd['dldTime'] = self.dd['dldTime'] - \
                          (poly1 * ((self.dd['dldPosX'] - xCenter) ** 2 + (
-                                     self.dd['dldPosY'] - yCenter) ** 2) ** 0.5 + \
+                                 self.dd['dldPosY'] - yCenter) ** 2) ** 0.5 + \
                           poly2 * ((self.dd['dldPosX'] - xCenter) ** 2 + (self.dd['dldPosY'] - yCenter) ** 2))
 
 
 # ==================
 # Methods by Steinn!
 # ==================
+
+def load_binned_h5(file_name, mode='r', ret_type='list'):
+    """ Load an HDF5 file saved with ``save_binned()`` method.
+
+    :Parameters:
+        file_name : str
+            name of the file to load, including full path
+
+        mode : str | 'r'
+            Read mode of h5 file ('r' = read).
+        ret_type: str | 'list','dict'
+            output format for axes and histograms:
+            'list' generates a list of arrays, ordered as
+            the corresponding dimensions in data. 'dict'
+            generates a dictionary with the names of each axis.
+
+    :Returns:
+        data : numpy array
+            Multidimensional data read from h5 file.
+        axes : numpy array
+            The axes values associated with the read data.
+        hist : numpy array
+            Histogram values associated with the read data.
+    """
+    if file_name[-3:] == '.h5':
+        filename = file_name
+    else:
+        filename = '{}.h5'.format(file_name)
+
+    with h5py.File(filename, mode) as h5File:
+
+        # Retrieving binned data
+        frames = h5File['frames']
+        data = []
+        if len(frames) == 1:
+            data = np.array(frames['f0000'])
+
+        else:
+            for frame in frames:
+                data.append(np.array(frames[frame]))
+            data = np.array(data)
+
+        # Retrieving axes
+        axes = [0 for i in range(len(data.shape))]
+        axes_d = {}
+        for ax in h5File['axes/']:
+            vals = h5File['axes/' + ax][()]
+            #             axes_d[ax] = vals
+            idx = int(ax.split(' - ')[0][2:])
+            if len(frames) == 1:  # shift index to compensate missing time dimension
+                idx -= 1
+            axes[idx] = vals
+
+            # Retrieving delay histograms
+        hists = []
+        hists_d = {}
+        for hist in h5File['histograms/']:
+            hists_d[hist] = h5File['histograms/' + hist][()]
+            hists.append(h5File['histograms/' + hist][()])
+
+    if ret_type == 'list':
+        return data, axes, hists
+    elif ret_type == 'dict':
+        return data, axes_d, hists_d
+
 
 def reshape_binned(result, axes, hists, order_in='texy', order_out='etxy',
                    eoff=None, toff=None, t0=0, kx0=0, ky0=0, revert='te'):
@@ -549,16 +619,14 @@ def reshape_binned(result, axes, hists, order_in='texy', order_out='etxy',
     ax_order_out = list(order_out)
 
     axes_c = []
-    for axis in ax_order_out: # reorder and invert axes
+    for axis in ax_order_out:  # reorder and invert axes
         if axis in revert:
             axes_c.append(axes[ax_order_in.index(axis)][::-1])
         else:
             axes_c.append(axes[ax_order_in.index(axis)])
 
-
-
     temp_order = ax_order_in[:]
-    for i, axis in enumerate(ax_order_out): # reorder data array
+    for i, axis in enumerate(ax_order_out):  # reorder data array
         if temp_order[i] != axis:
             res_c = res_c.swapaxes(i, temp_order.index(axis))
             print(temp_order)

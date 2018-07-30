@@ -12,6 +12,7 @@ import pandas as pd
 from tqdm import tqdm
 from configparser import ConfigParser
 import matplotlib.pyplot as plt
+from processor import utils
 
 # warnings.resetwarnings()
 
@@ -157,7 +158,7 @@ class DldProcessor:
                 path = self.DATA_PARQUET_DIR
             elif format in ['hdf5', 'h5']:
                 path = self.DATA_H5_DIR
-        
+
         if fileName is None:
             if self.runNumber is None:
                 fileName = 'mb{}to{}'.format(
@@ -299,11 +300,11 @@ class DldProcessor:
             data_array_normalized : numpy array
                 normalized version of the input array.
         """
-                
+
         try:
             # Find the index of the normalization axis
             idx = self.binNameList.index(ax)
-            
+
             data_array_normalized = np.swapaxes(data_array, 0, idx)
             norm_array = self.delaystageHistogram
 
@@ -320,15 +321,15 @@ class DldProcessor:
             raise ValueError(
                 'No pump probe time bin, could not normalize to delay stage histogram.')
 
-    def save_binned(self, binnedData, namestr, path=None, mode='w'):
+    def save_binned(self, binnedData, file_name, path=None, mode='w'):
         """ Save a binned numpy array to h5 file. The file includes the axes
         (taken from the scheduled bins) and the delay stage histogram, if it exists.
 
         :Parameters:
             binnedData : numpy array
                 Binned multidimensional data.
-            namestr : str
-                Extra namestring tag in the filename.
+            file_name : str
+                Name of the saved file. The extension '.h5' is automatically added.
             path : str | None
                 File path.
             mode : str | 'w'
@@ -336,24 +337,25 @@ class DldProcessor:
         """
         _abort = False
         if path is None:
-            path = self.DATA_RESULTS_DIR
-        if not os.path.isdir(path): # test if the path exists...
-            answer = input("The folder {} doesn't exist, do you want to create it? [y/n]")
+            path = self.DATA_H5_DIR
+        if not os.path.isdir(path):  # test if the path exists...
+            answer = input("The folder {} doesn't exist,"
+                           "do you want to create it? [y/n]")
             if 'y' in answer:
                 os.makedirs(path)
             else:
                 _abort = True
 
-
-        filename = '{}.h5'.format(namestr)
+        filename = '{}.h5'.format(file_name)
         if os.path.isfile(path + filename):
-            answer = input("A file named {} already exists. Overwrite it? [y/n or r for rename]".format(filename))
-            if 'r' in answer:
-                filename = input("choose a new name:")
-            elif 'y' in answer:
+            answer = input("A file named {} already exists. Overwrite it? "
+                           "[y/n or r for rename]".format(filename))
+            if answer.lower() in ['y', 'yes', 'ja']:
                 pass
-            else:
+            elif answer.lower() in ['n', 'no', 'nein']:
                 _abort = True
+            else:
+                filename = input("choose a new name:")
 
         if not _abort:
             with h5py.File(path + filename, mode) as h5File:
@@ -377,9 +379,8 @@ class DldProcessor:
                 if pp_data is None:  # in case there is no time axis, make a single dataset
                     ff.create_dataset('f{:04d}'.format(0), data=binnedData)
                 else:
-                    for i in range(pp_data.shape[0]): # otherwise make a dataset for each time frame.
+                    for i in range(pp_data.shape[0]):  # otherwise make a dataset for each time frame.
                         ff.create_dataset('f{:04d}'.format(i), data=pp_data[i, ...])
-
 
                 # Saving axes
                 aa = h5File.create_group("axes")
@@ -404,8 +405,10 @@ class DldProcessor:
                         'pumpProbeHistogram',
                         data=self.pumpProbeHistogram)
 
-    def load_binned(self, file_name, mode='r', ret_type='list'):
+    @staticmethod
+    def load_binned(file_name, mode='r', ret_type='list'):
         """ Load an HDF5 file saved with ``save_binned()`` method.
+        wrapper for function utils.load_binned_h5()
 
         :Parameters:
             file_name : str
@@ -427,49 +430,10 @@ class DldProcessor:
             hist : numpy array
                 Histogram values associated with the read data.
         """
-        if file_name[-3:] == '.h5':
-            filename = file_name
-        else:
-            filename = '{}.h5'.format(file_name)
-
-        with h5py.File(filename, mode) as h5File:
-
-            # Retrieving binned data
-            frames = h5File['frames']
-            data = []
-            if len(frames) == 1:
-                data = np.array(frames['f0000'])
-
-            else:
-                for frame in frames:
-                    data.append(np.array(frames[frame]))
-                data = np.array(data)
-
-            # Retrieving axes
-            axes = [0 for i in range(len(data.shape))]
-            axes_d = {}
-            for ax in h5File['axes/']:
-                vals = h5File['axes/' + ax][()]
-                #             axes_d[ax] = vals
-                idx = int(ax.split(' - ')[0][2:])
-                if len(frames) == 1:  # shift index to compensate missing time dimension
-                    idx -= 1
-                axes[idx] = vals
-
-                # Retrieving delay histograms
-            hists = []
-            hists_d = {}
-            for hist in h5File['histograms/']:
-                hists_d[hist] = h5File['histograms/' + hist][()]
-                hists.append(h5File['histograms/' + hist][()])
-
-        if ret_type == 'list':
-            return data, axes, hists
-        elif ret_type == 'dict':
-            return data, axes_d, hists_d
+        return utils.load_binned_h5(file_name, mode=mode, ret_type=ret_type)
 
     def read_h5(self, h5FilePath):
-        """ resad the h5 file at given path and return the contained data.
+        """ [DEPRECATED] Read the h5 file at given path and return the contained data.
 
         :parameters:
             h5FilePaht : str
@@ -521,7 +485,7 @@ class DldProcessor:
                 self.dd = self.dd[self.dd[colname] > lb]
             if ub is not None:
                 self.dd = self.dd[self.dd[colname] < ub]
-        
+
         if colname in self.ddMicrobunches.columns:
             if lb is not None:
                 self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[colname] > lb]
@@ -689,7 +653,7 @@ class DldProcessor:
             start + stepSize / 2,
             end - stepSize / 2,
             stepSize, useStepSize, forceEnds, include_last, force_legacy)
-        if axes[-1]>end:
+        if axes[-1] > end:
             axes = axes[:-1]
         self.binAxesList.append(axes)
         return axes
