@@ -5,7 +5,6 @@ import os
 import numpy as np
 import h5py
 import configparser
-from matplotlib import pyplot as plt, cm
 
 # ================================================================================
 """Functions for calculation of pulse energy and pulse energy density of optical laser.
@@ -359,6 +358,8 @@ def plot_lines(data,
             
     """
 
+    from matplotlib import pyplot as plt, cm
+
     f, axis = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
 
     if range is None:
@@ -418,11 +419,6 @@ def get_idx(array, value):
 
     return (np.abs(array - value)).argmin()
 
-
-def load_results(filename, path=None):
-    # load the data saved with processor.save_array()
-
-    pass
 
 
 def get_available_runs(rootpath):  # TODO: store the resulting dictionary to improve performance.
