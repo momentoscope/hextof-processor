@@ -96,11 +96,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         if (pulseIdInterval is None) and (runNumber is None):
             raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
 
-        if path is None:
-            path = self.DATA_RAW_DIR
-        print('searching for data...')
-        self.path_to_run = utils.get_path_to_run(runNumber, path)
-
         # parse settings and set all dataset addresses as attributes.
         settings = ConfigParser()
         if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
@@ -110,7 +105,19 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         section = 'DAQ address - used'
 
-        daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
+        print('searching for data...')
+        if path is not None:
+            try:
+                daqAccess = BeamtimeDaqAccess.create(path)
+            except:
+                self.path_to_run = utils.get_path_to_run(runNumber, path)
+                daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
+        else:
+            path = self.DATA_RAW_DIR
+            self.path_to_run = utils.get_path_to_run(runNumber, path)
+            daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
+
+
 
         self.daqAddresses = []
         for entry in settings[section]:
