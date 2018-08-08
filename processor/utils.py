@@ -5,6 +5,7 @@ import os
 import numpy as np
 import h5py
 import configparser
+import psutil
 
 # ================================================================================
 """Functions for calculation of pulse energy and pulse energy density of optical laser.
@@ -652,3 +653,17 @@ def reshape_binned(result, axes, hists, order_in='texy', order_out='etxy',
             axes[i] -= ky0
 
     return res_c, axes_c
+
+def get_system_memory_status(print_=False):
+    mem_labels  = ('total','available','percent','used','free')
+    mem = psutil.virtual_memory()
+    memstatus = {}
+    for i, val in enumerate(mem):
+        memstatus[mem_labels[i]] = val
+    if print_:
+        for key, value in memstatus.items():
+            if key == 'percent':
+                print('{}: {:0.3}%'.format(key,value))
+            else:
+                print('{}: {:0,.4} GB'.format(key,value/2**30))
+    return memstatus
