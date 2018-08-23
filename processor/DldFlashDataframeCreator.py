@@ -296,7 +296,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         # added macroBunchPulseId at last position
         # da = dask.array.stack([daX, daY, daTime, daDelaystage, daBam, daMicrobunchId,
-        #                       daDetectorId, daBunchCharge, daOpticalDiode,
+        #                       daDetectorId, daSectorId, daBunchCharge, daOpticalDiode,
         #                       daGmdTunnel, daMacroBunchPulseId])
         da = np.stack(arrayCols)
         return da
@@ -328,7 +328,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         a = np.concatenate(self.daListResult, axis=1)
         da = dask.array.from_array(a.T, chunks=self.CHUNK_SIZE)
 
-        cols = ('dldPosX', 'dldPosY', 'dldTime', 'delayStage', 'bam', 'dldMicrobunchId', 'dldDetectorId', 'bunchCharge',
+        cols = ('dldPosX', 'dldPosY', 'dldTime', 'delayStage', 'bam', 'dldMicrobunchId', 'dldDetectorId', 'dldSectorId', 'bunchCharge',
                 'opticalDiode', 'gmdTunnel', 'gmdBda', 'pumpPol', 'macroBunchPulseId')
 
         cols = tuple(x for x in cols if x in self.daqAddresses)
