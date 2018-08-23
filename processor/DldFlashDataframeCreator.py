@@ -239,6 +239,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             daDetectorId = dldDetectorId.flatten()
             arrayCols.append(daDetectorId)
 
+        if 'dldSectorId' in self.daqAddresses:
+            dldSectorId = (self.dldSectorId[mbIndexStart:mbIndexEnd, :].copy()).astype(int) % 8
+            daSectorId = dldSectorId.flatten()
+            arrayCols.append(daSectorId)
+
         if 'bunchCharge' in self.daqAddresses:
             bunchChargeArray = assignToMircobunch(
                 self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
