@@ -28,7 +28,7 @@ SETTINGS.ini
 # docs/build/
 
 # ignore Tutorial files
-Tutorial/h5
-Tutorial/raw
-Tutorial/results
-Tutorial/parquet
+Tutorial/h5/
+Tutorial/raw/
+Tutorial/results/
+Tutorial/parquet/
