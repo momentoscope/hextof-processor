@@ -123,7 +123,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         for entry in settings[section]:
             name = utils.camelCaseIt(entry)
             val = str(settings[section][entry])
-            if daqAccess.isChannelAvailable(val, self.getIds(runNumber)):
+            if daqAccess.isChannelAvailable(val, self.getIds(runNumber, path)):
                 self.daqAddresses.append(name)
                 if _VERBOSE:
                     print('assigning address: {}: {}'.format(name.ljust(20), val))
