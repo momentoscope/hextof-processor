@@ -6,7 +6,8 @@ import numpy as np
 import h5py
 import configparser
 import psutil
-
+from datetime import datetime
+from processor import DldFlashDataframeCreator as DldFlashProcessor
 # ================================================================================
 """Functions for calculation of pulse energy and pulse energy density of optical laser.
 Calibration values taken from Pump beam energy converter 800 400.xls
@@ -667,3 +668,57 @@ def get_system_memory_status(print_=False):
             else:
                 print('{}: {:0,.4} GB'.format(key,value/2**30))
     return memstatus
+
+def read_and_binn(runNumber, *args, static_bunches=False, source='raw', save=True):
+    print(datetime.now())
+    
+    processor = DldFlashProcessor.DldFlashProcessor()
+    processor.runNumber = runNumber
+    if source == 'raw':
+        processor.readData()
+    elif source == 'parquet':
+        try:
+            processor.readDataframes()
+        except:
+            print('No Parquet data found, loading raw data.')
+            processor.readData()
+            processor.storeDataframes()
+    processor.postProcess()
+    if static_bunches is True:
+        processor.dd = processor.dd[processor.dd['dldMicrobunchId'] > 400]
+    else:
+        processor.dd = processor.dd[processor.dd['dldMicrobunchId'] > 100]
+        processor.dd = processor.dd[processor.dd['dldMicrobunchId'] < 400]
+    shortname = ''
+    processor.resetBins()
+    dldTime = delayStage = dldPos = None
+    for arg in args:
+        if arg[0] == 'dldTime':
+            dldTime = arg[1:]
+        elif arg[0] == 'delayStage':
+            delayStage = arg[1:]        
+        elif arg[0] == 'dldPos':
+            dldPos = arg[1:]
+
+
+    if delayStage:
+        processor.addBinning('delayStage', *delayStage)
+        shortname += 'T'
+    if dldTime:
+        processor.addBinning('dldTime', *dldTime)
+        shortname += 'E'
+    if dldPos:
+        processor.addBinning('dldPosX', *dldPos)
+        processor.addBinning('dldPosY', *dldPos)
+        shortname += 'KxKy'
+
+    if save:
+        saveName = 'run{} - {}'.format(runNumber,shortname)
+        result = processor.computeBinnedData(saveName = saveName)
+    else:
+        result = processor.computeBinnedData()
+    axes = processor.binRangeList
+    return result, axes, processor
+
+
+
