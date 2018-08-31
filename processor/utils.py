@@ -700,13 +700,12 @@ def read_and_binn(runNumber, *args, static_bunches=False, source='raw', save=Tru
         elif arg[0] == 'dldPos':
             dldPos = arg[1:]
 
-
-    if delayStage:
-        processor.addBinning('delayStage', *delayStage)
-        shortname += 'T'
     if dldTime:
         processor.addBinning('dldTime', *dldTime)
         shortname += 'E'
+    if delayStage:
+        processor.addBinning('delayStage', *delayStage)
+        shortname += 'T'
     if dldPos:
         processor.addBinning('dldPosX', *dldPos)
         processor.addBinning('dldPosY', *dldPos)
