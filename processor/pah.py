@@ -77,7 +77,7 @@ class H5FileDataAccess(H5FileDataAccess):
         return channelName in self.allChannelNames() \
                or channelName.startswith('/uncategorised/') \
                or channelName.startswith('/FL2/') \
-               or channelName.startswith('/Timing/')  # <-- add timing section
+               or channelName.startswith('/FL1/Timing/')  # <-- add timing section
 
 
 class H5FileManager(H5FileManager):
