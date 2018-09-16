@@ -96,11 +96,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         if (pulseIdInterval is None) and (runNumber is None):
             raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
 
-        if path is None:
-            path = self.DATA_RAW_DIR
-        print('searching for data...')
-        self.path_to_run = utils.get_path_to_run(runNumber, path)
-
         # parse settings and set all dataset addresses as attributes.
         settings = ConfigParser()
         if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
@@ -110,13 +105,25 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         section = 'DAQ address - used'
 
-        daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
+        print('searching for data...')
+        if path is not None:
+            try:
+                daqAccess = BeamtimeDaqAccess.create(path)
+            except:
+                self.path_to_run = utils.get_path_to_run(runNumber, path)
+                daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
+        else:
+            path = self.DATA_RAW_DIR
+            self.path_to_run = utils.get_path_to_run(runNumber, path)
+            daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
+
+
 
         self.daqAddresses = []
         for entry in settings[section]:
             name = utils.camelCaseIt(entry)
             val = str(settings[section][entry])
-            if daqAccess.isChannelAvailable(val, self.getIds(runNumber)):
+            if daqAccess.isChannelAvailable(val, self.getIds(runNumber, path)):
                 self.daqAddresses.append(name)
                 if _VERBOSE:
                     print('assigning address: {}: {}'.format(name.ljust(20), val))
@@ -232,6 +239,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             daDetectorId = dldDetectorId.flatten()
             arrayCols.append(daDetectorId)
 
+        if 'dldSectorId' in self.daqAddresses:
+            dldSectorId = (self.dldSectorId[mbIndexStart:mbIndexEnd, :].copy()).astype(int) % 8
+            daSectorId = dldSectorId.flatten()
+            arrayCols.append(daSectorId)
+
         if 'bunchCharge' in self.daqAddresses:
             bunchChargeArray = assignToMircobunch(
                 self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
@@ -284,7 +296,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         # added macroBunchPulseId at last position
         # da = dask.array.stack([daX, daY, daTime, daDelaystage, daBam, daMicrobunchId,
-        #                       daDetectorId, daBunchCharge, daOpticalDiode,
+        #                       daDetectorId, daSectorId, daBunchCharge, daOpticalDiode,
         #                       daGmdTunnel, daMacroBunchPulseId])
         da = np.stack(arrayCols)
         return da
@@ -316,7 +328,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         a = np.concatenate(self.daListResult, axis=1)
         da = dask.array.from_array(a.T, chunks=self.CHUNK_SIZE)
 
-        cols = ('dldPosX', 'dldPosY', 'dldTime', 'delayStage', 'bam', 'dldMicrobunchId', 'dldDetectorId', 'bunchCharge',
+        cols = ('dldPosX', 'dldPosY', 'dldTime', 'delayStage', 'bam', 'dldMicrobunchId', 'dldDetectorId', 'dldSectorId', 'bunchCharge',
                 'opticalDiode', 'gmdTunnel', 'gmdBda', 'pumpPol', 'macroBunchPulseId')
 
         cols = tuple(x for x in cols if x in self.daqAddresses)
