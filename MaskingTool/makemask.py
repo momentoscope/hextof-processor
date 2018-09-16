@@ -2,7 +2,7 @@
 file makemask.py
 Author: Markus Scholz, Mario Reiser
 Masking tool for image data
-Ää'''
+'''
 
 from matplotlib import pyplot as plt
 import matplotlib as mpl
