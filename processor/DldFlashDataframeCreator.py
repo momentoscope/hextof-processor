@@ -143,7 +143,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                     attrVal = getattr(self, address_name)
                     values, otherStuff = daqAccess.allValuesOfRun(attrVal, runNumber)
                 except AssertionError:
-                    pass
+                    print('Assertion error: {}'.format(address_name, attrVal, values, otherStuff ))
 
                 setattr(self, address_name, values)
                 if address_name == 'macroBunchPulseId':  # catch the value of the first macrobunchID
