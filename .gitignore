@@ -6,7 +6,6 @@ __pycache__
 *.pyc
 
 lib/*.so
-lib/*.c
 lib/*.html
 
 #ignore IDE settings folders
@@ -21,6 +20,7 @@ SETTINGS.ini
 /build/
 *.so
 *.pyd
+*.c
 
 *.ini
 
