@@ -8,6 +8,7 @@ import configparser
 import psutil
 from datetime import datetime
 from processor import DldFlashDataframeCreator as DldFlashProcessor
+
 # ================================================================================
 """Functions for calculation of pulse energy and pulse energy density of optical laser.
 Calibration values taken from Pump beam energy converter 800 400.xls
