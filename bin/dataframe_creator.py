@@ -3,9 +3,8 @@
 
 @author: Steinn Ymir Agustsson
 """
-import sys, os
 import processor.DldFlashDataframeCreator as DldFlashProcessor
-from processor.utils import get_available_runs
+from utilities.misc import get_available_runs
 
 def main():
     print('running')
