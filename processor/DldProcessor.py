@@ -12,7 +12,7 @@ import pandas as pd
 from tqdm import tqdm
 from configparser import ConfigParser
 # import matplotlib.pyplot as plt
-from processor import utils
+from utilities import misc
 
 # warnings.resetwarnings()
 
@@ -84,6 +84,19 @@ class DldProcessor:
                 
             Here ``False`` is the better choice, since it keeps better track of attributes.
         """
+        self.N_CORES = int
+        self.UBID_OFFSET = int
+        self.CHUNK_SIZE = int
+        self.TOF_STEP_TO_NS = float
+        self.TOF_NS_TO_EV = float
+        self.TOF_STEP_TO_EV = float
+        self.ET_CONV_E_OFFSET = float
+        self.ET_CONV_T_OFFSET = float
+
+        self.DATA_RAW_DIR = str
+        self.DATA_H5_DIR = str
+        self.DATA_PARQUET_DIR = str
+        self.DATA_RESULTS_DIR = str
 
         settings = ConfigParser()
         if os.path.isfile(
@@ -133,6 +146,32 @@ class DldProcessor:
                                     settings[section][entry]))
                     else:
                         pass
+
+    def load_settings(self,settings_file_name):
+        """ load settings from an other saved setting file.
+
+        To save settings simply copy paste the SETTINGS.ini file to the
+        utilities/settings folder, and rename it. Use this name in this method
+        to then load its content to the SETTINGS.ini file."""
+        settings = ConfigParser()
+        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'utilities', 'settings', settings_file_name+'.ini')):
+            settings.read(os.path.join(os.path.dirname(__file__), 'utilities', 'settings', settings_file_name+'.ini'))
+            #print('true: {}'.format(os.path.join(os.path.dirname(__file__), 'utilities', 'settings', settings_file_name+'.ini')))
+        else:
+            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'utilities', 'settings', settings_file_name+'.ini'))
+            #print('false: {}'.format(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'utilities', 'settings', settings_file_name+'.ini')))
+        if len(settings.sections()) == 0:
+            print('no settings found, ignoring.')
+        else:
+            targetfile = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                      'SETTINGS.ini')
+
+            with open(targetfile, 'w') as SETTINGS_file:  # save
+                settings.write(SETTINGS_file)
+            print('written to {}'.format(targetfile))
+            # apply new settings to current processor
+            self.initAttributes()
+
 
     def readDataframes(self, fileName=None, path=None, format='parquet'):
         """ Load data from a parquet or HDF5 dataframe.
@@ -430,7 +469,7 @@ class DldProcessor:
             hist : numpy array
                 Histogram values associated with the read data.
         """
-        return utils.load_binned_h5(file_name, mode=mode, ret_type=ret_type)
+        return misc.load_binned_h5(file_name, mode=mode, ret_type=ret_type)
 
     def read_h5(self, h5FilePath):
         """ [DEPRECATED] Read the h5 file at given path and return the contained data.
