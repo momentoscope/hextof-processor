@@ -43,10 +43,10 @@ Parameters:
 """
 
 
-def t2e(t, toffset=None, eoffset=None):
+def tof2energy(t, toffset=None, eoffset=None):
     """ Transform ToF to eV.
 
-    The functions (t2e and e2t) convert between binding energy (:math:`E_b`) in eV (negative convention)
+    The functions (tof2energy and energy2tof) convert between binding energy (:math:`E_b`) in eV (negative convention)
     and time of flight (ToF) in ns.
 
     The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the
@@ -105,10 +105,10 @@ def t2e(t, toffset=None, eoffset=None):
     return e
 
 
-def e2t(e, toffset=None, eoffset=None):
+def energy2tof(e, toffset=None, eoffset=None):
     """ Transform eV to time of flight (ToF).
 
-    The functions (t2e and e2t) convert between binding energy (:math:`E_b`) in eV (negative convention)
+    The functions (tof2energy and energy2tof) convert between binding energy (:math:`E_b`) in eV (negative convention)
     and time of flight (ToF) in ns.
 
     The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the
