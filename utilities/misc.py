@@ -522,3 +522,30 @@ def read_and_binn(runNumber, *args, static_bunches=False, source='raw', save=Tru
         result = processor.computeBinnedData()
     axes = processor.binRangeList
     return result, axes, processor
+
+def create_dataframes(runNumbers, *args):
+    """ Creates a parquet dataframe for each run passed.
+    Returns
+        fails: dictionary of runs and error which broke the dataframe generation
+    """
+    if isinstance(runNumbers, int):
+        runNumbers = [runNumbers,]
+    for run in args:
+        if isinstance(run,list) or isinstance(run,tuple):
+            runNumbers.extend(run)
+        else:
+            runNumbers.append(run)
+    fails = {}
+    for run in runNumbers:
+        try:
+            prc = DldFlashProcessor.DldFlashProcessor()
+            prc.runNumber = run
+            prc.readData()
+            prc.storeDataframes()
+            print('Stored dataframe for run {} in {}'.format(run,prc.DATA_PARQUET_DIR))
+        except Exception as E:
+            fails[run] = E
+    for key, val in fails.items():
+        print('{} failed with error {}'.format(key, val))
+
+    return fails
