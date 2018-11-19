@@ -172,7 +172,6 @@ class DldProcessor:
             # apply new settings to current processor
             self.initAttributes()
 
-
     def readDataframes(self, fileName=None, path=None, format='parquet'):
         """ Load data from a parquet or HDF5 dataframe.
 
