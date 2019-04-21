@@ -12,7 +12,6 @@ else:
     settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
 # importing stuff from PAH modules
-import sys
 sys.path.append(settings['paths']['PAH_MODULE_DIR'])
 from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess, H5FileDataAccess, H5FileManager
 

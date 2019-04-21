@@ -487,7 +487,7 @@ var Search = {
     }
 
     // now sort the results by score (in opposite order of appearance, since the
-    // display function below uses pop() to retrieve items) and then
+    // display function below uses pop() to retrieve channels) and then
     // alphabetically
     results.sort(function(a, b) {
       var left = a[4];

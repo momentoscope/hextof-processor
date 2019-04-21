@@ -587,7 +587,7 @@
 
   /**
    * A simple template renderer. Placeholders such as <%id%> are replaced
-   * by context['id'] with items being escaped. Placeholders such as <#id#>
+   * by context['id'] with channels being escaped. Placeholders such as <#id#>
    * are not escaped.
    */
   function renderTemplate(template, context) {

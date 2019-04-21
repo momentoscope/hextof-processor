@@ -301,9 +301,9 @@ The units are um for beam diameter, uJ/cm^2 for energy density.</p>
 
 <dl class="function">
 <dt id="processor.utils.e2t">
-<code class="descclassname">processor.utils.</code><code class="descname">e2t</code><span class="sig-paren">(</span><em>e</em>, <em>toffset=None</em>, <em>eoffset=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#e2t"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.e2t" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">processor.utils.</code><code class="descname">energy2tof</code><span class="sig-paren">(</span><em>e</em>, <em>toffset=None</em>, <em>eoffset=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#e2t"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.e2t" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform eV to time of flight (ToF).</p>
-<p>The functions (t2e and e2t) convert between binding energy (<span class="math">\(E_b\)</span>) in eV (negative convention)
+<p>The functions (tof2energy and energy2tof) convert between binding energy (<span class="math">\(E_b\)</span>) in eV (negative convention)
 and time of flight (ToF) in ns.</p>
 <p>The formula used is based on the ToF for an electron with a kinetic energy <span class="math">\(E_k\)</span>. Then the
 binding energy <span class="math">\(E_b\)</span> is given by</p>
@@ -440,9 +440,9 @@ there are several strategies for calibrating this value,</p>
 
 <dl class="function">
 <dt id="processor.utils.t2e">
-<code class="descclassname">processor.utils.</code><code class="descname">t2e</code><span class="sig-paren">(</span><em>t</em>, <em>toffset=None</em>, <em>eoffset=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#t2e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.t2e" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">processor.utils.</code><code class="descname">tof2energy</code><span class="sig-paren">(</span><em>t</em>, <em>toffset=None</em>, <em>eoffset=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/utils.html#t2e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utils.t2e" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform ToF to eV.</p>
-<p>The functions (t2e and e2t) convert between binding energy (<span class="math">\(E_b\)</span>) in eV (negative convention)
+<p>The functions (tof2energy and energy2tof) convert between binding energy (<span class="math">\(E_b\)</span>) in eV (negative convention)
 and time of flight (ToF) in ns.</p>
 <p>The formula used is based on the ToF for an electron with a kinetic energy <span class="math">\(E_k\)</span>. Then the
 binding energy <span class="math">\(E_b\)</span> is given by</p>
