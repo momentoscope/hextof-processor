@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import os
-import numpy as np
-import h5py
 import configparser
-import psutil
+import os
 from datetime import datetime
+
+import h5py
+import numpy as np
+import psutil
+
 from processor import DldFlashDataframeCreator as DldFlashProcessor
+
 # ================================================================================
 """Functions for calculation of pulse energy and pulse energy density of optical laser.
 Calibration values taken from Pump beam energy converter 800 400.xls
@@ -64,6 +66,7 @@ def EnergyDensity800(Diode, Diameter=600):
     return PulseEnergy800(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
 
 
+# %% Math
 # ================================================================================
 
 
@@ -100,10 +103,8 @@ def argnearest(array, val, rettype='vectorized'):
         return np.unravel_index(argval, array.shape)
 
 
+# %% Data Input/Output
 # ================================================================================
-"""Output ImageJ/Fiji-compatible format
-"""
-
 
 def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
     """ Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI
@@ -158,278 +159,13 @@ def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
     print("Created file " + filepath)
 
 
-# ================================================================================
-
-# def camelCaseIt_onlyPython3(snake_str):
-#     first, *others = snake_str.split('_')
-#     return ''.join([first.lower(), *map(str.title, others)])
-
-
-def camelCaseIt(snake_case_string):
-    """ Format a string in camel case
-    """
-
-    titleCaseVersion = snake_case_string.title().replace("_", "")
-    camelCaseVersion = titleCaseVersion[0].lower() + titleCaseVersion[1:]
-
-    return camelCaseVersion
-
-
-# ================================================================================
-""" The following functions convert between binding energy (Eb) in eV (negative convention)
-    and time of flight (ToF) in ns.
-    
-    The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
-    binding energy Eb is given by
-    
-    Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
-    
-    With W the work function, hv the photon energy, V the electrostatic potential applied to
-    the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
-    The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
-    time in the drift tube. The measured ToF, however, has some offset due to clock start not
-    coinciding with entry in the drift section.
-
-    offs is supposed to include the time offset for when the electrons enter the drift section.
-    Its main mainly affects peak spacing, and there are several strategies for calibrating this
-    value:
-    1.  By measuring the photon peak and correcting by some extractor voltage-dependent offset
-    2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum
-    3.  Imposing some calibrated spacing between features in a spectrum
-
-    oo is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
-    there are several strategies for calibrating this value:
-    1.  By getting the correct values for W, hv, and V
-    2.  It can be calibrated by imposing peak position
-
-Parameters:
-    t (float) the ToF
-    e (float) the binding energy
-"""
-
-
-def t2e(t, toffset=None, eoffset=None):
-    """ Transform ToF to eV.
-
-    The functions (t2e and e2t) convert between binding energy (:math:`E_b`) in eV (negative convention)
-    and time of flight (ToF) in ns.
-    
-    The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the
-    binding energy :math:`E_b` is given by
-    
-    -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
-    
-    With W the work function, hv the photon energy, V the electrostatic potential applied to
-    the sample with respect to the drift section voltage, v the velocity of the electrons in the drift tube,
-    m the mass of the electron.
-    
-    The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
-    time in the drift tube. The measured ToF, however, has some offset due to clock start not
-    coinciding with entry in the drift section.
-
-    toffset is supposed to include the time offset for when the electrons enter the drift section.
-    Its main mainly affects peak spacing, and there are several strategies for calibrating this value,
-    
-    1.  By measuring the photon peak and correcting by some extractor voltage-dependent offset
-    2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum
-    3.  Imposing some calibrated spacing between features in a spectrum
-
-    eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
-    there are several strategies for calibrating this value,
-    
-    1.  By getting the correct values for W, hv, and V
-    2.  It can be calibrated by imposing peak position
-
-    :Parameters:
-        t : float
-            The time of flight
-        toffset : float
-            The time offset from thedld clock start to when the fastest photoelectrons reach the detector
-        eoffset : float
-            The energy offset given by W-hv-V
-
-    :Return:
-        e : float
-            The binding energy
-    """
-
-    from configparser import ConfigParser
-    settings = ConfigParser()
-    if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-        settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
-    else:
-        settings.read(
-            os.path.join(
-                os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
-
-    if toffset is None:
-        toffset = float(settings['processor']['ET_CONV_T_OFFSET'])
-    if eoffset is None:
-        eoffset = float(settings['processor']['ET_CONV_E_OFFSET'])
-    e = 0.5 * 1e18 * 9.10938e-31 / (((t) - toffset) *
-                                    ((t) - toffset)) / 1.602177e-19 - eoffset
-    return e
-
-
-def e2t(e, toffset=None, eoffset=None):
-    """ Transform eV to time of flight (ToF).
-
-    The functions (t2e and e2t) convert between binding energy (:math:`E_b`) in eV (negative convention)
-    and time of flight (ToF) in ns.
-    
-    The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the
-    binding energy :math:`E_b` is given by
-    
-    -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
-    
-    With W the work function, hv the photon energy, V the electrostatic potential applied to
-    the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
-    The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
-    time in the drift tube. The measured ToF, however, has some offset due to clock start not
-    coinciding with entry in the drift section.
-
-    offs is supposed to include the time offset for when the electrons enter the drift section.
-    Its main mainly affects peak spacing, and there are several strategies for calibrating this value,
-    
-    1.  By measuring the photon peak and correcting by some extractor voltage-dependent offset
-    2.  Shifting the potential by 1V and imposing the same shift in the measured spectrum
-    3.  Imposing some calibrated spacing between features in a spectrum
-
-    eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
-    there are several strategies for calibrating this value,
-    
-    1.  By getting the correct values for W, hv, and V
-    2.  It can be calibrated by imposing peak position
-
-    :Parameters:
-        e : float
-            The binding energy
-        toffset : float
-            The time offset from thedld clock start to when the fastest photoelectrons reach the detector
-        eoffset : float
-            The energy offset given by W-hv-V
-
-    :Return:
-        t : float
-            The time of flight
-    """
-
-    from configparser import ConfigParser
-    settings = ConfigParser()
-    if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-        settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
-    else:
-        settings.read(
-            os.path.join(
-                os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
-
-    if toffset is None:
-        toffset = float(settings['processor']['ET_CONV_T_OFFSET'])
-    if eoffset is None:
-        eoffset = float(settings['processor']['ET_CONV_E_OFFSET'])
-    t = np.sqrt(0.5 * 1e18 * 9.10938e-31 / 1.602177e-19 / (e + eoffset)) + toffset
-    return t
-
-
-# ------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------
-
-
-def plot_lines(data,
-               normalization='None',
-               range=None,
-               color_range=(0, 1),
-               x_label='',
-               y_label='',
-               xlim=None,
-               ylim=None,
-               savefig=False,
-               save_dir='E:/data/FLASH/',
-               save_name='fig',
-               static_curve=None):
-    """
-
-    :Parameters:
-        data :
-            
-        normalization :
-            
-        range :
-            
-        color_range :
-            
-    """
-
-    from matplotlib import pyplot as plt, cm
-
-    f, axis = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
-
-    if range is None:
-        from_ = 0
-        to_ = len(data[:, ...])
-    else:
-        from_ = range[0]
-        to_ = range[1]
-
-    n_curves = len(data[from_:to_, 0])
-    print(n_curves)
-    cm_subsection = np.linspace(color_range[0], color_range[1], n_curves)
-    colors = [cm.coolwarm(1 - x) for x in cm_subsection]
-
-    for i, color in enumerate(colors[from_:to_]):
-        label = '{}'.format(i)  # 20*(i+from_),
-        curve = data[i + from_, :]  # result_unpumped[i]
-        if normalization == 'sum':
-            curve /= curve.sum()
-        elif normalization == 'max':
-            curve /= curve.max()
-
-        axis.plot(curve, '-', color=color, label=label)
-    #    axis[1].plot(x_axis_energy,curve_pump, '-', color=color,label=label)
-    if static_curve is not None:
-        plt.plot(static_curve, '--', color='black', label='static')
-    plt.grid()
-    plt.legend(fontsize='large')
-    plt.xlabel(x_label, fontsize='xx-large')
-    plt.ylabel(y_label, fontsize='xx-large')
-    plt.xticks(fontsize='large')
-    plt.yticks(fontsize='large')
-    if xlim is not None:
-        plt.xlim(xlim[0], xlim[1])
-    if ylim is not None:
-        plt.ylim(ylim[0], ylim[1])
-
-    if savefig:
-        plt.savefig(
-            '{}{}.png'.format(save_dir, save_name),
-            dpi=200,
-            facecolor='w',
-            edgecolor='w',
-            orientation='portrait',
-            papertype=None,
-            format=None,
-            transparent=True,
-            bbox_inches=None,
-            pad_inches=0.1,
-            frameon=None)
-    plt.show()
-
-
-def get_idx(array, value):
-    """ **[DEPRECATED]** Use `utils.argnearest`
-    """
-
-    return (np.abs(array - value)).argmin()
-
-
-
 def get_available_runs(rootpath):  # TODO: store the resulting dictionary to improve performance.
     """ Collects the filepaths to the available experimental run data.
 
     :Parameters:
         rootpath : str
             path where to look for data (recursive in subdirectories)
-    
+
     :Return:
         available_runs : dict
             dict with run numbers as keys (e.g. 'run12345') and path where to load data from as str.
@@ -473,6 +209,72 @@ def get_path_to_run(runNumber, rootpath):
     except KeyError:
         raise KeyError('No run number {} under path {}'.format(runNumber, rootpath))
 
+
+# %% String operations
+# ================================================================================
+
+def camelCaseIt(snake_case_string):
+    """ Format a string in camel case
+    """
+
+    titleCaseVersion = snake_case_string.title().replace("_", "")
+    camelCaseVersion = titleCaseVersion[0].lower() + titleCaseVersion[1:]
+
+    return camelCaseVersion
+
+# %% plotting
+# # ================================================================================
+
+def plot_lines(data, normalization='None', range=None, color_range=(0, 1),
+               x_label='', y_label='', xlim=None, ylim=None, savefig=False,
+               save_dir='E:/data/FLASH/', save_name='fig', static_curve=None):
+    """ function to fit a series of curves with nice colorplot. """
+
+    from matplotlib import pyplot as plt, cm
+
+    f, axis = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
+
+    if range is None:
+        from_ = 0
+        to_ = len(data[:, ...])
+    else:
+        from_ = range[0]
+        to_ = range[1]
+
+    n_curves = len(data[from_:to_, 0])
+    print('Number of curves: {}'.format(n_curves))
+    cm_subsection = np.linspace(color_range[0], color_range[1], n_curves)
+    colors = [cm.coolwarm(1 - x) for x in cm_subsection]
+
+    for i, color in enumerate(colors[from_:to_]):
+        label = '{}'.format(i)  # 20*(i+from_),
+        curve = data[i + from_, :]  # result_unpumped[i]
+        if normalization == 'sum':
+            curve /= curve.sum()
+        elif normalization == 'max':
+            curve /= curve.max()
+
+        axis.plot(curve, '-', color=color, label=label)
+    #    axis[1].plot(x_axis_energy,curve_pump, '-', color=color,label=label)
+    if static_curve is not None:
+        plt.plot(static_curve, '--', color='black', label='static')
+    plt.grid()
+    plt.legend(fontsize='large')
+    plt.xlabel(x_label, fontsize='xx-large')
+    plt.ylabel(y_label, fontsize='xx-large')
+    plt.xticks(fontsize='large')
+    plt.yticks(fontsize='large')
+    if xlim is not None:
+        plt.xlim(xlim[0], xlim[1])
+    if ylim is not None:
+        plt.ylim(ylim[0], ylim[1])
+
+    if savefig:
+        plt.savefig('{}{}.png'.format(save_dir, save_name),
+                    dpi=200, facecolor='w', edgecolor='w', orientation='portrait',
+                    papertype=None, format=None, transparent=True, bbox_inches=None,
+                    pad_inches=0.1, frameon=None)
+    plt.show()
 
 # ==================
 # Methods by Mac!
@@ -655,8 +457,9 @@ def reshape_binned(result, axes, hists, order_in='texy', order_out='etxy',
 
     return res_c, axes_c
 
+
 def get_system_memory_status(print_=False):
-    mem_labels  = ('total','available','percent','used','free')
+    mem_labels = ('total', 'available', 'percent', 'used', 'free')
     mem = psutil.virtual_memory()
     memstatus = {}
     for i, val in enumerate(mem):
@@ -664,14 +467,15 @@ def get_system_memory_status(print_=False):
     if print_:
         for key, value in memstatus.items():
             if key == 'percent':
-                print('{}: {:0.3}%'.format(key,value))
+                print('{}: {:0.3}%'.format(key, value))
             else:
-                print('{}: {:0,.4} GB'.format(key,value/2**30))
+                print('{}: {:0,.4} GB'.format(key, value / 2 ** 30))
     return memstatus
+
 
 def read_and_binn(runNumber, *args, static_bunches=False, source='raw', save=True):
     print(datetime.now())
-    
+
     processor = DldFlashProcessor.DldFlashProcessor()
     processor.runNumber = runNumber
     if source == 'raw':
@@ -696,7 +500,7 @@ def read_and_binn(runNumber, *args, static_bunches=False, source='raw', save=Tru
         if arg[0] == 'dldTime':
             dldTime = arg[1:]
         elif arg[0] == 'delayStage':
-            delayStage = arg[1:]        
+            delayStage = arg[1:]
         elif arg[0] == 'dldPos':
             dldPos = arg[1:]
 
@@ -712,12 +516,36 @@ def read_and_binn(runNumber, *args, static_bunches=False, source='raw', save=Tru
         shortname += 'KxKy'
 
     if save:
-        saveName = 'run{} - {}'.format(runNumber,shortname)
-        result = processor.computeBinnedData(saveName = saveName)
+        saveName = 'run{} - {}'.format(runNumber, shortname)
+        result = processor.computeBinnedData(saveName=saveName)
     else:
         result = processor.computeBinnedData()
     axes = processor.binRangeList
     return result, axes, processor
 
+def create_dataframes(runNumbers, *args):
+    """ Creates a parquet dataframe for each run passed.
+    Returns
+        fails: dictionary of runs and error which broke the dataframe generation
+    """
+    if isinstance(runNumbers, int):
+        runNumbers = [runNumbers,]
+    for run in args:
+        if isinstance(run,list) or isinstance(run,tuple):
+            runNumbers.extend(run)
+        else:
+            runNumbers.append(run)
+    fails = {}
+    for run in runNumbers:
+        try:
+            prc = DldFlashProcessor.DldFlashProcessor()
+            prc.runNumber = run
+            prc.readData()
+            prc.storeDataframes()
+            print('Stored dataframe for run {} in {}'.format(run,prc.DATA_PARQUET_DIR))
+        except Exception as E:
+            fails[run] = E
+    for key, val in fails.items():
+        print('{} failed with error {}'.format(key, val))
 
-
+    return fails

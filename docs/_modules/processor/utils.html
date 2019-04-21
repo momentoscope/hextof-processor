@@ -381,10 +381,10 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="t2e"><a class="viewcode-back" href="../../library/utils.html#processor.utils.t2e">[docs]</a><span class="k">def</span> <span class="nf">t2e</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">toffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="t2e"><a class="viewcode-back" href="../../library/utils.html#processor.utils.t2e">[docs]</a><span class="k">def</span> <span class="nf">tof2energy</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">toffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Transform ToF to eV.</span>
 
-<span class="sd">    The functions (t2e and e2t) convert between binding energy (:math:`E_b`) in eV (negative convention)</span>
+<span class="sd">    The functions (tof2energy and energy2tof) convert between binding energy (:math:`E_b`) in eV (negative convention)</span>
 <span class="sd">    and time of flight (ToF) in ns.</span>
 <span class="sd">    </span>
 <span class="sd">    The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the</span>
@@ -444,10 +444,10 @@
     <span class="k">return</span> <span class="n">e</span></div>
 
 
-<div class="viewcode-block" id="e2t"><a class="viewcode-back" href="../../library/utils.html#processor.utils.e2t">[docs]</a><span class="k">def</span> <span class="nf">e2t</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">toffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="e2t"><a class="viewcode-back" href="../../library/utils.html#processor.utils.e2t">[docs]</a><span class="k">def</span> <span class="nf">energy2tof</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">toffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Transform eV to time of flight (ToF).</span>
 
-<span class="sd">    The functions (t2e and e2t) convert between binding energy (:math:`E_b`) in eV (negative convention)</span>
+<span class="sd">    The functions (tof2energy and energy2tof) convert between binding energy (:math:`E_b`) in eV (negative convention)</span>
 <span class="sd">    and time of flight (ToF) in ns.</span>
 <span class="sd">    </span>
 <span class="sd">    The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the</span>
