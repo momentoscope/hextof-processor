@@ -27,8 +27,11 @@ SETTINGS.ini
 # ignore old docs build
 # docs/build/
 
+# ignore virtual environments
+venv/
 # ignore Tutorial files
 Tutorial/h5/
 Tutorial/raw/
 Tutorial/results/
 Tutorial/parquet/
+utilities/settings

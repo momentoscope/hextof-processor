@@ -7,7 +7,8 @@ import dask.dataframe
 import dask.multiprocessing
 from dask.diagnostics import ProgressBar
 import numpy as np
-from processor import DldProcessor, utils
+from processor import DldProcessor
+from utilities import misc
 from processor.pah import BeamtimeDaqAccess
 
 _VERBOSE = False
@@ -103,25 +104,25 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         else:
             settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
-        section = 'DAQ address - used'
+        section = 'DAQ channels'
 
         print('searching for data...')
         if path is not None:
             try:
                 daqAccess = BeamtimeDaqAccess.create(path)
             except:
-                self.path_to_run = utils.get_path_to_run(runNumber, path)
+                self.path_to_run = misc.get_path_to_run(runNumber, path)
                 daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
         else:
             path = self.DATA_RAW_DIR
-            self.path_to_run = utils.get_path_to_run(runNumber, path)
+            self.path_to_run = misc.get_path_to_run(runNumber, path)
             daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
 
 
 
         self.daqAddresses = []
         for entry in settings[section]:
-            name = utils.camelCaseIt(entry)
+            name = misc.camelCaseIt(entry)
             val = str(settings[section][entry])
             if daqAccess.isChannelAvailable(val, self.getIds(runNumber, path)):
                 self.daqAddresses.append(name)
@@ -471,7 +472,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             path = self.DATA_RAW_DIR
         
         if not hasattr(self, 'path_to_run'):
-            self.path_to_run = utils.get_path_to_run(runNumber, path)
+            self.path_to_run = misc.get_path_to_run(runNumber, path)
 
         # Gets paths from settings file.
         # Checks for SETTINGS.ini in processor folder.

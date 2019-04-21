@@ -307,7 +307,7 @@ plt.imshow(result)
 
 **(1)** ToF to binding energy conversion
 
-The functions (t2e and e2t) convert between binding energy (E<sub>b</sub>) in eV (negative convention)
+The functions (tof2energy and energy2tof) convert between binding energy (E<sub>b</sub>) in eV (negative convention)
 and time of flight (ToF) in ns.
 
 The formula used is based on the ToF for an electron with a kinetic energy E<sub>k</sub>. Then the
