@@ -22,8 +22,6 @@ SETTINGS.ini
 *.pyd
 *.c
 
-*.ini
-
 # ignore old docs build
 # docs/build/
 
