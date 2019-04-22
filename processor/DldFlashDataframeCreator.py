@@ -59,9 +59,9 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             dataframe containing chosen channel information from the given run.
     """
 
-    def __init__(self):
+    def __init__(self,settings=None):
 
-        super().__init__()
+        super().__init__(settings)
 
         self.runNumber = None
         self.pulseIdInterval = None

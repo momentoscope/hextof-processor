@@ -150,6 +150,23 @@ class DldProcessor:
                     else:
                         pass
 
+    def get_channel_report(self):
+        """ Generates a Pandas dataframe containing relevant statistical quantities on all available channels"""
+        print('creating channel report...')
+        chan_dict = {}
+        for chan in self.dd.columns:
+            vals = self.dd[chan].compute()
+            clean=vals[np.isfinite(vals)]
+            chan_dict[chan] = {}
+            chan_dict[chan]['min'] = min(clean)
+            chan_dict[chan]['max'] = max(clean)
+            chan_dict[chan]['amp'] = chan_dict[chan]['max'] - chan_dict[chan]['min']
+            chan_dict[chan]['mean'] = np.mean(clean)
+            chan_dict[chan]['std'] = np.std(clean)
+            chan_dict[chan]['len'] = len(vals)
+            chan_dict[chan]['len_nan'] = len(vals) - len(clean)
+        return pd.DataFrame.from_dict(chan_dict).T
+
     def load_settings(self,settings_file_name):
         """ load settings from an other saved setting file.
 
@@ -171,9 +188,38 @@ class DldProcessor:
 
             with open(targetfile, 'w') as SETTINGS_file:  # save
                 settings.write(SETTINGS_file)
-            print('written to {}'.format(targetfile))
+            print('Loaded settings from {}'.format(settings_file_name))
             # apply new settings to current processor
             self.initAttributes()
+
+    def plot_diagnostics(self):
+        """ Generates a plot of each available channel. usefull for diagnostics on data conditions"""
+        cols = self.dd.columns
+        import matplotlib.pyplot as plt
+        f,ax = plt.subplots(len(cols)//2,2,figsize=(15,20))
+        for i,chan in enumerate(self.dd.columns):
+            vals = self.dd[chan].compute()
+            clean = vals[np.isfinite(vals)]
+            start,stop, mean = clean.min(), clean.max(), clean.mean()
+
+            if np.abs((start-mean)/(stop-mean)) > 5:
+                start = stop-2*mean
+            elif np.abs((stop-mean)/(start-mean)) > 5:
+                stop = start + 2*mean 
+            
+            step =  max((stop-start)/1000,1)
+            x = self.addBinning(chan,start,stop,step)
+            res = self.computeBinnedData()
+            ax[i//2,i%2].set_title(chan,fontsize='x-large')
+            if len(res)>1:
+                try:
+                    ax[i//2,i%2].plot(x,res)
+                except ValueError:
+                    ax[i//2,i%2].plot(x,res[:-1])
+
+            self.resetBins()
+        
+
 
     def readDataframes(self, fileName=None, path=None, format='parquet'):
         """ Load data from a parquet or HDF5 dataframe.
