@@ -22,16 +22,14 @@ SETTINGS.ini
 *.pyd
 *.c
 
-*.ini
-
 # ignore old docs build
 # docs/build/
 
 # ignore virtual environments
 venv/
+venv-hextof/
 # ignore Tutorial files
 Tutorial/h5/
 Tutorial/raw/
 Tutorial/results/
 Tutorial/parquet/
-utilities/settings
