@@ -1,12 +1,16 @@
 # Dev/Deployment
 numpy>=1.14.2
-pandas>=0.20.3
+pandas==0.20.3
 h5py>=2.7.1
-dask>=0.15.4
+dask==0.17.3
 xarray>=0.9.6
 Cython>=0.28.2
 matplotlib>=2.1.0
 psutil>=5.4.5
-tqdm
+tqdm>=4.31.1
 sphinx
 sphinx_rtd_theme
+natsort>=6.0.0
+scipy>=1.2.1
+fastparquet>=0.2.1
+pyarrow>=0.12.1
