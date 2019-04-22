@@ -29,9 +29,9 @@ SETTINGS.ini
 
 # ignore virtual environments
 venv/
+venv-hextof/
 # ignore Tutorial files
 Tutorial/h5/
 Tutorial/raw/
 Tutorial/results/
 Tutorial/parquet/
-utilities/settings
