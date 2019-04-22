@@ -40,10 +40,11 @@ def main():
 Parameters:
     t (float) the ToF
     e (float) the binding energy
+
 """
 
 
-def tof2energy(t, toffset=None, eoffset=None):
+def tof2energy(t, toffset=None, eoffset=None, l=None):
     """ Transform ToF to eV.
 
     The functions (tof2energy and energy2tof) convert between binding energy (:math:`E_b`) in eV (negative convention)
@@ -82,10 +83,15 @@ def tof2energy(t, toffset=None, eoffset=None):
             The time offset from thedld clock start to when the fastest photoelectrons reach the detector
         eoffset : float
             The energy offset given by W-hv-V
+        l : float
+            the effective length of the drift section
 
     :Return:
         e : float
             The binding energy
+
+    :Authors:
+        Davide Curcio <davide.curcio@phys.au.dk>
     """
 
     from configparser import ConfigParser
@@ -101,11 +107,13 @@ def tof2energy(t, toffset=None, eoffset=None):
         toffset = float(settings['processor']['ET_CONV_T_OFFSET'])
     if eoffset is None:
         eoffset = float(settings['processor']['ET_CONV_E_OFFSET'])
-    e = 0.5 * 1e18 * 9.10938e-31 / (((t) - toffset) * ((t) - toffset)) / 1.602177e-19 - eoffset
+    if l is None:
+        l = float(settings['processor']['ET_CONV_L'])
+    e = 0.5 * 1e18 * 9.10938e-31 * l * l / (((t) - toffset) * ((t) - toffset)) / 1.602177e-19 - eoffset
     return e
 
 
-def energy2tof(e, toffset=None, eoffset=None):
+def energy2tof(e, toffset=None, eoffset=None, l=None):
     """ Transform eV to time of flight (ToF).
 
     The functions (tof2energy and energy2tof) convert between binding energy (:math:`E_b`) in eV (negative convention)
@@ -142,10 +150,15 @@ def energy2tof(e, toffset=None, eoffset=None):
             The time offset from thedld clock start to when the fastest photoelectrons reach the detector
         eoffset : float
             The energy offset given by W-hv-V
+        l : float
+            the effective length of the drift section
 
     :Return:
         t : float
             The time of flight
+
+    :Authors:
+        Davide Curcio <davide.curcio@phys.au.dk>
     """
 
     from configparser import ConfigParser
@@ -161,7 +174,9 @@ def energy2tof(e, toffset=None, eoffset=None):
         toffset = float(settings['processor']['ET_CONV_T_OFFSET'])
     if eoffset is None:
         eoffset = float(settings['processor']['ET_CONV_E_OFFSET'])
-    t = np.sqrt(0.5 * 1e18 * 9.10938e-31 / 1.602177e-19 / (e + eoffset)) + toffset
+    if l is None:
+        l = float(settings['processor']['ET_CONV_L'])
+    t = l * np.sqrt(0.5 * 1e18 * 9.10938e-31 / 1.602177e-19 / (e + eoffset)) + toffset
     return t
 
 
