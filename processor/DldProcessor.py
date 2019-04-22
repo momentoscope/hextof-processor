@@ -47,9 +47,12 @@ class DldProcessor:
             tiff stack formats etc.
     """
 
-    def __init__(self):
+    def __init__(self, settings = None):
         """ Create and manage a dask DataFrame from the data recorded at FLASH.
         """
+
+        if settings is not None:
+            self.load_settings(settings)
 
         self.resetBins()
         # initialize attributes to their type. Values are then taken from
