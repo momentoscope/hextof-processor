@@ -55,21 +55,10 @@ class DldProcessor:
             self.load_settings(settings)
 
         self.resetBins()
+
         # initialize attributes to their type. Values are then taken from
         # SETTINGS.ini through initAttributes()
-        self.N_CORES = int
-        self.UBID_OFFSET = int
-        self.CHUNK_SIZE = int
-        self.TOF_STEP_TO_NS = float
-        self.TOF_NS_TO_EV = float
-        self.TOF_STEP_TO_EV = float
-        self.ET_CONV_E_OFFSET = float
-        self.ET_CONV_T_OFFSET = float
 
-        self.DATA_RAW_DIR = str
-        self.DATA_H5_DIR = str
-        self.DATA_PARQUET_DIR = str
-        self.DATA_RESULTS_DIR = str
         self.initAttributes()
 
         # set true to use the old binning method with arange, instead of
@@ -87,22 +76,21 @@ class DldProcessor:
                 
             Here ``False`` is the better choice, since it keeps better track of attributes.
         """
-        self.N_CORES = int
-        self.UBID_OFFSET = int
-        self.CHUNK_SIZE = int
-        self.TOF_STEP_TO_NS = float
-        self.TOF_NS_TO_EV = float
-        self.TOF_STEP_TO_EV = float
-        self.ET_CONV_E_OFFSET = float
-        self.ET_CONV_T_OFFSET = float
+        self.N_CORES = int(max(os.cpu_count()-1,1))
+        self.UBID_OFFSET = int(0)
+        self.CHUNK_SIZE = int(1000000)
+        self.TOF_STEP_TO_NS = np.float64(0.020574)
+        self.ET_CONV_E_OFFSET = np.float64(357.7)
+        self.ET_CONV_T_OFFSET = np.float64(82.7)
+        self.TOF_IN_NS = bool(True)
 
-        self.DATA_RAW_DIR = str
-        self.DATA_H5_DIR = str
-        self.DATA_PARQUET_DIR = str
-        self.DATA_RESULTS_DIR = str
+        self.DATA_RAW_DIR = str('/gpfs/pg2/current/raw/hdf')
+        self.DATA_H5_DIR = str('/home/pg2user/data/h5')
+        self.DATA_PARQUET_DIR = str('/home/pg2user/DATA/parquet/')
+        self.DATA_RESULTS_DIR = str('/home/pg2user/DATA/results/')
 
         settings = ConfigParser()
-        if os.path.isfile(
+        if os.path.isfile( # TODO: please change this! ITS HORRIBLE
                 os.path.join(
                     os.path.dirname(__file__),
                     'SETTINGS.ini')):
@@ -117,18 +105,18 @@ class DldProcessor:
                         os.path.dirname(__file__)),
                     'SETTINGS.ini'))
 
+        # TODO: use smart type recognition for dynamic adding of new settings              
+
         for section in settings:
             for entry in settings[section]:
                 if _VERBOSE:
-                    print(
-                        'trying: {} {}'.format(
-                            entry.upper(),
-                            settings[section][entry]))
+                    print('trying: {} {}'.format(entry.upper(),settings[section][entry]))
                 try:
-                    _type = getattr(self, entry.upper())
-                    setattr(
-                        self, entry.upper(), _type(
-                            settings[section][entry]))
+                    if settings[section][entry].upper() == 'FALSE': 
+                        setattr(self, entry.upper(), False)
+                    else:
+                        _type = type(getattr(self, entry.upper()))
+                        setattr(self, entry.upper(), _type(settings[section][entry]))
                     if _VERBOSE:
                         print(entry.upper(), _type(settings[section][entry]))
                 except AttributeError as e:
