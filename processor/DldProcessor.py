@@ -395,6 +395,47 @@ class DldProcessor:
         except ValueError:
             raise ValueError(
                 'No pump probe time bin, could not normalize to delay stage histogram.')
+    
+    def normalizeGMD(self,data_array,axis_name,axis_values):
+        """ create the normalization array for normalizing to the FEL intensity at the GMD
+        :Parameter:
+            data_array: np.ndarray
+                data to be normalized
+            axis_name:
+                name of the axis along which to perform normalization
+            axis_values:
+                the bins of the axis_name provided.
+        :Return:
+            normalized_array: np.ndarray
+                normalized version of the input array
+        """
+        print('Normalizing by GMD...')
+        try:
+            # Find the index of the normalization axis
+            idx = self.binNameList.index(axis_name)
+
+            data_array_normalized = np.swapaxes(data_array, 0, idx)
+            
+            gmd = np.nan_to_num(self.dd['gmdBda'].values.compute())
+            axisDataframe = self.dd[axis_name].values.compute()
+            
+            norm_array = np.zeros(len(delay))
+            for j in range(0,len(gmd)):
+                if (gmd[j]>0):
+                    ind = np.argmin(np.abs(axis_values-axisDataframe[j]))
+                    norm_array[ind]+=gmd[j]
+            
+            for i in range(np.ndim(data_array_normalized) - 1):
+                norm_array = norm_array[:, None]
+            data_array_normalized = data_array_normalized / norm_array
+            data_array_normalized = np.swapaxes(data_array_normalized, idx, 0)
+
+            return data_array_normalized
+
+        except ValueError:
+            raise ValueError('Failed the GMD normalization.')
+
+
 
     def save_binned(self, binnedData, file_name, path=None, mode='w'):
         """ Save a binned numpy array to h5 file. The file includes the axes
