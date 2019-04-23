@@ -336,8 +336,9 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.dd = dask.dataframe.from_array(da, columns=cols)
         # needed as negative values are used to mark bad data
         self.dd = self.dd[self.dd['dldMicrobunchId'] > -1]
-        # I propose leaving it like this, since energy calibration depends on microscope parameters and photon energy
-        self.dd['dldTime'] = self.dd['dldTime'] * self.TOF_STEP_TO_NS
+        # I propose leaving it like this, since energy calibration depends on microscope parameters and photon energy; CHANGED: default is as before, but if attribute TOF_IN_NS is set to true, it leaves the delay in steps.
+        if self.TOF_IN_NS:
+            self.dd['dldTime'] = self.dd['dldTime'] * self.TOF_STEP_TO_NS
 
     def createDataframePerMicrobunch(self):
         """Create a dataframe indexed by the microbunch ID. The method needs no input parameters.
