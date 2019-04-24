@@ -9,6 +9,7 @@ import dask.multiprocessing
 import h5py
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 from configparser import ConfigParser
 # import matplotlib.pyplot as plt
@@ -419,7 +420,7 @@ class DldProcessor:
             gmd = np.nan_to_num(self.dd['gmdBda'].values.compute())
             axisDataframe = self.dd[axis_name].values.compute()
             
-            norm_array = np.zeros(len(delay))
+            norm_array = np.zeros(len(axis_values))
             for j in range(0,len(gmd)):
                 if (gmd[j]>0):
                     ind = np.argmin(np.abs(axis_values-axisDataframe[j]))
@@ -435,7 +436,82 @@ class DldProcessor:
         except ValueError:
             raise ValueError('Failed the GMD normalization.')
 
+    def normalizeAxisMean(self,data_array,ax):
+        """ Normalize to the mean of the given axis
+        :Parameters:
+            data_array: np.ndarray
+                array to be normalized
+            ax:
+                axis along which to normalize
+        :Return:
+            norm_array: np.ndarray
+                normalized array
+ 
+        """
+        print("normalizing mean on axis {}".format(ax))
+        try:
+            # Find the index of the normalization axis
+            idx = self.binNameList.index(ax)
+            data_array_normalized = np.swapaxes(data_array, 0, idx)
+            norm_array = data_array.mean(0)
+            norm_array = norm_array[None,:]
 
+            for i in range(np.ndim(data_array_normalized) - 2):
+                norm_array = norm_array[:, None]
+
+            data_array_normalized = data_array_normalized / norm_array
+            data_array_normalized = np.swapaxes(data_array_normalized, idx, 0)
+
+            return data_array_normalized
+
+        except ValueError as e:
+            raise ValueError("Could not normalize to {} histogram.\n{}".format(ax,e))
+
+    def diagnostic_plot_FEL(self):
+        f,ax = plt.subplots(1,2)
+
+        ubId = self.addBinning('dldMicrobunchId',1,500,1)
+        result_ubId = self.computeBinnedData()
+        ax[0].plot(ubId,result_ubId/max(result_ubId), label='Photoelectron count')
+        ax[0].set_title('Microbunch')
+
+        self.resetBins()
+
+        MbId_values = self.dd['macroBunchPulseId'].compute()
+        clean = MbId_values[np.isfinite(MbId_values)]
+        start,stop, mean = clean.min(), clean.max(), clean.mean()
+        if np.abs((start-mean)/(stop-mean)) > 5:
+            start = stop-2*mean
+        elif np.abs((stop-mean)/(start-mean)) > 5:
+            stop = start + 2*mean 
+        step =  max((stop-start)/1000,1)
+
+        MbId = self.addBinning('macroBunchPulseId',start,stop,step)
+        result_MbId = self.computeBinnedData()
+        ax[1].plot(MbId,result_MbId/max(result_MbId), label='Photoelectron count')
+        ax[1].set_title('Macrobunch')
+
+
+        gmd_values = np.nan_to_num(self.dd['gmdBda'].compute())
+        ubId_values = self.dd['dldMicrobunchId'].compute()
+
+        gmd_ubId = np.zeros_like(ubId)
+        for g,ub in zip(gmd_values,ubId_values):
+            ub_idx = int(ub)
+            if 0<ub_idx<len(gmd_ubId):
+                gmd_ubId[ub_idx]+=g
+
+        gmd_MbId = np.zeros_like(MbId)
+        for g,Mb in zip(gmd_values,MbId_values):
+            Mb_idx = int(Mb)
+            if 0<Mb_idx<len(gmd_MbId):
+                gmd_MbId[Mb_idx]+=g
+
+        ax[0].plot(ubId,gmd_ubId/max(gmd_ubId), label='GMD')
+        ax[1].plot(MbId,gmd_MbId/max(gmd_MbId)+1, label='GMD')
+        for a in ax:
+            a.legend()
+            a.grid()
 
     def save_binned(self, binnedData, file_name, path=None, mode='w'):
         """ Save a binned numpy array to h5 file. The file includes the axes
