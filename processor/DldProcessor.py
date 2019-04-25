@@ -9,6 +9,7 @@ import dask.multiprocessing
 import h5py
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 from configparser import ConfigParser
 # import matplotlib.pyplot as plt
@@ -55,21 +56,10 @@ class DldProcessor:
             self.load_settings(settings)
 
         self.resetBins()
+
         # initialize attributes to their type. Values are then taken from
         # SETTINGS.ini through initAttributes()
-        self.N_CORES = int
-        self.UBID_OFFSET = int
-        self.CHUNK_SIZE = int
-        self.TOF_STEP_TO_NS = float
-        self.TOF_NS_TO_EV = float
-        self.TOF_STEP_TO_EV = float
-        self.ET_CONV_E_OFFSET = float
-        self.ET_CONV_T_OFFSET = float
 
-        self.DATA_RAW_DIR = str
-        self.DATA_H5_DIR = str
-        self.DATA_PARQUET_DIR = str
-        self.DATA_RESULTS_DIR = str
         self.initAttributes()
 
         # set true to use the old binning method with arange, instead of
@@ -87,22 +77,21 @@ class DldProcessor:
                 
             Here ``False`` is the better choice, since it keeps better track of attributes.
         """
-        self.N_CORES = int
-        self.UBID_OFFSET = int
-        self.CHUNK_SIZE = int
-        self.TOF_STEP_TO_NS = float
-        self.TOF_NS_TO_EV = float
-        self.TOF_STEP_TO_EV = float
-        self.ET_CONV_E_OFFSET = float
-        self.ET_CONV_T_OFFSET = float
+        self.N_CORES = int(max(os.cpu_count()-1,1))
+        self.UBID_OFFSET = int(0)
+        self.CHUNK_SIZE = int(1000000)
+        self.TOF_STEP_TO_NS = np.float64(0.020574)
+        self.ET_CONV_E_OFFSET = np.float64(357.7)
+        self.ET_CONV_T_OFFSET = np.float64(82.7)
+        self.TOF_IN_NS = bool(True)
 
-        self.DATA_RAW_DIR = str
-        self.DATA_H5_DIR = str
-        self.DATA_PARQUET_DIR = str
-        self.DATA_RESULTS_DIR = str
+        self.DATA_RAW_DIR = str('/gpfs/pg2/current/raw/hdf')
+        self.DATA_H5_DIR = str('/home/pg2user/data/h5')
+        self.DATA_PARQUET_DIR = str('/home/pg2user/DATA/parquet/')
+        self.DATA_RESULTS_DIR = str('/home/pg2user/DATA/results/')
 
         settings = ConfigParser()
-        if os.path.isfile(
+        if os.path.isfile( # TODO: please change this! ITS HORRIBLE
                 os.path.join(
                     os.path.dirname(__file__),
                     'SETTINGS.ini')):
@@ -117,18 +106,18 @@ class DldProcessor:
                         os.path.dirname(__file__)),
                     'SETTINGS.ini'))
 
+        # TODO: use smart type recognition for dynamic adding of new settings              
+
         for section in settings:
             for entry in settings[section]:
                 if _VERBOSE:
-                    print(
-                        'trying: {} {}'.format(
-                            entry.upper(),
-                            settings[section][entry]))
+                    print('trying: {} {}'.format(entry.upper(),settings[section][entry]))
                 try:
-                    _type = getattr(self, entry.upper())
-                    setattr(
-                        self, entry.upper(), _type(
-                            settings[section][entry]))
+                    if settings[section][entry].upper() == 'FALSE': 
+                        setattr(self, entry.upper(), False)
+                    else:
+                        _type = type(getattr(self, entry.upper()))
+                        setattr(self, entry.upper(), _type(settings[section][entry]))
                     if _VERBOSE:
                         print(entry.upper(), _type(settings[section][entry]))
                 except AttributeError as e:
@@ -149,6 +138,23 @@ class DldProcessor:
                                     settings[section][entry]))
                     else:
                         pass
+
+    def get_channel_report(self):
+        """ Generates a Pandas dataframe containing relevant statistical quantities on all available channels"""
+        print('creating channel report...')
+        chan_dict = {}
+        for chan in self.dd.columns:
+            vals = self.dd[chan].compute()
+            clean=vals[np.isfinite(vals)]
+            chan_dict[chan] = {}
+            chan_dict[chan]['min'] = min(clean)
+            chan_dict[chan]['max'] = max(clean)
+            chan_dict[chan]['amp'] = chan_dict[chan]['max'] - chan_dict[chan]['min']
+            chan_dict[chan]['mean'] = np.mean(clean)
+            chan_dict[chan]['std'] = np.std(clean)
+            chan_dict[chan]['len'] = len(vals)
+            chan_dict[chan]['len_nan'] = len(vals) - len(clean)
+        return pd.DataFrame.from_dict(chan_dict).T
 
     def load_settings(self,settings_file_name):
         """ load settings from an other saved setting file.
@@ -171,9 +177,38 @@ class DldProcessor:
 
             with open(targetfile, 'w') as SETTINGS_file:  # save
                 settings.write(SETTINGS_file)
-            print('written to {}'.format(targetfile))
+            print('Loaded settings from {}'.format(settings_file_name))
             # apply new settings to current processor
             self.initAttributes()
+
+    def plot_diagnostics(self):
+        """ Generates a plot of each available channel. usefull for diagnostics on data conditions"""
+        cols = self.dd.columns
+        import matplotlib.pyplot as plt
+        f,ax = plt.subplots(len(cols)//2,2,figsize=(15,20))
+        for i,chan in enumerate(self.dd.columns):
+            vals = self.dd[chan].compute()
+            clean = vals[np.isfinite(vals)]
+            start,stop, mean = clean.min(), clean.max(), clean.mean()
+
+            if np.abs((start-mean)/(stop-mean)) > 5:
+                start = stop-2*mean
+            elif np.abs((stop-mean)/(start-mean)) > 5:
+                stop = start + 2*mean 
+            
+            step =  max((stop-start)/1000,1)
+            x = self.addBinning(chan,start,stop,step)
+            res = self.computeBinnedData()
+            ax[i//2,i%2].set_title(chan,fontsize='x-large')
+            if len(res)>1:
+                try:
+                    ax[i//2,i%2].plot(x,res)
+                except ValueError:
+                    ax[i//2,i%2].plot(x,res[:-1])
+
+            self.resetBins()
+        
+
 
     def readDataframes(self, fileName=None, path=None, format='parquet'):
         """ Load data from a parquet or HDF5 dataframe.
@@ -361,6 +396,122 @@ class DldProcessor:
         except ValueError:
             raise ValueError(
                 'No pump probe time bin, could not normalize to delay stage histogram.')
+    
+    def normalizeGMD(self,data_array,axis_name,axis_values):
+        """ create the normalization array for normalizing to the FEL intensity at the GMD
+        :Parameter:
+            data_array: np.ndarray
+                data to be normalized
+            axis_name:
+                name of the axis along which to perform normalization
+            axis_values:
+                the bins of the axis_name provided.
+        :Return:
+            normalized_array: np.ndarray
+                normalized version of the input array
+        """
+        print('Normalizing by GMD...')
+        try:
+            # Find the index of the normalization axis
+            idx = self.binNameList.index(axis_name)
+
+            data_array_normalized = np.swapaxes(data_array, 0, idx)
+            
+            gmd = np.nan_to_num(self.dd['gmdBda'].values.compute())
+            axisDataframe = self.dd[axis_name].values.compute()
+            
+            norm_array = np.zeros(len(axis_values))
+            for j in range(0,len(gmd)):
+                if (gmd[j]>0):
+                    ind = np.argmin(np.abs(axis_values-axisDataframe[j]))
+                    norm_array[ind]+=gmd[j]
+            
+            for i in range(np.ndim(data_array_normalized) - 1):
+                norm_array = norm_array[:, None]
+            data_array_normalized = data_array_normalized / norm_array
+            data_array_normalized = np.swapaxes(data_array_normalized, idx, 0)
+
+            return data_array_normalized
+
+        except ValueError:
+            raise ValueError('Failed the GMD normalization.')
+
+    def normalizeAxisMean(self,data_array,ax):
+        """ Normalize to the mean of the given axis
+        :Parameters:
+            data_array: np.ndarray
+                array to be normalized
+            ax:
+                axis along which to normalize
+        :Return:
+            norm_array: np.ndarray
+                normalized array
+ 
+        """
+        print("normalizing mean on axis {}".format(ax))
+        try:
+            # Find the index of the normalization axis
+            idx = self.binNameList.index(ax)
+            data_array_normalized = np.swapaxes(data_array, 0, idx)
+            norm_array = data_array.mean(0)
+            norm_array = norm_array[None,:]
+
+            for i in range(np.ndim(data_array_normalized) - 2):
+                norm_array = norm_array[:, None]
+
+            data_array_normalized = data_array_normalized / norm_array
+            data_array_normalized = np.swapaxes(data_array_normalized, idx, 0)
+
+            return data_array_normalized
+
+        except ValueError as e:
+            raise ValueError("Could not normalize to {} histogram.\n{}".format(ax,e))
+
+    def diagnostic_plot_FEL(self):
+        f,ax = plt.subplots(1,2)
+
+        ubId = self.addBinning('dldMicrobunchId',1,500,1)
+        result_ubId = self.computeBinnedData()
+        ax[0].plot(ubId,result_ubId/max(result_ubId), label='Photoelectron count')
+        ax[0].set_title('Microbunch')
+
+        self.resetBins()
+
+        MbId_values = self.dd['macroBunchPulseId'].compute()
+        clean = MbId_values[np.isfinite(MbId_values)]
+        start,stop, mean = clean.min(), clean.max(), clean.mean()
+        if np.abs((start-mean)/(stop-mean)) > 5:
+            start = stop-2*mean
+        elif np.abs((stop-mean)/(start-mean)) > 5:
+            stop = start + 2*mean 
+        step =  max((stop-start)/1000,1)
+
+        MbId = self.addBinning('macroBunchPulseId',start,stop,step)
+        result_MbId = self.computeBinnedData()
+        ax[1].plot(MbId,result_MbId/max(result_MbId), label='Photoelectron count')
+        ax[1].set_title('Macrobunch')
+
+
+        gmd_values = np.nan_to_num(self.dd['gmdBda'].compute())
+        ubId_values = self.dd['dldMicrobunchId'].compute()
+
+        gmd_ubId = np.zeros_like(ubId)
+        for g,ub in zip(gmd_values,ubId_values):
+            ub_idx = int(ub)
+            if 0<ub_idx<len(gmd_ubId):
+                gmd_ubId[ub_idx]+=g
+
+        gmd_MbId = np.zeros_like(MbId)
+        for g,Mb in zip(gmd_values,MbId_values):
+            Mb_idx = int(Mb)
+            if 0<Mb_idx<len(gmd_MbId):
+                gmd_MbId[Mb_idx]+=g
+
+        ax[0].plot(ubId,gmd_ubId/max(gmd_ubId), label='GMD')
+        ax[1].plot(MbId,gmd_MbId/max(gmd_MbId)+1, label='GMD')
+        for a in ax:
+            a.legend()
+            a.grid()
 
     def save_binned(self, binnedData, file_name, path=None, mode='w'):
         """ Save a binned numpy array to h5 file. The file includes the axes
