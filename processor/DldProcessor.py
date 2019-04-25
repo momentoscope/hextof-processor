@@ -83,6 +83,7 @@ class DldProcessor:
         self.TOF_STEP_TO_NS = np.float64(0.020574)
         self.ET_CONV_E_OFFSET = np.float64(357.7)
         self.ET_CONV_T_OFFSET = np.float64(82.7)
+        self.ET_CONV_L = np.float64(.75)
         self.TOF_IN_NS = bool(True)
 
         self.DATA_RAW_DIR = str('/gpfs/pg2/current/raw/hdf')
@@ -469,7 +470,7 @@ class DldProcessor:
 
     def diagnostic_plot_FEL(self):
         f,ax = plt.subplots(1,2)
-
+        self.resetBins()
         ubId = self.addBinning('dldMicrobunchId',1,500,1)
         result_ubId = self.computeBinnedData()
         ax[0].plot(ubId,result_ubId/max(result_ubId), label='Photoelectron count')
