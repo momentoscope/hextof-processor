@@ -180,5 +180,53 @@ def energy2tof(e, toffset=None, eoffset=None, l=None):
     return t
 
 
+def e2t(e, toffset=None, eoffset=None, l=0.77):
+    """ Same as energy2tof, but different name for retrocompatibility
+
+    :Parameters:
+        e : float
+            The binding energy
+        toffset : float
+            The time offset from thedld clock start to when the fastest photoelectrons reach the detector
+        eoffset : float
+            The energy offset given by W-hv-V
+        l : float
+            the effective length of the drift section
+
+    :Return:
+        t : float
+            The time of flight
+
+    :Authors:
+        Davide Curcio <davide.curcio@phys.au.dk>
+    """
+
+    return energy2tof(e, toffset, eoffset, l)
+
+
+def t2e(t, toffset=None, eoffset=None, l=0.77):
+    """ Same as tof2energy, but different name for retrocompatibility
+
+    :Parameters:
+        t : float
+            The time of flight
+        toffset : float
+            The time offset from thedld clock start to when the fastest photoelectrons reach the detector
+        eoffset : float
+            The energy offset given by W-hv-V
+        l : float
+            the effective length of the drift section
+
+    :Return:
+        e : float
+            The binding energy
+
+    :Authors:
+        Davide Curcio <davide.curcio@phys.au.dk>
+    """
+
+    return tof2energy(t, toffset, eoffset, l)
+
+
 if __name__ == '__main__':
     main()
