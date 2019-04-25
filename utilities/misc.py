@@ -7,6 +7,9 @@ from datetime import datetime
 import h5py
 import numpy as np
 import psutil
+import ast
+import os
+from configparser import ConfigParser
 
 from processor import DldFlashDataframeCreator as DldFlashProcessor
 
@@ -15,7 +18,6 @@ from processor import DldFlashDataframeCreator as DldFlashProcessor
 Calibration values taken from Pump beam energy converter 800 400.xls
 Units are uJ for energy, um for beam diameter, uJ/cm^2 for energy density (and arb. for diode signal)
 """
-
 
 def PulseEnergy400(Diode):
     """Calculate the pulse energy of 400nm laser in uJ. The unit is um for beam diameter.
@@ -64,6 +66,71 @@ def EnergyDensity800(Diode, Diameter=600):
     """
 
     return PulseEnergy800(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
+
+# %% Settings
+# ================================================================================
+
+
+def parse_category(category, settings_file='default'):
+    """ parse setting file and return desired value
+    Args:
+        category (str): title of the category
+        setting_file (str): path to setting file. If set to 'default' it takes
+            a file called SETTINGS.ini in the main folder of the repo.
+    Returns:
+        dictionary containing name and value of all entries present in this
+        category.
+    """
+    settings = ConfigParser()
+    if settings_file == 'default':
+        current_path = os.path.dirname(__file__)
+        while not os.path.isfile(os.path.join(current_path, 'SETTINGS.ini')):
+            current_path = os.path.split(current_path)[0]
+
+        settings_file = os.path.join(current_path, 'SETTINGS.ini')
+    settings.read(settings_file)
+    try:
+        cat_dict = {}
+        for k,v in settings[category].items():
+            try:
+                cat_dict[k] = ast.literal_eval(v)
+            except ValueError:
+                cat_dict[k] = v
+        return cat_dict
+    except KeyError:
+        print('No category "{}" found in SETTINGS.ini'.format(category))
+
+
+def parse_setting(category, name, settings_file='default'):
+    """ parse setting file and return desired value
+    Args:
+        category (str): title of the category
+        name (str): name of the parameter
+        setting_file (str): path to setting file. If set to 'default' it takes
+            a file called SETTINGS.ini in the main folder of the repo.
+    Returns:
+        value of the parameter, None if parameter cannot be found.
+    """
+    settings = ConfigParser()
+    if settings_file == 'default':
+        current_path = os.path.dirname(__file__)
+        while not os.path.isfile(os.path.join(current_path, 'SETTINGS.ini')):
+            current_path = os.path.split(current_path)[0]
+
+        settings_file = os.path.join(current_path, 'SETTINGS.ini')
+    settings.read(settings_file)
+
+    try:
+        value = settings[category][name]
+        if value[0] == "/":
+            return str(value)
+        else:
+            return ast.literal_eval(value)
+    except KeyError:
+        print('No entry "{}" in category "{}" found in SETTINGS.ini'.format(name, category))
+        return None
+    except ValueError:
+        return settings[category][name]
 
 
 # %% Math
@@ -275,6 +342,7 @@ def plot_lines(data, normalization='None', range=None, color_range=(0, 1),
                     papertype=None, format=None, transparent=True, bbox_inches=None,
                     pad_inches=0.1, frameon=None)
     plt.show()
+
 
 # ==================
 # Methods by Mac!

@@ -14,6 +14,7 @@ from tqdm import tqdm
 from configparser import ConfigParser
 # import matplotlib.pyplot as plt
 from utilities import misc
+from processor.BinnedArrays import BinnedArray
 
 # warnings.resetwarnings()
 
@@ -966,6 +967,15 @@ class DldProcessor:
             self.save_binned(result, saveName, path=savePath, mode='w')
 
         return result
+
+    def computeBinnedArray(self):
+        """returns a BinnedArray object of the binned data."""
+        res = self.computeBinnedData()
+        dims = self.binNameList
+        coords = {}
+        for name,vals in zip(self.binNameList,self.binAxesList):
+            coords[name] = vals
+        return BinnedArray(res,dims=dims,coords=coords)
 
     def computeBinnedDataMulti(self, saveName=None, savePath=None,
                                rank=None, size=None):
