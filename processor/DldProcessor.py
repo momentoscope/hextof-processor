@@ -991,7 +991,7 @@ class DldProcessor:
         
         ba = BinnedArray(res,dims=dims,coords=coords)
         
-        start, stop = min(self.dd['timeStamp']), max(self.dd['timeStamp'])
+        start, stop = 0,1#min(self.dd['timeStamp']), max(self.dd['timeStamp'])
         ba.attrs['timing'] = {'acquisition start':start,
                               'acquisition stop':stop,
                               'acquisition duration':stop-start,
