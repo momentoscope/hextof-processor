@@ -288,6 +288,13 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             daMacroBunchPulseId = macroBunchPulseIdArray.flatten()
             arrayCols.append(daMacroBunchPulseId)
 
+        # convert the timeStamp to the electron format. No check because this surely exists
+        if 'timeStamp' in self.daqAddresses:
+            timeStampArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+            timeStampArray[:, :] = (self.timeStamp[mbIndexStart:mbIndexEnd, 0])[:, None]
+            daTimeStamp = timeStampArray.flatten()
+            arrayCols.append(daTimeStamp)
+
         # the Aux channel: aux0:
         # aux0Arr= assignToMircobunch(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64), self.dldAux[mbIndexStart:mbIndexEnd, 0].astype(np.float64))
         # daAux0 = dask.array.from_array(aux0Arr.flatten(), chunks=(chunks))
@@ -331,7 +338,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         da = dask.array.from_array(a.T, chunks=self.CHUNK_SIZE)
 
         cols = ('dldPosX', 'dldPosY', 'dldTime', 'delayStage', 'bam', 'dldMicrobunchId', 'dldDetectorId', 'dldSectorId', 'bunchCharge',
-                'opticalDiode', 'gmdTunnel', 'gmdBda', 'pumpPol', 'macroBunchPulseId')
+                'opticalDiode', 'gmdTunnel', 'gmdBda', 'pumpPol', 'macroBunchPulseId', 'timeStamp')
 
         cols = tuple(x for x in cols if x in self.daqAddresses)
         self.dd = dask.dataframe.from_array(da, columns=cols)
@@ -402,11 +409,17 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             daMacroBunchPulseId = dask.array.from_array(macroBunchPulseIdArray.flatten(), chunks=(self.CHUNK_SIZE))
             arrayCols.append(daMacroBunchPulseId)
 
+        if 'timeStamp' in self.daqAddresses:
+            timeStampArray = np.zeros_like(self.bam)
+            timeStampArray[:, :] = (self.timeStamp[:, 0])[:, None]
+            daTimeStamp = dask.array.from_array(timeStampArray.flatten(), chunks=(self.CHUNK_SIZE))
+            arrayCols.append(daTimeStamp)
+
         da = dask.array.stack(arrayCols)
 
         # Create the microbunch-indexed dataframe
         cols = (
-            'delayStage', 'bam', 'dldAux0', 'dldAux1', 'bunchCharge', 'opticalDiode', 'pumpPol', 'macroBunchPulseId')
+            'delayStage', 'bam', 'dldAux0', 'dldAux1', 'bunchCharge', 'opticalDiode', 'pumpPol', 'macroBunchPulseId', 'timeStamp')
         cols = tuple(x for x in cols if x in self.daqAddresses)
 
         self.ddMicrobunches = dask.dataframe.from_array(da.T, columns=cols)
