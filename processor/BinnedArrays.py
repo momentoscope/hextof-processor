@@ -86,16 +86,24 @@ class BinnedArray(xr.DataArray):
                         ds.attrs['name'] = binName
                         ax_n += 1
                 # Saving delay histograms
-                hh = h5File.create_group("histograms")
-                if hasattr(self, 'delaystageHistogram'):
-                    hh.create_dataset(
-                        'delaystageHistogram',
-                        data=self.delaystageHistogram)
-                if hasattr(self, 'pumpProbeHistogram'):
-                    hh.create_dataset(
-                        'pumpProbeHistogram',
-                        data=self.pumpProbeHistogram)
+#                hh = h5File.create_group("histograms")
+#                if hasattr(self, 'delaystageHistogram'):
+#                    hh.create_dataset(
+#                        'delaystageHistogram',
+#                        data=self.delaystageHistogram)
+#                if hasattr(self, 'pumpProbeHistogram'):
+#                    hh.create_dataset(
+#                        'pumpProbeHistogram',
+#                        data=self.pumpProbeHistogram)\
 
+                for k,v in self.attrs.items():
+                    g = h5File.create_group(k)
+                    for kk,vv in v.items():
+                        try:
+                            g.create_dataset(kk,data=vv)
+                        except TypeError:
+                            for kkk,vvv in vv.items():
+                                g.create_dataset('{}/{}'.format(kk,kkk),data=vvv)
 
     def read_h5(self,filename):
         raise NotImplementedError()
