@@ -149,6 +149,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 setattr(self, address_name, values)
                 if address_name == 'macroBunchPulseId':  # catch the value of the first macrobunchID
                     pulseIdInterval = (otherStuff[0], otherStuff[-1])
+                    self.pulseIdInterval = pulseIdInterval
                     macroBunchPulseId_correction = pulseIdInterval[0]
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
             print('Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}'\
@@ -175,9 +176,9 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         electronsToCount = np.nan_to_num(electronsToCount)
         electronsToCount = electronsToCount[electronsToCount > 0]
         electronsToCount = electronsToCount[electronsToCount < 10000]
-        numOfElectrons = len(electronsToCount)
-        electronsPerMacrobunch = int(numOfElectrons / numOfMacrobunches)
-        print("Number of electrons: {0:,}; {1:,} e/Mb ".format(numOfElectrons, electronsPerMacrobunch))
+        self.numOfElectrons = len(electronsToCount)
+        self.electronsPerMacrobunch = int(self.numOfElectrons / numOfMacrobunches)
+        print("Number of electrons: {0:,}; {1:,} e/Mb ".format(self.numOfElectrons, self.electronsPerMacrobunch))
 
         print("Creating dataframes... Please wait...")
         with ProgressBar():

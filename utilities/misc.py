@@ -98,7 +98,7 @@ def parse_category(category, settings_file='default'):
                 cat_dict[k] = v
         return cat_dict
     except KeyError:
-        print('No category "{}" found in SETTINGS.ini'.format(category))
+        print('No category {} found in SETTINGS.ini'.format(category))
 
 
 def parse_setting(category, name, settings_file='default'):
@@ -127,7 +127,7 @@ def parse_setting(category, name, settings_file='default'):
         else:
             return ast.literal_eval(value)
     except KeyError:
-        print('No entry "{}" in category "{}" found in SETTINGS.ini'.format(name, category))
+        print('No entry {} in category {} found in SETTINGS.ini'.format(name, category))
         return None
     except ValueError:
         return settings[category][name]
