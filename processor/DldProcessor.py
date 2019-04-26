@@ -501,10 +501,13 @@ class DldProcessor:
             stop = start + 2*mean 
         step =  max((stop-start)/1000,1)
 
-        MbId = self.addBinning('macroBunchPulseId',start,stop,step)
-        result_MbId = self.computeBinnedData()
-        ax[1].plot(MbId,result_MbId/max(result_MbId), label='Photoelectron count')
-        ax[1].set_title('Macrobunch')
+        if _VERBOSE:
+            print("Be careful: resetting bins")
+        else:
+            MbId = self.addBinning('macroBunchPulseId',start,stop,step)
+            result_MbId = self.computeBinnedData()
+            ax[1].plot(MbId,result_MbId/max(result_MbId), label='Photoelectron count')
+            ax[1].set_title('Macrobunch')
 
 
         gmd_values = np.nan_to_num(self.dd['gmdBda'].compute())
