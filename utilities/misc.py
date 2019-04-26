@@ -93,7 +93,10 @@ def parse_category(category, settings_file='default'):
         cat_dict = {}
         for k,v in settings[category].items():
             try:
-                cat_dict[k] = ast.literal_eval(v)
+                if v[0] == "/":
+                    cat_dict[k] = str(v)
+                else:
+                    cat_dict[k] = ast.literal_eval(v)
             except ValueError:
                 cat_dict[k] = v
         return cat_dict
@@ -131,6 +134,31 @@ def parse_setting(category, name, settings_file='default'):
         return None
     except ValueError:
         return settings[category][name]
+
+def write_setting(value, category, name, settings_file='default'):
+    """ Write enrty in the settings file
+    Args:
+        category (str): title of the category
+        name (str): name of the parameter
+        setting_file (str): path to setting file. If set to 'default' it takes
+            a file called SETTINGS.ini in the main folder of the repo.
+    Returns:
+        value of the parameter, None if parameter cannot be found.
+    """
+    settings = ConfigParser()
+    if settings_file == 'default':
+        current_path = os.path.dirname(__file__)
+        while not os.path.isfile(os.path.join(current_path, 'SETTINGS.ini')):
+            current_path = os.path.split(current_path)[0]
+
+        settings_file = os.path.join(current_path, 'SETTINGS.ini')
+    settings.read(settings_file)
+
+    settings[category][name] = str(value)
+
+    with open(settings_file, 'w') as configfile:
+        settings.write(configfile)
+
 
 
 # %% Math

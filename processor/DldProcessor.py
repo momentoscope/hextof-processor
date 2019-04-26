@@ -64,7 +64,6 @@ class DldProcessor:
 
         self.initAttributes()
 
-
         # initialize attributes for metadata
         self.sample = {} # this should contain 'name', 'sampleID', 'cleave number' etc...
         
@@ -163,7 +162,7 @@ class DldProcessor:
             chan_dict[chan]['len_nan'] = len(vals) - len(clean)
         return pd.DataFrame.from_dict(chan_dict).T
 
-    def load_settings(self,settings_file_name):
+    def load_settings(self,settings_file_name,preserve_path=True):
         """ load settings from an other saved setting file.
 
         To save settings simply copy paste the SETTINGS.ini file to the
@@ -179,14 +178,18 @@ class DldProcessor:
         if len(settings.sections()) == 0:
             print('no settings found, ignoring.')
         else:
-            targetfile = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                                      'SETTINGS.ini')
-
+            targetfile = os.path.join(os.path.dirname(os.path.dirname(__file__)),'SETTINGS.ini')
+            if preserve_path:
+                old_settings = ConfigParser()
+                old_settings.read(targetfile)
+                settings['paths'] = old_settings['paths']
             with open(targetfile, 'w') as SETTINGS_file:  # save
                 settings.write(SETTINGS_file)
             print('Loaded settings from {}'.format(settings_file_name))
             # apply new settings to current processor
             self.initAttributes()
+
+
 
     def plot_diagnostics(self):
         """ Generates a plot of each available channel. usefull for diagnostics on data conditions"""
@@ -424,14 +427,7 @@ class DldProcessor:
 
             data_array_normalized = np.swapaxes(data_array, 0, idx)
             
-            gmd = np.nan_to_num(self.dd['gmdBda'].values.compute())
-            axisDataframe = self.dd[axis_name].values.compute()
-            
-            norm_array = np.zeros(len(axis_values))
-            for j in range(0,len(gmd)):
-                if (gmd[j]>0):
-                    ind = np.argmin(np.abs(axis_values-axisDataframe[j]))
-                    norm_array[ind]+=gmd[j]
+            norm_array = self.make_GMD_histogram(axis_name,axis_values)
             
             for i in range(np.ndim(data_array_normalized) - 1):
                 norm_array = norm_array[:, None]
@@ -443,6 +439,18 @@ class DldProcessor:
         except ValueError:
             raise ValueError('Failed the GMD normalization.')
 
+    def make_GMD_histogram(self,axis_name,axis_values):
+
+            gmd = np.nan_to_num(self.dd['gmdBda'].values.compute())
+            axisDataframe = self.dd[axis_name].values.compute()
+
+            norm_array = np.zeros(len(axis_values))
+            for j in range(0,len(gmd)):
+                if (gmd[j]>0):
+                    ind = np.argmin(np.abs(axis_values-axisDataframe[j]))
+                    norm_array[ind]+=gmd[j]
+            return norm_array
+    
     def normalizeAxisMean(self,data_array,ax):
         """ Normalize to the mean of the given axis
         :Parameters:
@@ -978,25 +986,44 @@ class DldProcessor:
         res = self.computeBinnedData()
         dims = self.binNameList
         coords = {}
-        attrs = {}
         for name,vals in zip(self.binNameList,self.binAxesList):
             coords[name] = vals
         
         ba = BinnedArray(res,dims=dims,coords=coords)
         
-#        ba.attrs['run'] = self.runNumber
-#        start, stop = min(self.dd['timeStamp']), max(self.dd['timeStamp'])
-#        ba.attrs['timing'] = {'acquisition start':start,
-#                              'acquisition stop':stop,
-#                              'acquisition duration':stop-start,
-#                              'binned': time.time(),
-#                              }
-#                            
-#        ba.attrs['settings'] = parse_category('processor')
-#        ba.attrs['DAQ channels'] = parse_category('DAQ channels')
-        
+        start, stop = min(self.dd['timeStamp']), max(self.dd['timeStamp'])
+        ba.attrs['timing'] = {'acquisition start':start,
+                              'acquisition stop':stop,
+                              'acquisition duration':stop-start,
+                              'binned': time.time(),
+                              }
+                            
+        ba.attrs['settings'] = misc.parse_category('processor')
+        ba.attrs['DAQ channels'] = misc.parse_category('DAQ channels')
+        ba.attrs['run'] = {
+                        'runNumber':self.runNumber,
+                        'macroBunchPulseIdInterval':self.pulseIdInterval,
+                        'nMacrobunches': self.pulseIdInterval[1]-self.pulseIdInterval[0],
+                        'nElectrons': self.numOfElectrons,
+                        'electronsPerMacrobunch': self.electronsPerMacrobunch,
+                        
+                        }
+        ba.attrs['histograms'] = {}
 
-
+        if hasattr(self, 'delaystageHistogram'):
+            ba.attrs['histograms']['delay'] = {'axis': 'delayStage', 'histogram':self.delaystageHistogram}
+        elif hasattr(self, 'pumpProbeHistogram'):
+            ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram':self.pumpProbeHistogram}
+        try:
+            axis_values = []
+            for ax,val in coords.items():
+                if len(val)>ax_len:
+                    axis_name = ax
+                    axis_values = val
+            GMD_norm = self.make_GMD_histogram(axis_name,axis_values)
+            ba.attrs['histograms']['GMD'] = {'axis': axis_name, 'histogram':GMD_norm}
+        except:
+            print('didnt find GMD channel for making GMD normalization histogram')
         return ba
 
 
