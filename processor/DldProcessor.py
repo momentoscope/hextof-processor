@@ -3,6 +3,7 @@ import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)  # avoid printing FutureWarnings from other packages
 import os
+import time
 import dask
 import dask.dataframe
 import dask.multiprocessing
@@ -63,6 +64,10 @@ class DldProcessor:
 
         self.initAttributes()
 
+
+        # initialize attributes for metadata
+        self.sample = {} # this should contain 'name', 'sampleID', 'cleave number' etc...
+        
         # set true to use the old binning method with arange, instead of
         # linspace
         self._LEGACY_BINNING = False
@@ -973,9 +978,27 @@ class DldProcessor:
         res = self.computeBinnedData()
         dims = self.binNameList
         coords = {}
+        attrs = {}
         for name,vals in zip(self.binNameList,self.binAxesList):
             coords[name] = vals
-        return BinnedArray(res,dims=dims,coords=coords)
+        
+        ba = BinnedArray(res,dims=dims,coords=coords)
+        
+#        ba.attrs['run'] = self.runNumber
+#        start, stop = min(self.dd['timeStamp']), max(self.dd['timeStamp'])
+#        ba.attrs['timing'] = {'acquisition start':start,
+#                              'acquisition stop':stop,
+#                              'acquisition duration':stop-start,
+#                              'binned': time.time(),
+#                              }
+#                            
+#        ba.attrs['settings'] = parse_category('processor')
+#        ba.attrs['DAQ channels'] = parse_category('DAQ channels')
+        
+
+
+        return ba
+
 
     def computeBinnedDataMulti(self, saveName=None, savePath=None,
                                rank=None, size=None):
