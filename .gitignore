@@ -14,6 +14,7 @@ lib/*.html
 
 # ignore local settings
 SETTINGS.ini
+utilities/settings/personalSettings
 \.DS_Store
 
 # ignore cython builds
@@ -33,3 +34,6 @@ Tutorial/h5/
 Tutorial/raw/
 Tutorial/results/
 Tutorial/parquet/
+
+# ignore Notebooks folder
+Notebooks
