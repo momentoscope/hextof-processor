@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from datetime import datetime
 from configparser import ConfigParser
 import dask
 import dask.dataframe
@@ -151,9 +152,20 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                     pulseIdInterval = (otherStuff[0], otherStuff[-1])
                     self.pulseIdInterval = pulseIdInterval
                     macroBunchPulseId_correction = pulseIdInterval[0]
+
+                if address_name == 'timeStamp':  # catch the time stamps
+                    startEndTime = (values[0,0], values[-1,0])
+                    self.startEndTime = startEndTime
+
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
             print('Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}'\
                 .format(runNumber, numOfMacrobunches, pulseIdInterval[0], pulseIdInterval[1]))
+
+            print("start time: {}, end time: {}, total time: {}"
+                  .format(datetime.utcfromtimestamp(startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S'),
+                          datetime.utcfromtimestamp(startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S'),
+                          datetime.utcfromtimestamp(startEndTime[1]-startEndTime[0]).strftime('%H:%M:%S')))
+
         else:
             print('reading DAQ data from interval {}'.format(pulseIdInterval))
             self.pulseIdInterval = pulseIdInterval
@@ -181,7 +193,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         print("Number of electrons: {0:,}; {1:,} e/Mb ".format(self.numOfElectrons, self.electronsPerMacrobunch))
 
         print("Creating dataframes... Please wait...")
-        with ProgressBar():
+        pbar = ProgressBar()
+        with pbar:
             self.createDataframePerElectron()
             print('Electron dataframe created.')
             self.createDataframePerMicrobunch()
@@ -288,6 +301,13 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             daMacroBunchPulseId = macroBunchPulseIdArray.flatten()
             arrayCols.append(daMacroBunchPulseId)
 
+        # convert the timeStamp to the electron format. No check because this surely exists
+        if 'timeStamp' in self.daqAddresses:
+            timeStampArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+            timeStampArray[:, :] = (self.timeStamp[mbIndexStart:mbIndexEnd, 0])[:, None]
+            daTimeStamp = timeStampArray.flatten()
+            arrayCols.append(daTimeStamp)
+
         # the Aux channel: aux0:
         # aux0Arr= assignToMircobunch(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64), self.dldAux[mbIndexStart:mbIndexEnd, 0].astype(np.float64))
         # daAux0 = dask.array.from_array(aux0Arr.flatten(), chunks=(chunks))
@@ -331,7 +351,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         da = dask.array.from_array(a.T, chunks=self.CHUNK_SIZE)
 
         cols = ('dldPosX', 'dldPosY', 'dldTime', 'delayStage', 'bam', 'dldMicrobunchId', 'dldDetectorId', 'dldSectorId', 'bunchCharge',
-                'opticalDiode', 'gmdTunnel', 'gmdBda', 'pumpPol', 'macroBunchPulseId')
+                'opticalDiode', 'gmdTunnel', 'gmdBda', 'pumpPol', 'macroBunchPulseId', 'timeStamp')
 
         cols = tuple(x for x in cols if x in self.daqAddresses)
         self.dd = dask.dataframe.from_array(da, columns=cols)
@@ -402,11 +422,17 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             daMacroBunchPulseId = dask.array.from_array(macroBunchPulseIdArray.flatten(), chunks=(self.CHUNK_SIZE))
             arrayCols.append(daMacroBunchPulseId)
 
+        if 'timeStamp' in self.daqAddresses:
+            timeStampArray = np.zeros_like(self.bam)
+            timeStampArray[:, :] = (self.timeStamp[:, 0])[:, None]
+            daTimeStamp = dask.array.from_array(timeStampArray.flatten(), chunks=(self.CHUNK_SIZE))
+            arrayCols.append(daTimeStamp)
+
         da = dask.array.stack(arrayCols)
 
         # Create the microbunch-indexed dataframe
         cols = (
-            'delayStage', 'bam', 'dldAux0', 'dldAux1', 'bunchCharge', 'opticalDiode', 'pumpPol', 'macroBunchPulseId')
+            'delayStage', 'bam', 'dldAux0', 'dldAux1', 'bunchCharge', 'opticalDiode', 'pumpPol', 'macroBunchPulseId', 'timeStamp')
         cols = tuple(x for x in cols if x in self.daqAddresses)
 
         self.ddMicrobunches = dask.dataframe.from_array(da.T, columns=cols)
