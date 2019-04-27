@@ -3,7 +3,8 @@ import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)  # avoid printing FutureWarnings from other packages
 import os
-import time
+
+from datetime import datetime
 import dask
 import dask.dataframe
 import dask.multiprocessing
@@ -1004,11 +1005,12 @@ class DldProcessor:
                 u = None
             units[name] = u
         ba.attrs['units'] = units
-        start, stop = min(self.dd['timeStamp']), max(self.dd['timeStamp'])
-        ba.attrs['timing'] = {'acquisition start':datetime.fromtimestamp(start),
-                              'acquisition stop':datetime.fromtimestamp(stop),
+        start, stop = self.dd['timeStamp'].min().compute(), self.dd['timeStamp'].max().compute()
+
+        ba.attrs['timing'] = {'acquisition start':datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
+                              'acquisition stop':datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
                               'acquisition duration':stop-start,
-                              'binned': time.time(),
+                              'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                               }
         ba.attrs['sample'] = self.sample
         ba.attrs['settings'] = misc.parse_category('processor')
@@ -1029,14 +1031,16 @@ class DldProcessor:
             ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram':self.pumpProbeHistogram}
         try:
             axis_values = []
+            ax_len=0
             for ax,val in coords.items():
                 if len(val)>ax_len:
+                    ax_len = len(val)
                     axis_name = ax
                     axis_values = val
             GMD_norm = self.make_GMD_histogram(axis_name,axis_values)
             ba.attrs['histograms']['GMD'] = {'axis': axis_name, 'histogram':GMD_norm}
-        except:
-            print('didnt find GMD channel for making GMD normalization histogram')
+        except Exception as e:
+            print("Couldn't find GMD channel for making GMD normalization histogramz\nError: {}".format(e))
         return ba
 
 

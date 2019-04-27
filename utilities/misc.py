@@ -10,6 +10,7 @@ import psutil
 import ast
 import os
 from configparser import ConfigParser
+from collections import OrderedDict
 
 from processor import DldFlashDataframeCreator as DldFlashProcessor
 
@@ -159,6 +160,47 @@ def write_setting(value, category, name, settings_file='default'):
     with open(settings_file, 'w') as configfile:
         settings.write(configfile)
 
+def parse_logbook(log_text):    
+    """ create a dictionary out of the log book entry 
+    
+    
+    """
+    assert isinstance(log_text,str) or os.path.isfile(log_text), 'Unrecognized format for logbook text'
+    if os.path.isfile(log_text):
+        with open(log_text,'r') as f:
+            text = f.read()
+    else:
+        text = log_text
+    logDict = OrderedDict()
+    
+    t_split = text.split('\nFEL:')
+    logDict['comments'] = t_split.pop(0)
+    text = 'FEL:{}'.format(t_split[0])
+    log_sections = []
+    for line in text.split('\n'):
+        log_sections.append(line.strip())
+    log_sections = '|'.join([x.strip() for x in text.split('\n')]).split('||')
+    
+    for section in log_sections:
+        while section[:1] == '|':
+            section=section[1:]
+        slist = section.split('|')
+        title = slist[0].split(':')
+        name = title.pop(0)
+        logDict[name] = OrderedDict()
+        try:
+            status = title[0].strip()
+            if status != '':
+                logDict[name]['status'] = title[0].strip()
+        except:
+            pass
+        for line in slist[1:]:
+            linelist = line.replace(':','=').split('=')
+            try:
+                logDict[name][linelist[0].strip()] = linelist[1].strip()
+            except IndexError:
+                logDict[name][linelist[0].strip()] = None
+    return logDict
 
 
 # %% Math
