@@ -862,6 +862,7 @@ class DldProcessor:
             stepSize, useStepSize, forceEnds, include_last, force_legacy)
         if axes[-1] > end:
             axes = axes[:-1]
+        axes = np.array([np.mean((x,y)) for x,y in zip(bins[:-1],bins[1:])])
         self.binAxesList.append(axes)
         return axes
 
@@ -920,19 +921,19 @@ class DldProcessor:
                 idx = cols.tolist().index(binName)
                 colsToBin.append(idx)
 
-            # create the array with the bins and bin ranges
-            numBins = []
-            ranges = []
-            for i in range(0, len(colsToBin)):
-                # need to subtract 1 from the number of bin ranges
-                numBins.append(len(self.binRangeList[i]) - 1)
-                ranges.append(
-                    (self.binRangeList[i].min(),
-                     self.binRangeList[i].max()))
-            # now we are ready for the analysis with numpy:
-            res, edges = np.histogramdd(
-                vals[:, colsToBin], bins=numBins, range=ranges)
-
+#            # create the array with the bins and bin ranges
+#            numBins = []
+#            ranges = []
+#            for i in range(0, len(colsToBin)):
+#                # need to subtract 1 from the number of bin ranges
+#                numBins.append(len(self.binRangeList[i]) - 1)
+#                ranges.append(
+#                    (self.binRangeList[i].min(),
+#                     self.binRangeList[i].max()))
+#            # now we are ready for the analysis with numpy:
+#            res, edges = np.histogramdd(
+#                vals[:, colsToBin], bins=numBins, range=ranges)
+            res, edges = np.histogramdd(vals[:, colsToBin], bins=self.binRangeList)
             return res
 
         # prepare the partitions for the calculation in parallel
@@ -991,13 +992,22 @@ class DldProcessor:
         
         ba = BinnedArray(res,dims=dims,coords=coords)
         
-        start, stop = 0,1#min(self.dd['timeStamp']), max(self.dd['timeStamp'])
-        ba.attrs['timing'] = {'acquisition start':start,
-                              'acquisition stop':stop,
+        units = {}
+        default_units={'dldTime':'step','delayStage':'ps', 'pumpProbeDelay':'ps'}
+        for name in self.binNameList:
+            try:
+                u = default_units[name]
+            except KeyError:
+                u = None
+            units[name] = u
+        ba.attrs['units'] = units
+        start, stop = min(self.dd['timeStamp']), max(self.dd['timeStamp'])
+        ba.attrs['timing'] = {'acquisition start':datetime.fromtimestamp(start),
+                              'acquisition stop':datetime.fromtimestamp(stop),
                               'acquisition duration':stop-start,
                               'binned': time.time(),
                               }
-                            
+        ba.attrs['sample'] = self.sample
         ba.attrs['settings'] = misc.parse_category('processor')
         ba.attrs['DAQ channels'] = misc.parse_category('DAQ channels')
         ba.attrs['run'] = {
