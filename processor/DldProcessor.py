@@ -263,7 +263,7 @@ class DldProcessor:
             self.ddMicrobunches = dask.dataframe.read_hdf(
                 fullName, '/microbunches', mode='r', chunksize=self.CHUNK_SIZE)
 
-    def appendDataframeParquet(self, fileName):
+    def appendDataframeParquet(self, fileName, path = None):
         """ Append data to an existing dask Parquet dataframe.
 
         This can be used to concatenate multiple DAQ runs in one dataframe.
