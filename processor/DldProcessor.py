@@ -263,7 +263,7 @@ class DldProcessor:
             self.ddMicrobunches = dask.dataframe.read_hdf(
                 fullName, '/microbunches', mode='r', chunksize=self.CHUNK_SIZE)
 
-    def appendDataframeParquet(self, fileName):
+    def appendDataframeParquet(self, fileName, path = None):
         """ Append data to an existing dask Parquet dataframe.
 
         This can be used to concatenate multiple DAQ runs in one dataframe.
@@ -274,13 +274,15 @@ class DldProcessor:
                 name (including path) of the folder containing the
                 parquet files to append the new data.
         """
-
-        print(len(self.dd.divisions))
-        newdd = dask.dataframe.read_parquet(fileName + "_el")
-        print(len(newdd.divisions))
-        self.dd = self.dd.append(newdd)
-        self.ddMicrobunches = self.ddMicrobunches.append(
-            dask.dataframe.read_parquet(fileName + "_mb"))
+        if type(fileName) == int: #if runNumber is given (only works if the run was prevously stored with default naming)
+            fileName = 'run{}'.format(fileName)
+        if path == None:
+            path = self.DATA_PARQUET_DIR
+        fullName = path + fileName
+        newdd = dask.dataframe.read_parquet(fullName + "_el")
+        self.dd = dask.dataframe.concat([self.dd, newdd], join='outer', interleave_partitions=True)
+        newddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
+        self.ddMicrobunches = dask.dataframe.concat([self.ddMicrobunches, newddMicrobunches], join='outer', interleave_partitions=True)
 
     def postProcess(self, bamCorrectionSign=0, kCenter=None):
         """ Apply corrections to the dataframe.
