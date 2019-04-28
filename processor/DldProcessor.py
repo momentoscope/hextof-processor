@@ -860,13 +860,13 @@ class DldProcessor:
         else:
             stepSize = (end - start) / steps
 
-        axes = self.genBins(
-            start + stepSize / 2,
-            end - stepSize / 2,
-            stepSize, useStepSize, forceEnds, include_last, force_legacy)
-        if axes[-1] > end:
-            axes = axes[:-1]
-        axes = np.array([np.mean((x,y)) for x,y in zip(bins[:-1],bins[1:])])
+#        axes = self.genBins(
+#            start + stepSize / 2,
+#            end - stepSize / 2,
+#            stepSize, useStepSize, forceEnds, include_last, force_legacy)
+#        if axes[-1] > end:
+#            axes = axes[:-1]
+        axes = np.array([np.mean((x,y)) for x,y in zip(bins[:-1],bins[1:])]) #TODO: could be improved for nonlinear scales
         self.binAxesList.append(axes)
         return axes
 
@@ -1036,14 +1036,23 @@ class DldProcessor:
         ba.attrs['sample'] = self.sample
         ba.attrs['settings'] = misc.parse_category('processor')
         ba.attrs['DAQ channels'] = misc.parse_category('DAQ channels')
+        if self.pulseIdInterval is None:
+            pulseIdFrom = self.dd['macroBunchPulseId'].min().compute()
+            pulseIdTo = self.dd['macroBunchPulseId'].max().compute()
+        else:
+            pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
+
         ba.attrs['run'] = {
                         'runNumber':self.runNumber,
-                        'macroBunchPulseIdInterval':self.pulseIdInterval,
-                        'nMacrobunches': self.pulseIdInterval[1]-self.pulseIdInterval[0],
-                        'nElectrons': self.numOfElectrons,
-                        'electronsPerMacrobunch': self.electronsPerMacrobunch,
-                        
+                        'macroBunchPulseIdInterval': [pulseIdFrom, pulseIdTo],
+                        'nMacrobunches': pulseIdTo-pulseIdFrom,
                         }
+        try:
+            ba.attrs['run']['nElectrons'] = self.numOfElectrons
+            ba.attrs['run']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
+        except:
+            pass #TODO: find smarter solution          
+              
         ba.attrs['histograms'] = {}
 
         if hasattr(self, 'delaystageHistogram'):
