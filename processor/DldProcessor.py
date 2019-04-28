@@ -440,7 +440,7 @@ class DldProcessor:
         except ValueError:
             raise ValueError('Failed the GMD normalization.')
 
-    def make_GMD_histogram(self,axis_name,axis_values):
+    def make_GMD_histogram(self,axis_name,axis_values): # TODO: improve performance... its deadly slow! 
 
             gmd = np.nan_to_num(self.dd['gmdBda'].values.compute())
             axisDataframe = self.dd[axis_name].values.compute()
@@ -986,9 +986,23 @@ class DldProcessor:
 
         return result
 
-    def computeBinnedArray(self):
+    def computeBinnedArray(self, fast_mode=False):
         """returns a BinnedArray object of the binned data."""
         res = self.computeBinnedData()
+        return self.res_to_xarray(res,fast_mode=fast_mode)
+
+    def res_to_xarray(self,res,fast_mode=False):
+        """ creates a BinnedArray (xarray subclass) out of the given np.array
+        
+        :Parameters:
+            res: np.array
+                nd array of binned data
+            fast_mode: bool default True
+                if True, it skips the creation of metadata element which require computation.
+        :Returns:
+            ba: BinnedArray (xarray)
+                an xarray-like container with binned data, axis, and all available metadata
+        """
         dims = self.binNameList
         coords = {}
         for name,vals in zip(self.binNameList,self.binAxesList):
@@ -1005,7 +1019,14 @@ class DldProcessor:
                 u = None
             units[name] = u
         ba.attrs['units'] = units
-        start, stop = self.dd['timeStamp'].min().compute(), self.dd['timeStamp'].max().compute()
+
+        try:
+            start, stop = self.startEndTime[0],self.startEndTime[1]
+        except AttributeError:
+            if not fast_mode:
+                start, stop = self.dd['timeStamp'].min().compute(), self.dd['timeStamp'].max().compute()
+            else:
+                start, stop = 0,1
 
         ba.attrs['timing'] = {'acquisition start':datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
                               'acquisition stop':datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
@@ -1029,18 +1050,21 @@ class DldProcessor:
             ba.attrs['histograms']['delay'] = {'axis': 'delayStage', 'histogram':self.delaystageHistogram}
         elif hasattr(self, 'pumpProbeHistogram'):
             ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram':self.pumpProbeHistogram}
-        try:
-            axis_values = []
-            ax_len=0
-            for ax,val in coords.items():
-                if len(val)>ax_len:
-                    ax_len = len(val)
-                    axis_name = ax
-                    axis_values = val
-            GMD_norm = self.make_GMD_histogram(axis_name,axis_values)
-            ba.attrs['histograms']['GMD'] = {'axis': axis_name, 'histogram':GMD_norm}
-        except Exception as e:
-            print("Couldn't find GMD channel for making GMD normalization histogramz\nError: {}".format(e))
+        if not fast_mode:
+            try:
+                axis_values = []
+                ax_len=0
+                for ax,val in coords.items():
+                    if len(val)>ax_len:
+                        ax_len = len(val)
+                        axis_name = ax
+                        axis_values = val
+
+                GMD_norm = self.make_GMD_histogram(axis_name,axis_values)
+                ba.attrs['histograms']['GMD'] = {'axis': axis_name, 'histogram':GMD_norm}
+            except Exception as e:
+                print("Couldn't find GMD channel for making GMD normalization histograms\nError: {}".format(e))
+
         return ba
 
 
