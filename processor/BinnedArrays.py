@@ -102,9 +102,24 @@ class BinnedArray(xr.DataArray):
                         try:
                             g.create_dataset(kk,data=vv)
                         except TypeError:
-                            for kkk,vvv in vv.items():
-                                g.create_dataset('{}/{}'.format(kk,kkk),data=vvv)
-
+                            if isinstance(vv, dict):
+                                for kkk,vvv in vv.items():
+                                    g.create_dataset('{}/{}'.format(kk,kkk),data=vvv)
+                            else:
+                                g.create_dataset(kk,data=str(vv))
+                        
     def read_h5(self,filename):
         raise NotImplementedError()
+
+    def read_logbook(self,log_text):
+        log = utils.parse_logbook(log_text)
+        
+        try:
+            self.attrs['metadata'] = {**log,**self.attrs['metadata']}        
+        except KeyError:
+            self.attrs['metadata'] = log
+
+    
+
+
 
