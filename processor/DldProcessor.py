@@ -274,13 +274,15 @@ class DldProcessor:
                 name (including path) of the folder containing the
                 parquet files to append the new data.
         """
-
-        print(len(self.dd.divisions))
-        newdd = dask.dataframe.read_parquet(fileName + "_el")
-        print(len(newdd.divisions))
-        self.dd = self.dd.append(newdd)
-        self.ddMicrobunches = self.ddMicrobunches.append(
-            dask.dataframe.read_parquet(fileName + "_mb"))
+        if type(fileName) == int: #if runNumber is given (only works if the run was prevously stored with default naming)
+            fileName = 'run{}'.format(fileName)
+        if path == None:
+            path = self.DATA_PARQUET_DIR
+        fullName = path + fileName
+        newdd = dask.dataframe.read_parquet(fullName + "_el")
+        self.dd = dask.dataframe.concat([self.dd, newdd], join='outer', interleave_partitions=True)
+        newddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
+        self.ddMicrobunches = dask.dataframe.concat([self.ddMicrobunches, newddMicrobunches], join='outer', interleave_partitions=True)
 
     def postProcess(self, bamCorrectionSign=0, kCenter=None):
         """ Apply corrections to the dataframe.
