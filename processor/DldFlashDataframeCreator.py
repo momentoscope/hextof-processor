@@ -160,12 +160,13 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
             print('Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}'\
                 .format(runNumber, numOfMacrobunches, pulseIdInterval[0], pulseIdInterval[1]))
-
-            print("start time: {}, end time: {}, total time: {}"
-                  .format(datetime.utcfromtimestamp(startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S'),
-                          datetime.utcfromtimestamp(startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S'),
-                          datetime.utcfromtimestamp(startEndTime[1]-startEndTime[0]).strftime('%H:%M:%S')))
-
+            try:
+                print("start time: {}, end time: {}, total time: {}"
+                      .format(datetime.utcfromtimestamp(startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S'),
+                              datetime.utcfromtimestamp(startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S'),
+                              datetime.utcfromtimestamp(startEndTime[1]-startEndTime[0]).strftime('%H:%M:%S')))
+            except:
+                pass
         else:
             print('reading DAQ data from interval {}'.format(pulseIdInterval))
             self.pulseIdInterval = pulseIdInterval
