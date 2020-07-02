@@ -120,6 +120,38 @@ class BinnedArray(xr.DataArray):
             self.attrs['metadata'] = log
 
     
+def res_to_xarray(res, binNames, binAxes, metadata):
+    """ creates a BinnedArray (xarray subclass) out of the given np.array
 
+    :Parameters:
+        res: np.array
+            nd array of binned data
+        binNames (list): list of names of the binned axes
+        binAxes (list): list of np.arrays with the values of the axes
+    :Returns:
+        ba: BinnedArray (xarray)
+            an xarray-like container with binned data, axis, and all available metadata
+    """
+    dims = binNames
+    coords = {}
+    for name, vals in zip(binNames, binAxes):
+        coords[name] = vals
+
+    xres = xr.DataArray(res, dims=dims, coords=coords)
+
+    units = {}
+    default_units = {'dldTime': 'step', 'delayStage': 'ps', 'pumpProbeDelay': 'ps'}
+    for name in binNames:
+        try:
+            u = default_units[name]
+        except KeyError:
+            u = None
+        units[name] = u
+    xres.attrs['units'] = units
+
+    for k,v in metadata.items():
+        xres.attrs[k] = v
+
+    return xres
 
 
