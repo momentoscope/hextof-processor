@@ -6,6 +6,7 @@
 import sys, os
 import numpy as np
 
+
 def main():
     pass
 
@@ -228,6 +229,7 @@ def t2e(t, toffset=None, eoffset=None, l=0.77):
 
     return tof2energy(t, toffset, eoffset, l)
 
+
 # %% Detector calibration
 
 # ==================
@@ -289,8 +291,6 @@ def correctOpticalPath(self, poly1=-0.00020578, poly2=4.6813e-7, xCenter=1334, y
                          (poly1 * ((self.dd['dldPosX'] - xCenter) ** 2 + (
                                  self.dd['dldPosY'] - yCenter) ** 2) ** 0.5 + \
                           poly2 * ((self.dd['dldPosX'] - xCenter) ** 2 + (self.dd['dldPosY'] - yCenter) ** 2))
-
-
 
 
 if __name__ == '__main__':

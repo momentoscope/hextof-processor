@@ -573,3 +573,5 @@ def create_dataframes(runNumbers, *args):
         print('{} failed with error {}'.format(key, val))
 
     return fails
+
+# %% diagnostic
