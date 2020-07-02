@@ -20,6 +20,7 @@ Calibration values taken from Pump beam energy converter 800 400.xls
 Units are uJ for energy, um for beam diameter, uJ/cm^2 for energy density (and arb. for diode signal)
 """
 
+
 def PulseEnergy400(Diode):
     """Calculate the pulse energy of 400nm laser in uJ. The unit is um for beam diameter.
     
@@ -68,6 +69,7 @@ def EnergyDensity800(Diode, Diameter=600):
 
     return PulseEnergy800(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
 
+
 # %% Settings
 # ================================================================================
 
@@ -81,6 +83,8 @@ def parse_category(category, settings_file='default'):
     Returns:
         dictionary containing name and value of all entries present in this
         category.
+    Notes:
+        Author: Steinn Ymir Agustsson <sagustss@uni-mainz.de>
     """
     settings = ConfigParser()
     if settings_file == 'default':
@@ -92,7 +96,7 @@ def parse_category(category, settings_file='default'):
     settings.read(settings_file)
     try:
         cat_dict = {}
-        for k,v in settings[category].items():
+        for k, v in settings[category].items():
             try:
                 if v[0] == "/":
                     cat_dict[k] = str(v)
@@ -114,6 +118,8 @@ def parse_setting(category, name, settings_file='default'):
             a file called SETTINGS.ini in the main folder of the repo.
     Returns:
         value of the parameter, None if parameter cannot be found.
+    Notes:
+        Author: Steinn Ymir Agustsson <sagustss@uni-mainz.de>
     """
     settings = ConfigParser()
     if settings_file == 'default':
@@ -136,6 +142,7 @@ def parse_setting(category, name, settings_file='default'):
     except ValueError:
         return settings[category][name]
 
+
 def write_setting(value, category, name, settings_file='default'):
     """ Write enrty in the settings file
     Args:
@@ -145,6 +152,8 @@ def write_setting(value, category, name, settings_file='default'):
             a file called SETTINGS.ini in the main folder of the repo.
     Returns:
         value of the parameter, None if parameter cannot be found.
+    Notes:
+        Author: Steinn Ymir Agustsson <sagustss@uni-mainz.de>
     """
     settings = ConfigParser()
     if settings_file == 'default':
@@ -160,19 +169,26 @@ def write_setting(value, category, name, settings_file='default'):
     with open(settings_file, 'w') as configfile:
         settings.write(configfile)
 
-def parse_logbook(log_text):    
-    """ create a dictionary out of the log book entry 
-    
-    
+
+def parse_logbook(log_text):
+    """ Parse a log book entry to read out metadata.
+
+    Args:
+        log_text (str or file): file or plain text of the log book, in the
+        "correct" format TODO: add example of log entry
+    Returns:
+        logDict (dict): Dictionary with the relevant metadata
+    Notes:
+        Author: Steinn Ymir Agustsson <sagustss@uni-mainz.de>
     """
-    assert isinstance(log_text,str) or os.path.isfile(log_text), 'Unrecognized format for logbook text'
+    assert isinstance(log_text, str) or os.path.isfile(log_text), 'Unrecognized format for logbook text'
     if os.path.isfile(log_text):
-        with open(log_text,'r') as f:
+        with open(log_text, 'r') as f:
             text = f.read()
     else:
         text = log_text
     logDict = OrderedDict()
-    
+
     t_split = text.split('\nFEL:')
     logDict['comments'] = t_split.pop(0)
     text = 'FEL:{}'.format(t_split[0])
@@ -180,10 +196,10 @@ def parse_logbook(log_text):
     for line in text.split('\n'):
         log_sections.append(line.strip())
     log_sections = '|'.join([x.strip() for x in text.split('\n')]).split('||')
-    
+
     for section in log_sections:
         while section[:1] == '|':
-            section=section[1:]
+            section = section[1:]
         slist = section.split('|')
         title = slist[0].split(':')
         name = title.pop(0)
@@ -195,7 +211,7 @@ def parse_logbook(log_text):
         except:
             pass
         for line in slist[1:]:
-            linelist = line.replace(':','=').split('=')
+            linelist = line.replace(':', '=').split('=')
             try:
                 logDict[name][linelist[0].strip()] = linelist[1].strip()
             except IndexError:
@@ -217,18 +233,14 @@ def radius(df, center=(0, 0)):
 def argnearest(array, val, rettype='vectorized'):
     """Find the coordinates of the nD array element nearest to a specified value
 
-    :Parameters:
-        array : numpy array
-            Numeric data array
-        val : numeric
-            Look-up value
-        rettype : str | 'vectorized'
-            return type specification
-            'vectorized' denotes vectorized coordinates (integer)
+    Args:
+        array (np.array): Numeric data array
+        val (int or float) : Look-up value
+        rettype (:obj:`str`,optional): return type specification
+            'vectorized' (default) denotes vectorized coordinates (integer)
             'coordinates' denotes multidimensional coordinates (tuple)
-    :Return:
-        argval : numeric
-            coordinate position
+    Returns:
+        argval (int): coordinate position
     """
 
     vnz = np.abs(array - val)
@@ -296,6 +308,64 @@ def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
     print("Created file " + filepath)
 
 
+def load_binned_h5(file_name, mode='r', ret_type='list'):
+    """ Load an HDF5 file saved with ``save_binned()`` method.
+
+    Args:
+        file_name (str): name of the file to load, including full path
+        mode (:obj:`str`, optional): Read mode of h5 file ('r' = read).
+        ret_type (:obj:`str`, optional): output format for axes and histograms:
+            'list' generates a list of arrays, ordered as
+            the corresponding dimensions in data. 'dict'
+            generates a dictionary with the names of each axis.
+
+    Returns:
+        data np.array: Multidimensional data read from h5 file.
+        axes np.array: The axes values associated with the read data.
+        hist np.array: Histogram values associated with the read data.
+    """
+    if file_name[-3:] == '.h5':
+        filename = file_name
+    else:
+        filename = '{}.h5'.format(file_name)
+
+    with h5py.File(filename, mode) as h5File:
+
+        # Retrieving binned data
+        frames = h5File['frames']
+        data = []
+        if len(frames) == 1:
+            data = np.array(frames['f0000'])
+
+        else:
+            for frame in frames:
+                data.append(np.array(frames[frame]))
+            data = np.array(data)
+
+        # Retrieving axes
+        axes = [0 for i in range(len(data.shape))]
+        axes_d = {}
+        for ax in h5File['axes/']:
+            vals = h5File['axes/' + ax][()]
+            #             axes_d[ax] = vals
+            idx = int(ax.split(' - ')[0][2:])
+            if len(frames) == 1:  # shift index to compensate missing time dimension
+                idx -= 1
+            axes[idx] = vals
+
+            # Retrieving delay histograms
+        hists = []
+        hists_d = {}
+        for hist in h5File['histograms/']:
+            hists_d[hist] = h5File['histograms/' + hist][()]
+            hists.append(h5File['histograms/' + hist][()])
+
+    if ret_type == 'list':
+        return data, axes, hists
+    elif ret_type == 'dict':
+        return data, axes_d, hists_d
+
+
 def get_available_runs(rootpath):  # TODO: store the resulting dictionary to improve performance.
     """ Collects the filepaths to the available experimental run data.
 
@@ -359,6 +429,7 @@ def camelCaseIt(snake_case_string):
 
     return camelCaseVersion
 
+
 # %% plotting
 # # ================================================================================
 
@@ -413,73 +484,10 @@ def plot_lines(data, normalization='None', range=None, color_range=(0, 1),
                     pad_inches=0.1, frameon=None)
     plt.show()
 
+
 # ==================
 # Methods by Steinn!
 # ==================
-
-def load_binned_h5(file_name, mode='r', ret_type='list'):
-    """ Load an HDF5 file saved with ``save_binned()`` method.
-
-    :Parameters:
-        file_name : str
-            name of the file to load, including full path
-
-        mode : str | 'r'
-            Read mode of h5 file ('r' = read).
-        ret_type: str | 'list','dict'
-            output format for axes and histograms:
-            'list' generates a list of arrays, ordered as
-            the corresponding dimensions in data. 'dict'
-            generates a dictionary with the names of each axis.
-
-    :Returns:
-        data : numpy array
-            Multidimensional data read from h5 file.
-        axes : numpy array
-            The axes values associated with the read data.
-        hist : numpy array
-            Histogram values associated with the read data.
-    """
-    if file_name[-3:] == '.h5':
-        filename = file_name
-    else:
-        filename = '{}.h5'.format(file_name)
-
-    with h5py.File(filename, mode) as h5File:
-
-        # Retrieving binned data
-        frames = h5File['frames']
-        data = []
-        if len(frames) == 1:
-            data = np.array(frames['f0000'])
-
-        else:
-            for frame in frames:
-                data.append(np.array(frames[frame]))
-            data = np.array(data)
-
-        # Retrieving axes
-        axes = [0 for i in range(len(data.shape))]
-        axes_d = {}
-        for ax in h5File['axes/']:
-            vals = h5File['axes/' + ax][()]
-            #             axes_d[ax] = vals
-            idx = int(ax.split(' - ')[0][2:])
-            if len(frames) == 1:  # shift index to compensate missing time dimension
-                idx -= 1
-            axes[idx] = vals
-
-            # Retrieving delay histograms
-        hists = []
-        hists_d = {}
-        for hist in h5File['histograms/']:
-            hists_d[hist] = h5File['histograms/' + hist][()]
-            hists.append(h5File['histograms/' + hist][()])
-
-    if ret_type == 'list':
-        return data, axes, hists
-    elif ret_type == 'dict':
-        return data, axes_d, hists_d
 
 
 def get_system_memory_status(print_=False):
@@ -547,15 +555,16 @@ def read_and_binn(runNumber, *args, static_bunches=False, source='raw', save=Tru
     axes = processor.binRangeList
     return result, axes, processor
 
+
 def create_dataframes(runNumbers, *args):
     """ Creates a parquet dataframe for each run passed.
     Returns
         fails: dictionary of runs and error which broke the dataframe generation
     """
     if isinstance(runNumbers, int):
-        runNumbers = [runNumbers,]
+        runNumbers = [runNumbers, ]
     for run in args:
-        if isinstance(run,list) or isinstance(run,tuple):
+        if isinstance(run, list) or isinstance(run, tuple):
             runNumbers.extend(run)
         else:
             runNumbers.append(run)
@@ -566,12 +575,10 @@ def create_dataframes(runNumbers, *args):
             prc.runNumber = run
             prc.readData()
             prc.storeDataframes()
-            print('Stored dataframe for run {} in {}'.format(run,prc.DATA_PARQUET_DIR))
+            print('Stored dataframe for run {} in {}'.format(run, prc.DATA_PARQUET_DIR))
         except Exception as E:
             fails[run] = E
     for key, val in fails.items():
         print('{} failed with error {}'.format(key, val))
 
     return fails
-
-# %% diagnostic

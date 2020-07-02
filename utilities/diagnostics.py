@@ -27,16 +27,14 @@ from dask.diagnostics import ProgressBar
 def channel_report(dd):
     """ Generates a table containing relevant statistical quantities on all available channels [EXPENSIVE!!]
 
-    :Parameters:
-        dd : dask.DataFrame
-            talble to explore
+    Args:
+        dd (dask.DataFrame): Table to analyse
 
-    :Return:
-        df : pandas.DataFrame
-            table with computed values
+    Returns:
+        df (pandas.DataFrame): table with computed values
+    Notes:
+        Author: Steinn Ymir Agustsson <sagustss@uni-mainz.de>
 
-    :Authors:
-        Steinn Ymir Agustsson <sagustss@uni-mainz.de>
     """
     print('creating channel report...')
     with ProgressBar():
