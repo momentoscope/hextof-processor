@@ -607,16 +607,20 @@ class DldProcessor:
                 pd.cut, bins)
             delaystageHistGrouped = self.ddMicrobunches.groupby(
                 [delaystageHistBinner])
+            # self.pumpProbeHistogram = delaystageHistGrouped.count(
+            # ).compute()['bam'].to_xarray().values.astype(np.float64)
             self.pumpProbeHistogram = delaystageHistGrouped.count(
-            ).compute()['bam'].to_xarray().values.astype(np.float64)
+            ).compute()['bam'].values.astype(np.float64)
         if (name == 'delayStage'):
             # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
             delaystageHistBinner = self.ddMicrobunches['delayStage'].map_partitions(
                 pd.cut, bins)
             delaystageHistGrouped = self.ddMicrobunches.groupby(
                 [delaystageHistBinner])
+            # self.delaystageHistogram = delaystageHistGrouped.count(
+            # ).compute()['bam'].to_xarray().values.astype(np.float64)
             self.delaystageHistogram = delaystageHistGrouped.count(
-            ).compute()['bam'].to_xarray().values.astype(np.float64)
+            ).compute()['bam'].values.astype(np.float64)
         if useStepSize:
             stepSize = steps
         else:
