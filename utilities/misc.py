@@ -413,69 +413,6 @@ def plot_lines(data, normalization='None', range=None, color_range=(0, 1),
                     pad_inches=0.1, frameon=None)
     plt.show()
 
-
-# ==================
-# Methods by Mac!
-# ==================
-
-
-def shiftQuadrants(self, shiftQ1=0.231725, shiftQ2=-0.221625, shiftQ3=0.096575, shiftQ4=-0.106675, xCenter=1350,
-                   yCenter=1440):
-    """ Apply corrections to the dataframe. (Maciej Dendzik)
-
-    Each quadrant of DLD is shifted in DLD time by shiftQn.
-    xCenter and yCenter are used to define the center of the division.
-
-         Q2     |     Q4
-    ------------|------------
-         Q1     |     Q3
-
-    this picture is upside-down in plt.imshow because it starts from 0 in top right corner
-    """
-    # Q1
-    # daskdataframe.where(condition,value) keeps the data where condition is True
-    # and changes them to value otherwise.
-    cond = ((self.dd['dldPosX'] > xCenter) | (self.dd['dldPosY'] > yCenter))
-    self.dd['dldTime'] = self.dd['dldTime'].where(cond, self.dd['dldTime'] + shiftQ1)
-    cond = ((self.dd['dldPosX'] > xCenter) | (self.dd['dldPosY'] < yCenter))
-    self.dd['dldTime'] = self.dd['dldTime'].where(cond, self.dd['dldTime'] + shiftQ2)
-    cond = ((self.dd['dldPosX'] < xCenter) | (self.dd['dldPosY'] > yCenter))
-    self.dd['dldTime'] = self.dd['dldTime'].where(cond, self.dd['dldTime'] + shiftQ3)
-    cond = ((self.dd['dldPosX'] < xCenter) | (self.dd['dldPosY'] < yCenter))
-    self.dd['dldTime'] = self.dd['dldTime'].where(cond, self.dd['dldTime'] + shiftQ4)
-
-
-def filterCircleDLDPos(self, xCenter=1334, yCenter=1426, radius=1250):
-    """ Apply corrections to the dataframe. (Maciej Dendzik)
-
-    Filters events with dldPosX and dldPosY within the radius from (xCenter,yCenter)
-
-    """
-
-    self.dd = self.dd[
-        (((self.dd['dldPosX'] - xCenter) ** 2 + (self.dd['dldPosY'] - yCenter) ** 2) ** 0.5 <= radius)]
-
-
-def correctOpticalPath(self, poly1=-0.00020578, poly2=4.6813e-7, xCenter=1334, yCenter=1426):
-    """ Apply corrections to the dataframe. (Maciej Dendzik)
-
-    Each DLD time is subtracted with a polynomial poly1*r + poly2*r^2,
-    where r=sqrt((posx-xCenter)^2+(posy-yCenter)^2)
-
-    This function makes corrections to the time of flight which take into account
-    the path difference between the center of the detector and the edges of the detector
-
-    """
-    # Q1
-    # daskdataframe.where(condition,value) keeps the data where condition is True
-    # and changes them to value otherwise.
-
-    self.dd['dldTime'] = self.dd['dldTime'] - \
-                         (poly1 * ((self.dd['dldPosX'] - xCenter) ** 2 + (
-                                 self.dd['dldPosY'] - yCenter) ** 2) ** 0.5 + \
-                          poly2 * ((self.dd['dldPosX'] - xCenter) ** 2 + (self.dd['dldPosY'] - yCenter) ** 2))
-
-
 # ==================
 # Methods by Steinn!
 # ==================
@@ -543,57 +480,6 @@ def load_binned_h5(file_name, mode='r', ret_type='list'):
         return data, axes, hists
     elif ret_type == 'dict':
         return data, axes_d, hists_d
-
-
-def reshape_binned(result, axes, hists, order_in='texy', order_out='etxy',
-                   eoff=None, toff=None, t0=0, kx0=0, ky0=0, revert='te'):
-    """ attempt to make a reshaping function. Not to be used yet"""
-    print('using an unsafe function: reshape_binned')
-    norm_array = hists[0] / max(hists[0])
-    norm_array = norm_array[:, None, None, None]
-    res_c = np.nan_to_num(result / norm_array)
-
-    ax_order_in = list(order_in)
-    ax_order_out = list(order_out)
-
-    axes_c = []
-    for axis in ax_order_out:  # reorder and invert axes
-        if axis in revert:
-            axes_c.append(axes[ax_order_in.index(axis)][::-1])
-        else:
-            axes_c.append(axes[ax_order_in.index(axis)])
-
-    temp_order = ax_order_in[:]
-    for i, axis in enumerate(ax_order_out):  # reorder data array
-        if temp_order[i] != axis:
-            res_c = res_c.swapaxes(i, temp_order.index(axis))
-            print(temp_order)
-            print('swapped axes {} and {}'.format(i, temp_order.index(axis)))
-            temp_order[temp_order.index(axis)] = temp_order[i]
-            temp_order[i] = axis
-            print(temp_order)
-
-    if ax_order_out[0] in revert:
-        res_c = res_c[::-1, :, :, :]
-    if ax_order_out[1] in revert:
-        res_c = res_c[:, ::-1, :, :]
-    if ax_order_out[2] in revert:
-        res_c = res_c[:, :, ::-1, :]
-    if ax_order_out[3] in revert:
-        res_c = res_c[:, :, :, ::-1]
-
-    for i, axis in enumerate(ax_order_out):
-        if axis == 't':
-            axes[i] -= t0
-        elif axis == 'e':
-            if None not in [eoff, toff]:
-                axes[i] = t2e(axis[i], eoffset=eoff, toffset=toff)
-        elif axis == 'x':
-            axes[i] -= kx0
-        elif axis == 'y':
-            axes[i] -= ky0
-
-    return res_c, axes_c
 
 
 def get_system_memory_status(print_=False):
