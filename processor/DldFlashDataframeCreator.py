@@ -438,7 +438,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         self.ddMicrobunches = dask.dataframe.from_array(da.T, columns=cols)
 
-    def storeDataframes(self, fileName=None, path=None, format='parquet', append=False):
+    def storeDataframes(self, fileName=None, path=None, format='parquet', append=False,pbar=True):
         """ Save imported dask dataframe as a parquet or hdf5 file.
 
         :Parameters:
@@ -470,10 +470,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         fileName = path + fileName  # TODO: test if naming is correct
 
         if format == 'parquet':
-            self.dd.to_parquet(fileName + "_el", compression="UNCOMPRESSED", \
-                               append=append, ignore_divisions=True)
-            self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED", \
-                                           append=append, ignore_divisions=True)
+            with ProgressBar():
+                self.dd.to_parquet(fileName + "_el", compression="UNCOMPRESSED", \
+                                   append=append, ignore_divisions=True)
+                self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED", \
+                                               append=append, ignore_divisions=True)
         elif format in ['hdf5', 'h5']:
             dask.dataframe.to_hdf(self.dd, fileName, '/electrons')
             dask.dataframe.to_hdf(self.ddMicrobunches, fileName, '/microbunches')
