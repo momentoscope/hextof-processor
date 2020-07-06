@@ -132,10 +132,14 @@ def parse_setting(category, name, settings_file='default'):
 
     try:
         value = settings[category][name]
-        if value[0] == "/":
+        # if value[0] == "/":
+        if os.path.isdir(value):
             return str(value)
         else:
-            return ast.literal_eval(value)
+            try:
+                return ast.literal_eval(value)
+            except SyntaxError:
+                return str(value)
     except KeyError:
         print('No entry {} in category {} found in SETTINGS.ini'.format(name, category))
         return None
