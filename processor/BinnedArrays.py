@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import os
-from configparser import ConfigParser
-import xarray as xr
-import tifffile
-import tempfile
-import shutil
-import utilities.misc as utils
+
 import h5py
 import numpy as np
+import tifffile
+import xarray as xr
+
+import utilities.misc as utils
+
 
 class BinnedArray(xr.DataArray):
-    
-    def __init__(self,data=None, coords=None, dims=None, name=None,attrs=None, encoding=None, indexes=None, fastpath=False):
-        super(BinnedArray,self).__init__(data, coords=coords, dims=dims, name=name,
-            attrs=attrs, encoding=encoding, indexes=indexes, fastpath=fastpath)
+
+    def __init__(self, data=None, coords=None, dims=None, name=None, attrs=None, encoding=None, indexes=None,
+                 fastpath=False):
+        super(BinnedArray, self).__init__(data, coords=coords, dims=dims, name=name,
+                                          attrs=attrs, encoding=encoding, indexes=indexes, fastpath=fastpath)
 
     def to_h5(self, file_name, path=None, mode='w'):
         """ Save a binned numpy array to h5 file. The file includes the axes
@@ -31,7 +32,7 @@ class BinnedArray(xr.DataArray):
         _abort = False
 
         if path is None:
-            path = utils.parse_setting('paths','DATA_H5_DIR')
+            path = utils.parse_setting('paths', 'DATA_H5_DIR')
         if not os.path.isdir(path):  # test if the path exists...
             answer = input("The folder {} doesn't exist,"
                            "do you want to create it? [y/n]".format(path))
@@ -89,41 +90,41 @@ class BinnedArray(xr.DataArray):
                         ds.attrs['name'] = binName
                         ax_n += 1
                 # Saving delay histograms
-#                hh = h5File.create_group("histograms")
-#                if hasattr(data, 'delaystageHistogram'):
-#                    hh.create_dataset(
-#                        'delaystageHistogram',
-#                        data=data.delaystageHistogram)
-#                if hasattr(data, 'pumpProbeHistogram'):
-#                    hh.create_dataset(
-#                        'pumpProbeHistogram',
-#                        data=data.pumpProbeHistogram)\
+                #                hh = h5File.create_group("histograms")
+                #                if hasattr(data, 'delaystageHistogram'):
+                #                    hh.create_dataset(
+                #                        'delaystageHistogram',
+                #                        data=data.delaystageHistogram)
+                #                if hasattr(data, 'pumpProbeHistogram'):
+                #                    hh.create_dataset(
+                #                        'pumpProbeHistogram',
+                #                        data=data.pumpProbeHistogram)\
 
-                for k,v in self.attrs.items():
+                for k, v in self.attrs.items():
                     g = h5File.create_group(k)
-                    for kk,vv in v.items():
+                    for kk, vv in v.items():
                         try:
-                            g.create_dataset(kk,data=vv)
+                            g.create_dataset(kk, data=vv)
                         except TypeError:
                             if isinstance(vv, dict):
-                                for kkk,vvv in vv.items():
-                                    g.create_dataset('{}/{}'.format(kk,kkk),data=vvv)
+                                for kkk, vvv in vv.items():
+                                    g.create_dataset('{}/{}'.format(kk, kkk), data=vvv)
                             else:
-                                g.create_dataset(kk,data=str(vv))
-                        
-    def read_h5(self,filename):
+                                g.create_dataset(kk, data=str(vv))
+
+    def read_h5(self, filename):
         raise NotImplementedError()
 
-    def read_logbook(self,log_text):
+    def read_logbook(self, log_text):
         log = utils.parse_logbook(log_text)
-        
+
         try:
-            self.attrs['metadata'] = {**log,**self.attrs['metadata']}        
+            self.attrs['metadata'] = {**log, **self.attrs['metadata']}
         except KeyError:
             self.attrs['metadata'] = log
 
-    
-def res_to_xarray(res, binNames, binAxes, metadata):
+
+def res_to_xarray(res, binNames, binAxes, metadata=None):
     """ creates a BinnedArray (xarray subclass) out of the given np.array
 
     :Parameters:
@@ -152,10 +153,12 @@ def res_to_xarray(res, binNames, binAxes, metadata):
         units[name] = u
     xres.attrs['units'] = units
 
-    for k,v in metadata.items():
-        xres.attrs[k] = v
+    if metadata is not None:
+        for k, v in metadata.items():
+            xres.attrs[k] = v
 
     return xres
+
 
 def save_binned(data, file_name, format='h5', path=None, mode='w'):
     """ Save a binned numpy array to h5 file. The file includes the axes
@@ -199,8 +202,10 @@ def save_binned(data, file_name, format='h5', path=None, mode='w'):
         if format == 'h5':
             xres_to_h5(data, path + filename, mode)
         elif 'tif' in format:
-            xres_to_tiff(data, path+filename)
-def xres_to_h5(data, faddr, mode):
+            xres_to_tiff(data, path + filename)
+
+
+def xres_to_h5(data, faddr, mode='w'):
     """ Save xarray formatted data to hdf5
 
     Args:
@@ -274,8 +279,57 @@ def xres_to_h5(data, faddr, mode):
 
 
 def xres_to_tiff(data, filename):
+    """ Save data to tiff file
 
+    Args:
+        data (xarray.DataArray): data to be saved. ImageJ likes tiff files with
+            axis order as TZCYXS. Therefore, best axis order in input should be:
+            Time, Energy, posY, posX. The channels 'C' and 'S' are automatically
+            added and can be ignored.
+        filename (str): full path and name of file to save.
 
-    xres = xres.expand_dims({'C': 1, 'S': 1})
-    tifffile.imwrite('temp.tif', xres.values.astype(np.float32),
-                     imagej=True, )  # resolution=(1./2.6755, 1./2.6755),metadata={'spacing': 3.947368, 'unit': 'um'})
+    """
+
+    assert isinstance(data, xr.DataArray), 'Data must be an xarray.DataArray'
+    dims_to_add = {'C': 1, 'S': 1}
+    dims_order = []
+
+    # Sort the dimensions in the correct order, and fill with one-point dimensions
+    # the missing axes.
+    if 'delayStage' in data.dims:
+        dims_order.append('delayStage')
+    elif 'pumpProbeTime' in data.dims:
+        dims_order.append('pumpProbeTime')
+    else:
+        dims_to_add['T'] = 1
+        dims_order.append('T')
+
+    if 'dldTime' in data.dims:
+        dims_order.append('dldTime')
+    else:
+        dims_to_add['E'] = 1
+        dims_order.append('E')
+
+    dims_order.append('C')
+
+    if 'dldPosY' in data.dims:
+        dims_order.append('dldPosY')
+    else:
+        dims_to_add['Y'] = 1
+        dims_order.append('Y')
+
+    if 'dldPosX' in data.dims:
+        dims_order.append('dldPosX')
+    else:
+        dims_to_add['X'] = 1
+        dims_order.append('X')
+
+    dims_order.append('S')
+    print(dims_order)
+    xres = data.expand_dims(dims_to_add)
+    xres = xres.transpose(*dims_order)
+    if '.tif' not in filename:
+        filename += '.tif'
+    tifffile.imwrite(filename, xres.values.astype(np.float32),imagej=True) # TODO: expand imagej metadata to include physical units
+    # resolution=(1./2.6755, 1./2.6755),metadata={'spacing': 3.947368, 'unit': 'um'})
+    print(f'Successfully saved {filename}')
