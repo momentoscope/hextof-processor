@@ -758,7 +758,11 @@ class DldProcessor:
             result = result.astype(np.float64)
 
         if return_xarray or saveAs:
-            metadata = self.get_metadata(fast_mode=fast_metadata)
+            try:
+                metadata = self.get_metadata(fast_mode=fast_metadata)
+            except KeyError as err:
+                print(f'Failed creating metadata: {err}')
+                metadata= None
             result = res_to_xarray(result,self.binNameList,self.binAxesList,metadata)
 
         if saveAs is not None:
