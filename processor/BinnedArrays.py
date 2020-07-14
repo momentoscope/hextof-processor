@@ -200,12 +200,12 @@ def save_binned(data, file_name, format='h5', path=None, mode='w'):
 
     if not _abort:
         if format == 'h5':
-            xres_to_h5(data, path + filename, mode)
+            xarray_to_h5(data, path + filename, mode)
         elif 'tif' in format:
-            xres_to_tiff(data, path + filename)
+            to_tiff(data, path + filename)
 
 
-def xres_to_h5(data, faddr, mode='w'):
+def xarray_to_h5(data, faddr, mode='w'):
     """ Save xarray formatted data to hdf5
 
     Args:
@@ -278,7 +278,28 @@ def xres_to_h5(data, faddr, mode='w'):
         print('Saving complete!')
 
 
-def xres_to_tiff(data, filename):
+def array_to_tiff(array,filename):
+    """ Save array to imageJ compatible tiff stack.
+
+    Args:
+        array (np.array): array to save. 2D,3D or 4D
+        filename (str): full path and name of file to save.
+
+    """
+    if array.ndim == 2:
+        out = np.expand_dims(array,[0,1,2,5])
+    elif array.ndim == 3:
+        out = np.expand_dims(array,[0,2,5])
+    elif array.ndim == 4:
+        out = np.expand_dims(array, [2, 5])
+    else:
+        raise NotImplementedError('Only 2-3-4D arrays supported.')
+
+    tifffile.imwrite(filename, out.astype(np.float32), imagej=True)
+    print(f'Successfully saved array with shape {array.shape} to {filename}')
+
+
+def xarray_to_tiff(data, filename, axis_dict=None):
     """ Save data to tiff file
 
     Args:
@@ -287,6 +308,13 @@ def xres_to_tiff(data, filename):
             Time, Energy, posY, posX. The channels 'C' and 'S' are automatically
             added and can be ignored.
         filename (str): full path and name of file to save.
+        axis_dict (dict): name pairs for correct axis ordering. Keys should be
+            any of T,Z,C,Y,X,S. The Corresponding value will be searched among
+            the dimensions of the xarray, and placed in the right order for
+            imagej stacks metadata.
+        units (bool): Not implemented. Will be used to set units in the tif stack
+            TODO: expand imagej metadata to include physical units
+
 
     """
 
@@ -294,42 +322,46 @@ def xres_to_tiff(data, filename):
     dims_to_add = {'C': 1, 'S': 1}
     dims_order = []
 
+    if axis_dict is None:
+        axis_dict = {'T': 'delayStage',
+                     'Z': 'dldTime',
+                     'C': 'C',
+                     'Y': 'dldPosY',
+                     'X': 'dldPosX',
+                     'S': 'S'}
+    else:
+        for key in ['T', 'Z', 'C', 'Y', 'X', 'S']:
+            if key not in axis_dict.keys():
+                axis_dict[key] = key
+
     # Sort the dimensions in the correct order, and fill with one-point dimensions
     # the missing axes.
-    if 'delayStage' in data.dims:
-        dims_order.append('delayStage')
-    elif 'pumpProbeTime' in data.dims:
-        dims_order.append('pumpProbeTime')
-    else:
-        dims_to_add['T'] = 1
-        dims_order.append('T')
+    for key in ['T', 'Z', 'C', 'Y', 'X', 'S']:
+        if axis_dict[key] in data.dims:
+            dims_order.append(axis_dict[key])
+        else:
+            dims_to_add[key] = 1
+            dims_order.append(key)
 
-    if 'dldTime' in data.dims:
-        dims_order.append('dldTime')
-    else:
-        dims_to_add['E'] = 1
-        dims_order.append('E')
-
-    dims_order.append('C')
-
-    if 'dldPosY' in data.dims:
-        dims_order.append('dldPosY')
-    else:
-        dims_to_add['Y'] = 1
-        dims_order.append('Y')
-
-    if 'dldPosX' in data.dims:
-        dims_order.append('dldPosX')
-    else:
-        dims_to_add['X'] = 1
-        dims_order.append('X')
-
-    dims_order.append('S')
-    print(dims_order)
+    print(f'tif stack dimension order: {dims_order}')
     xres = data.expand_dims(dims_to_add)
     xres = xres.transpose(*dims_order)
     if '.tif' not in filename:
         filename += '.tif'
-    tifffile.imwrite(filename, xres.values.astype(np.float32),imagej=True) # TODO: expand imagej metadata to include physical units
+    tifffile.imwrite(filename, xres.values.astype(np.float32), imagej=True)
     # resolution=(1./2.6755, 1./2.6755),metadata={'spacing': 3.947368, 'unit': 'um'})
     print(f'Successfully saved {filename}')
+
+
+def to_tiff(data,filename,axis_dict=None, units=False):
+    """ save array to imagej tiff sack."""
+    if isinstance(data,xr.DataArray):
+        xarray_to_tiff(data,filename,axis_dict=axis_dict,units=units)
+    elif isinstance(data,np.array):
+        array_to_tiff(data,filename)
+    else:
+        raise TypeError('Input data must be a numpy array or xarray DataArray')
+
+
+if __name__ == '__main__':
+    pass
