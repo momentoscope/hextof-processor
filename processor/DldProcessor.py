@@ -8,6 +8,7 @@ from datetime import datetime
 import dask
 import dask.dataframe
 import dask.multiprocessing
+from dask.diagnostics import ProgressBar
 import h5py
 import numpy as np
 import pandas as pd
@@ -68,7 +69,7 @@ class DldProcessor:
 
         # initialize attributes for metadata
         self.sample = {}  # this should contain 'name', 'sampleID', 'cleave number' etc...
-
+        self.histograms = {}
         # set true to use the old binning method with arange, instead of
         # linspace
         self._LEGACY_BINNING = False
@@ -176,6 +177,10 @@ class DldProcessor:
             # apply new settings to current processor
             self.initAttributes()
 
+    # ==================
+    # Dataframe creation
+    # ==================
+
     def readDataframes(self, fileName=None, path=None, format='parquet'):
         """ Load data from a parquet or HDF5 dataframe.
 
@@ -240,6 +245,10 @@ class DldProcessor:
         newddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
         self.ddMicrobunches = dask.dataframe.concat([self.ddMicrobunches, newddMicrobunches], join='outer',
                                                     interleave_partitions=True)
+
+    # ==========================
+    # Dataframe column expansion
+    # ==========================
 
     def postProcess(self, bamCorrectionSign=0, kCenter=None):
         """ Apply corrections to the dataframe.
@@ -328,6 +337,10 @@ class DldProcessor:
 
         self.dd['posR'] = self.dd.map_partitions(radius)
         self.dd['posT'] = self.dd.map_partitions(angle)
+
+    # ========================
+    # Normalization histograms
+    # ========================
 
     def normalizePumpProbeTime(self, data_array, ax='pumpProbeTime'):
         # TODO: work on better implementation and accessibility for this method
@@ -438,6 +451,26 @@ class DldProcessor:
         except ValueError as e:
             raise ValueError("Could not normalize to {} histogram.\n{}".format(ax, e))
 
+    def makeNormHistogram(self, name, compute=False):
+        if name not in self.binNameList:
+            raise ValueError(f'No bin axis {name} found. Cannot create normalization axis')
+        else:
+            bins = self.binAxesList[self.binNameList.index(name)]
+
+            # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
+            histBinner = self.ddMicrobunches[name].map_partitions(pd.cut, bins)
+            histGrouped = self.ddMicrobunches.groupby([histBinner])
+            # self.pumpProbeHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(np.float64)
+            out = histGrouped.count().values  # .astype(np.int32)
+            if compute:
+                print(f'Computing normalization array along {name}:')
+                with ProgressBar():
+                    out = out.compute()
+            return out
+    # ==========================
+    # Binning
+    # ==========================
+
     def addFilter(self, colname, lb=None, ub=None):
         """ Filters the dataframes contained in the processor instance.
 
@@ -544,7 +577,7 @@ class DldProcessor:
         return bins
 
     def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False,
-                   include_last=True, force_legacy=False):
+                   include_last=True, force_legacy=False, compute_histograms=False):
         """ Add binning of one dimension, to be then computed with ``computeBinnedData`` method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -600,47 +633,46 @@ class DldProcessor:
         bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
         self.binNameList.append(name)
         self.binRangeList.append(bins)
-
-        if (name == 'pumpProbeTime'):
-            # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(
-                pd.cut, bins)
-            delaystageHistGrouped = self.ddMicrobunches.groupby(
-                [delaystageHistBinner])
-            # self.pumpProbeHistogram = delaystageHistGrouped.count(
-            # ).compute()['bam'].to_xarray().values.astype(np.float64)
-            self.pumpProbeHistogram = delaystageHistGrouped.count(
-            ).compute()['bam'].values.astype(np.float64)
-        if (name == 'delayStage'):
-            # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['delayStage'].map_partitions(
-                pd.cut, bins)
-            delaystageHistGrouped = self.ddMicrobunches.groupby(
-                [delaystageHistBinner])
-            # self.delaystageHistogram = delaystageHistGrouped.count(
-            # ).compute()['bam'].to_xarray().values.astype(np.float64)
-            self.delaystageHistogram = delaystageHistGrouped.count(
-            ).compute()['bam'].values.astype(np.float64)
-        if useStepSize:
-            stepSize = steps
-        else:
-            stepSize = (end - start) / steps
-
-        #        axes = self.genBins(
-        #            start + stepSize / 2,
-        #            end - stepSize / 2,
-        #            stepSize, useStepSize, forceEnds, include_last, force_legacy)
-        #        if axes[-1] > end:
-        #            axes = axes[:-1]
-        axes = np.array(
-            [np.mean((x, y)) for x, y in zip(bins[:-1], bins[1:])])  # TODO: could be improved for nonlinear scales
+        axes = np.array([np.mean((x, y)) for x, y in zip(bins[:-1], bins[1:])])
+        # TODO: could be improved for nonlinear scales
         self.binAxesList.append(axes)
+
+        if name in ['pumpProbeTime','delayStage']:
+            # add the normalization histogram to the histograms dictionary. computes them if requested, otherwise
+            # only assigned the dask calculations for later computation.
+            self.histograms[name] = self.makeNormHistogram(name,compute=compute_histograms)
+            # These can be accessed in the old method through the class properties pumpProbeHistogram and delayStageHistogram
+
         return axes
 
-    def resetBins(self):
-        """ Reset the bin list
-        """
+    @property
+    def pumpProbeHistogram(self):
+        """ Easy access to pump probe normalization array.
+        Mostly for retrocompatibility"""
+        try:
+            if isinstance(self.histograms['pumpProbeTime'], dask.array.core.Array):
+                print(f'Computing normalization array along pumpProbeTime')
+                with ProgressBar():
+                    self.histograms['pumpProbeTime'] = self.histograms['pumpProbeTime'].compute()
+            return self.histograms['pumpProbeTime']
+        except KeyError:
+            return [None]
+    @property
+    def delayStageHistogram(self):
+        """ Easy access to pump probe normalization array.
+        Mostly for retrocompatibility"""
+        try:
+            if isinstance(self.histograms['delayStage'], dask.array.core.Array):
+                print(f'Computing normalization array along pumpProbeTime')
+                with ProgressBar():
+                    self.histograms['delayStage'] = self.histograms['delayStage'].compute()
+            return self.histograms['delayStage']
+        except KeyError:
+            return [None]
 
+    def resetBins(self):
+        """ Reset the bin list """
+        self.histograms = {}
         self.binNameList = []
         self.binRangeList = []
         self.binAxesList = []
