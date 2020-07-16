@@ -99,11 +99,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
 
         # parse settings and set all dataset addresses as attributes.
-        settings = ConfigParser()
-        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-            settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
-        else:
-            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+        # settings = ConfigParser()
+        # if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+        #     settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+        # else:
+        #     settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
         section = 'DAQ channels'
 
@@ -122,9 +122,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
 
         self.daqAddresses = []
-        for entry in settings[section]:
-            name = misc.camelCaseIt(entry)
-            val = str(settings[section][entry])
+        # Parse the settings file in the DAQ channels section for the list of
+        # h5 addresses to read from raw and add to the dataframe.
+        for name, entry in self.settings['DAQ channels'].items():
+            name = misc.camelCaseIt(name)
+            val = str(entry)
             if daqAccess.isChannelAvailable(val, self.getIds(runNumber, path)):
                 self.daqAddresses.append(name)
                 if _VERBOSE:
