@@ -12,8 +12,6 @@ from dask.diagnostics import ProgressBar
 import h5py
 import numpy as np
 import pandas as pd
-import xarray as xr
-import matplotlib.pyplot as plt
 from tqdm import tqdm
 from configparser import ConfigParser
 # import matplotlib.pyplot as plt
@@ -59,31 +57,47 @@ class DldProcessor:
 
         if settings is not None:
             self.load_settings(settings)
+        else:
+            self.initAttributes()  # in else because it is called already in load_settings
 
         self.resetBins()
-
-        # initialize attributes to their type. Values are then taken from
-        # SETTINGS.ini through initAttributes()
-
-        self.initAttributes()
 
         # initialize attributes for metadata
         self.sample = {}  # this should contain 'name', 'sampleID', 'cleave number' etc...
         self.histograms = {}
-        # set true to use the old binning method with arange, instead of
-        # linspace
-        self._LEGACY_BINNING = False
+
+    @property
+    def settings(self):
+        """ Easy access to settings.ini file
+
+        Returns:
+            dictionary with the settings file structure
+        """
+        settings = ConfigParser()
+        root_folder = os.path.dirname(__file__)
+        if 'SETTINGS.ini' not in os.listdir(root_folder):
+            folder = os.path.dirname(root_folder)
+        file = os.path.join(root_folder, 'SETTINGS.ini')
+        settings.read(file)
+        return settings
 
     def initAttributes(self, import_all=False):
         """ Parse settings file and assign the variables.
 
+
+
         Args:
             import_all (:obj:`bool`): import method selection.
-                :True: imports all entries in SETTINGS.ini from the sections [processor] and [paths].
+                :True: imports all entries in SETTINGS.ini except those from
+                sections [DAQ channels]. These are handled in the DldFlashProcessor subclass.
+                Prints a warning when an entry is not found as class attribute
                 :False: only imports those that match existing attribute names.
-                
-                Here ``False`` is the better choice, since it keeps better track of attributes.
+        Warnings:
+            UserWarning: when an entry is found in the SETTINGS.ini file, which
+                is not present as a pre-defined class attribute, it warns the
+                user to add id to the code.
         """
+        # Hard coded class attributes which can be overwritten by settings files.
         self.N_CORES = int(max(os.cpu_count() - 1, 1))
         self.UBID_OFFSET = int(0)
         self.CHUNK_SIZE = int(1000000)
@@ -98,83 +112,111 @@ class DldProcessor:
         self.DATA_PARQUET_DIR = str('/home/pg2user/DATA/parquet/')
         self.DATA_RESULTS_DIR = str('/home/pg2user/DATA/results/')
         self.LOG_DIR = str('/home/pg2user/DATA/logs/')
+        self.PAH_MODULE_DIR = str('')
 
-        settings = ConfigParser()
-        if os.path.isfile(  # TODO: please change this! ITS HORRIBLE
-                os.path.join(
-                    os.path.dirname(__file__),
-                    'SETTINGS.ini')):
-            settings.read(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    'SETTINGS.ini'))
-        else:
-            settings.read(
-                os.path.join(
-                    os.path.dirname(
-                        os.path.dirname(__file__)),
-                    'SETTINGS.ini'))
-
-        # TODO: use smart type recognition for dynamic adding of new settings              
-
-        for section in settings:
-            for entry in settings[section]:
-                if _VERBOSE:
-                    print('trying: {} {}'.format(entry.upper(), settings[section][entry]))
-                try:
-                    if settings[section][entry].upper() == 'FALSE':
-                        setattr(self, entry.upper(), False)
-                    else:
-                        _type = type(getattr(self, entry.upper()))
-                        setattr(self, entry.upper(), _type(settings[section][entry]))
-                    if _VERBOSE:
-                        print(entry.upper(), _type(settings[section][entry]))
-                except AttributeError as e:
-                    if _VERBOSE:
-                        print('attribute error: {}'.format(e))
-                    if import_all:  # old method
-                        try:  # assign the attribute to the best fitting type between float, int and string
-                            f = float(settings[section][entry])
-                            i = int(f)
-                            if f - i == 0.0:
-                                val = i  # assign Integer
+        # parse the currently loaded settings file and store as class attributes
+        # each entry which is not in DAQ channels. Those are handled in the
+        # DldFlashProcessor class.
+        for sec_name, section in self.settings.items():
+            if sec_name != 'DAQ channels':  # ignore the DAQ channels
+                for entry_name, entry_value in section.items():
+                    for type_ in [int, np.float64]:  # try assigning numeric values
+                        try:
+                            val = type_(entry_value)
+                            break
+                        except ValueError:
+                            val = None
+                    if val is None:
+                        val = entry_value
+                        if val.upper() == 'FALSE':
+                            val = False
+                        elif val.upper() == 'TRUE':
+                            val = True
+                        elif val.upper() in ['AUTO', 'NONE']:  # add option for ignoring value.
+                            val = None
+                    if val is not None:
+                        try:
+                            old_type = type(getattr(self, entry_name.upper()))
+                            new_type = type(val)
+                            if old_type != new_type:
+                                warnings.warn(
+                                    f'Setting {entry_name} found as {new_type} instead of the expected {old_type}')
+                            setattr(self, entry_name.upper(), val)
+                        except:
+                            if import_all:
+                                setattr(self, entry_name.upper(), val)
                             else:
-                                val = f  # assign Float
-                            setattr(self, entry.upper(), val)
-                        except ValueError:  # assign String
-                            setattr(
-                                self, entry.upper(), str(
-                                    settings[section][entry]))
-                    else:
-                        pass
+                                warnings.warn(
+                                    f'Found new setting {entry_name}. Consider adding to hard coded defaults for correct'
+                                    f'type and error handling.')
+        # Old parsing method:
+        # for section in settings:
+        #     for entry in settings[section]:
+        #         if _VERBOSE:
+        #             print('trying: {} {}'.format(entry.upper(), settings[section][entry]))
+        #         try:
+        #             if settings[section][entry].upper() == 'FALSE':
+        #                 setattr(self, entry.upper(), False)
+        #             else:
+        #                 _type = type(getattr(self, entry.upper()))
+        #                 setattr(self, entry.upper(), _type(settings[section][entry]))
+        #             if _VERBOSE:
+        #                 print(entry.upper(), _type(settings[section][entry]))
+        #         except AttributeError as e:
+        #             if _VERBOSE:
+        #                 print('attribute error: {}'.format(e))
+        #             if import_all:  # old method
+        #                 try:  # assign the attribute to the best fitting type between float, int and string
+        #                     f = float(settings[section][entry])
+        #                     i = int(f)
+        #                     if f - i == 0.0:
+        #                         val = i  # assign Integer
+        #                     else:
+        #                         val = f  # assign Float
+        #                     setattr(self, entry.upper(), val)
+        #                 except ValueError:  # assign String
+        #                     setattr(
+        #                         self, entry.upper(), str(
+        #                             settings[section][entry]))
+        #             else:
+        #                 pass
 
-    def load_settings(self, settings_file_name, preserve_path=True):
-        """ load settings from an other saved setting file.
+    def loadSettings(self, settings_file_name, preserve_path=True):
+        """ Load settings from an other saved setting file.
 
         To save settings simply copy paste the SETTINGS.ini file to the
         utilities/settings folder, and rename it. Use this name in this method
-        to then load its content to the SETTINGS.ini file."""
-        settings = ConfigParser()
-        if os.path.isfile(
-                os.path.join(os.path.dirname(__file__), 'utilities', 'settings', settings_file_name + '.ini')):
-            settings.read(os.path.join(os.path.dirname(__file__), 'utilities', 'settings', settings_file_name + '.ini'))
-            # print('true: {}'.format(os.path.join(os.path.dirname(__file__), 'utilities', 'settings', settings_file_name+'.ini')))
+        to then load its content to the SETTINGS.ini file.
+
+        Args:
+            settings_file_name (str): Name of the settings file to load.
+                This file must be in the folder "hextof-processor/utilities/settings"
+            preserve_path: Disables overwriting local file saving paths. Defaults to True
+
+        """
+
+        root_folder = os.path.dirname(__file__)
+        if 'SETTINGS.ini' not in os.listdir(root_folder):
+            root_folder = os.path.dirname(root_folder)
+        old_settings_file = os.path.join(root_folder, 'SETTINGS.ini')
+        new_settings = ConfigParser()
+        if settings_file_name[-4:] != '.ini':
+            settings_file_name += '.ini'
+        new_settings_file = os.path.join(root_folder, 'utilities', 'settings', settings_file_name)
+        new_settings.read(new_settings_file)
+        if len(new_settings.sections()) == 0:
+            print(f'No settings file {settings_file_name} found.')
+            available_settings = os.listdir(os.path.join(root_folder, 'utilities', 'settings'))
+            print('Available settings files are:', *available_settings, sep='\n\t')
         else:
-            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'utilities', 'settings',
-                                       settings_file_name + '.ini'))
-            # print('false: {}'.format(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'utilities', 'settings', settings_file_name+'.ini')))
-        if len(settings.sections()) == 0:
-            print('no settings found, ignoring.')
-        else:
-            targetfile = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini')
             if preserve_path:
                 old_settings = ConfigParser()
-                old_settings.read(targetfile)
-                settings['paths'] = old_settings['paths']
-            with open(targetfile, 'w') as SETTINGS_file:  # save
-                settings.write(SETTINGS_file)
+                old_settings.read(old_settings_file)
+                new_settings['paths'] = old_settings['paths']
+            with open(old_settings_file, 'w') as SETTINGS_file:  # overwrite SETTINGS.ini with the new settings
+                new_settings.write(SETTINGS_file)
             print('Loaded settings from {}'.format(settings_file_name))
-            # apply new settings to current processor
+            # reload settings in the current processor instance
             self.initAttributes()
 
     # ==================
@@ -467,6 +509,7 @@ class DldProcessor:
                 with ProgressBar():
                     out = out.compute()
             return out
+
     # ==========================
     # Binning
     # ==========================
@@ -637,10 +680,10 @@ class DldProcessor:
         # TODO: could be improved for nonlinear scales
         self.binAxesList.append(axes)
 
-        if name in ['pumpProbeTime','delayStage']:
+        if name in ['pumpProbeTime', 'delayStage']:
             # add the normalization histogram to the histograms dictionary. computes them if requested, otherwise
             # only assigned the dask calculations for later computation.
-            self.histograms[name] = self.makeNormHistogram(name,compute=compute_histograms)
+            self.histograms[name] = self.makeNormHistogram(name, compute=compute_histograms)
             # These can be accessed in the old method through the class properties pumpProbeHistogram and delayStageHistogram
 
         return axes
@@ -657,6 +700,7 @@ class DldProcessor:
             return self.histograms['pumpProbeTime']
         except KeyError:
             return [None]
+
     @property
     def delayStageHistogram(self):
         """ Easy access to pump probe normalization array.
@@ -794,17 +838,16 @@ class DldProcessor:
                 metadata = self.get_metadata(fast_mode=fast_metadata)
             except KeyError as err:
                 print(f'Failed creating metadata: {err}')
-                metadata= None
-            result = res_to_xarray(result,self.binNameList,self.binAxesList,metadata)
+                metadata = None
+            result = res_to_xarray(result, self.binNameList, self.binAxesList, metadata)
 
         if saveAs is not None:
-            pass # TODO: Make saving function
+            pass  # TODO: Make saving function
             # self.save_binned(result, saveName, path=savePath, mode='w')
 
         return result
 
-
-    def get_metadata(self,fast_mode=False):
+    def get_metadata(self, fast_mode=False):
         """  Creates a dictionary with the most relevant metadata.
 
         Args:
@@ -872,7 +915,6 @@ class DldProcessor:
         #         print("Couldn't find GMD channel for making GMD normalization histograms\nError: {}".format(e))
 
         return metadata
-
 
     def res_to_xarray_old(self, res, fast_mode=False):
         """ creates a BinnedArray (xarray subclass) out of the given np.array
@@ -1053,8 +1095,6 @@ class DldProcessor:
 
         return results
 
-
-
     def save_binned(self, binnedData, file_name, path=None, mode='w'):
         """ Save a binned numpy array to h5 file. The file includes the axes
         (taken from the scheduled bins) and the delay stage histogram, if it exists.
@@ -1167,6 +1207,10 @@ class DldProcessor:
         return misc.load_binned_h5(file_name, mode=mode, ret_type=ret_type)
 
     # % retro-compatibility functions and deprecated methods
+
+    def load_settings(self, settings_file_name, preserve_path=True):
+        """ Retrocompatibility naming"""
+        return self.loadSettings(settings_file_name, preserve_path=preserve_path)
 
     def deleteBinners(self):
         """ **[DEPRECATED]** use resetBins() instead
