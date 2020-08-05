@@ -5,6 +5,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)  # avoid printing
 import os
 
 from datetime import datetime
+import json
 import dask
 import dask.dataframe
 import dask.multiprocessing
@@ -67,6 +68,39 @@ class DldProcessor:
         self.histograms = {}
 
     @property
+    def metadata_dict(self):
+        md = {}
+        md['paths'] = {
+            'DATA_RAW_DIR': self.DATA_RAW_DIR,
+
+        }
+        md['run'] = {
+            'runNumber': self.runNumber,
+            'pulseIdInterval': self.pulseIdInterval,
+        }
+        md['processor'] = {'n_cores': self.N_CORES,
+                           'chunk_size': self.CHUNK_SIZE,
+                           }
+        md['calibration'] = {'TOF_STEP_TO_NS': self.TOF_STEP_TO_NS,
+                             'ET_CONV_E_OFFSET': self.ET_CONV_E_OFFSET,
+                             'ET_CONV_T_OFFSET': self.ET_CONV_T_OFFSET,
+                             'ET_CONV_L': self.ET_CONV_L,
+                             'TOF_IN_NS': self.TOF_IN_NS,
+                             }
+        md['paths'] = {
+            'DATA_RAW_DIR': self.DATA_RAW_DIR,
+            'DATA_H5_DIR': self.DATA_H5_DIR,
+            'DATA_PARQUET_DIR': self.DATA_PARQUET_DIR,
+            'DATA_RESULTS_DIR': self.DATA_RESULTS_DIR,
+            'LOG_DIR': self.LOG_DIR,
+            'PAH_MODULE_DIR': self.PAH_MODULE_DIR,
+        }
+        # md['DAQ channels'] =
+        md['sample'] = self.sample
+
+        return md
+
+    @property
     def settings(self):
         """ Easy access to settings.ini file
 
@@ -76,10 +110,13 @@ class DldProcessor:
         settings = ConfigParser()
         root_folder = os.path.dirname(__file__)
         if 'SETTINGS.ini' not in os.listdir(root_folder):
-            folder = os.path.dirname(root_folder)
+            root_folder = os.path.dirname(root_folder)
         file = os.path.join(root_folder, 'SETTINGS.ini')
         settings.read(file)
-        return settings
+        if len(settings.sections()) == 0:
+            raise Exception('Failed loading main settings!')
+        else:
+            return settings
 
     def initAttributes(self, import_all=False):
         """ Parse settings file and assign the variables.
@@ -258,6 +295,11 @@ class DldProcessor:
         if format == 'parquet':
             self.dd = dask.dataframe.read_parquet(fullName + "_el")
             self.ddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
+            try:
+                with open(os.path.join(fileName + '_el', 'metadata.txt'), 'w') as json_file:
+                    json.load(self.metadata, json_file)
+            except:
+                print('Failed loading metadata from parquet stored files!')
         elif format in ['hdf5', 'h5']:
             self.dd = dask.dataframe.read_hdf(
                 fullName, '/electrons', mode='r', chunksize=self.CHUNK_SIZE)
