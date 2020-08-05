@@ -398,7 +398,7 @@ def get_available_runs(rootpath):  # TODO: store the resulting dictionary to imp
     return available_runs
 
 
-def get_path_to_run(runNumber, rootpath):
+def get_path_to_run(runNumber, rootpath): # TODO: improve performance
     """ Returns the path to the data of a given run number
 
     :Parameters:

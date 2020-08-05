@@ -19,11 +19,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from dask.diagnostics import ProgressBar
-import matplotlib.pyplot as plt
-from.misc import repr_byte_size
+
+from .misc import repr_byte_size
+
 
 def channel_report(dd):
     """ Generates a table containing relevant statistical quantities on all available channels [EXPENSIVE!!]
@@ -61,6 +63,7 @@ def binned_array_size(processor):
     the current binning parameters"""
     voxels = np.prod([len(x) for x in processor.binAxesList])
     print(repr_byte_size(voxels.astype(np.float64) * 64.))
+
 
 def plot_channels(processor):
     """ Generates a plot of each available channel.
@@ -114,7 +117,6 @@ def plot_GMD_vs_bunches(self):
     elif np.abs((stop - mean) / (start - mean)) > 5:
         stop = start + 2 * mean
     step = max((stop - start) / 1000, 1)
-
 
     MbId = self.addBinning('macroBunchPulseId', start, stop, step)
     result_MbId = self.computeBinnedData()
