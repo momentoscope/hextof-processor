@@ -182,10 +182,12 @@ class DldProcessor:
                         except:
                             if import_all:
                                 setattr(self, entry_name.upper(), val)
-                            else:
+                            elif  _VERBOSE:
                                 warnings.warn(
                                     f'Found new setting {entry_name}. Consider adding to hard coded defaults for correct'
                                     f'type and error handling.')
+                            else:
+                                pass
         # Old parsing method:
         # for section in settings:
         #     for entry in settings[section]:
