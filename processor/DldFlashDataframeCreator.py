@@ -68,6 +68,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         self.runNumber = runNumber
         self.pulseIdInterval = pulseIdInterval
+
+
     def readData_new(self, runNumber=None, pulseIdInterval=None, path=None,pbar_style='notebook',pbar=True):
         """Read data by run number or macrobunch pulseID interval.
 
@@ -92,7 +94,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             pbar = tqdm_notebook
         else:
             pbar = tqdm
-
 
         if runNumber is None:
             runNumber = self.runNumber
@@ -217,18 +218,174 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         i = self.runInfo
         print(f'Run {i["runNumber"]}')
         try:
-            print(f"Started at {i['timeStart']}, finished at{i['timeStop']}, "
-                  f"total duration {i['timeDuration']}")
+            print(f"Started at {i['timeStart']}, finished at {i['timeStop']}, "
+                  f"total duration {i['timeDuration']:,} s")
         except:
             pass
-        print(f"Macrobunches: {i['numberOfMacrobunches']:.2e}  "
-              f"from {i['pulseIdInterval'][0]} to {i['pulseIdInterval'][1]} ")
-        print(f"Total electrons: {i['numberOfElectrons']:.2e}, "
-              f"electrons/Macrobunch {i['electronsPerMacrobunch']:,}")
-
+        print(f"Macrobunches: {i['numberOfMacrobunches']:,}  "
+              f"from {i['pulseIdInterval'][0]:,} to {i['pulseIdInterval'][1]:,} ")
+        print(f"Total electrons: {i['numberOfElectrons']:,}, "
+              f"electrons/Macrobunch {i['electronsPerMacrobunch']:}")
 
 
     def readData(self, runNumber=None, pulseIdInterval=None, path=None):
+        """Read data by run number or macrobunch pulseID interval.
+
+        Useful for scans that would otherwise hit the machine's memory limit.
+
+        :Parameters:
+            runNumber : int | None (default to ``self.runNumber``)
+                number of the run from which to read data. If None, requires pulseIdInterval.
+            pulseIdInterval : (int, int) | None (default to ``self.pulseIdInterval``)
+                first and last macrobunches of selected data range. If None, the whole run
+                defined by runNumber will be taken.
+            path : str | None (default to ``self.DATA_RAW_DIR``)
+                path to location where raw HDF5 files are stored
+
+        This is a union of the readRun and readInterval methods defined in previous versions.
+        """
+
+        # Update instance attributes based on input parameters
+        if runNumber is None:
+            runNumber = self.runNumber
+        else:
+            self.runNumber = runNumber
+
+        if pulseIdInterval is None:
+            pulseIdInterval = self.pulseIdInterval
+        else:
+            self.pulseIdInterval = pulseIdInterval
+
+        if (pulseIdInterval is None) and (runNumber is None):
+            raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
+
+        print('searching for data...')
+        if path is not None:
+            try:
+                daqAccess = BeamtimeDaqAccess.create(path)
+            except:
+                self.path_to_run = misc.get_path_to_run(runNumber, path)
+                daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
+        else:
+            path = self.DATA_RAW_DIR
+            self.path_to_run = misc.get_path_to_run(runNumber, path)
+            daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
+
+        self.daqAddresses = []
+        # Parse the settings file in the DAQ channels section for the list of
+        # h5 addresses to read from raw and add to the dataframe.
+        for name, entry in self.settings['DAQ channels'].items():
+            name = misc.camelCaseIt(name)
+            val = str(entry)
+            if daqAccess.isChannelAvailable(val, self.getIds(runNumber, path)):
+                self.daqAddresses.append(name)
+                if _VERBOSE:
+                    print('assigning address: {}: {}'.format(name.ljust(20), val))
+                setattr(self, name, val)
+            else:
+                # if _VERBOSE:
+                print('skipping address missing from data: {}: {}'.format(name.ljust(20), val))
+
+        # TODO: get the available pulse id from PAH
+        if pulseIdInterval is None:
+            print('Reading DAQ data from run {}... Please wait...'.format(runNumber))
+
+            for address_name in self.daqAddresses:
+                if _VERBOSE:
+                    print('reading address: {}'.format(address_name))
+                try:
+                    attrVal = getattr(self, address_name)
+                    values, otherStuff = daqAccess.allValuesOfRun(attrVal, runNumber)
+                except AssertionError:
+                    print('Assertion error: {}'.format(address_name, attrVal, values, otherStuff ))
+
+                setattr(self, address_name, values)
+                if address_name == 'macroBunchPulseId':  # catch the value of the first macrobunchID
+                    pulseIdInterval = (otherStuff[0], otherStuff[-1])
+                    self.pulseIdInterval = pulseIdInterval
+                    macroBunchPulseId_correction = pulseIdInterval[0]
+
+                if address_name == 'timeStamp':  # catch the time stamps
+                    startEndTime = (values[0,0], values[-1,0])
+                    self.startEndTime = startEndTime
+
+            numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
+
+
+
+        else:
+            print('reading DAQ data from interval {}'.format(pulseIdInterval))
+            self.pulseIdInterval = pulseIdInterval
+            for address_name in self.daqAddresses:
+                if _VERBOSE:
+                    print('reading address: {}'.format(address_name))
+                setattr(self, address_name, daqAccess.valuesOfInterval(getattr(self, address_name), pulseIdInterval))
+            numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
+            macroBunchPulseId_correction = pulseIdInterval[0]
+
+        # necessary corrections for specific channels:
+        self.delayStage = self.delayStage[:, 1]
+        self.macroBunchPulseId -= macroBunchPulseId_correction
+        self.dldMicrobunchId -= self.UBID_OFFSET
+
+        if _VERBOSE:
+            print('Counting electrons...')
+
+        electronsToCount = self.dldPosX.copy().flatten()
+        electronsToCount = np.nan_to_num(electronsToCount)
+        electronsToCount = electronsToCount[electronsToCount > 0]
+        electronsToCount = electronsToCount[electronsToCount < 10000]
+        self.numOfElectrons = len(electronsToCount)
+        self.electronsPerMacrobunch = int(self.numOfElectrons / numOfMacrobunches)
+
+        self.runInfo = {
+            'runNumber':self.runNumber,
+            'pulseIdInterval':self.pulseIdInterval,
+            'numberOfMacrobunches': numOfMacrobunches,
+            'numberOfElectrons':self.numOfElectrons,
+            'electronsPerMacrobunch': self.electronsPerMacrobunch,
+        }
+        try:
+            self.runInfo['timestampStart'] = self.startEndTime[0]
+            self.runInfo['timestampStop'] = self.startEndTime[1]
+            self.runInfo['timestampDuration'] = self.startEndTime[1]-self.startEndTime[0]
+            self.runInfo['timeStart'] = datetime.utcfromtimestamp(self.startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S')
+            self.runInfo['timeStop'] = datetime.utcfromtimestamp(self.startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S')
+            self.runInfo['timeDuration'] = self.startEndTime[1]-self.startEndTime[0]
+        except:
+            self.runInfo['timestampStart'] = None
+            self.runInfo['timestampStop'] = None
+            self.runInfo['timestampDuration'] = None
+            self.runInfo['timeStart'] = None
+            self.runInfo['timeStop'] = None
+            self.runInfo['timeDuration'] = None
+
+        self.printRunOverview()
+
+        # Old Print style
+        # print('Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}' \
+        #       .format(runNumber, numOfMacrobunches, pulseIdInterval[0], pulseIdInterval[1]))
+        # try:
+        #     print("start time: {}, end time: {}, total time: {}"
+        #           .format(datetime.utcfromtimestamp(startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S'),
+        #                   datetime.utcfromtimestamp(startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S'),
+        #                   datetime.utcfromtimestamp(startEndTime[1] - startEndTime[0]).strftime('%H:%M:%S')))
+        # except:
+        #     pass
+        #
+        # print("Number of electrons: {0:,}; {1:,} e/Mb ".format(self.numOfElectrons, self.electronsPerMacrobunch))
+
+        print("Creating dataframes... Please wait...")
+        with ProgressBar():
+            self.createDataframePerElectron()
+            print('Electron dataframe created.')
+            self.createDataframePerMicrobunch()
+            print('Microbunch dataframe created.')
+            print('Reading Complete.')
+
+
+
+    def readData_old(self, runNumber=None, pulseIdInterval=None, path=None):
         """Read data by run number or macrobunch pulseID interval.
 
         Useful for scans that would otherwise hit the machine's memory limit.
