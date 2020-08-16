@@ -255,10 +255,10 @@ def xarray_to_tiff(data, filename, axis_dict=None):
     print(f'Successfully saved {filename}')
 
 
-def to_tiff(data,filename,axis_dict=None, units=False):
+def to_tiff(data,filename,axis_dict=None):
     """ save array to imagej tiff sack."""
     if isinstance(data,xr.DataArray):
-        xarray_to_tiff(data,filename,axis_dict=axis_dict,units=units)
+        xarray_to_tiff(data,filename,axis_dict=axis_dict)
     elif isinstance(data,np.array):
         array_to_tiff(data,filename)
     else:
