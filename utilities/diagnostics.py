@@ -53,6 +53,10 @@ def channel_report(dd):
             chan_dict[chan]['std'] = np.std(clean)
             chan_dict[chan]['len'] = len(vals)
             chan_dict[chan]['len_nan'] = len(vals) - len(clean)
+            chan_dict[chan]['max_loc'] = vals.idxmax()
+            chan_dict[chan]['min_loc'] = vals.idxmin()
+            
+
 
     df = pd.DataFrame.from_dict(chan_dict).T
     return df
