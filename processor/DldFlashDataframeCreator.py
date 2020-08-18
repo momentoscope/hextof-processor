@@ -830,20 +830,23 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         if not hasattr(self, 'path_to_run'):
             self.path_to_run = misc.get_path_to_run(runNumber, path)
 
-        # Gets paths from settings file.
-        # Checks for SETTINGS.ini in processor folder.
-        # If not there, checks parent directory
-        settings = ConfigParser()
-        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-            settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
-        else:
-            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
-        path = settings['paths']['DATA_RAW_DIR']
+        try:
+            from camp.pah.beamtimedaqaccess import H5FileDataAccess, H5FileManager
+        except:
+            # Gets paths from settings file.
+            # Checks for SETTINGS.ini in processor folder.
+            # If not there, checks parent directory
+            settings = ConfigParser()
+            if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+                settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+            else:
+                settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+            path = settings['paths']['DATA_RAW_DIR']
 
-        # needs to import stuff from PAH modules
-        import sys
-        sys.path.append(settings['paths']['PAH_MODULE_DIR'])
-        from camp.pah.beamtimedaqaccess import H5FileDataAccess, H5FileManager
+            # needs to import stuff from PAH modules
+            import sys
+            sys.path.append(settings['paths']['PAH_MODULE_DIR'])
+            from camp.pah.beamtimedaqaccess import H5FileDataAccess, H5FileManager
 
         fileAccess = H5FileDataAccess(H5FileManager(self.path_to_run))
         pulseIdInterval = fileAccess.availablePulseIdInterval(runNumber)
