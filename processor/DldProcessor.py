@@ -66,38 +66,42 @@ class DldProcessor:
         # initialize attributes for metadata
         self.sample = {}  # this should contain 'name', 'sampleID', 'cleave number' etc...
         self.histograms = {}
+        self.metadata = {}
 
     @property
     def metadata_dict(self):
-        md = {}
-        md['paths'] = {
-            'DATA_RAW_DIR': self.DATA_RAW_DIR,
 
-        }
-        md['run'] = {
-            'runNumber': self.runNumber,
-            'pulseIdInterval': self.pulseIdInterval,
-        }
-        md['processor'] = {'n_cores': self.N_CORES,
+        try:
+            md = self.metadata
+        except AttributeError:
+            md = {}
+            try: 
+                md['run'] = self.runInfo
+            except AttributeError:
+                md['run'] = {
+                    'runNumber': self.runNumber,
+                    'pulseIdInterval': self.pulseIdInterval,
+                }
+            md['processor'] = {'n_cores': self.N_CORES,
                            'chunk_size': self.CHUNK_SIZE,
-                           }
-        md['calibration'] = {'TOF_STEP_TO_NS': self.TOF_STEP_TO_NS,
-                             'ET_CONV_E_OFFSET': self.ET_CONV_E_OFFSET,
-                             'ET_CONV_T_OFFSET': self.ET_CONV_T_OFFSET,
-                             'ET_CONV_L': self.ET_CONV_L,
-                             'TOF_IN_NS': self.TOF_IN_NS,
-                             }
-        md['paths'] = {
-            'DATA_RAW_DIR': self.DATA_RAW_DIR,
-            'DATA_H5_DIR': self.DATA_H5_DIR,
-            'DATA_PARQUET_DIR': self.DATA_PARQUET_DIR,
-            'DATA_RESULTS_DIR': self.DATA_RESULTS_DIR,
-            'LOG_DIR': self.LOG_DIR,
-            'PAH_MODULE_DIR': self.PAH_MODULE_DIR,
-        }
-        # md['DAQ channels'] =
-        md['sample'] = self.sample
-
+                               }
+            md['calibration'] = {'TOF_STEP_TO_NS': self.TOF_STEP_TO_NS,
+                                 'ET_CONV_E_OFFSET': self.ET_CONV_E_OFFSET,
+                                 'ET_CONV_T_OFFSET': self.ET_CONV_T_OFFSET,
+                                 'ET_CONV_L': self.ET_CONV_L,
+                                 'TOF_IN_NS': self.TOF_IN_NS,
+                                 }
+            md['paths'] = {
+                'DATA_RAW_DIR': self.DATA_RAW_DIR,
+                'DATA_H5_DIR': self.DATA_H5_DIR,
+                'DATA_PARQUET_DIR': self.DATA_PARQUET_DIR,
+                'DATA_RESULTS_DIR': self.DATA_RESULTS_DIR,
+                'LOG_DIR': self.LOG_DIR,
+                'PAH_MODULE_DIR': self.PAH_MODULE_DIR,
+                }
+            # md['DAQ channels'] =
+            md['sample'] = self.sample
+            self.metadata = md
         return md
 
     @property
@@ -298,10 +302,10 @@ class DldProcessor:
             self.dd = dask.dataframe.read_parquet(fullName + "_el")
             self.ddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
             try:
-                with open(os.path.join(fileName + '_el', 'metadata.txt'), 'w') as json_file:
-                    json.load(self.metadata, json_file)
-            except:
-                print('Failed loading metadata from parquet stored files!')
+                with open(os.path.join(fullName + '_el', 'run_metadata.txt'), 'r') as json_file:
+                    self.metadata = json.load(json_file)
+            except Exception as err:
+                print(f'Failed loading metadata from parquet stored files!, {err}')
         elif format in ['hdf5', 'h5']:
             self.dd = dask.dataframe.read_hdf(
                 fullName, '/electrons', mode='r', chunksize=self.CHUNK_SIZE)
@@ -718,8 +722,8 @@ class DldProcessor:
 
         # write the parameters to the bin list:
         if name in ['dldTime'] and self.TOF_IN_NS:
-            start /= self.TOF_STEP_TO_NS
-            end /= self.TOF_STEP_TO_NS
+            start = round(start/self.TOF_STEP_TO_NS)
+            end = round(end/self.TOF_STEP_TO_NS)
             if useStepSize is True:
                 steps = round(steps/self.TOF_STEP_TO_NS/8)*8
                 # steps = np.max(steps,8)
