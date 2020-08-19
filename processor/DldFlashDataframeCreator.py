@@ -70,149 +70,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.pulseIdInterval = pulseIdInterval
 
 
-    def readData_new(self, runNumber=None, pulseIdInterval=None, path=None,pbar_style='notebook',pbar=True):
-        """Read data by run number or macrobunch pulseID interval.
-
-        Useful for scans that would otherwise hit the machine's memory limit.
-
-        :Parameters:
-            runNumber : int | None (default to ``self.runNumber``)
-                number of the run from which to read data. If None, requires pulseIdInterval.
-            pulseIdInterval : (int, int) | None (default to ``self.pulseIdInterval``)
-                first and last macrobunches of selected data range. If None, the whole run
-                defined by runNumber will be taken.
-            path : str | None (default to ``self.DATA_RAW_DIR``)
-                path to location where raw HDF5 files are stored
-            tqdm_env : str | 'notebook'
-                environment for progress bar, use 'notebook' for jupyter notebooks 'classic'
-                for command line, and anything else will give error and use no progress bars.
-        This is a union of the readRun and readInterval methods defined in previous versions.
-        """
-
-        # Update instance attributes based on input parameters
-        if pbar_style == 'notebook':
-            pbar = tqdm_notebook
-        else:
-            pbar = tqdm
-
-        if runNumber is None:
-            runNumber = self.runNumber
-        else:
-            self.runNumber = runNumber
-
-        if pulseIdInterval is not None:
-        #     pulseIdInterval = self.pulseIdInterval
-        # else:
-            self.pulseIdInterval = pulseIdInterval
-
-        if (pulseIdInterval is None) and (runNumber is None):
-            raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
-
-        print('searching for data...')
-        if path is not None:
-            try:
-                daqAccess = BeamtimeDaqAccess.create(path)
-            except:
-                self.path_to_run = misc.get_path_to_run(runNumber, path)
-                daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
-        else:
-            path = self.DATA_RAW_DIR
-            self.path_to_run = misc.get_path_to_run(runNumber, path)
-            daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
-
-        self.daqAddresses = []
-        self.daqAddressDict = {}
-
-        # Parse the settings file in the DAQ channels section for the list of
-        # h5 addresses to read from raw and add to the dataframe.
-        for name, entry in self.settings['DAQ channels'].items():
-            name = misc.camelCaseIt(name)
-            val = str(entry)
-            if daqAccess.isChannelAvailable(val, self.getIds(runNumber, path)):
-                # self.daqAddresses.append(name)
-                if _VERBOSE: print('assigning address: {}: {}'.format(name.ljust(20), val))
-                self.daqAddressDict[name] = val
-                # setattr(self, name, val)
-            else:
-                # if _VERBOSE:
-                print('skipping address missing from data: {}: {}'.format(name.ljust(20), val))
-
-        self.daqColumns = {}
-        # TODO: get the available pulse id from PAH
-
-        if pulseIdInterval is None:
-            print(f'Reading DAQ data from run {runNumber}... Please wait...')
-            readDAQ = daqAccess.allValuesOfRun
-        else:
-            print(f'Reading DAQ data from interval {pulseIdInterval}')
-            self.pulseIdInterval = pulseIdInterval
-            readDAQ = daqAccess.valuesOfInterval
-            # TODO: find runNumber in h5 file
-
-        for name, address in pbar(self.daqAddressDict.items(),disable=not pbar):
-            if _VERBOSE: print('reading address: {}'.format(name))
-            try:
-                # attrVal = getattr(self, name)
-                values, otherStuff = readDAQ(address, runNumber)
-                self.daqColumns[name] = values
-                # setattr(self, name, values)
-
-                if name == 'macroBunchPulseId' and pulseIdInterval is None:  # catch the value of the first macrobunchID
-                    pulseIdInterval = (otherStuff[0], otherStuff[-1])
-                    self.pulseIdInterval = pulseIdInterval
-
-                if name == 'timeStamp':  # catch the time stamps
-                    startEndTime = (values[0,0], values[-1,0])
-                    self.startEndTime = startEndTime
-            except AssertionError as e:
-                print(f'Assertion error loading data from DAQ: {e}\nname {name}\naddress {address}\n')
-        # necessary corrections for specific channels:
-        self.daqColumns['delayStage'] = self.daqColumns['delayStage'][:, 1]
-        self.daqColumns['macroBunchPulseId'] -= self.pulseIdInterval[0]
-        self.daqColumns['dldMicrobunchId'] -= self.UBID_OFFSET
-
-        # Calculate relevant metadata:
-        # count electrons
-        electronsToCount = self.daqColumns['dldPosX'].flatten()
-        electronsToCount = electronsToCount[np.isfinite(electronsToCount)]
-        electronsToCount = electronsToCount[electronsToCount > 0]
-        numberOfElectrons = len(electronsToCount)
-        del electronsToCount
-        numberOfMacrobunches = self.pulseIdInterval[1] - self.pulseIdInterval[0]
-
-        self.runInfo = {
-            'runNumber':self.runNumber,
-            'pulseIdInterval':self.pulseIdInterval,
-            'numberOfMacrobunches': numberOfMacrobunches,
-            'numberOfElectrons':numberOfElectrons,
-            'electronsPerMacrobunch': int(numberOfElectrons / numberOfMacrobunches),
-            'timestampStart':startEndTime[0],
-            'timestampStop':startEndTime[1],
-            'timestampDuration':startEndTime[1]-startEndTime[0],
-            'timeStart':datetime.utcfromtimestamp(startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S'),
-            'timeStop': datetime.utcfromtimestamp(startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S'),
-            'timeDuration': datetime.utcfromtimestamp(startEndTime[1]-startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S'),
-        }
-
-
-        self.printRunOverview()
-
-
-        print('Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}'\
-            .format(runNumber, numberOfMacrobunches, pulseIdInterval[0], pulseIdInterval[1]))
-        try:
-            print("start time: {}, end time: {}, total time: {}"
-                  .format(datetime.utcfromtimestamp(startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S'),
-                          datetime.utcfromtimestamp(startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S'),
-                          datetime.utcfromtimestamp(startEndTime[1]-startEndTime[0]).strftime('%H:%M:%S')))
-        except:
-            pass
-
-        with ProgressBar:
-            self.createDataframePerElectron()
-            print('Electron dataframe created.')
-            self.createDataframePerMicrobunch()
-            print('Microbunch dataframe created.')
 
     def printRunOverview(self):
         i = self.runInfo
@@ -346,12 +203,12 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             'electronsPerMacrobunch': self.electronsPerMacrobunch,
         }
         try:
-            self.runInfo['timestampStart'] = self.startEndTime[0]
-            self.runInfo['timestampStop'] = self.startEndTime[1]
-            self.runInfo['timestampDuration'] = self.startEndTime[1]-self.startEndTime[0]
+            self.runInfo['timestampStart'] = self.startEndTime[0].astype(int)
+            self.runInfo['timestampStop'] = self.startEndTime[1].astype(int)
+            self.runInfo['timestampDuration'] = self.startEndTime[1]-self.startEndTime[0].astype(int)
             self.runInfo['timeStart'] = datetime.utcfromtimestamp(self.startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S')
             self.runInfo['timeStop'] = datetime.utcfromtimestamp(self.startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S')
-            self.runInfo['timeDuration'] = self.startEndTime[1]-self.startEndTime[0]
+            self.runInfo['timeDuration'] = datetime.timedelta(self.startEndTime[1]-self.startEndTime[0])
         except:
             self.runInfo['timestampStart'] = None
             self.runInfo['timestampStop'] = None
@@ -796,8 +653,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                                    append=append, ignore_divisions=True)
                 self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED", \
                                                append=append, ignore_divisions=True)
-                with open(os.path.join(fileName + '_el','metadata.txt'), 'w') as json_file:
-                    json.dump(self.metadata, json_file)
+                try:
+                    with open(os.path.join(fileName + '_el','run_metadata.txt'), 'w') as json_file:
+                        json.dump(self.metadata_dict, json_file, indent=4)
+                except AttributeError:
+                    print('failed saving metadata')
 
         elif format in ['hdf5', 'h5']:
             if os.path.isdir(fileName):
