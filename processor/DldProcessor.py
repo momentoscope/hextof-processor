@@ -653,9 +653,10 @@ class DldProcessor:
                         end -= float((Decimal(str(abs(end - start))) %
                                       Decimal(str(steps))))
                         include_last = True
-            n_bins = round((abs(end - start)) / steps) + 1
+            n_bins = int(round((abs(end - start)) / steps)) + 1
             if not include_last:
                 n_bins -= 1
+            
             bins = np.linspace(start, end, n_bins, endpoint=include_last)
 
         # non default interpretation of steps as the number of steps
@@ -978,7 +979,7 @@ class DldProcessor:
         #         metadata['histograms']['GMD'] = {'axis': axis_name, 'histogram': GMD_norm}
         #     except Exception as e:
         #         print("Couldn't find GMD channel for making GMD normalization histograms\nError: {}".format(e))
-
+        print('...done!')
         return metadata
 
     def res_to_xarray_old(self, res, fast_mode=False):
