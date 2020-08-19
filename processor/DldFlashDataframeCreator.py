@@ -459,6 +459,25 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             daGmdBda = gmdBdaArray.flatten()
             arrayCols.append(daGmdBda)
 
+        if 'i0Monitor' in self.daqAddresses:
+            def I0BunchTrain2Pulses():
+                """
+                Cut, reshape and average the ADC signal of the I0 monitor. 
+                Preliminary procedure: migth be optimized and tunend in to the DAQ 
+                """
+                i0Cutted=np.array(np.split(-self.i0Monitor[:,810:45090],410,axis=1))
+                i0BG=i0Cutted[:,:,:39].mean(2)
+                return np.nansum(i0Cutted[:,:,39:90]-i0BG[:,:,None],2).T
+            
+            i0Data=I0BunchTrain2Pulses()
+            
+            i0Array = assignToMircobunch(
+                self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+                i0Data[mbIndexStart:mbIndexEnd, :].astype(np.float64))
+            daI0 = i0Array.flatten()
+            arrayCols.append(daI0)
+
+
         # convert the laser polarization motor position to the electron format
         if 'pumpPol' in self.daqAddresses:
             pumpPolArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
@@ -523,7 +542,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         da = dask.array.from_array(a.T, chunks=self.CHUNK_SIZE)
 
         cols = ('dldPosX', 'dldPosY', 'dldTime', 'delayStage', 'bam', 'dldMicrobunchId', 'dldDetectorId', 'dldSectorId', 'bunchCharge',
-                'opticalDiode', 'gmdTunnel', 'gmdBda', 'pumpPol', 'timeStamp', 'macroBunchPulseId')
+                'opticalDiode', 'gmdTunnel', 'gmdBda', 'i0Monitor', 'pumpPol', 'timeStamp', 'macroBunchPulseId')
 
         cols = tuple(x for x in cols if x in self.daqAddresses)
         self.dd = dask.dataframe.from_array(da, columns=cols)
@@ -584,6 +603,28 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                                                        chunks=self.CHUNK_SIZE)
             arrayCols.append(daOpticalDiode)
 
+        if 'i0Monitor' in self.daqAddresses:
+            def I0BunchTrain2Pulses():
+                """
+                Cut, reshape and average the ADC signal of the I0 monitor. 
+                Preliminary procedure: migth be optimized and tunend in to the DAQ 
+                """
+                i0Cutted=np.array(np.split(-self.i0Monitor[:,810:45090],410,axis=1))
+                i0BG=i0Cutted[:,:,:39].mean(2)
+                return np.nansum(i0Cutted[:,:,39:90]-i0BG[:,:,None],2).T
+                
+            i0Data=I0BunchTrain2Pulses()
+            try:
+                paddedI0 = np.pad(i0Data, ((0, 0), (0, numOfMicrobunches - i0Data.shape[1])), 'constant',
+                                            constant_values=(0, 0))
+                daI0 = dask.array.from_array(paddedI0.flatten(), chunks=self.CHUNK_SIZE)
+            except:
+                print('fix i0 Monitor DAQ: Length: ' + str(i0Data.shape[1]))
+                daI0 = dask.array.from_array(i0Data[:, 0:numOfMicrobunches].flatten(),
+                                                       chunks=self.CHUNK_SIZE)
+            arrayCols.append(daI0)            
+
+
         if 'pumpPol' in self.daqAddresses:
             pumpPolArray = np.zeros_like(self.bam)
             pumpPolArray[:] = (self.pumpPol[:, 0])[:, None]
@@ -606,7 +647,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         # Create the microbunch-indexed dataframe
         cols = (
-            'delayStage', 'bam', 'dldAux0', 'dldAux1', 'bunchCharge', 'opticalDiode', 'pumpPol', 'macroBunchPulseId', 'timeStamp')
+            'delayStage', 'bam', 'dldAux0', 'dldAux1', 'bunchCharge', 'opticalDiode',  'i0Monitor', 'pumpPol', 'macroBunchPulseId', 'timeStamp')
         cols = tuple(x for x in cols if x in self.daqAddresses)
 
         self.ddMicrobunches = dask.dataframe.from_array(da.T, columns=cols)
