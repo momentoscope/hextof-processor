@@ -1157,8 +1157,8 @@ class DldProcessor:
         if path is None:
             path = self.DATA_H5_DIR
         if not os.path.isdir(path):  # test if the path exists...
-            answer = input("The folder {} doesn't exist,".format(path)
-                           "do you want to create it? [y/n]")
+            answer = input("The folder {} doesn't exist,"
+                           "do you want to create it? [y/n]".format(path))
             if 'y' in answer:
                 os.makedirs(path)
             else:
@@ -1166,8 +1166,8 @@ class DldProcessor:
 
         filename = '{}.h5'.format(file_name)
         if os.path.isfile(path + filename):
-            answer = input("A file named {} already exists. Overwrite it? ".format(filename)
-                           "[y/n or r for rename]")
+            answer = input("A file named {} already exists. Overwrite it? "
+                           "[y/n or r for rename]".format(filename))
             if answer.lower() in ['y', 'yes', 'ja']:
                 pass
             elif answer.lower() in ['n', 'no', 'nein']:
