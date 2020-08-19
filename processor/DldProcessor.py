@@ -726,8 +726,10 @@ class DldProcessor:
             start = round(start/self.TOF_STEP_TO_NS)
             end = round(end/self.TOF_STEP_TO_NS)
             if useStepSize is True:
-                steps = round(steps/self.TOF_STEP_TO_NS/8)*8
-                # steps = np.max(steps,8)
+                # division by 8 is necessary since the first 3 bits of the channel where these values are
+                # taken from is used for other purpouses. Therefore the real tof step is:
+                steps = round(steps/self.TOF_STEP_TO_NS/8)*8 
+                steps = max(steps,8)
 
         bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
         self.binNameList.append(name)
