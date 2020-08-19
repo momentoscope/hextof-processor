@@ -71,23 +71,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
 
 
-    def printRunOverview(self):
-        
-        try:
-            i = self.runInfo
-        except AttributeError
-            
 
-        print(f'Run {i["runNumber"]}')
-        try:
-            print(f"Started at {i['timeStart']}, finished at {i['timeStop']}, "
-                  f"total duration {i['timeDuration']:,} s")
-        except:
-            pass
-        print(f"Macrobunches: {i['numberOfMacrobunches']:,}  "
-              f"from {i['pulseIdInterval'][0]:,} to {i['pulseIdInterval'][1]:,} ")
-        print(f"Total electrons: {i['numberOfElectrons']:,}, "
-              f"electrons/Macrobunch {i['electronsPerMacrobunch']:}")
 
 
     def readData(self, runNumber=None, pulseIdInterval=None, path=None):
@@ -169,7 +153,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
                 if address_name == 'timeStamp':  # catch the time stamps
                     startEndTime = (values[0,0], values[-1,0])
-                    self.startEndTime = startEndTime410
+                    self.startEndTime = startEndTime
 
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
 

@@ -311,6 +311,7 @@ class DldProcessor:
                 fullName, '/electrons', mode='r', chunksize=self.CHUNK_SIZE)
             self.ddMicrobunches = dask.dataframe.read_hdf(
                 fullName, '/microbunches', mode='r', chunksize=self.CHUNK_SIZE)
+        self.printRunOverview()
         print(f'Loaded data form {format} file')
 
     def appendDataframeParquet(self, fileName, path=None):
@@ -335,6 +336,32 @@ class DldProcessor:
         newddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
         self.ddMicrobunches = dask.dataframe.concat([self.ddMicrobunches, newddMicrobunches], join='outer',
                                                     interleave_partitions=True)
+    def printRunOverview(self):
+        """ Print run information, used in readData and readDataParquet 
+        """
+        i=None
+        try:
+            i = self.runInfo
+        except AttributeError:
+            pass
+        try:
+            i = self.metadata_dict['run']
+        except:
+            pass                
+            
+        if i is None:
+            print('no run info available.')
+        else:
+            print(f'Run {i["runNumber"]}')
+            try:
+                print(f"Started at {i['timeStart']}, finished at {i['timeStop']}, "
+                      f"total duration {i['timeDuration']:,} s")
+            except:
+                pass
+            print(f"Macrobunches: {i['numberOfMacrobunches']:,}  "
+                  f"from {i['pulseIdInterval'][0]:,} to {i['pulseIdInterval'][1]:,} ")
+            print(f"Total electrons: {i['numberOfElectrons']:,}, "
+                  f"electrons/Macrobunch {i['electronsPerMacrobunch']:}")
 
     # ==========================
     # Dataframe column expansion
