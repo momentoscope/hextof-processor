@@ -72,7 +72,12 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
 
     def printRunOverview(self):
-        i = self.runInfo
+        
+        try:
+            i = self.runInfo
+        except AttributeError
+            
+
         print(f'Run {i["runNumber"]}')
         try:
             print(f"Started at {i['timeStart']}, finished at {i['timeStop']}, "
@@ -164,7 +169,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
                 if address_name == 'timeStamp':  # catch the time stamps
                     startEndTime = (values[0,0], values[-1,0])
-                    self.startEndTime = startEndTime
+                    self.startEndTime = startEndTime410
 
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
 
