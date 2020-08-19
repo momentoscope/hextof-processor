@@ -765,7 +765,7 @@ class DldProcessor:
         self.binRangeList = []
         self.binAxesList = []
 
-    def computeBinnedData(self, saveAs=None, return_xarray=True, force_64bit=False, fast_metadata=False):
+    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, fast_metadata=False):
         """ Use the bin list to bin the data.
         
         :Parameters:
@@ -784,6 +784,12 @@ class DldProcessor:
             postProcess method must be used before computing the binned data if binning
             along pumpProbeDelay or polar k-space coordinates.
         """
+        if return_xarray is None:
+            try:
+                return_xarray = self.RETURN_XARRAY
+            except:
+                return_xarray = True
+
 
         def analyzePart(part):
             """ Function called by each thread of the analysis.
