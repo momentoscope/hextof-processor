@@ -250,7 +250,11 @@ def xarray_to_tiff(data, filename, axis_dict=None):
     xres = xres.transpose(*dims_order)
     if '.tif' not in filename:
         filename += '.tif'
-    tifffile.imwrite(filename, xres.values.astype(np.float32), imagej=True)
+    try:
+        tifffile.imwrite(filename, xres.values.astype(np.float32), imagej=True)
+    except:
+        tifffile.imsave(filename, xres.values.astype(np.float32), imagej=True)
+
     # resolution=(1./2.6755, 1./2.6755),metadata={'spacing': 3.947368, 'unit': 'um'})
     print(f'Successfully saved {filename}')
 
