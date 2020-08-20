@@ -572,7 +572,7 @@ class DldProcessor:
         if name not in self.binNameList:
             raise ValueError(f'No bin axis {name} found. Cannot create normalization axis')
         else:
-            bins = self.binAxesList[self.binNameList.index(name)]
+            bins = self.binRangeList[self.binNameList.index(name)]
 
             # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
             histBinner = self.ddMicrobunches[name].map_partitions(pd.cut, bins)
