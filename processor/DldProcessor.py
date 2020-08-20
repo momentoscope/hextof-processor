@@ -482,7 +482,7 @@ class DldProcessor:
             idx = self.binNameList.index(ax)
 
             data_array_normalized = np.swapaxes(data_array, 0, idx)
-            norm_array = self.delaystageHistogram
+            norm_array = self.delayStageHistogram
 
             for i in range(np.ndim(data_array_normalized) - 1):
                 norm_array = norm_array[:, None]
