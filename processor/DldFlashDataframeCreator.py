@@ -116,7 +116,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             path = self.DATA_RAW_DIR
             self.path_to_run = misc.get_path_to_run(runNumber, path)
             daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
-
+        
         self.daqAddresses = []
         # Parse the settings file in the DAQ channels section for the list of
         # h5 addresses to read from raw and add to the dataframe.
