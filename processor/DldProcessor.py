@@ -578,13 +578,39 @@ class DldProcessor:
             histBinner = self.ddMicrobunches[name].map_partitions(pd.cut, bins)
             histGrouped = self.ddMicrobunches.groupby([histBinner])
             # self.pumpProbeHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(np.float64)
-            out = histGrouped.count().values  # .astype(np.int32)
+            out = histGrouped.count()['bam'].values  # .astype(np.int32)
             if compute:
                 print(f'Computing normalization array along {name}:')
                 with ProgressBar():
                     out = out.compute()
             return out
 
+    @property
+    def pumpProbeHistogram(self):
+        """ Easy access to pump probe normalization array.
+        Mostly for retrocompatibility"""
+        try:
+            if isinstance(self.histograms['pumpProbeTime'], dask.array.core.Array):
+                print(f'Computing normalization array along pumpProbeTime')
+                with ProgressBar():
+                    self.histograms['pumpProbeTime'] = self.histograms['pumpProbeTime'].compute()
+            return self.histograms['pumpProbeTime']
+        except KeyError:
+            return [None]
+
+    @property
+    def delayStageHistogram(self):
+        """ Easy access to pump probe normalization array.
+        Mostly for retrocompatibility"""
+        try:
+            if isinstance(self.histograms['delayStage'], dask.array.core.Array):
+                print(f'Computing normalization array along delayStage')
+                with ProgressBar():
+                    self.histograms['delayStage'] = self.histograms['delayStage'].compute()
+            return self.histograms['delayStage']
+        except KeyError:
+            return [None]
+        
     # ==========================
     # Binning
     # ==========================
@@ -776,32 +802,6 @@ class DldProcessor:
             # These can be accessed in the old method through the class properties pumpProbeHistogram and delayStageHistogram
 
         return axes
-
-    @property
-    def pumpProbeHistogram(self):
-        """ Easy access to pump probe normalization array.
-        Mostly for retrocompatibility"""
-        try:
-            if isinstance(self.histograms['pumpProbeTime'], dask.array.core.Array):
-                print(f'Computing normalization array along pumpProbeTime')
-                with ProgressBar():
-                    self.histograms['pumpProbeTime'] = self.histograms['pumpProbeTime'].compute()
-            return self.histograms['pumpProbeTime']
-        except KeyError:
-            return [None]
-
-    @property
-    def delayStageHistogram(self):
-        """ Easy access to pump probe normalization array.
-        Mostly for retrocompatibility"""
-        try:
-            if isinstance(self.histograms['delayStage'], dask.array.core.Array):
-                print(f'Computing normalization array along pumpProbeTime')
-                with ProgressBar():
-                    self.histograms['delayStage'] = self.histograms['delayStage'].compute()
-            return self.histograms['delayStage']
-        except KeyError:
-            return [None]
 
     def resetBins(self):
         """ Reset the bin list """
