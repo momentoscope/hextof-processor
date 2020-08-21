@@ -13,7 +13,7 @@ from dask.diagnostics import ProgressBar
 import h5py
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
+from tqdm import tqdm, tqdm_notebook
 from configparser import ConfigParser
 # import matplotlib.pyplot as plt
 from utilities import misc
@@ -895,7 +895,7 @@ class DldProcessor:
         with warnings.catch_warnings():
             warnings.simplefilter(warnString)
 
-            for i in tqdm(range(0, self.dd.npartitions, self.N_CORES)):
+            for i in tqdm_notebook(range(0, self.dd.npartitions, self.N_CORES)):
                 resultsToCalculate = []
                 # process the data in blocks of n partitions (given by the number
                 # of cores):
