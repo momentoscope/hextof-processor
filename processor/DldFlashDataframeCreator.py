@@ -105,7 +105,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         if (pulseIdInterval is None) and (runNumber is None):
             raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
 
-        print('searching for data...')
+
         if path is not None:
             try:
                 daqAccess = BeamtimeDaqAccess.create(path)
@@ -118,12 +118,14 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
         
         self.daqAddresses = []
+        self.pulseIdInterval = self.getIds(runNumber, path)
         # Parse the settings file in the DAQ channels section for the list of
         # h5 addresses to read from raw and add to the dataframe.
+        print('loading data...')
         for name, entry in self.settings['DAQ channels'].items():
             name = misc.camelCaseIt(name)
             val = str(entry)
-            if daqAccess.isChannelAvailable(val, self.getIds(runNumber, path)):
+            if daqAccess.isChannelAvailable(val, self.pulseIdInterval):
                 self.daqAddresses.append(name)
                 if _VERBOSE:
                     print('assigning address: {}: {}'.format(name.ljust(20), val))
