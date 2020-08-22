@@ -810,7 +810,7 @@ class DldProcessor:
         self.binRangeList = []
         self.binAxesList = []
 
-    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, fast_metadata=False):
+    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=False, fast_metadata=False):
         """ Use the bin list to bin the data.
         
         :Parameters:
@@ -929,8 +929,12 @@ class DldProcessor:
             result = result.astype(np.float64)
 
         if return_xarray or saveAs:
+            
             try:
-                metadata = self.get_metadata(fast_mode=fast_metadata)
+                if skip_metadata: 
+                    raise KeyError('forced to skip metadata creation')
+                else:
+                    metadata = self.get_metadata(fast_mode=fast_metadata)
             except KeyError as err:
                 print(f'Failed creating metadata: {err}')
                 metadata = None
