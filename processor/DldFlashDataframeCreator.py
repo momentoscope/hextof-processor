@@ -513,7 +513,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         if self.SINGLE_CORE_DATAFRAME_CREATION: 
             n_cores = 1 # creating dataframes with multiple cores takes much longer...
-            print('using single core for dataframe creation')
         else:
             n_cores = self.N_CORES
 
