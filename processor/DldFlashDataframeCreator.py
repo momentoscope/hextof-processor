@@ -508,9 +508,16 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         # self.dldTime=self.dldTime*self.dldTimeStep
         if _VERBOSE:
             print('creating electron dataframe...')
-
+            
         maxIndex = self.dldTime.shape[0]
-        chunkSize = min(self.CHUNK_SIZE, maxIndex / self.N_CORES)  # ensure minimum one chunk per core.
+
+        if self.SINGLE_CORE_DATAFRAME_CREATION: 
+            n_cores = 1 # creating dataframes with multiple cores takes much longer...
+            print('using single core for dataframe creation')
+        else:
+            n_cores = self.N_CORES
+
+        chunkSize = min(self.CHUNK_SIZE, maxIndex / n_cores)  # ensure minimum one chunk per core.
         numOfPartitions = int(maxIndex / chunkSize) + 1
         daList = []
 
