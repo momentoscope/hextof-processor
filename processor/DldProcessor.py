@@ -459,10 +459,10 @@ class DldProcessor:
     # Normalization histograms
     # ========================
 
-    def normalizePumpProbeTime(self, data_array, ax='pumpProbeTime'):
+    def normalizePumpProbeTime(self, data_array, ax='pumpProbeTime',preserve_mean=False):
         # TODO: work on better implementation and accessibility for this method
         """ Normalizes the data array to the number of counts per delay stage step.
-
+            [DEPRECATED] this is buggy... the new normalizeDelay function should be used
         :Parameter:
             data_array : numpy array
                 data array containing binned data, as created by the ``computeBinnedData`` method.
@@ -476,7 +476,6 @@ class DldProcessor:
             data_array_normalized : numpy array
                 normalized version of the input array.
         """
-
         try:
             # Find the index of the normalization axis
             idx = self.binNameList.index(ax)
@@ -496,6 +495,47 @@ class DldProcessor:
         except ValueError:
             raise ValueError(
                 'No pump probe time bin, could not normalize to delay stage histogram.')
+
+    def normalizeDelay(self, data_array, ax='pumpProbeTime', preserve_mean=True):
+        # TODO: work on better implementation and accessibility for this method
+        """ Normalizes the data array to the number of counts per delay stage step.
+
+        :Parameter:
+            data_array : numpy array
+                data array containing binned data, as created by the ``computeBinnedData`` method.
+            preserve_mean : bool | True
+                if True, divides the histogram by its mean, preserving the average value of the 
+                normalized array.   
+        :Raise:
+            Throw a ValueError when no pump probe time delay axis is available.
+
+        :Return:
+            data_array_normalized : numpy array
+                normalized version of the input array.
+        """
+        if 'pumpProbeTime' in self.binNameList:
+            ax='pumpProbeTime'
+            nhist = self.pumpProbeTimeHistogram.copy()
+        elif 'delayStage' in self.binNameList:
+            ax='delayStage'
+            nhist = self.delayStageHistogram.copy()
+        else:
+            raise ValueError(
+                'No pump probe time bin, could not normalize to delay stage histogram.')
+        idx = self.binNameList.index(ax)
+        print('normalized pumpProbe data found along axis {}'.format(idx))
+        data_array_normalized = np.swapaxes(data_array, 0, idx)
+        
+        for i in range(np.ndim(data_array_normalized) - 1):
+            nhist = nhist[:, None]
+            
+        data_array_normalized = data_array_normalized / nhist
+        if preserve_mean:
+            data_array_normalized *= np.mean(nhist)
+        data_array_normalized = np.swapaxes(data_array_normalized, idx, 0)
+
+        return data_array_normalized
+
 
     def normalizeGMD(self, data_array, axis_name, axis_values):
         """ create the normalization array for normalizing to the FEL intensity at the GMD
@@ -810,7 +850,7 @@ class DldProcessor:
         self.binRangeList = []
         self.binAxesList = []
 
-    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=False, fast_metadata=False):
+    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False):
         """ Use the bin list to bin the data.
         
         :Parameters:
