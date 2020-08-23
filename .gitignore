@@ -1,3 +1,6 @@
+# Ignore MacOS stuff
+*.DS_Store
+
 # We don't need the checkpoints
 .ipynb_checkpoints
 \IPython
