@@ -516,7 +516,7 @@ class DldProcessor:
         """
         if 'pumpProbeTime' in self.binNameList:
             ax='pumpProbeTime'
-            nhist = self.pumpProbeTimeHistogram.copy()
+            nhist = self.pumpProbeHistogram.copy()
         elif 'delayStage' in self.binNameList:
             ax='delayStage'
             nhist = self.delayStageHistogram.copy()
