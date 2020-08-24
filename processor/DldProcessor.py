@@ -154,7 +154,7 @@ class DldProcessor:
         self.DATA_RESULTS_DIR = str('/home/pg2user/DATA/results/')
         self.LOG_DIR = str('/home/pg2user/DATA/logs/')
         self.PAH_MODULE_DIR = str('')
-        self.SIGNLE_CORE_DATAFRAME_CREATION = bool(False)
+        self.SINGLE_CORE_DATAFRAME_CREATION = bool(False)
 
         # parse the currently loaded settings file and store as class attributes
         # each entry which is not in DAQ channels. Those are handled in the
