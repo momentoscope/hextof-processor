@@ -7,10 +7,12 @@ import dask
 import dask.dataframe
 import dask.multiprocessing
 from dask.diagnostics import ProgressBar
+from tqdm import tqdm, tqdm_notebook
 import numpy as np
 from processor import DldProcessor
 from utilities import misc
 from processor.pah import BeamtimeDaqAccess
+import json
 
 _VERBOSE = False
 
@@ -60,12 +62,17 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             dataframe containing chosen channel information from the given run.
     """
 
-    def __init__(self,settings=None):
+    def __init__(self,runNumber=None, pulseIdInterval=None, settings=None):
 
         super().__init__(settings)
 
-        self.runNumber = None
-        self.pulseIdInterval = None
+        self.runNumber = runNumber
+        self.pulseIdInterval = pulseIdInterval
+
+
+
+
+
 
     def readData(self, runNumber=None, pulseIdInterval=None, path=None):
         """Read data by run number or macrobunch pulseID interval.
@@ -89,7 +96,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             runNumber = self.runNumber
         else:
             self.runNumber = runNumber
-        
+
         if pulseIdInterval is None:
             pulseIdInterval = self.pulseIdInterval
         else:
@@ -98,14 +105,164 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         if (pulseIdInterval is None) and (runNumber is None):
             raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
 
-        # parse settings and set all dataset addresses as attributes.
-        settings = ConfigParser()
-        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-            settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
-        else:
-            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
-        section = 'DAQ channels'
+        if path is not None:
+            try:
+                daqAccess = BeamtimeDaqAccess.create(path)
+            except:
+                self.path_to_run = misc.get_path_to_run(runNumber, path)
+                daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
+        else:
+            path = self.DATA_RAW_DIR
+            self.path_to_run = misc.get_path_to_run(runNumber, path)
+            daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
+        
+        self.daqAddresses = []
+        self.pulseIdInterval = self.getIds(runNumber, path)
+        # Parse the settings file in the DAQ channels section for the list of
+        # h5 addresses to read from raw and add to the dataframe.
+        print('loading data...')
+        for name, entry in self.settings['DAQ channels'].items():
+            name = misc.camelCaseIt(name)
+            val = str(entry)
+            if daqAccess.isChannelAvailable(val, self.pulseIdInterval):
+                self.daqAddresses.append(name)
+                if _VERBOSE:
+                    print('assigning address: {}: {}'.format(name.ljust(20), val))
+                setattr(self, name, val)
+            else:
+                # if _VERBOSE:
+                print('skipping address missing from data: {}: {}'.format(name.ljust(20), val))
+
+        # TODO: get the available pulse id from PAH
+        if pulseIdInterval is None:
+            print('Reading DAQ data from run {}... Please wait...'.format(runNumber))
+
+            for address_name in self.daqAddresses:
+                if _VERBOSE:
+                    print('reading address: {}'.format(address_name))
+                try:
+                    attrVal = getattr(self, address_name)
+                    values, otherStuff = daqAccess.allValuesOfRun(attrVal, runNumber)
+                except AssertionError:
+                    print('Assertion error: {}'.format(address_name, attrVal, values, otherStuff ))
+
+                setattr(self, address_name, values)
+                if address_name == 'macroBunchPulseId':  # catch the value of the first macrobunchID
+                    pulseIdInterval = (otherStuff[0], otherStuff[-1])
+                    self.pulseIdInterval = pulseIdInterval
+                    macroBunchPulseId_correction = pulseIdInterval[0]
+
+                if address_name == 'timeStamp':  # catch the time stamps
+                    startEndTime = (values[0,0], values[-1,0])
+                    self.startEndTime = startEndTime
+
+            numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
+
+
+
+        else:
+            print('reading DAQ data from interval {}'.format(pulseIdInterval))
+            self.pulseIdInterval = pulseIdInterval
+            for address_name in self.daqAddresses:
+                if _VERBOSE:
+                    print('reading address: {}'.format(address_name))
+                setattr(self, address_name, daqAccess.valuesOfInterval(getattr(self, address_name), pulseIdInterval))
+            numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
+            macroBunchPulseId_correction = pulseIdInterval[0]
+
+        # necessary corrections for specific channels:
+        self.delayStage = self.delayStage[:, 1]
+        self.macroBunchPulseId -= macroBunchPulseId_correction
+        self.dldMicrobunchId -= self.UBID_OFFSET
+
+        if _VERBOSE:
+            print('Counting electrons...')
+
+        electronsToCount = self.dldPosX.copy().flatten()
+        electronsToCount = np.nan_to_num(electronsToCount)
+        electronsToCount = electronsToCount[electronsToCount > 0]
+        electronsToCount = electronsToCount[electronsToCount < 10000]
+        self.numOfElectrons = len(electronsToCount)
+        self.electronsPerMacrobunch = int(self.numOfElectrons / numOfMacrobunches)
+
+        self.runInfo = {
+            'runNumber':self.runNumber,
+            'pulseIdInterval':self.pulseIdInterval,
+            'numberOfMacrobunches': numOfMacrobunches,
+            'numberOfElectrons':self.numOfElectrons,
+            'electronsPerMacrobunch': self.electronsPerMacrobunch,
+        }
+        try:
+            self.runInfo['timestampStart'] = self.startEndTime[0].astype(int)
+            self.runInfo['timestampStop'] = self.startEndTime[1].astype(int)
+            self.runInfo['timestampDuration'] = self.startEndTime[1]-self.startEndTime[0].astype(int)
+            self.runInfo['timeStart'] = datetime.utcfromtimestamp(self.startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S')
+            self.runInfo['timeStop'] = datetime.utcfromtimestamp(self.startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S')
+            self.runInfo['timeDuration'] = datetime.timedelta(self.startEndTime[1]-self.startEndTime[0])
+        except:
+            self.runInfo['timestampStart'] = None
+            self.runInfo['timestampStop'] = None
+            self.runInfo['timestampDuration'] = None
+            self.runInfo['timeStart'] = None
+            self.runInfo['timeStop'] = None
+            self.runInfo['timeDuration'] = None
+
+        self.printRunOverview()
+
+        # Old Print style
+        # print('Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}' \
+        #       .format(runNumber, numOfMacrobunches, pulseIdInterval[0], pulseIdInterval[1]))
+        # try:
+        #     print("start time: {}, end time: {}, total time: {}"
+        #           .format(datetime.utcfromtimestamp(startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S'),
+        #                   datetime.utcfromtimestamp(startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S'),
+        #                   datetime.utcfromtimestamp(startEndTime[1] - startEndTime[0]).strftime('%H:%M:%S')))
+        # except:
+        #     pass
+        #
+        # print("Number of electrons: {0:,}; {1:,} e/Mb ".format(self.numOfElectrons, self.electronsPerMacrobunch))
+
+        print("Creating dataframes... Please wait...")
+        with ProgressBar():
+            self.createDataframePerElectron()
+            print('Electron dataframe created.')
+            self.createDataframePerMicrobunch()
+            print('Microbunch dataframe created.')
+            print('Reading Complete.')
+
+
+
+    def readData_old(self, runNumber=None, pulseIdInterval=None, path=None):
+        """Read data by run number or macrobunch pulseID interval.
+
+        Useful for scans that would otherwise hit the machine's memory limit.
+
+        :Parameters:
+            runNumber : int | None (default to ``self.runNumber``)
+                number of the run from which to read data. If None, requires pulseIdInterval.
+            pulseIdInterval : (int, int) | None (default to ``self.pulseIdInterval``)
+                first and last macrobunches of selected data range. If None, the whole run
+                defined by runNumber will be taken.
+            path : str | None (default to ``self.DATA_RAW_DIR``)
+                path to location where raw HDF5 files are stored
+
+        This is a union of the readRun and readInterval methods defined in previous versions.
+        """
+
+        # Update instance attributes based on input parameters
+        if runNumber is None:
+            runNumber = self.runNumber
+        else:
+            self.runNumber = runNumber
+
+        if pulseIdInterval is None:
+            pulseIdInterval = self.pulseIdInterval
+        else:
+            self.pulseIdInterval = pulseIdInterval
+
+        if (pulseIdInterval is None) and (runNumber is None):
+            raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
 
         print('searching for data...')
         if path is not None:
@@ -119,12 +276,12 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             self.path_to_run = misc.get_path_to_run(runNumber, path)
             daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
 
-
-
         self.daqAddresses = []
-        for entry in settings[section]:
-            name = misc.camelCaseIt(entry)
-            val = str(settings[section][entry])
+        # Parse the settings file in the DAQ channels section for the list of
+        # h5 addresses to read from raw and add to the dataframe.
+        for name, entry in self.settings['DAQ channels'].items():
+            name = misc.camelCaseIt(name)
+            val = str(entry)
             if daqAccess.isChannelAvailable(val, self.getIds(runNumber, path)):
                 self.daqAddresses.append(name)
                 if _VERBOSE:
@@ -288,6 +445,25 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             daGmdBda = gmdBdaArray.flatten()
             arrayCols.append(daGmdBda)
 
+        if 'i0Monitor' in self.daqAddresses:
+            def I0BunchTrain2Pulses():
+                """
+                Cut, reshape and average the ADC signal of the I0 monitor. 
+                Preliminary procedure: migth be optimized and tunend in to the DAQ 
+                """
+                i0Cutted=np.array(np.split(-self.i0Monitor[:,810:45090],410,axis=1))
+                i0BG=i0Cutted[:,:,:39].mean(2)
+                return np.nansum(i0Cutted[:,:,39:90]-i0BG[:,:,None],2).T
+            
+            i0Data=I0BunchTrain2Pulses()
+            
+            i0Array = assignToMircobunch(
+                self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+                i0Data[mbIndexStart:mbIndexEnd, :].astype(np.float64))
+            daI0 = i0Array.flatten()
+            arrayCols.append(daI0)
+
+
         # convert the laser polarization motor position to the electron format
         if 'pumpPol' in self.daqAddresses:
             pumpPolArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
@@ -332,9 +508,15 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         # self.dldTime=self.dldTime*self.dldTimeStep
         if _VERBOSE:
             print('creating electron dataframe...')
-
+            
         maxIndex = self.dldTime.shape[0]
-        chunkSize = min(self.CHUNK_SIZE, maxIndex / self.N_CORES)  # ensure minimum one chunk per core.
+
+        if self.SINGLE_CORE_DATAFRAME_CREATION: 
+            n_cores = 1 # creating dataframes with multiple cores takes much longer...
+        else:
+            n_cores = self.N_CORES
+
+        chunkSize = min(self.CHUNK_SIZE, maxIndex / n_cores)  # ensure minimum one chunk per core.
         numOfPartitions = int(maxIndex / chunkSize) + 1
         daList = []
 
@@ -352,15 +534,17 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         da = dask.array.from_array(a.T, chunks=self.CHUNK_SIZE)
 
         cols = ('dldPosX', 'dldPosY', 'dldTime', 'delayStage', 'bam', 'dldMicrobunchId', 'dldDetectorId', 'dldSectorId', 'bunchCharge',
-                'opticalDiode', 'gmdTunnel', 'gmdBda', 'pumpPol', 'macroBunchPulseId', 'timeStamp')
+                'opticalDiode', 'gmdTunnel', 'gmdBda', 'i0Monitor', 'pumpPol', 'timeStamp', 'macroBunchPulseId')
 
         cols = tuple(x for x in cols if x in self.daqAddresses)
         self.dd = dask.dataframe.from_array(da, columns=cols)
         # needed as negative values are used to mark bad data
         self.dd = self.dd[self.dd['dldMicrobunchId'] > -1]
-        # I propose leaving it like this, since energy calibration depends on microscope parameters and photon energy; CHANGED: default is as before, but if attribute TOF_IN_NS is set to true, it leaves the delay in steps.
-        if self.TOF_IN_NS:
-            self.dd['dldTime'] = self.dd['dldTime'] * self.TOF_STEP_TO_NS
+        # I propose leaving it like this, since energy calibration depends on microscope parameters and photon energy;
+        # CHANGED: default is as before, but if attribute TOF_IN_NS is set to true, it leaves the delay in steps.
+        # Changed again. there is aliasing if binning in ns, physical binning needs to happen in tof_steps
+        # if self.TOF_IN_NS:
+        #     self.dd['dldTime'] = self.dd['dldTime'] * self.TOF_STEP_TO_NS
 
     def createDataframePerMicrobunch(self):
         """Create a dataframe indexed by the microbunch ID. The method needs no input parameters.
@@ -411,6 +595,28 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                                                        chunks=self.CHUNK_SIZE)
             arrayCols.append(daOpticalDiode)
 
+        if 'i0Monitor' in self.daqAddresses:
+            def I0BunchTrain2Pulses():
+                """
+                Cut, reshape and average the ADC signal of the I0 monitor. 
+                Preliminary procedure: migth be optimized and tunend in to the DAQ 
+                """
+                i0Cutted=np.array(np.split(-self.i0Monitor[:,810:45090],410,axis=1))
+                i0BG=i0Cutted[:,:,:39].mean(2)
+                return np.nansum(i0Cutted[:,:,39:90]-i0BG[:,:,None],2).T
+                
+            i0Data=I0BunchTrain2Pulses()
+            try:
+                paddedI0 = np.pad(i0Data, ((0, 0), (0, numOfMicrobunches - i0Data.shape[1])), 'constant',
+                                            constant_values=(0, 0))
+                daI0 = dask.array.from_array(paddedI0.flatten(), chunks=self.CHUNK_SIZE)
+            except:
+                print('fix i0 Monitor DAQ: Length: ' + str(i0Data.shape[1]))
+                daI0 = dask.array.from_array(i0Data[:, 0:numOfMicrobunches].flatten(),
+                                                       chunks=self.CHUNK_SIZE)
+            arrayCols.append(daI0)            
+
+
         if 'pumpPol' in self.daqAddresses:
             pumpPolArray = np.zeros_like(self.bam)
             pumpPolArray[:] = (self.pumpPol[:, 0])[:, None]
@@ -433,7 +639,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         # Create the microbunch-indexed dataframe
         cols = (
-            'delayStage', 'bam', 'dldAux0', 'dldAux1', 'bunchCharge', 'opticalDiode', 'pumpPol', 'macroBunchPulseId', 'timeStamp')
+            'delayStage', 'bam', 'dldAux0', 'dldAux1', 'bunchCharge', 'opticalDiode',  'i0Monitor', 'pumpPol', 'macroBunchPulseId', 'timeStamp')
         cols = tuple(x for x in cols if x in self.daqAddresses)
 
         self.ddMicrobunches = dask.dataframe.from_array(da.T, columns=cols)
@@ -461,20 +667,41 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 path = self.DATA_PARQUET_DIR
             elif format in ['hdf5', 'h5']:
                 path = self.DATA_H5_DIR
-        
+        if not os.path.isdir(path):
+            raise NotADirectoryError(f'Could not find directory {path}')
+
         if fileName is None:
             if self.runNumber is None:
                 fileName = 'mb{}to{}'.format(self.pulseIdInterval[0], self.pulseIdInterval[-1])
             else:
                 fileName = 'run{}'.format(self.runNumber)
+
         fileName = path + fileName  # TODO: test if naming is correct
 
+
         if format == 'parquet':
-            self.dd.to_parquet(fileName + "_el", compression="UNCOMPRESSED", \
-                               append=append, ignore_divisions=True)
-            self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED", \
-                                           append=append, ignore_divisions=True)
+            if os.path.isdir(fileName):
+                print(f'Appending data to existing parquet container {fileName}')
+            else:
+                print(f'Creating parquet container {fileName}')
+
+            with ProgressBar():
+
+                self.dd.to_parquet(fileName + "_el", compression="UNCOMPRESSED", \
+                                   append=append, ignore_divisions=True)
+                self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED", \
+                                               append=append, ignore_divisions=True)
+                try:
+                    with open(os.path.join(fileName + '_el','run_metadata.txt'), 'w') as json_file:
+                        json.dump(self.metadata_dict, json_file, indent=4)
+                except AttributeError:
+                    print('failed saving metadata')
+
         elif format in ['hdf5', 'h5']:
+            if os.path.isdir(fileName):
+                print(f'Appending data to existing h5 container {fileName}')
+            else:
+                print(f'Creating h5 container {fileName}')
             dask.dataframe.to_hdf(self.dd, fileName, '/electrons')
             dask.dataframe.to_hdf(self.ddMicrobunches, fileName, '/microbunches')
 
@@ -503,20 +730,23 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         if not hasattr(self, 'path_to_run'):
             self.path_to_run = misc.get_path_to_run(runNumber, path)
 
-        # Gets paths from settings file.
-        # Checks for SETTINGS.ini in processor folder.
-        # If not there, checks parent directory
-        settings = ConfigParser()
-        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-            settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
-        else:
-            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
-        path = settings['paths']['DATA_RAW_DIR']
+        try:
+            from camp.pah.beamtimedaqaccess import H5FileDataAccess, H5FileManager
+        except:
+            # Gets paths from settings file.
+            # Checks for SETTINGS.ini in processor folder.
+            # If not there, checks parent directory
+            settings = ConfigParser()
+            if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+                settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+            else:
+                settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+            path = settings['paths']['DATA_RAW_DIR']
 
-        # needs to import stuff from PAH modules
-        import sys
-        sys.path.append(settings['paths']['PAH_MODULE_DIR'])
-        from camp.pah.beamtimedaqaccess import H5FileDataAccess, H5FileManager
+            # needs to import stuff from PAH modules
+            import sys
+            sys.path.append(settings['paths']['PAH_MODULE_DIR'])
+            from camp.pah.beamtimedaqaccess import H5FileDataAccess, H5FileManager
 
         fileAccess = H5FileDataAccess(H5FileManager(self.path_to_run))
         pulseIdInterval = fileAccess.availablePulseIdInterval(runNumber)

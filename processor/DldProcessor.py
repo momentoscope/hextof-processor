@@ -5,18 +5,19 @@ warnings.simplefilter(action='ignore', category=FutureWarning)  # avoid printing
 import os
 
 from datetime import datetime
+import json
 import dask
 import dask.dataframe
 import dask.multiprocessing
+from dask.diagnostics import ProgressBar
 import h5py
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from tqdm import tqdm
+from tqdm import tqdm, tqdm_notebook
 from configparser import ConfigParser
 # import matplotlib.pyplot as plt
 from utilities import misc
-from processor.BinnedArrays import BinnedArray
+from processor.BinnedArrays import res_to_xarray
 
 # warnings.resetwarnings()
 
@@ -51,39 +52,94 @@ class DldProcessor:
             tiff stack formats etc.
     """
 
-    def __init__(self, settings = None):
+    def __init__(self, settings=None):
         """ Create and manage a dask DataFrame from the data recorded at FLASH.
         """
 
         if settings is not None:
             self.load_settings(settings)
+        else:
+            self.initAttributes()  # in else because it is called already in load_settings
 
         self.resetBins()
 
-        # initialize attributes to their type. Values are then taken from
-        # SETTINGS.ini through initAttributes()
-
-        self.initAttributes()
-
         # initialize attributes for metadata
-        self.sample = {} # this should contain 'name', 'sampleID', 'cleave number' etc...
-        
-        # set true to use the old binning method with arange, instead of
-        # linspace
-        self._LEGACY_BINNING = False
+        self.sample = {}  # this should contain 'name', 'sampleID', 'cleave number' etc...
+        self.histograms = {}
+        self.metadata = {}
+
+    @property
+    def metadata_dict(self):
+
+        try:
+            md = self.metadata
+        except AttributeError:
+            md = {}
+            try: 
+                md['run'] = self.runInfo
+            except AttributeError:
+                md['run'] = {
+                    'runNumber': self.runNumber,
+                    'pulseIdInterval': self.pulseIdInterval,
+                }
+            md['processor'] = {'n_cores': self.N_CORES,
+                           'chunk_size': self.CHUNK_SIZE,
+                               }
+            md['calibration'] = {'TOF_STEP_TO_NS': self.TOF_STEP_TO_NS,
+                                 'ET_CONV_E_OFFSET': self.ET_CONV_E_OFFSET,
+                                 'ET_CONV_T_OFFSET': self.ET_CONV_T_OFFSET,
+                                 'ET_CONV_L': self.ET_CONV_L,
+                                 'TOF_IN_NS': self.TOF_IN_NS,
+                                 }
+            md['paths'] = {
+                'DATA_RAW_DIR': self.DATA_RAW_DIR,
+                'DATA_H5_DIR': self.DATA_H5_DIR,
+                'DATA_PARQUET_DIR': self.DATA_PARQUET_DIR,
+                'DATA_RESULTS_DIR': self.DATA_RESULTS_DIR,
+                'LOG_DIR': self.LOG_DIR,
+                'PAH_MODULE_DIR': self.PAH_MODULE_DIR,
+                }
+            # md['DAQ channels'] =
+            md['sample'] = self.sample
+            self.metadata = md
+        return md
+
+    @property
+    def settings(self):
+        """ Easy access to settings.ini file
+
+        Returns:
+            dictionary with the settings file structure
+        """
+        settings = ConfigParser()
+        root_folder = os.path.dirname(__file__)
+        if 'SETTINGS.ini' not in os.listdir(root_folder):
+            root_folder = os.path.dirname(root_folder)
+        file = os.path.join(root_folder, 'SETTINGS.ini')
+        settings.read(file)
+        if len(settings.sections()) == 0:
+            raise Exception('Failed loading main settings!')
+        else:
+            return settings
 
     def initAttributes(self, import_all=False):
         """ Parse settings file and assign the variables.
 
-        :Parameters:
-            import_all : bool | False
-            
-                :True: imports all entries in SETTINGS.ini from the sections [processor] and [paths].
+
+
+        Args:
+            import_all (:obj:`bool`): import method selection.
+                :True: imports all entries in SETTINGS.ini except those from
+                sections [DAQ channels]. These are handled in the DldFlashProcessor subclass.
+                Prints a warning when an entry is not found as class attribute
                 :False: only imports those that match existing attribute names.
-                
-            Here ``False`` is the better choice, since it keeps better track of attributes.
+        Warnings:
+            UserWarning: when an entry is found in the SETTINGS.ini file, which
+                is not present as a pre-defined class attribute, it warns the
+                user to add id to the code.
         """
-        self.N_CORES = int(max(os.cpu_count()-1,1))
+        # Hard coded class attributes which can be overwritten by settings files.
+        self.N_CORES = int(max(os.cpu_count() - 1, 1))
         self.UBID_OFFSET = int(0)
         self.CHUNK_SIZE = int(1000000)
         self.TOF_STEP_TO_NS = np.float64(0.020574)
@@ -96,130 +152,120 @@ class DldProcessor:
         self.DATA_H5_DIR = str('/home/pg2user/data/h5')
         self.DATA_PARQUET_DIR = str('/home/pg2user/DATA/parquet/')
         self.DATA_RESULTS_DIR = str('/home/pg2user/DATA/results/')
+        self.LOG_DIR = str('/home/pg2user/DATA/logs/')
+        self.PAH_MODULE_DIR = str('')
+        self.SINGLE_CORE_DATAFRAME_CREATION = bool(False)
 
-        settings = ConfigParser()
-        if os.path.isfile( # TODO: please change this! ITS HORRIBLE
-                os.path.join(
-                    os.path.dirname(__file__),
-                    'SETTINGS.ini')):
-            settings.read(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    'SETTINGS.ini'))
-        else:
-            settings.read(
-                os.path.join(
-                    os.path.dirname(
-                        os.path.dirname(__file__)),
-                    'SETTINGS.ini'))
-
-        # TODO: use smart type recognition for dynamic adding of new settings              
-
-        for section in settings:
-            for entry in settings[section]:
-                if _VERBOSE:
-                    print('trying: {} {}'.format(entry.upper(),settings[section][entry]))
-                try:
-                    if settings[section][entry].upper() == 'FALSE': 
-                        setattr(self, entry.upper(), False)
-                    else:
-                        _type = type(getattr(self, entry.upper()))
-                        setattr(self, entry.upper(), _type(settings[section][entry]))
-                    if _VERBOSE:
-                        print(entry.upper(), _type(settings[section][entry]))
-                except AttributeError as e:
-                    if _VERBOSE:
-                        print('attribute error: {}'.format(e))
-                    if import_all:  # old method
-                        try:  # assign the attribute to the best fitting type between float, int and string
-                            f = float(settings[section][entry])
-                            i = int(f)
-                            if f - i == 0.0:
-                                val = i  # assign Integer
+        # parse the currently loaded settings file and store as class attributes
+        # each entry which is not in DAQ channels. Those are handled in the
+        # DldFlashProcessor class.
+        for sec_name, section in self.settings.items():
+            if sec_name != 'DAQ channels':  # ignore the DAQ channels
+                for entry_name, entry_value in section.items():
+                    for type_ in [int, np.float64]:  # try assigning numeric values
+                        try:
+                            val = type_(entry_value)
+                            break
+                        except ValueError:
+                            val = None
+                    if val is None:
+                        val = entry_value
+                        if val.upper() == 'FALSE':
+                            val = False
+                        elif val.upper() == 'TRUE':
+                            val = True
+                        elif val.upper() in ['AUTO', 'NONE']:  # add option for ignoring value.
+                            val = None
+                    if val is not None:
+                        try:
+                            old_type = type(getattr(self, entry_name.upper()))
+                            new_type = type(val)
+                            if old_type != new_type:
+                                warnings.warn(
+                                    f'Setting {entry_name} found as {new_type} instead of the expected {old_type}')
+                            setattr(self, entry_name.upper(), val)
+                        except:
+                            if import_all:
+                                setattr(self, entry_name.upper(), val)
+                            elif  _VERBOSE:
+                                warnings.warn(
+                                    f'Found new setting {entry_name}. Consider adding to hard coded defaults for correct'
+                                    f'type and error handling.')
                             else:
-                                val = f  # assign Float
-                            setattr(self, entry.upper(), val)
-                        except ValueError:  # assign String
-                            setattr(
-                                self, entry.upper(), str(
-                                    settings[section][entry]))
-                    else:
-                        pass
+                                pass
+        # Old parsing method:
+        # for section in settings:
+        #     for entry in settings[section]:
+        #         if _VERBOSE:
+        #             print('trying: {} {}'.format(entry.upper(), settings[section][entry]))
+        #         try:
+        #             if settings[section][entry].upper() == 'FALSE':
+        #                 setattr(self, entry.upper(), False)
+        #             else:
+        #                 _type = type(getattr(self, entry.upper()))
+        #                 setattr(self, entry.upper(), _type(settings[section][entry]))
+        #             if _VERBOSE:
+        #                 print(entry.upper(), _type(settings[section][entry]))
+        #         except AttributeError as e:
+        #             if _VERBOSE:
+        #                 print('attribute error: {}'.format(e))
+        #             if import_all:  # old method
+        #                 try:  # assign the attribute to the best fitting type between float, int and string
+        #                     f = float(settings[section][entry])
+        #                     i = int(f)
+        #                     if f - i == 0.0:
+        #                         val = i  # assign Integer
+        #                     else:
+        #                         val = f  # assign Float
+        #                     setattr(self, entry.upper(), val)
+        #                 except ValueError:  # assign String
+        #                     setattr(
+        #                         self, entry.upper(), str(
+        #                             settings[section][entry]))
+        #             else:
+        #                 pass
 
-    def get_channel_report(self):
-        """ Generates a Pandas dataframe containing relevant statistical quantities on all available channels"""
-        print('creating channel report...')
-        chan_dict = {}
-        for chan in self.dd.columns:
-            vals = self.dd[chan].compute()
-            clean=vals[np.isfinite(vals)]
-            chan_dict[chan] = {}
-            chan_dict[chan]['min'] = min(clean)
-            chan_dict[chan]['max'] = max(clean)
-            chan_dict[chan]['amp'] = chan_dict[chan]['max'] - chan_dict[chan]['min']
-            chan_dict[chan]['mean'] = np.mean(clean)
-            chan_dict[chan]['std'] = np.std(clean)
-            chan_dict[chan]['len'] = len(vals)
-            chan_dict[chan]['len_nan'] = len(vals) - len(clean)
-        return pd.DataFrame.from_dict(chan_dict).T
-
-    def load_settings(self,settings_file_name,preserve_path=True):
-        """ load settings from an other saved setting file.
+    def loadSettings(self, settings_file_name, preserve_path=True):
+        """ Load settings from an other saved setting file.
 
         To save settings simply copy paste the SETTINGS.ini file to the
         utilities/settings folder, and rename it. Use this name in this method
-        to then load its content to the SETTINGS.ini file."""
-        settings = ConfigParser()
-        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'utilities', 'settings', settings_file_name+'.ini')):
-            settings.read(os.path.join(os.path.dirname(__file__), 'utilities', 'settings', settings_file_name+'.ini'))
-            #print('true: {}'.format(os.path.join(os.path.dirname(__file__), 'utilities', 'settings', settings_file_name+'.ini')))
+        to then load its content to the SETTINGS.ini file.
+
+        Args:
+            settings_file_name (str): Name of the settings file to load.
+                This file must be in the folder "hextof-processor/utilities/settings"
+            preserve_path: Disables overwriting local file saving paths. Defaults to True
+
+        """
+
+        root_folder = os.path.dirname(__file__)
+        if 'SETTINGS.ini' not in os.listdir(root_folder):
+            root_folder = os.path.dirname(root_folder)
+        old_settings_file = os.path.join(root_folder, 'SETTINGS.ini')
+        new_settings = ConfigParser()
+        if settings_file_name[-4:] != '.ini':
+            settings_file_name += '.ini'
+        new_settings_file = os.path.join(root_folder, 'utilities', 'settings', settings_file_name)
+        new_settings.read(new_settings_file)
+        if len(new_settings.sections()) == 0:
+            print(f'No settings file {settings_file_name} found.')
+            available_settings = os.listdir(os.path.join(root_folder, 'utilities', 'settings'))
+            print('Available settings files are:', *available_settings, sep='\n\t')
         else:
-            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'utilities', 'settings', settings_file_name+'.ini'))
-            #print('false: {}'.format(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'utilities', 'settings', settings_file_name+'.ini')))
-        if len(settings.sections()) == 0:
-            print('no settings found, ignoring.')
-        else:
-            targetfile = os.path.join(os.path.dirname(os.path.dirname(__file__)),'SETTINGS.ini')
             if preserve_path:
                 old_settings = ConfigParser()
-                old_settings.read(targetfile)
-                settings['paths'] = old_settings['paths']
-            with open(targetfile, 'w') as SETTINGS_file:  # save
-                settings.write(SETTINGS_file)
+                old_settings.read(old_settings_file)
+                new_settings['paths'] = old_settings['paths']
+            with open(old_settings_file, 'w') as SETTINGS_file:  # overwrite SETTINGS.ini with the new settings
+                new_settings.write(SETTINGS_file)
             print('Loaded settings from {}'.format(settings_file_name))
-            # apply new settings to current processor
+            # reload settings in the current processor instance
             self.initAttributes()
 
-
-
-    def plot_diagnostics(self):
-        """ Generates a plot of each available channel. usefull for diagnostics on data conditions"""
-        cols = self.dd.columns
-        import matplotlib.pyplot as plt
-        f,ax = plt.subplots(len(cols)//2,2,figsize=(15,20))
-        for i,chan in enumerate(self.dd.columns):
-            vals = self.dd[chan].compute()
-            clean = vals[np.isfinite(vals)]
-            start,stop, mean = clean.min(), clean.max(), clean.mean()
-
-            if np.abs((start-mean)/(stop-mean)) > 5:
-                start = stop-2*mean
-            elif np.abs((stop-mean)/(start-mean)) > 5:
-                stop = start + 2*mean 
-            
-            step =  max((stop-start)/1000,1)
-            x = self.addBinning(chan,start,stop,step)
-            res = self.computeBinnedData()
-            ax[i//2,i%2].set_title(chan,fontsize='x-large')
-            if len(res)>1:
-                try:
-                    ax[i//2,i%2].plot(x,res)
-                except ValueError:
-                    ax[i//2,i%2].plot(x,res[:-1])
-
-            self.resetBins()
-        
-
+    # ==================
+    # Dataframe creation
+    # ==================
 
     def readDataframes(self, fileName=None, path=None, format='parquet'):
         """ Load data from a parquet or HDF5 dataframe.
@@ -235,7 +281,6 @@ class DldProcessor:
             format : str | 'parquet'
                 file format, 'parquet' (parquet file), 'h5' or 'hdf5' (hdf5 file).
         """
-
         format = format.lower()
         assert format in [
             'parquet', 'h5', 'hdf5'], 'Invalid format for data input. Please select between parquet or h5.'
@@ -257,13 +302,20 @@ class DldProcessor:
         if format == 'parquet':
             self.dd = dask.dataframe.read_parquet(fullName + "_el")
             self.ddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
+            try:
+                with open(os.path.join(fullName + '_el', 'run_metadata.txt'), 'r') as json_file:
+                    self.metadata = json.load(json_file)
+            except Exception as err:
+                print(f'Failed loading metadata from parquet stored files!, {err}')
         elif format in ['hdf5', 'h5']:
             self.dd = dask.dataframe.read_hdf(
                 fullName, '/electrons', mode='r', chunksize=self.CHUNK_SIZE)
             self.ddMicrobunches = dask.dataframe.read_hdf(
                 fullName, '/microbunches', mode='r', chunksize=self.CHUNK_SIZE)
+        self.printRunOverview()
+        print(f'Loaded data form {format} file')
 
-    def appendDataframeParquet(self, fileName, path = None):
+    def appendDataframeParquet(self, fileName, path=None):
         """ Append data to an existing dask Parquet dataframe.
 
         This can be used to concatenate multiple DAQ runs in one dataframe.
@@ -274,7 +326,8 @@ class DldProcessor:
                 name (including path) of the folder containing the
                 parquet files to append the new data.
         """
-        if type(fileName) == int: #if runNumber is given (only works if the run was prevously stored with default naming)
+        if type(
+                fileName) == int:  # if runNumber is given (only works if the run was prevously stored with default naming)
             fileName = 'run{}'.format(fileName)
         if path == None:
             path = self.DATA_PARQUET_DIR
@@ -282,7 +335,38 @@ class DldProcessor:
         newdd = dask.dataframe.read_parquet(fullName + "_el")
         self.dd = dask.dataframe.concat([self.dd, newdd], join='outer', interleave_partitions=True)
         newddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
-        self.ddMicrobunches = dask.dataframe.concat([self.ddMicrobunches, newddMicrobunches], join='outer', interleave_partitions=True)
+        self.ddMicrobunches = dask.dataframe.concat([self.ddMicrobunches, newddMicrobunches], join='outer',
+                                                    interleave_partitions=True)
+    def printRunOverview(self):
+        """ Print run information, used in readData and readDataParquet 
+        """
+        i=None
+        try:
+            i = self.runInfo
+        except AttributeError:
+            pass
+        try:
+            i = self.metadata_dict['run']
+        except:
+            pass                
+            
+        if i is None:
+            print('no run info available.')
+        else:
+            print(f'Run {i["runNumber"]}')
+            try:
+                print(f"Started at {i['timeStart']}, finished at {i['timeStop']}, "
+                      f"total duration {i['timeDuration']:,} s")
+            except:
+                pass
+            print(f"Macrobunches: {i['numberOfMacrobunches']:,}  "
+                  f"from {i['pulseIdInterval'][0]:,} to {i['pulseIdInterval'][1]:,} ")
+            print(f"Total electrons: {i['numberOfElectrons']:,}, "
+                  f"electrons/Macrobunch {i['electronsPerMacrobunch']:}")
+
+    # ==========================
+    # Dataframe column expansion
+    # ==========================
 
     def postProcess(self, bamCorrectionSign=0, kCenter=None):
         """ Apply corrections to the dataframe.
@@ -372,10 +456,14 @@ class DldProcessor:
         self.dd['posR'] = self.dd.map_partitions(radius)
         self.dd['posT'] = self.dd.map_partitions(angle)
 
-    def normalizePumpProbeTime(self, data_array, ax='pumpProbeTime'):
+    # ========================
+    # Normalization histograms
+    # ========================
+
+    def normalizePumpProbeTime(self, data_array, ax='pumpProbeTime',preserve_mean=False):
         # TODO: work on better implementation and accessibility for this method
         """ Normalizes the data array to the number of counts per delay stage step.
-
+            [DEPRECATED] this is buggy... the new normalizeDelay function should be used
         :Parameter:
             data_array : numpy array
                 data array containing binned data, as created by the ``computeBinnedData`` method.
@@ -389,13 +477,12 @@ class DldProcessor:
             data_array_normalized : numpy array
                 normalized version of the input array.
         """
-
         try:
             # Find the index of the normalization axis
             idx = self.binNameList.index(ax)
 
             data_array_normalized = np.swapaxes(data_array, 0, idx)
-            norm_array = self.delaystageHistogram
+            norm_array = self.delayStageHistogram
 
             for i in range(np.ndim(data_array_normalized) - 1):
                 norm_array = norm_array[:, None]
@@ -409,8 +496,49 @@ class DldProcessor:
         except ValueError:
             raise ValueError(
                 'No pump probe time bin, could not normalize to delay stage histogram.')
-    
-    def normalizeGMD(self,data_array,axis_name,axis_values):
+
+    def normalizeDelay(self, data_array, ax='pumpProbeTime', preserve_mean=True):
+        # TODO: work on better implementation and accessibility for this method
+        """ Normalizes the data array to the number of counts per delay stage step.
+
+        :Parameter:
+            data_array : numpy array
+                data array containing binned data, as created by the ``computeBinnedData`` method.
+            preserve_mean : bool | True
+                if True, divides the histogram by its mean, preserving the average value of the 
+                normalized array.   
+        :Raise:
+            Throw a ValueError when no pump probe time delay axis is available.
+
+        :Return:
+            data_array_normalized : numpy array
+                normalized version of the input array.
+        """
+        if 'pumpProbeTime' in self.binNameList:
+            ax='pumpProbeTime'
+            nhist = self.pumpProbeHistogram.copy()
+        elif 'delayStage' in self.binNameList:
+            ax='delayStage'
+            nhist = self.delayStageHistogram.copy()
+        else:
+            raise ValueError(
+                'No pump probe time bin, could not normalize to delay stage histogram.')
+        idx = self.binNameList.index(ax)
+        print('normalized pumpProbe data found along axis {}'.format(idx))
+        data_array_normalized = np.swapaxes(data_array, 0, idx)
+        
+        for i in range(np.ndim(data_array_normalized) - 1):
+            nhist = nhist[:, None]
+            
+        data_array_normalized = data_array_normalized / nhist
+        if preserve_mean:
+            data_array_normalized *= np.mean(nhist)
+        data_array_normalized = np.swapaxes(data_array_normalized, idx, 0)
+
+        return data_array_normalized
+
+
+    def normalizeGMD(self, data_array, axis_name, axis_values):
         """ create the normalization array for normalizing to the FEL intensity at the GMD
         :Parameter:
             data_array: np.ndarray
@@ -429,9 +557,9 @@ class DldProcessor:
             idx = self.binNameList.index(axis_name)
 
             data_array_normalized = np.swapaxes(data_array, 0, idx)
-            
-            norm_array = self.make_GMD_histogram(axis_name,axis_values)
-            
+
+            norm_array = self.make_GMD_histogram(axis_name, axis_values)
+
             for i in range(np.ndim(data_array_normalized) - 1):
                 norm_array = norm_array[:, None]
             data_array_normalized = data_array_normalized / norm_array
@@ -442,29 +570,25 @@ class DldProcessor:
         except ValueError:
             raise ValueError('Failed the GMD normalization.')
 
-    def make_GMD_histogram(self,axis_name,axis_values): # TODO: improve performance... its deadly slow! 
+    def make_GMD_histogram(self, axis_name, axis_values):  # TODO: improve performance... its deadly slow!
 
-            gmd = np.nan_to_num(self.dd['gmdBda'].values.compute())
-            axisDataframe = self.dd[axis_name].values.compute()
+        gmd = np.nan_to_num(self.dd['gmdBda'].values.compute())
+        axisDataframe = self.dd[axis_name].values.compute()
 
-            norm_array = np.zeros(len(axis_values))
-            for j in range(0,len(gmd)):
-                if (gmd[j]>0):
-                    ind = np.argmin(np.abs(axis_values-axisDataframe[j]))
-                    norm_array[ind]+=gmd[j]
-            return norm_array
-    
-    def normalizeAxisMean(self,data_array,ax):
+        norm_array = np.zeros(len(axis_values))
+        for j in tqdm(range(0, len(gmd))):
+            if (gmd[j] > 0):
+                ind = np.argmin(np.abs(axis_values - axisDataframe[j]))
+                norm_array[ind] += gmd[j]
+        return norm_array
+
+    def normalizeAxisMean(self, data_array, ax):
         """ Normalize to the mean of the given axis
-        :Parameters:
-            data_array: np.ndarray
-                array to be normalized
-            ax:
-                axis along which to normalize
-        :Return:
-            norm_array: np.ndarray
-                normalized array
- 
+        Args:
+            data_array (np.ndarray): array to be normalized
+            ax (int): axis along which to normalize
+        Returns:
+            norm_array (np.ndarray): normalized array
         """
         print("normalizing mean on axis {}".format(ax))
         try:
@@ -472,7 +596,7 @@ class DldProcessor:
             idx = self.binNameList.index(ax)
             data_array_normalized = np.swapaxes(data_array, 0, idx)
             norm_array = data_array.mean(0)
-            norm_array = norm_array[None,:]
+            norm_array = norm_array[None, :]
 
             for i in range(np.ndim(data_array_normalized) - 2):
                 norm_array = norm_array[:, None]
@@ -483,214 +607,68 @@ class DldProcessor:
             return data_array_normalized
 
         except ValueError as e:
-            raise ValueError("Could not normalize to {} histogram.\n{}".format(ax,e))
+            raise ValueError("Could not normalize to {} histogram.\n{}".format(ax, e))
 
-    def diagnostic_plot_FEL(self):
-        f,ax = plt.subplots(1,2)
-        self.resetBins()
-        ubId = self.addBinning('dldMicrobunchId',1,500,1)
-        result_ubId = self.computeBinnedData()
-        ax[0].plot(ubId,result_ubId/max(result_ubId), label='Photoelectron count')
-        ax[0].set_title('Microbunch')
-
-        self.resetBins()
-
-        MbId_values = self.dd['macroBunchPulseId'].compute()
-        clean = MbId_values[np.isfinite(MbId_values)]
-        start,stop, mean = clean.min(), clean.max(), clean.mean()
-        if np.abs((start-mean)/(stop-mean)) > 5:
-            start = stop-2*mean
-        elif np.abs((stop-mean)/(start-mean)) > 5:
-            stop = start + 2*mean 
-        step =  max((stop-start)/1000,1)
-
-        if _VERBOSE:
-            print("Be careful: resetting bins")
+    def makeNormHistogram(self, name, compute=False):
+        if name not in self.binNameList:
+            raise ValueError(f'No bin axis {name} found. Cannot create normalization axis')
         else:
-            MbId = self.addBinning('macroBunchPulseId',start,stop,step)
-            result_MbId = self.computeBinnedData()
-            ax[1].plot(MbId,result_MbId/max(result_MbId), label='Photoelectron count')
-            ax[1].set_title('Macrobunch')
+            bins = self.binRangeList[self.binNameList.index(name)]
 
+            # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
+            histBinner = self.ddMicrobunches[name].map_partitions(pd.cut, bins)
+            histGrouped = self.ddMicrobunches.groupby([histBinner])
+            # self.pumpProbeHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(np.float64)
+            out = histGrouped.count()['bam'].values  # .astype(np.int32)
+            if compute:
+                print(f'Computing normalization array along {name}:')
+                with ProgressBar():
+                    out = out.compute()
+            return out
 
-        gmd_values = np.nan_to_num(self.dd['gmdBda'].compute())
-        ubId_values = self.dd['dldMicrobunchId'].compute()
+    @property
+    def pumpProbeHistogram(self):
+        """ Easy access to pump probe normalization array.
+        Mostly for retrocompatibility"""
+        try:
+            if isinstance(self.histograms['pumpProbeTime'], dask.array.core.Array):
+                print(f'Computing normalization array along pumpProbeTime')
+                with ProgressBar():
+                    self.histograms['pumpProbeTime'] = self.histograms['pumpProbeTime'].compute()
+            return self.histograms['pumpProbeTime']
+        except KeyError:
+            return [None]
 
-        gmd_ubId = np.zeros_like(ubId)
-        for g,ub in zip(gmd_values,ubId_values):
-            ub_idx = int(ub)
-            if 0<ub_idx<len(gmd_ubId):
-                gmd_ubId[ub_idx]+=g
-
-        gmd_MbId = np.zeros_like(MbId)
-        for g,Mb in zip(gmd_values,MbId_values):
-            Mb_idx = int(Mb)
-            if 0<Mb_idx<len(gmd_MbId):
-                gmd_MbId[Mb_idx]+=g
-
-        ax[0].plot(ubId,gmd_ubId/max(gmd_ubId), label='GMD')
-        ax[1].plot(MbId,gmd_MbId/max(gmd_MbId)+1, label='GMD')
-        for a in ax:
-            a.legend()
-            a.grid()
-
-    def save_binned(self, binnedData, file_name, path=None, mode='w'):
-        """ Save a binned numpy array to h5 file. The file includes the axes
-        (taken from the scheduled bins) and the delay stage histogram, if it exists.
-
-        :Parameters:
-            binnedData : numpy array
-                Binned multidimensional data.
-            file_name : str
-                Name of the saved file. The extension '.h5' is automatically added.
-            path : str | None
-                File path.
-            mode : str | 'w'
-                Write mode of h5 file ('w' = write).
-        """
-        _abort = False
-        if path is None:
-            path = self.DATA_H5_DIR
-        if not os.path.isdir(path):  # test if the path exists...
-            answer = input("The folder {} doesn't exist,"
-                           "do you want to create it? [y/n]")
-            if 'y' in answer:
-                os.makedirs(path)
-            else:
-                _abort = True
-
-        filename = '{}.h5'.format(file_name)
-        if os.path.isfile(path + filename):
-            answer = input("A file named {} already exists. Overwrite it? "
-                           "[y/n or r for rename]".format(filename))
-            if answer.lower() in ['y', 'yes', 'ja']:
-                pass
-            elif answer.lower() in ['n', 'no', 'nein']:
-                _abort = True
-            else:
-                filename = input("choose a new name:")
-
-        if not _abort:
-            with h5py.File(path + filename, mode) as h5File:
-
-                print('saving data to {}'.format(path + filename))
-
-                if 'pumpProbeTime' in self.binNameList:
-                    idx = self.binNameList.index('pumpProbeTime')
-                    pp_data = np.swapaxes(binnedData, 0, idx)
-
-                elif 'delayStage' in self.binNameList:
-                    idx = self.binNameList.index('delayStage')
-                    pp_data = np.swapaxes(binnedData, 0, idx)
-                else:
-                    pp_data = None
-
-                # Saving data
-
-                ff = h5File.create_group('frames')
-
-                if pp_data is None:  # in case there is no time axis, make a single dataset
-                    ff.create_dataset('f{:04d}'.format(0), data=binnedData)
-                else:
-                    for i in range(pp_data.shape[0]):  # otherwise make a dataset for each time frame.
-                        ff.create_dataset('f{:04d}'.format(i), data=pp_data[i, ...])
-
-                # Saving axes
-                aa = h5File.create_group("axes")
-                # aa.create_dataset('axis_order', data=self.binNameList)
-                ax_n = 1
-                for i, binName in enumerate(self.binNameList):
-                    if binName in ['pumpProbeTime', 'delayStage']:
-                        ds = aa.create_dataset('ax0 - {}'.format(binName), data=self.binAxesList[i])
-                        ds.attrs['name'] = binName
-                    else:
-                        ds = aa.create_dataset('ax{} - {}'.format(ax_n, binName), data=self.binAxesList[i])
-                        ds.attrs['name'] = binName
-                        ax_n += 1
-                # Saving delay histograms
-                hh = h5File.create_group("histograms")
-                if hasattr(self, 'delaystageHistogram'):
-                    hh.create_dataset(
-                        'delaystageHistogram',
-                        data=self.delaystageHistogram)
-                if hasattr(self, 'pumpProbeHistogram'):
-                    hh.create_dataset(
-                        'pumpProbeHistogram',
-                        data=self.pumpProbeHistogram)
-
-    @staticmethod
-    def load_binned(file_name, mode='r', ret_type='list'):
-        """ Load an HDF5 file saved with ``save_binned()`` method.
-        wrapper for function utils.load_binned_h5()
-
-        :Parameters:
-            file_name : str
-                name of the file to load, including full path
-
-            mode : str | 'r'
-                Read mode of h5 file ('r' = read).
-            ret_type: str | 'list','dict'
-                output format for axes and histograms:
-                'list' generates a list of arrays, ordered as
-                the corresponding dimensions in data. 'dict'
-                generates a dictionary with the names of each axis.
-
-        :Returns:
-            data : numpy array
-                Multidimensional data read from h5 file.
-            axes : numpy array
-                The axes values associated with the read data.
-            hist : numpy array
-                Histogram values associated with the read data.
-        """
-        return misc.load_binned_h5(file_name, mode=mode, ret_type=ret_type)
-
-    def read_h5(self, h5FilePath):
-        """ [DEPRECATED] Read the h5 file at given path and return the contained data.
-
-        :parameters:
-            h5FilePaht : str
-                Path to the h5 file to read.
-
-        :returns:
-            result : np.ndarray
-                array containing binned data
-            axes : dict
-                dictionary with axes data labeled by axes name
-            histogram : np.array
-                array of time normalization data.
-        """
-        with h5py.File(h5FilePath, 'r') as f:
-            result = []
-            for frame in f['frames']:
-                result.append(f['frames'][frame][...])
-            result = np.stack(result, axis=0)
-
-            histogram = None
-            if 'pumpProbeHistogram' in f['histograms']:
-                histogram = f['histograms']['pumpProbeHistogram'][...]
-            elif 'delaystageHistogram' in f['histograms']:
-                histogram = f['histograms']['delaystageHistogram'][...]
-            axes = {}
-            for ax_label in f['axes']:
-                ax_name = ax_label.split(' ')[-1]
-                axes[ax_name] = f['axes'][ax_label][...]
-
-        return result, axes, histogram
+    @property
+    def delayStageHistogram(self):
+        """ Easy access to pump probe normalization array.
+        Mostly for retrocompatibility"""
+        try:
+            if isinstance(self.histograms['delayStage'], dask.array.core.Array):
+                print(f'Computing normalization array along delayStage')
+                with ProgressBar():
+                    self.histograms['delayStage'] = self.histograms['delayStage'].compute()
+            return self.histograms['delayStage']
+        except KeyError:
+            return [None]
+        
+    # ==========================
+    # Binning
+    # ==========================
 
     def addFilter(self, colname, lb=None, ub=None):
-        """ Filters the dataframes contained in the processor instance
+        """ Filters the dataframes contained in the processor instance.
 
-        :Parameters:
-            colname : str
-                name of the column in the dask dataframes
-            lb : float64 | None
-                lower bound of the filter
-            ub : float64 | None
-                upper bound of the filter
-        
-        :Effect:
-            Filters the columns of ``dd`` and ``ddMicrobunches`` dataframes in place.
+        Filters the columns of ``dd`` and ``ddMicrobunches`` dataframes in place.
+
+        Args:
+            colname (str): name of the column in the dask dataframes
+            lb (:obj:`float',optional):  lower bound of the filter
+                if :None: (default), ignores lower boundary
+            ub (:obj:`float',optional):  upper bound of the filter
+                if :None: (default), ignores upper boundary
+        Attention:
+            this is an irreversible process, since the dataframe gets overwritten.
         """
 
         if colname in self.dd.columns:
@@ -769,9 +747,10 @@ class DldProcessor:
                         end -= float((Decimal(str(abs(end - start))) %
                                       Decimal(str(steps))))
                         include_last = True
-            n_bins = round((abs(end - start)) / steps) + 1
+            n_bins = int(round((abs(end - start)) / steps)) + 1
             if not include_last:
                 n_bins -= 1
+            
             bins = np.linspace(start, end, n_bins, endpoint=include_last)
 
         # non default interpretation of steps as the number of steps
@@ -784,7 +763,7 @@ class DldProcessor:
         return bins
 
     def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False,
-                   include_last=True, force_legacy=False):
+                   include_last=True, force_legacy=False, compute_histograms=False):
         """ Add binning of one dimension, to be then computed with ``computeBinnedData`` method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -837,60 +816,53 @@ class DldProcessor:
         """
 
         # write the parameters to the bin list:
+        if name in ['dldTime'] and self.TOF_IN_NS:
+            start = round(start/self.TOF_STEP_TO_NS)
+            end = round(end/self.TOF_STEP_TO_NS)
+            if useStepSize is True:
+                # division by 8 is necessary since the first 3 bits of the channel where these values are
+                # taken from is used for other purpouses. Therefore the real tof step is:
+                steps = round(steps/self.TOF_STEP_TO_NS/8)*8 
+                steps = max(steps,8)
+
         bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
         self.binNameList.append(name)
         self.binRangeList.append(bins)
+        axes = np.array([np.mean((x, y)) for x, y in zip(bins[:-1], bins[1:])])
 
-        if (name == 'pumpProbeTime'):
-            # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['pumpProbeTime'].map_partitions(
-                pd.cut, bins)
-            delaystageHistGrouped = self.ddMicrobunches.groupby(
-                [delaystageHistBinner])
-            self.pumpProbeHistogram = delaystageHistGrouped.count(
-            ).compute()['bam'].to_xarray().values.astype(np.float64)
-        if (name == 'delayStage'):
-            # self.delaystageHistogram = numpy.histogram(self.delaystage[numpy.isfinite(self.delaystage)], bins)[0]
-            delaystageHistBinner = self.ddMicrobunches['delayStage'].map_partitions(
-                pd.cut, bins)
-            delaystageHistGrouped = self.ddMicrobunches.groupby(
-                [delaystageHistBinner])
-            self.delaystageHistogram = delaystageHistGrouped.count(
-            ).compute()['bam'].to_xarray().values.astype(np.float64)
-        if useStepSize:
-            stepSize = steps
-        else:
-            stepSize = (end - start) / steps
+        if name in ['dldTime'] and self.TOF_IN_NS:
+            axes *= self.TOF_STEP_TO_NS
 
-#        axes = self.genBins(
-#            start + stepSize / 2,
-#            end - stepSize / 2,
-#            stepSize, useStepSize, forceEnds, include_last, force_legacy)
-#        if axes[-1] > end:
-#            axes = axes[:-1]
-        axes = np.array([np.mean((x,y)) for x,y in zip(bins[:-1],bins[1:])]) #TODO: could be improved for nonlinear scales
+        # TODO: could be improved for nonlinear scales
         self.binAxesList.append(axes)
+
+        if name in ['pumpProbeTime', 'delayStage']:
+            # add the normalization histogram to the histograms dictionary. computes them if requested, otherwise
+            # only assigned the dask calculations for later computation.
+            self.histograms[name] = self.makeNormHistogram(name, compute=compute_histograms)
+            # These can be accessed in the old method through the class properties pumpProbeHistogram and delayStageHistogram
+
         return axes
 
     def resetBins(self):
-        """ Reset the bin list
-        """
-
+        """ Reset the bin list """
+        self.histograms = {}
         self.binNameList = []
         self.binRangeList = []
         self.binAxesList = []
 
-    def computeBinnedData(self, saveName=None, savePath=None):
+    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False):
         """ Use the bin list to bin the data.
         
         :Parameters:
-            saveName : str | None
-                filename
-            savePath : str | None
-                file path
-
+            saveAs : str | None
+                full file name where to save the result (forces return_xarray
+                to be true)
+            return_xarray : bool
+                if true, returns and xarray with all available axis and metadata
+                information attached, otherwise a numpy.array
         :Returns:
-            result : numpy array
+            result : numpy.array or xarray.DataArray
                 A numpy array of float64 values. Number of bins defined will define the
                 dimensions of such array.
 
@@ -898,11 +870,18 @@ class DldProcessor:
             postProcess method must be used before computing the binned data if binning
             along pumpProbeDelay or polar k-space coordinates.
         """
+        if return_xarray is None:
+            try:
+                return_xarray = self.RETURN_XARRAY
+            except:
+                return_xarray = True
+
 
         def analyzePart(part):
             """ Function called by each thread of the analysis.
-            """
 
+            Old deprecated method
+            """
             grouperList = []
             for i in range(len(self.binNameList)):
                 grouperList.append(
@@ -915,9 +894,14 @@ class DldProcessor:
         # new binner for a partition, not using the Pandas framework. It should
         # be faster!
         def analyzePartNumpy(part):
-            """ Function called by each thread of the analysis. This now should be faster.
-            """
+            """ Function called by each thread of the analysis.
 
+            This now should be faster.
+            Args:
+                part : partition to process
+            Returns:
+                res: binned array calculated from this partition
+            """
             # get the data as numpy:
             vals = part.values
             cols = part.columns.values
@@ -927,18 +911,18 @@ class DldProcessor:
                 idx = cols.tolist().index(binName)
                 colsToBin.append(idx)
 
-#            # create the array with the bins and bin ranges
-#            numBins = []
-#            ranges = []
-#            for i in range(0, len(colsToBin)):
-#                # need to subtract 1 from the number of bin ranges
-#                numBins.append(len(self.binRangeList[i]) - 1)
-#                ranges.append(
-#                    (self.binRangeList[i].min(),
-#                     self.binRangeList[i].max()))
-#            # now we are ready for the analysis with numpy:
-#            res, edges = np.histogramdd(
-#                vals[:, colsToBin], bins=numBins, range=ranges)
+            #            # create the array with the bins and bin ranges
+            #            numBins = []
+            #            ranges = []
+            #            for i in range(0, len(colsToBin)):
+            #                # need to subtract 1 from the number of bin ranges
+            #                numBins.append(len(self.binRangeList[i]) - 1)
+            #                ranges.append(
+            #                    (self.binRangeList[i].min(),
+            #                     self.binRangeList[i].max()))
+            #            # now we are ready for the analysis with numpy:
+            #            res, edges = np.histogramdd(
+            #                vals[:, colsToBin], bins=numBins, range=ranges)
             res, edges = np.histogramdd(vals[:, colsToBin], bins=self.binRangeList)
             return res
 
@@ -952,7 +936,7 @@ class DldProcessor:
         with warnings.catch_warnings():
             warnings.simplefilter(warnString)
 
-            for i in tqdm(range(0, self.dd.npartitions, self.N_CORES)):
+            for i in tqdm_notebook(range(0, self.dd.npartitions, self.N_CORES)):
                 resultsToCalculate = []
                 # process the data in blocks of n partitions (given by the number
                 # of cores):
@@ -981,19 +965,98 @@ class DldProcessor:
         for r in calculatedResults:
             r = np.nan_to_num(r)
             result = result + r
-        result = result.astype(np.float64)
 
-        if saveName is not None:
-            self.save_binned(result, saveName, path=savePath, mode='w')
+        if force_64bit:
+            result = result.astype(np.float64)
+
+        if return_xarray or saveAs:
+            
+            try:
+                if skip_metadata: 
+                    raise KeyError('forced to skip metadata creation')
+                else:
+                    metadata = self.get_metadata(fast_mode=fast_metadata)
+            except KeyError as err:
+                print(f'Failed creating metadata: {err}')
+                metadata = None
+            result = res_to_xarray(result, self.binNameList, self.binAxesList, metadata)
+
+        if saveAs is not None:
+            pass  # TODO: Make saving function
+            # self.save_binned(result, saveName, path=savePath, mode='w')
 
         return result
 
-    def computeBinnedArray(self, fast_mode=False):
-        """returns a BinnedArray object of the binned data."""
-        res = self.computeBinnedData()
-        return self.res_to_xarray(res,fast_mode=fast_mode)
+    def get_metadata(self, fast_mode=False):
+        """  Creates a dictionary with the most relevant metadata.
 
-    def res_to_xarray(self,res,fast_mode=False):
+        Args:
+            fast_mode (bool): if False skips the heavy computation steps which
+                take a long time.
+        Returns:
+            metadata (dict): dictionary with metadata information
+        # TODO: distribute metadata generation in the appropriate methods.
+        """
+        print('Generating metadata...')
+        metadata = {}
+        try:
+            start, stop = self.startEndTime[0], self.startEndTime[1]
+        except AttributeError:
+            if not fast_mode:
+                start, stop = self.dd['timeStamp'].min().compute(), self.dd['timeStamp'].max().compute()
+            else:
+                start, stop = 0, 1
+
+        metadata['timing'] = {'acquisition start': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
+                              'acquisition stop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
+                              'acquisition duration': stop - start,
+                              # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                              }
+        metadata['sample'] = self.sample
+        metadata['settings'] = misc.parse_category('processor')
+        metadata['DAQ channels'] = misc.parse_category('DAQ channels')
+        if self.pulseIdInterval is None and not fast_mode:
+            pulseIdFrom = self.dd['macroBunchPulseId'].min().compute()
+            pulseIdTo = self.dd['macroBunchPulseId'].max().compute()
+        else:
+            pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
+
+        metadata['run'] = {
+            'runNumber': self.runNumber,
+            'macroBunchPulseIdInterval': [pulseIdFrom, pulseIdTo],
+            'nMacrobunches': pulseIdTo - pulseIdFrom,
+        }
+        try:
+            metadata['run']['nElectrons'] = self.numOfElectrons
+            metadata['run']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
+        except:
+            pass  # TODO: find smarter solution
+
+        metadata['histograms'] = {}
+
+        if hasattr(self, 'delaystageHistogram'):
+            metadata['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
+        elif hasattr(self, 'pumpProbeHistogram'):
+            metadata['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeHistogram}
+
+        # if not fast_mode:
+        #     try:
+        #         axis_values = []
+        #         ax_len = 0
+        #         for ax, val in zip(self.binNameList, self.binAxesList):
+        #             if len(val) > ax_len:
+        #                 ax_len = len(val)
+        #                 axis_name = ax
+        #                 axis_values = val
+        #
+        #         GMD_norm = self.make_GMD_histogram(axis_name, axis_values)
+        #         metadata['histograms']['GMD'] = {'axis': axis_name, 'histogram': GMD_norm}
+        #     except Exception as e:
+        #         print("Couldn't find GMD channel for making GMD normalization histograms\nError: {}".format(e))
+        print('...done!')
+        return metadata
+
+    def res_to_xarray_old(self, res, fast_mode=False):
         """ creates a BinnedArray (xarray subclass) out of the given np.array
         
         :Parameters:
@@ -1007,13 +1070,13 @@ class DldProcessor:
         """
         dims = self.binNameList
         coords = {}
-        for name,vals in zip(self.binNameList,self.binAxesList):
+        for name, vals in zip(self.binNameList, self.binAxesList):
             coords[name] = vals
-        
-        ba = BinnedArray(res,dims=dims,coords=coords)
-        
+
+        ba = BinnedArray(res, dims=dims, coords=coords)
+
         units = {}
-        default_units={'dldTime':'step','delayStage':'ps', 'pumpProbeDelay':'ps'}
+        default_units = {'dldTime': 'step', 'delayStage': 'ps', 'pumpProbeDelay': 'ps'}
         for name in self.binNameList:
             try:
                 u = default_units[name]
@@ -1023,16 +1086,16 @@ class DldProcessor:
         ba.attrs['units'] = units
 
         try:
-            start, stop = self.startEndTime[0],self.startEndTime[1]
+            start, stop = self.startEndTime[0], self.startEndTime[1]
         except AttributeError:
             if not fast_mode:
                 start, stop = self.dd['timeStamp'].min().compute(), self.dd['timeStamp'].max().compute()
             else:
-                start, stop = 0,1
+                start, stop = 0, 1
 
-        ba.attrs['timing'] = {'acquisition start':datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
-                              'acquisition stop':datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
-                              'acquisition duration':stop-start,
+        ba.attrs['timing'] = {'acquisition start': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
+                              'acquisition stop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
+                              'acquisition duration': stop - start,
                               'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                               }
         ba.attrs['sample'] = self.sample
@@ -1045,39 +1108,38 @@ class DldProcessor:
             pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
 
         ba.attrs['run'] = {
-                        'runNumber':self.runNumber,
-                        'macroBunchPulseIdInterval': [pulseIdFrom, pulseIdTo],
-                        'nMacrobunches': pulseIdTo-pulseIdFrom,
-                        }
+            'runNumber': self.runNumber,
+            'macroBunchPulseIdInterval': [pulseIdFrom, pulseIdTo],
+            'nMacrobunches': pulseIdTo - pulseIdFrom,
+        }
         try:
             ba.attrs['run']['nElectrons'] = self.numOfElectrons
             ba.attrs['run']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
         except:
-            pass #TODO: find smarter solution          
-              
+            pass  # TODO: find smarter solution
+
         ba.attrs['histograms'] = {}
 
         if hasattr(self, 'delaystageHistogram'):
-            ba.attrs['histograms']['delay'] = {'axis': 'delayStage', 'histogram':self.delaystageHistogram}
+            ba.attrs['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
         elif hasattr(self, 'pumpProbeHistogram'):
-            ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram':self.pumpProbeHistogram}
+            ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeHistogram}
         if not fast_mode:
             try:
                 axis_values = []
-                ax_len=0
-                for ax,val in coords.items():
-                    if len(val)>ax_len:
+                ax_len = 0
+                for ax, val in coords.items():
+                    if len(val) > ax_len:
                         ax_len = len(val)
                         axis_name = ax
                         axis_values = val
 
-                GMD_norm = self.make_GMD_histogram(axis_name,axis_values)
-                ba.attrs['histograms']['GMD'] = {'axis': axis_name, 'histogram':GMD_norm}
+                GMD_norm = self.make_GMD_histogram(axis_name, axis_values)
+                ba.attrs['histograms']['GMD'] = {'axis': axis_name, 'histogram': GMD_norm}
             except Exception as e:
                 print("Couldn't find GMD channel for making GMD normalization histograms\nError: {}".format(e))
 
         return ba
-
 
     def computeBinnedDataMulti(self, saveName=None, savePath=None,
                                rank=None, size=None):
@@ -1172,6 +1234,123 @@ class DldProcessor:
             self.save_binned(results, saveName, path=savePath, mode='w')
 
         return results
+
+    def save_binned(self, binnedData, file_name, path=None, mode='w'):
+        """ Save a binned numpy array to h5 file. The file includes the axes
+        (taken from the scheduled bins) and the delay stage histogram, if it exists.
+
+        :Parameters:
+            binnedData : numpy array
+                Binned multidimensional data.
+            file_name : str
+                Name of the saved file. The extension '.h5' is automatically added.
+            path : str | None
+                File path.
+            mode : str | 'w'
+                Write mode of h5 file ('w' = write).
+        """
+        _abort = False
+        if path is None:
+            path = self.DATA_H5_DIR
+        if not os.path.isdir(path):  # test if the path exists...
+            answer = input("The folder {} doesn't exist,"
+                           "do you want to create it? [y/n]".format(path))
+            if 'y' in answer:
+                os.makedirs(path)
+            else:
+                _abort = True
+
+        filename = '{}.h5'.format(file_name)
+        if os.path.isfile(path + filename):
+            answer = input("A file named {} already exists. Overwrite it? "
+                           "[y/n or r for rename]".format(filename))
+            if answer.lower() in ['y', 'yes', 'ja']:
+                pass
+            elif answer.lower() in ['n', 'no', 'nein']:
+                _abort = True
+            else:
+                filename = input("choose a new name:")
+
+        if not _abort:
+            with h5py.File(path + filename, mode) as h5File:
+
+                print('saving data to {}'.format(path + filename))
+
+                if 'pumpProbeTime' in self.binNameList:
+                    idx = self.binNameList.index('pumpProbeTime')
+                    pp_data = np.swapaxes(binnedData, 0, idx)
+
+                elif 'delayStage' in self.binNameList:
+                    idx = self.binNameList.index('delayStage')
+                    pp_data = np.swapaxes(binnedData, 0, idx)
+                else:
+                    pp_data = None
+
+                # Saving data
+
+                ff = h5File.create_group('frames')
+
+                if pp_data is None:  # in case there is no time axis, make a single dataset
+                    ff.create_dataset('f{:04d}'.format(0), data=binnedData)
+                else:
+                    for i in range(pp_data.shape[0]):  # otherwise make a dataset for each time frame.
+                        ff.create_dataset('f{:04d}'.format(i), data=pp_data[i, ...])
+
+                # Saving axes
+                aa = h5File.create_group("axes")
+                # aa.create_dataset('axis_order', data=self.binNameList)
+                ax_n = 1
+                for i, binName in enumerate(self.binNameList):
+                    if binName in ['pumpProbeTime', 'delayStage']:
+                        ds = aa.create_dataset('ax0 - {}'.format(binName), data=self.binAxesList[i])
+                        ds.attrs['name'] = binName
+                    else:
+                        ds = aa.create_dataset('ax{} - {}'.format(ax_n, binName), data=self.binAxesList[i])
+                        ds.attrs['name'] = binName
+                        ax_n += 1
+                # Saving delay histograms
+                hh = h5File.create_group("histograms")
+                if hasattr(self, 'delaystageHistogram'):
+                    hh.create_dataset(
+                        'delaystageHistogram',
+                        data=self.delaystageHistogram)
+                if hasattr(self, 'pumpProbeHistogram'):
+                    hh.create_dataset(
+                        'pumpProbeHistogram',
+                        data=self.pumpProbeHistogram)
+
+    @staticmethod
+    def load_binned(file_name, mode='r', ret_type='list'):
+        """ Load an HDF5 file saved with ``save_binned()`` method.
+        wrapper for function utils.load_binned_h5()
+
+        :Parameters:
+            file_name : str
+                name of the file to load, including full path
+
+            mode : str | 'r'
+                Read mode of h5 file ('r' = read).
+            ret_type: str | 'list','dict'
+                output format for axes and histograms:
+                'list' generates a list of arrays, ordered as
+                the corresponding dimensions in data. 'dict'
+                generates a dictionary with the names of each axis.
+
+        :Returns:
+            data : numpy array
+                Multidimensional data read from h5 file.
+            axes : numpy array
+                The axes values associated with the read data.
+            hist : numpy array
+                Histogram values associated with the read data.
+        """
+        return misc.load_binned_h5(file_name, mode=mode, ret_type=ret_type)
+
+    # % retro-compatibility functions and deprecated methods
+
+    def load_settings(self, settings_file_name, preserve_path=True):
+        """ Retrocompatibility naming"""
+        return self.loadSettings(settings_file_name, preserve_path=preserve_path)
 
     def deleteBinners(self):
         """ **[DEPRECATED]** use resetBins() instead
@@ -1347,3 +1526,36 @@ class DldProcessor:
                 [delaystageHistBinner])
             self.delaystageHistogram = delaystageHistGrouped.count().compute()['bam'].to_xarray().values.astype(
                 np.float64)  # TODO: discuss and improve the delay stage histogram normalization.
+
+    def read_h5(self, h5FilePath):
+        """ [DEPRECATED] Read the h5 file at given path and return the contained data.
+
+        :parameters:
+            h5FilePaht : str
+                Path to the h5 file to read.
+
+        :returns:
+            result : np.ndarray
+                array containing binned data
+            axes : dict
+                dictionary with axes data labeled by axes name
+            histogram : np.array
+                array of time normalization data.
+        """
+        with h5py.File(h5FilePath, 'r') as f:
+            result = []
+            for frame in f['frames']:
+                result.append(f['frames'][frame][...])
+            result = np.stack(result, axis=0)
+
+            histogram = None
+            if 'pumpProbeHistogram' in f['histograms']:
+                histogram = f['histograms']['pumpProbeHistogram'][...]
+            elif 'delaystageHistogram' in f['histograms']:
+                histogram = f['histograms']['delaystageHistogram'][...]
+            axes = {}
+            for ax_label in f['axes']:
+                ax_name = ax_label.split(' ')[-1]
+                axes[ax_name] = f['axes'][ax_label][...]
+
+        return result, axes, histogram
