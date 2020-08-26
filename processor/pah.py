@@ -3,16 +3,16 @@
 @author: Steinn Ymir Agustsson
 """
 import sys, os
-import configparser
+# import configparser
 
-settings = configparser.ConfigParser() # TODO: find a smarter way
-if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-    settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
-else:
-    settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+# settings = configparser.ConfigParser() # TODO: find a smarter way
+# if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+#     settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+# else:
+#     settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
 # importing stuff from PAH modules
-sys.path.append(settings['paths']['PAH_MODULE_DIR'])
+# sys.path.append(settings['paths']['PAH_MODULE_DIR'])
 from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess, H5FileDataAccess, H5FileManager
 
 # Below are the redefined classes belonging to PAH that should correct the 
