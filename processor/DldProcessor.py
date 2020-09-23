@@ -438,6 +438,73 @@ class DldProcessor:
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStage'] - \
                                                self.ddMicrobunches['bam'] * sign
 
+    def calibrateEnergy(self, toffset=None, eoffset=None, l=None,useAvgSampleBias=False):
+        """ add calibrated energy axis to dataframe
+
+        Uses the same equation as in tof2energy in calibrate.
+        Args:
+            t : float
+                The time of flight
+            toffset : float
+                The time offset from thedld clock start to when the fastest photoelectrons reach the detector
+            eoffset : float
+                The energy offset given by W-hv-V
+            l : float
+                the effective length of the drift section
+            useAvgSampleBias: bool (False)
+                uses the average value for the sample bias across the dataset,
+                possibly reducing noise, but cannot be used on runs where the
+                sample bias was changed
+
+        """
+
+        if toffset is None:
+            toffset = float(self.settings['processor']['ET_CONV_T_OFFSET'])
+        if eoffset is None:
+            eoffset = float(self.settings['processor']['ET_CONV_E_OFFSET'])
+        if l is None:
+            l = float(self.settings['processor']['ET_CONV_L'])
+        t = self.dd['dldTime'] * self.TOF_STEP_TO_NS
+        if useAvgSampleBias:
+            eoffset -= self.dd['sampleBias'].mean()
+        else:
+            eoffset -= self.dd['sampleBias']
+
+        k =  0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
+        self.dd['energy'] = k * np.power(l/((t) - toffset),2.) - eoffset
+
+    def calibratePumpProbeTime(self, t0=0, bamSign=1, streakSign=1, invertTimeAxis=True):
+        """  Add pumpProbeTime axis to dataframes.
+
+        Correct pump probe time by BAM and/or streak camera
+
+        Args:
+            t0: float
+                pump probe time overlap
+            bamSign: -1,+1
+                sign of the bam correction:
+                    +1 : pumpProbeTime =  delayStage + bam
+                    -1 : pumpProbeTime =  delayStage - bam
+                     0 : ignore bam correction
+            streakSign: -1,0,+1
+                sign of the bam correction:
+                    +1 : pumpProbeTime =  delayStage + streakCam
+                    -1 : pumpProbeTime =  delayStage - streakCam
+                     0 : ignore streakCamera correction
+            invertTimeAxis: bool (True)
+                invert time direction on pump probe time
+
+        """
+        for df in [self.dd,self.ddMicrobunches]:
+            df['pumpProbeTime'] = df['delayStage'] - t0
+
+            if 'bam' in df:
+                df['pumpProbeTime'] += df['bam'] * bamSign
+            if 'streakCamera' in df:
+                df['pumpProbeTime'] += df['streakCamera'] * streakSign
+            if invertTimeAxis:
+                df['pumpProbeTime'] = - df['pumpProbeTime']
+
     def createPolarCoordinates(self, kCenter=(250, 250)):
         """ Calculate polar coordinates for k-space values.
 
@@ -851,7 +918,7 @@ class DldProcessor:
         self.binRangeList = []
         self.binAxesList = []
 
-    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False):
+    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False, usePbar=True):
         """ Use the bin list to bin the data.
         
         :Parameters:
@@ -936,7 +1003,7 @@ class DldProcessor:
         with warnings.catch_warnings():
             warnings.simplefilter(warnString)
 
-            for i in tqdm_notebook(range(0, self.dd.npartitions, self.N_CORES)):
+            for i in tqdm_notebook(range(0, self.dd.npartitions, self.N_CORES),disable=not usePbar):
                 resultsToCalculate = []
                 # process the data in blocks of n partitions (given by the number
                 # of cores):
