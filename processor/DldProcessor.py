@@ -438,7 +438,34 @@ class DldProcessor:
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStage'] - \
                                                self.ddMicrobunches['bam'] * sign
 
-    def calibrateEnergy(self, toffset=None, eoffset=None, l=None,useAvgSampleBias=False):
+    @staticmethod
+    def applyJitter(df, amp, col, type):
+        """ Add jittering to a dataframe column.
+
+        Adapted from MPES package: https://github.com/mpes-kit/mpes
+
+        :Parameters:
+            df : dataframe
+                Dataframe to add noise/jittering to.
+            amp : numeric
+                Amplitude scaling for the jittering noise.
+            col : str
+                Name of the column to add jittering to.
+
+        :Return:
+            Uniformly distributed noise vector with specified amplitude and size.
+        """
+        colsize = df[col].size
+
+        if (type == 'uniform'):
+            # Uniform Jitter distribution
+            return df[col] + amp * np.random.uniform(low=-1, high=1, size=colsize)
+        elif (type == 'normal'):
+            # Normal Jitter distribution works better for non-linear transformations and jitter sizes that don't match the original bin sizes
+            return df[col] + amp * np.random.standard_normal(size=colsize)
+
+    def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=False, useJitter=True,
+                        jitterAmplitude=3, jitterType='normal'):
         """ add calibrated energy axis to dataframe
 
         Uses the same equation as in tof2energy in calibrate.
@@ -457,21 +484,26 @@ class DldProcessor:
                 sample bias was changed
 
         """
-
         if toffset is None:
             toffset = float(self.settings['processor']['ET_CONV_T_OFFSET'])
         if eoffset is None:
             eoffset = float(self.settings['processor']['ET_CONV_E_OFFSET'])
         if l is None:
             l = float(self.settings['processor']['ET_CONV_L'])
-        t = self.dd['dldTime'] * self.TOF_STEP_TO_NS
+
+        self.dd['energy'] = self.dd['dldTime'] - self.dd['dldSectorId']
+
+        if useJitter:
+            self.dd['energy'] = self.dd.map_partitions(self.applyJitter, amp=jitterAmplitude, col='energy', type=jitterType)
+
+        self.dd['energy'] *= self.TOF_STEP_TO_NS
         if useAvgSampleBias:
             eoffset -= self.dd['sampleBias'].mean()
         else:
             eoffset -= self.dd['sampleBias']
 
-        k =  0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
-        self.dd['energy'] = k * np.power(l/((t) - toffset),2.) - eoffset
+        k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
+        self.dd['energy'] = k * np.power(l / ((self.dd['energy']) - toffset), 2.) - eoffset
 
     def calibratePumpProbeTime(self, t0=0, bamSign=1, streakSign=1, invertTimeAxis=True):
         """  Add pumpProbeTime axis to dataframes.
