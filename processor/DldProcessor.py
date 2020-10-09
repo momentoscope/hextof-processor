@@ -596,13 +596,15 @@ class DldProcessor:
             raise ValueError(
                 'No pump probe time bin, could not normalize to delay stage histogram.')
 
-    def normalizeDelay(self, data_array, ax='pumpProbeTime', preserve_mean=True):
-        # TODO: work on better implementation and accessibility for this method
+    def normalizeDelay(self, data_array, ax=None, preserve_mean=True):
         """ Normalizes the data array to the number of counts per delay stage step.
 
         :Parameter:
             data_array : numpy array
                 data array containing binned data, as created by the ``computeBinnedData`` method.
+            ax : str
+                name of the axis to normalize to, default is None, which uses as
+                normalization axis "pumpProbeTime" if found, otherwise "delayStage"
             preserve_mean : bool | True
                 if True, divides the histogram by its mean, preserving the average value of the 
                 normalized array.   
@@ -613,17 +615,23 @@ class DldProcessor:
             data_array_normalized : numpy array
                 normalized version of the input array.
         """
-        if 'pumpProbeTime' in self.binNameList:
-            ax='pumpProbeTime'
-            nhist = self.pumpProbeHistogram.copy()
-        elif 'delayStage' in self.binNameList:
-            ax='delayStage'
-            nhist = self.delayStageHistogram.copy()
+
+        if ax is None:
+            if 'pumpProbeTime' in self.binNameList:
+                ax='pumpProbeTime'
+                nhist = self.pumpProbeTimeHistogram.copy()
+            elif 'delayStage' in self.binNameList:
+                ax='delayStage'
+                nhist = self.delayStageHistogram.copy()
+            else:
+                raise ValueError(f'No axis pump probe or delay stage histogram found, could not normalize.')
         else:
-            raise ValueError(
-                'No pump probe time bin, could not normalize to delay stage histogram.')
+            try:
+                nhist = getattr(self,f'{ax}Histogram')
+            except:
+                raise ValueError(f'No axis {ax} histogram found, could not normalize.')
         idx = self.binNameList.index(ax)
-        print('normalized pumpProbe data found along axis {}'.format(idx))
+        print(f'normalized {ax} data found along axis {idx}')
         data_array_normalized = np.swapaxes(data_array, 0, idx)
         
         for i in range(np.ndim(data_array_normalized) - 1):
@@ -726,7 +734,7 @@ class DldProcessor:
             return out
 
     @property
-    def pumpProbeHistogram(self):
+    def pumpProbeTimeHistogram(self):
         """ Easy access to pump probe normalization array.
         Mostly for retrocompatibility"""
         try:
@@ -1136,7 +1144,7 @@ class DldProcessor:
         if hasattr(self, 'delaystageHistogram'):
             metadata['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
         elif hasattr(self, 'pumpProbeHistogram'):
-            metadata['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeHistogram}
+            metadata['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeTimeHistogram}
 
         # if not fast_mode:
         #     try:
@@ -1222,7 +1230,7 @@ class DldProcessor:
         if hasattr(self, 'delaystageHistogram'):
             ba.attrs['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
         elif hasattr(self, 'pumpProbeHistogram'):
-            ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeHistogram}
+            ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeTimeHistogram}
         if not fast_mode:
             try:
                 axis_values = []
@@ -1416,7 +1424,7 @@ class DldProcessor:
                 if hasattr(self, 'pumpProbeHistogram'):
                     hh.create_dataset(
                         'pumpProbeHistogram',
-                        data=self.pumpProbeHistogram)
+                        data=self.pumpProbeTimeHistogram)
 
     @staticmethod
     def load_binned(file_name, mode='r', ret_type='list'):
