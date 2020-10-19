@@ -65,7 +65,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'hextof-processor'
-copyright = '2018, momentoscope team'
+copyright = '2018-2020, momentoscope team'
 author = 'momentoscope team'
 
 # The version info for the project you're documenting, acts as replacement for
