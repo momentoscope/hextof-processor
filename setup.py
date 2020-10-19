@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
 
-@author: Steinn Ymir Agustsson
-"""
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
 import numpy
@@ -22,7 +19,7 @@ extensions = [
 
 setup(
     name="HextofOfflineAnalyzer",
-    version='0.9.0',
+    version='0.9.5',
     description='Hextof Offline Analyzer',
     author=['Yves Acremann','Steinn Ymir Agustsson','Davide Curcio','Patrick Xian'],
     url='https://github.com/momentoscope/hextof-processor',
