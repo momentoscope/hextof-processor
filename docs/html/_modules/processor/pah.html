@@ -1,0 +1,324 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>processor.pah &mdash; hextof-processor 0.9.5 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library/pah.html">3. Interfacing external pah library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/howtomaintain.html">1. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>processor.pah</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for processor.pah</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author: Steinn Ymir Agustsson</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+
+<span class="c1"># settings = configparser.ConfigParser() # TODO: find a smarter way</span>
+<span class="c1"># if os.path.isfile(os.path.join(os.path.dirname(__file__), &#39;SETTINGS.ini&#39;)):</span>
+<span class="c1">#     settings.read(os.path.join(os.path.dirname(__file__), &#39;SETTINGS.ini&#39;))</span>
+<span class="c1"># else:</span>
+<span class="c1">#     settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), &#39;SETTINGS.ini&#39;))</span>
+
+<span class="c1"># importing stuff from PAH modules</span>
+<span class="c1"># sys.path.append(settings[&#39;paths&#39;][&#39;PAH_MODULE_DIR&#39;])</span>
+<span class="kn">from</span> <span class="nn">camp.pah.beamtimedaqaccess</span> <span class="kn">import</span> <span class="n">BeamtimeDaqAccess</span> <span class="k">as</span> <span class="n">_BeamtimeDaqAccess</span><span class="p">,</span> <span class="n">H5FileDataAccess</span> <span class="k">as</span> <span class="n">_H5FileDataAccess</span><span class="p">,</span> <span class="n">H5FileManager</span> <span class="k">as</span> <span class="n">_H5FileManager</span>
+
+<span class="c1"># Below are the redefined classes belonging to PAH that should correct the </span>
+<span class="c1"># problems induced by adding the macrobunchID information to the data.</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../library/pah.html#processor.pah.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Configuring local settings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;DATA_RAW_DIR&#39;</span><span class="p">]</span>
+    <span class="n">daqAccess</span> <span class="o">=</span> <span class="n">BeamtimeDaqAccess</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">dldPosXName</span> <span class="o">=</span> <span class="s2">&quot;/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset&quot;</span>
+    <span class="n">dldPosY</span><span class="p">,</span> <span class="n">otherStuff</span> <span class="o">=</span> <span class="n">daqAccess</span><span class="o">.</span><span class="n">allValuesOfRun</span><span class="p">(</span><span class="n">dldPosXName</span><span class="p">,</span> <span class="mi">19135</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BeamtimeDaqAccess"><a class="viewcode-back" href="../../library/pah.html#processor.pah.BeamtimeDaqAccess">[docs]</a><span class="k">class</span> <span class="nc">BeamtimeDaqAccess</span><span class="p">(</span><span class="n">_BeamtimeDaqAccess</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Overwriting original class to apply local corrections to PAH code.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileAccess</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BeamtimeDaqAccess</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fileAccess</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BeamtimeDaqAccess.create"><a class="viewcode-back" href="../../library/pah.html#processor.pah.BeamtimeDaqAccess.create">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">rootDirectoryOfH5Files</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates a BeamtimeDaqAccess object for the given root directory - API</span>
+
+<span class="sd">        **Parameter**</span>
+<span class="sd">            rootDirectoryOfH5Files (str): The root directory of the HDF files. The root</span>
+<span class="sd">                    directory contains sub directories for different FLASH DAQ streams.</span>
+
+<span class="sd">        **Return**</span>
+<span class="sd">            BeamtimeDaqAccess: The ready to use beamtime DAQ access object.</span>
+
+<span class="sd">        **Raise**</span>
+<span class="sd">            AssertionError: If the given rootDirectoryOfH5Files does not exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">fileAccess</span> <span class="o">=</span> <span class="n">H5FileDataAccess</span><span class="p">(</span><span class="n">H5FileManager</span><span class="p">(</span><span class="n">rootDirectoryOfH5Files</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">BeamtimeDaqAccess</span><span class="p">(</span><span class="n">fileAccess</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="H5FileDataAccess"><a class="viewcode-back" href="../../library/pah.html#processor.pah.H5FileDataAccess">[docs]</a><span class="k">class</span> <span class="nc">H5FileDataAccess</span><span class="p">(</span><span class="n">_H5FileDataAccess</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Wrapper class for correcting PAH code for defining valid channels to read from.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5FileManager</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">H5FileDataAccess</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">h5FileManager</span><span class="p">)</span>
+        <span class="c1"># super(self).__init__(h5FileManager)</span>
+
+<div class="viewcode-block" id="H5FileDataAccess.isValidChannel"><a class="viewcode-back" href="../../library/pah.html#processor.pah.H5FileDataAccess.isValidChannel">[docs]</a>    <span class="k">def</span> <span class="nf">isValidChannel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channelName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Define the valid channels in HDF5 data.</span>
+
+<span class="sd">        Add the timing section of the hdf5 dataset as valid channel, as the</span>
+<span class="sd">        timing channel was not considered a valid channel in the original</span>
+<span class="sd">        PAH code.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (bool): True: channel is valid, False: channel not valid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">channelName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allChannelNames</span><span class="p">()</span> \
+               <span class="ow">or</span> <span class="n">channelName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/uncategorised/&#39;</span><span class="p">)</span> \
+               <span class="ow">or</span> <span class="n">channelName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/FL2/&#39;</span><span class="p">)</span> \
+               <span class="ow">or</span> <span class="n">channelName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/FL1/&#39;</span><span class="p">)</span> \
+               <span class="ow">or</span> <span class="n">channelName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/Timing/&#39;</span><span class="p">)</span>  <span class="c1"># &lt;--for datasets before 08-2018</span></div></div>
+
+
+<div class="viewcode-block" id="H5FileManager"><a class="viewcode-back" href="../../library/pah.html#processor.pah.H5FileManager">[docs]</a><span class="k">class</span> <span class="nc">H5FileManager</span><span class="p">(</span><span class="n">_H5FileManager</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Wrapper for pointing to original class in  PAH module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rootDirectoryOfH5Files</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">H5FileManager</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">rootDirectoryOfH5Files</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.9.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
