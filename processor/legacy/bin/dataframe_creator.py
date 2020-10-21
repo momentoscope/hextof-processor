@@ -4,7 +4,7 @@
 @author: Steinn Ymir Agustsson
 """
 import processor.DldFlashDataframeCreator as DldFlashProcessor
-from utilities.misc import get_available_runs, create_dataframes
+from processor.utilities.misc import get_available_runs, create_dataframes
 
 print('running')
 prc = DldFlashProcessor.DldFlashProcessor()
