@@ -7,7 +7,7 @@ import numpy as np
 import tifffile
 import xarray as xr
 
-import utilities.misc as utils
+import processor.utilities.misc as utils
 
 
 class BinnedArray(xr.DataArray):
