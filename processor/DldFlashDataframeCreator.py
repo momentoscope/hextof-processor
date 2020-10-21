@@ -7,10 +7,9 @@ import dask
 import dask.dataframe
 import dask.multiprocessing
 from dask.diagnostics import ProgressBar
-from tqdm import tqdm, tqdm_notebook
 import numpy as np
 from processor import DldProcessor
-from utilities import misc
+from processor.utilities import misc
 from processor.pah import BeamtimeDaqAccess
 import json
 

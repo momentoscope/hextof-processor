@@ -16,7 +16,7 @@ import pandas as pd
 from tqdm import tqdm, tqdm_notebook
 from configparser import ConfigParser
 # import matplotlib.pyplot as plt
-from utilities import misc
+from processor.utilities import misc
 from processor.BinnedArrays import res_to_xarray
 
 # warnings.resetwarnings()
