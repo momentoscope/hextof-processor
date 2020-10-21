@@ -233,7 +233,7 @@ def t2e(t, toffset=None, eoffset=None, l=0.77):
 # %% Detector calibration
 
 # ==================
-# Methods by Mac!
+# Methods by Mac! Built for the April 2018 beamtime, where a four quadrant detector was used.
 # ==================
 
 def shiftQuadrants(self, shiftQ1=0.231725, shiftQ2=-0.221625, shiftQ3=0.096575, shiftQ4=-0.106675, xCenter=1350,
