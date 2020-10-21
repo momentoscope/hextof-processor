@@ -22,6 +22,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+import dask
 from dask.diagnostics import ProgressBar
 
 from .misc import repr_byte_size
@@ -61,6 +63,44 @@ def channel_report(dd):
     df = pd.DataFrame.from_dict(chan_dict).T
     return df
 
+def channel_statistics(dd,columns=None):
+    """ Statistical overiview of the dataset.
+
+    The report contains minimum, maximum, amplitude(max-min), mean and standard
+    deviation of each column.
+
+    Args:
+        dd (dask.DataFrame): Table to analyse
+        columns (list,None): list of columns to analyse, if None it checks all
+            columns in the dataframe.
+    Returns:
+        df (pandas.DataFrame): table with computed values
+    Notes:
+        Author: Steinn Ymir Agustsson <sagustss@uni-mainz.de>
+
+    """
+    print('creating channel report...')
+    chan_dict = {}
+    if columns is None:
+        columns = dd.columns
+    for chan in columns:
+        try:
+            vals = dd[chan]
+            chan_dict[chan] = {}
+            chan_dict[chan]['min'] = vals.min()
+            chan_dict[chan]['max'] = vals.max()
+            chan_dict[chan]['amp'] = chan_dict[chan]['max'] - chan_dict[chan]['min']
+            chan_dict[chan]['mean'] = vals.mean()
+            chan_dict[chan]['std'] = vals.std()
+#             chan_dict[chan]['len'] = vals.size
+#             chan_dict[chan]['len_nan'] = vals.size - vals.isna().size
+
+        except KeyError:
+            print(f'No column {chan} in dataframe')
+
+    with ProgressBar():
+        d, = dask.compute(chan_dict)
+    return pd.DataFrame.from_dict(d)
 
 def binned_array_size(processor):
     """ Prints the expected size in memory of the binned array, computed with
