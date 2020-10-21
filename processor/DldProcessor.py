@@ -246,11 +246,11 @@ class DldProcessor:
         new_settings = ConfigParser()
         if settings_file_name[-4:] != '.ini':
             settings_file_name += '.ini'
-        new_settings_file = os.path.join(root_folder, 'utilities', 'settings', settings_file_name)
+        new_settings_file = os.path.join(root_folder, 'settings', settings_file_name)
         new_settings.read(new_settings_file)
         if len(new_settings.sections()) == 0:
             print(f'No settings file {settings_file_name} found.')
-            available_settings = os.listdir(os.path.join(root_folder, 'utilities', 'settings'))
+            available_settings = os.listdir(os.path.join(root_folder, 'settings'))
             print('Available settings files are:', *available_settings, sep='\n\t')
         else:
             if preserve_path:
