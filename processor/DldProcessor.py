@@ -438,6 +438,105 @@ class DldProcessor:
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStage'] - \
                                                self.ddMicrobunches['bam'] * sign
 
+    @staticmethod
+    def applyJitter(df, amp, col, type):
+        """ Add jittering to a dataframe column.
+
+        Adapted from MPES package: https://github.com/mpes-kit/mpes
+
+        :Parameters:
+            df : dataframe
+                Dataframe to add noise/jittering to.
+            amp : numeric
+                Amplitude scaling for the jittering noise.
+            col : str
+                Name of the column to add jittering to.
+
+        :Return:
+            Uniformly distributed noise vector with specified amplitude and size.
+        """
+        colsize = df[col].size
+
+        if (type == 'uniform'):
+            # Uniform Jitter distribution
+            return df[col] + amp * np.random.uniform(low=-1, high=1, size=colsize)
+        elif (type == 'normal'):
+            # Normal Jitter distribution works better for non-linear transformations and jitter sizes that don't match the original bin sizes
+            return df[col] + amp * np.random.standard_normal(size=colsize)
+
+    def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=False, useJitter=True,
+                        jitterAmplitude=3, jitterType='normal'):
+        """ add calibrated energy axis to dataframe
+
+        Uses the same equation as in tof2energy in calibrate.
+        Args:
+            t : float
+                The time of flight
+            toffset : float
+                The time offset from thedld clock start to when the fastest photoelectrons reach the detector
+            eoffset : float
+                The energy offset given by W-hv-V
+            l : float
+                the effective length of the drift section
+            useAvgSampleBias: bool (False)
+                uses the average value for the sample bias across the dataset,
+                possibly reducing noise, but cannot be used on runs where the
+                sample bias was changed
+
+        """
+        if toffset is None:
+            toffset = float(self.settings['processor']['ET_CONV_T_OFFSET'])
+        if eoffset is None:
+            eoffset = float(self.settings['processor']['ET_CONV_E_OFFSET'])
+        if l is None:
+            l = float(self.settings['processor']['ET_CONV_L'])
+
+        self.dd['energy'] = self.dd['dldTime'] - self.dd['dldSectorId']
+
+        if useJitter:
+            self.dd['energy'] = self.dd.map_partitions(self.applyJitter, amp=jitterAmplitude, col='energy', type=jitterType)
+
+        self.dd['energy'] *= self.TOF_STEP_TO_NS
+        if useAvgSampleBias:
+            eoffset -= self.dd['sampleBias'].mean()
+        else:
+            eoffset -= self.dd['sampleBias']
+
+        k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
+        self.dd['energy'] = k * np.power(l / ((self.dd['energy']) - toffset), 2.) - eoffset
+
+    def calibratePumpProbeTime(self, t0=0, bamSign=1, streakSign=1, invertTimeAxis=True):
+        """  Add pumpProbeTime axis to dataframes.
+
+        Correct pump probe time by BAM and/or streak camera
+
+        Args:
+            t0: float
+                pump probe time overlap
+            bamSign: -1,+1
+                sign of the bam correction:
+                    +1 : pumpProbeTime =  delayStage + bam
+                    -1 : pumpProbeTime =  delayStage - bam
+                     0 : ignore bam correction
+            streakSign: -1,0,+1
+                sign of the bam correction:
+                    +1 : pumpProbeTime =  delayStage + streakCam
+                    -1 : pumpProbeTime =  delayStage - streakCam
+                     0 : ignore streakCamera correction
+            invertTimeAxis: bool (True)
+                invert time direction on pump probe time
+
+        """
+        for df in [self.dd,self.ddMicrobunches]:
+            df['pumpProbeTime'] = df['delayStage'] - t0
+
+            if 'bam' in df:
+                df['pumpProbeTime'] += df['bam'] * bamSign
+            if 'streakCamera' in df:
+                df['pumpProbeTime'] += df['streakCamera'] * streakSign
+            if invertTimeAxis:
+                df['pumpProbeTime'] = - df['pumpProbeTime']
+
     def createPolarCoordinates(self, kCenter=(250, 250)):
         """ Calculate polar coordinates for k-space values.
 
@@ -497,13 +596,15 @@ class DldProcessor:
             raise ValueError(
                 'No pump probe time bin, could not normalize to delay stage histogram.')
 
-    def normalizeDelay(self, data_array, ax='pumpProbeTime', preserve_mean=True):
-        # TODO: work on better implementation and accessibility for this method
+    def normalizeDelay(self, data_array, ax=None, preserve_mean=True):
         """ Normalizes the data array to the number of counts per delay stage step.
 
         :Parameter:
             data_array : numpy array
                 data array containing binned data, as created by the ``computeBinnedData`` method.
+            ax : str
+                name of the axis to normalize to, default is None, which uses as
+                normalization axis "pumpProbeTime" if found, otherwise "delayStage"
             preserve_mean : bool | True
                 if True, divides the histogram by its mean, preserving the average value of the 
                 normalized array.   
@@ -514,17 +615,23 @@ class DldProcessor:
             data_array_normalized : numpy array
                 normalized version of the input array.
         """
-        if 'pumpProbeTime' in self.binNameList:
-            ax='pumpProbeTime'
-            nhist = self.pumpProbeHistogram.copy()
-        elif 'delayStage' in self.binNameList:
-            ax='delayStage'
-            nhist = self.delayStageHistogram.copy()
+
+        if ax is None:
+            if 'pumpProbeTime' in self.binNameList:
+                ax='pumpProbeTime'
+                nhist = self.pumpProbeTimeHistogram.copy()
+            elif 'delayStage' in self.binNameList:
+                ax='delayStage'
+                nhist = self.delayStageHistogram.copy()
+            else:
+                raise ValueError(f'No axis pump probe or delay stage histogram found, could not normalize.')
         else:
-            raise ValueError(
-                'No pump probe time bin, could not normalize to delay stage histogram.')
+            try:
+                nhist = getattr(self,f'{ax}Histogram')
+            except:
+                raise ValueError(f'No axis {ax} histogram found, could not normalize.')
         idx = self.binNameList.index(ax)
-        print('normalized pumpProbe data found along axis {}'.format(idx))
+        print(f'normalized {ax} data found along axis {idx}')
         data_array_normalized = np.swapaxes(data_array, 0, idx)
         
         for i in range(np.ndim(data_array_normalized) - 1):
@@ -627,7 +734,7 @@ class DldProcessor:
             return out
 
     @property
-    def pumpProbeHistogram(self):
+    def pumpProbeTimeHistogram(self):
         """ Easy access to pump probe normalization array.
         Mostly for retrocompatibility"""
         try:
@@ -851,7 +958,7 @@ class DldProcessor:
         self.binRangeList = []
         self.binAxesList = []
 
-    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False):
+    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False, usePbar=True):
         """ Use the bin list to bin the data.
         
         :Parameters:
@@ -936,7 +1043,7 @@ class DldProcessor:
         with warnings.catch_warnings():
             warnings.simplefilter(warnString)
 
-            for i in tqdm_notebook(range(0, self.dd.npartitions, self.N_CORES)):
+            for i in tqdm_notebook(range(0, self.dd.npartitions, self.N_CORES),disable=not usePbar):
                 resultsToCalculate = []
                 # process the data in blocks of n partitions (given by the number
                 # of cores):
@@ -1037,7 +1144,7 @@ class DldProcessor:
         if hasattr(self, 'delaystageHistogram'):
             metadata['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
         elif hasattr(self, 'pumpProbeHistogram'):
-            metadata['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeHistogram}
+            metadata['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeTimeHistogram}
 
         # if not fast_mode:
         #     try:
@@ -1123,7 +1230,7 @@ class DldProcessor:
         if hasattr(self, 'delaystageHistogram'):
             ba.attrs['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
         elif hasattr(self, 'pumpProbeHistogram'):
-            ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeHistogram}
+            ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeTimeHistogram}
         if not fast_mode:
             try:
                 axis_values = []
@@ -1317,7 +1424,7 @@ class DldProcessor:
                 if hasattr(self, 'pumpProbeHistogram'):
                     hh.create_dataset(
                         'pumpProbeHistogram',
-                        data=self.pumpProbeHistogram)
+                        data=self.pumpProbeTimeHistogram)
 
     @staticmethod
     def load_binned(file_name, mode='r', ret_type='list'):

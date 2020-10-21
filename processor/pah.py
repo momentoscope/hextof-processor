@@ -3,7 +3,6 @@
 @author: Steinn Ymir Agustsson
 """
 import sys, os
-# import configparser
 
 # settings = configparser.ConfigParser() # TODO: find a smarter way
 # if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
@@ -13,13 +12,28 @@ import sys, os
 
 # importing stuff from PAH modules
 # sys.path.append(settings['paths']['PAH_MODULE_DIR'])
-from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess, H5FileDataAccess, H5FileManager
+try:
+    from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess, H5FileDataAccess, H5FileManager
+except:
+    import configparser
+
+    settings = configparser.ConfigParser() # TODO: find a smarter way
+    if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+        settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+    else:
+        settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+
+    # importing stuff from PAH modules
+    sys.path.append(settings['paths']['PAH_MODULE_DIR'])
+    from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess, H5FileDataAccess, H5FileManager
 
 # Below are the redefined classes belonging to PAH that should correct the 
 # problems induced by adding the macrobunchID information to the data.
 
 
 def main():
+    import configparser
+
     settings = configparser.ConfigParser()
     settings.read('SETTINGS.ini')
     path = settings['paths']['DATA_RAW_DIR']
