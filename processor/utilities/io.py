@@ -10,22 +10,6 @@ import xarray as xr
 import processor.utilities.misc as utils
 
 
-class BinnedArray(xr.DataArray):
-
-    def __init__(self, data=None, coords=None, dims=None, name=None, attrs=None, encoding=None, indexes=None,
-                 fastpath=False):
-        super(BinnedArray, self).__init__(data, coords=coords, dims=dims, name=name,
-                                          attrs=attrs, encoding=encoding, indexes=indexes, fastpath=fastpath)
-
-    def read_logbook(self, log_text):
-        log = utils.parse_logbook(log_text)
-
-        try:
-            self.attrs['metadata'] = {**log, **self.attrs['metadata']}
-        except KeyError:
-            self.attrs['metadata'] = log
-
-
 def res_to_xarray(res, binNames, binAxes, metadata=None):
     """ creates a BinnedArray (xarray subclass) out of the given np.array
 
