@@ -1,0 +1,359 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>5. Input/Output (processor.utilities.io) &mdash; hextof-processor 0.9.5 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../../index.html"/>
+        <link rel="next" title="6. Miscellaneous (processor.utilities.misc)" href="misc.html"/>
+        <link rel="prev" title="4. Miscellaneous (processor.utilities.vis)" href="vis.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pah.html">3. Interfacing external pah library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/06_fullexample.html">6. Complete code examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/howtomaintain.html">2. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li><span class="section-number">5. </span>Input/Output (processor.utilities.io)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/library/utils/io.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-processor.utilities.io">
+<span id="input-output-processor-utilities-io"></span><h1><span class="section-number">5. </span>Input/Output (processor.utilities.io)<a class="headerlink" href="#module-processor.utilities.io" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="processor.utilities.io.array_to_tiff">
+<code class="sig-prename descclassname">processor.utilities.io.</code><code class="sig-name descname">array_to_tiff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em>, <em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/io.html#array_to_tiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.io.array_to_tiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save array to imageJ compatible tiff stack.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>array (np.array): array to save. 2D,3D or 4D
+filename (str): full path and name of file to save.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.io.res_to_xarray">
+<code class="sig-prename descclassname">processor.utilities.io.</code><code class="sig-name descname">res_to_xarray</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">res</span></em>, <em class="sig-param"><span class="n">binNames</span></em>, <em class="sig-param"><span class="n">binAxes</span></em>, <em class="sig-param"><span class="n">metadata</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/io.html#res_to_xarray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.io.res_to_xarray" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates a BinnedArray (xarray subclass) out of the given np.array</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>res: np.array</dt><dd><p>nd array of binned data</p>
+</dd>
+</dl>
+<p>binNames (list): list of names of the binned axes
+binAxes (list): list of np.arrays with the values of the axes</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>ba: BinnedArray (xarray)</dt><dd><p>an xarray-like container with binned data, axis, and all available metadata</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.io.save_binned">
+<code class="sig-prename descclassname">processor.utilities.io.</code><code class="sig-name descname">save_binned</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'h5'</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'w'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/io.html#save_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.io.save_binned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a binned numpy array to h5 file. The file includes the axes
+(taken from the scheduled bins) and the delay stage histogram, if it exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>file_name<span class="classifier">str</span></dt><dd><p>Name of the saved file. The extension '.h5' is automatically added.</p>
+</dd>
+<dt>path<span class="classifier">str | None</span></dt><dd><p>File path.</p>
+</dd>
+<dt>mode<span class="classifier">str | 'w'</span></dt><dd><p>Write mode of h5 file ('w' = write).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.io.to_tiff">
+<code class="sig-prename descclassname">processor.utilities.io.</code><code class="sig-name descname">to_tiff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">axis_dict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/io.html#to_tiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.io.to_tiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>save array to imagej tiff sack.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.io.xarray_to_h5">
+<code class="sig-prename descclassname">processor.utilities.io.</code><code class="sig-name descname">xarray_to_h5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">faddr</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'w'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/io.html#xarray_to_h5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.io.xarray_to_h5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save xarray formatted data to hdf5</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>data (xarray.DataArray): input data
+faddr (str): complete file name (including path)
+mode (str): hdf5 read/write mode</p>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.io.xarray_to_tiff">
+<code class="sig-prename descclassname">processor.utilities.io.</code><code class="sig-name descname">xarray_to_tiff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">axis_dict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/io.html#xarray_to_tiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.io.xarray_to_tiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save data to tiff file</p>
+<dl>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>data (xarray.DataArray): data to be saved. ImageJ likes tiff files with</dt><dd><p>axis order as TZCYXS. Therefore, best axis order in input should be:
+Time, Energy, posY, posX. The channels 'C' and 'S' are automatically
+added and can be ignored.</p>
+</dd>
+</dl>
+<p>filename (str): full path and name of file to save.
+axis_dict (dict): name pairs for correct axis ordering. Keys should be</p>
+<blockquote>
+<div><p>any of T,Z,C,Y,X,S. The Corresponding value will be searched among
+the dimensions of the xarray, and placed in the right order for
+imagej stacks metadata.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>units (bool): Not implemented. Will be used to set units in the tif stack</dt><dd><p>TODO: expand imagej metadata to include physical units</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="misc.html" class="btn btn-neutral float-right" title="6. Miscellaneous (processor.utilities.misc)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="vis.html" class="btn btn-neutral" title="4. Miscellaneous (processor.utilities.vis)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.9.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

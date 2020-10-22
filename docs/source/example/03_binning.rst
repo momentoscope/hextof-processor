@@ -1,25 +1,32 @@
-## Binning multidimensional data
+Binning multidimensional data
+==========================================
 
 In order to get n-dimensional numpy array from the generated datasets, it is necessary to bin data along the desired axes. An example starting from loading parquet data is in the following,
-```python
-processor = DldFlashProcessor()
-processor.runNumber = 18843
-processor.readDataframes('path/to/file/name')
-```
+
+.. code-block:: python
+
+    processor = DldFlashProcessor()
+    processor.runNumber = 18843
+    processor.readDataframes('path/to/file/name')
+
 
 This can be also done from direct raw data read with `readData` To create the bin array structure, run
-```python
-processor.addBinning('dldPosX',480,980,10)
-processor.addBinning('dldPosY',480,980,10)
-```
+
+.. code-block:: python
+
+    processor.addBinning('dldPosX',480,980,10)
+    processor.addBinning('dldPosY',480,980,10)
+
 
 This adds binning along the kx and ky directions, from point 480 to point 980 with bin size of 10. Bins can be created defining start and end points and either step size or number of steps. The resulting array can be obtained using
-```python
-result = processor.ComputeBinnedData()
-```
+
+.. code-block:: python
+
+    result = processor.ComputeBinnedData()
+
 
 where the resulting numpy array with float64-typed values will have the axes in the same order as binning assignments. Other binning axes commonly used are,
-```eval_rst
+
 +-----------------------+---------------------+----------------+--------+
 |      Proper name      |     Namestring      | Typical values |  Units |
 +=======================+=====================+================+========+
@@ -45,10 +52,9 @@ where the resulting numpy array with float64-typed values will have the axes in 
 +-----------------------+---------------------+----------------+--------+
 |           ?           |      'gmdBda'       |                |        |
 +-----------------------+---------------------+----------------+--------+
-```
+
 
 \* ToF delay bin size needs to be multiplied by `processor.TOF_STEP_TO_NS` in order to avoid artifacts.
-
 \** binning on microbunch works only when not binning on any other dimension
 
 Binning is created using np.linspace (formerly was done with `np.arange`). The implementation allows to choose between setting a step size (`useStepSize=True, default`) or using a number of bins (`useStepSize=False`).

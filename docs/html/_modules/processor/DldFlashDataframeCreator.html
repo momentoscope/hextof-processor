@@ -89,21 +89,29 @@
               
             
             
-              <p class="caption"><span class="caption-text">Processor library</span></p>
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../library/pah.html">3. Interfacing external pah library</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../library/utils.html">4. Utility functions (utils)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../library/utils/calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library/utils/diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library/utils/masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library/utils/vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library/utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library/utils/misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../example/readdaq.html">1. Read DAQ data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example/parquet.html">2. Save dataset to dask parquet files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example/binning.html">3. Binning multidimensional data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example/nobinning.html">4. Processing data without binning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example/corrections.html">5. Corrections to FEL pulse timing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example/fullexample.html">6. Complete code examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/06_fullexample.html">6. Complete code examples</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Miscellaneous</span></p>
 <ul>
@@ -176,14 +184,17 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">configparser</span> <span class="k">import</span> <span class="n">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">ConfigParser</span>
 <span class="kn">import</span> <span class="nn">dask</span>
 <span class="kn">import</span> <span class="nn">dask.dataframe</span>
 <span class="kn">import</span> <span class="nn">dask.multiprocessing</span>
-<span class="kn">from</span> <span class="nn">dask.diagnostics</span> <span class="k">import</span> <span class="n">ProgressBar</span>
+<span class="kn">from</span> <span class="nn">dask.diagnostics</span> <span class="kn">import</span> <span class="n">ProgressBar</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">processor</span> <span class="k">import</span> <span class="n">DldProcessor</span><span class="p">,</span> <span class="n">utils</span>
-<span class="kn">from</span> <span class="nn">processor.pah</span> <span class="k">import</span> <span class="n">BeamtimeDaqAccess</span>
+<span class="kn">from</span> <span class="nn">processor</span> <span class="kn">import</span> <span class="n">DldProcessor</span>
+<span class="kn">from</span> <span class="nn">processor.utilities</span> <span class="kn">import</span> <span class="n">misc</span>
+<span class="kn">from</span> <span class="nn">processor.pah</span> <span class="kn">import</span> <span class="n">BeamtimeDaqAccess</span>
+<span class="kn">import</span> <span class="nn">json</span>
 
 <span class="n">_VERBOSE</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -199,26 +210,6 @@
     <span class="kn">import</span> <span class="nn">processor.cscripts.DldFlashProcessorNotCy</span> <span class="k">as</span> <span class="nn">DldFlashProcessorCy</span>
 
 <span class="n">assignToMircobunch</span> <span class="o">=</span> <span class="n">DldFlashProcessorCy</span><span class="o">.</span><span class="n">assignToMircobunch</span>
-
-
-<span class="c1"># For code testing (Steinn Y. Agustsson)</span>
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-
-    <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
-    <span class="n">t0</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-    <span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
-    <span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="mi">18843</span>
-    <span class="c1"># processor.pulseIdInterval =</span>
-    <span class="n">processor</span><span class="o">.</span><span class="n">readData</span><span class="p">()</span>
-    <span class="n">processor</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
-
-    <span class="n">processor</span><span class="o">.</span><span class="n">addBinning</span><span class="p">(</span><span class="s1">&#39;dldTime&#39;</span><span class="p">,</span> <span class="mi">620</span><span class="p">,</span> <span class="mi">670</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-
-    <span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">computeBinnedData</span><span class="p">()</span>
-    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computation time: </span><span class="si">{}</span><span class="s2"> s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="DldFlashProcessor"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor">[docs]</a><span class="k">class</span> <span class="nc">DldFlashProcessor</span><span class="p">(</span><span class="n">DldProcessor</span><span class="o">.</span><span class="n">DldProcessor</span><span class="p">):</span>
@@ -253,12 +244,12 @@
 <span class="sd">            dataframe containing chosen channel information from the given run.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">runNumber</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pulseIdInterval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="n">runNumber</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="n">pulseIdInterval</span>
 
 <div class="viewcode-block" id="DldFlashProcessor.readData"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.readData">[docs]</a>    <span class="k">def</span> <span class="nf">readData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runNumber</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pulseIdInterval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Read data by run number or macrobunch pulseID interval.</span>
@@ -282,7 +273,7 @@
             <span class="n">runNumber</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="n">runNumber</span>
-        
+
         <span class="k">if</span> <span class="n">pulseIdInterval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span>
         <span class="k">else</span><span class="p">:</span>
@@ -291,34 +282,28 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">pulseIdInterval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">runNumber</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need either runNumber or pulseIdInterval to know what data to read.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_RAW_DIR</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_path_to_run</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span><span class="n">path</span><span class="p">)</span>
 
-        <span class="c1"># parse settings and set all dataset addresses as attributes.</span>
-        <span class="n">settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)):</span>
-            <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">daqAccess</span> <span class="o">=</span> <span class="n">BeamtimeDaqAccess</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">get_path_to_run</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+                <span class="n">daqAccess</span> <span class="o">=</span> <span class="n">BeamtimeDaqAccess</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">))</span>
-
-        <span class="n">section</span> <span class="o">=</span> <span class="s1">&#39;DAQ address - used&#39;</span>
-
-
-        <span class="c1"># available_runs = utils.get_available_runs(path)</span>
-        <span class="c1"># try:</span>
-        <span class="c1">#     path_to_run = available_runs[&#39;run{}&#39;.format(runNumber)]</span>
-        <span class="c1"># except KeyError:</span>
-        <span class="c1">#     raise ValueError(&#39;no data for run {}&#39;.format(runNumber))</span>
-        <span class="c1"># print(path_to_run)</span>
-        <span class="c1"># daqAccess = BeamtimeDaqAccess.create(path_to_run)</span>
-        <span class="n">daqAccess</span> <span class="o">=</span> <span class="n">BeamtimeDaqAccess</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span><span class="p">)</span>
-
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_RAW_DIR</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">get_path_to_run</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="n">daqAccess</span> <span class="o">=</span> <span class="n">BeamtimeDaqAccess</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span><span class="p">)</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">[</span><span class="n">section</span><span class="p">]:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">camelCaseIt</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
-            <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">entry</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">daqAccess</span><span class="o">.</span><span class="n">isChannelAvailable</span><span class="p">(</span><span class="n">val</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">getIds</span><span class="p">(</span><span class="n">runNumber</span><span class="p">)):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getIds</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="c1"># Parse the settings file in the DAQ channels section for the list of</span>
+        <span class="c1"># h5 addresses to read from raw and add to the dataframe.</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;loading data...&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">camelCaseIt</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">daqAccess</span><span class="o">.</span><span class="n">isChannelAvailable</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">_VERBOSE</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;assigning address: </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span> <span class="n">val</span><span class="p">))</span>
@@ -338,15 +323,22 @@
                     <span class="n">attrVal</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address_name</span><span class="p">)</span>
                     <span class="n">values</span><span class="p">,</span> <span class="n">otherStuff</span> <span class="o">=</span> <span class="n">daqAccess</span><span class="o">.</span><span class="n">allValuesOfRun</span><span class="p">(</span><span class="n">attrVal</span><span class="p">,</span> <span class="n">runNumber</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
-                    <span class="k">pass</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Assertion error: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">address_name</span><span class="p">,</span> <span class="n">attrVal</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">otherStuff</span> <span class="p">))</span>
 
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address_name</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">address_name</span> <span class="o">==</span> <span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">:</span>  <span class="c1"># catch the value of the first macrobunchID</span>
                     <span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="p">(</span><span class="n">otherStuff</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">otherStuff</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="n">pulseIdInterval</span>
                     <span class="n">macroBunchPulseId_correction</span> <span class="o">=</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">address_name</span> <span class="o">==</span> <span class="s1">&#39;timeStamp&#39;</span><span class="p">:</span>  <span class="c1"># catch the time stamps</span>
+                    <span class="n">startEndTime</span> <span class="o">=</span> <span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span> <span class="o">=</span> <span class="n">startEndTime</span>
+
             <span class="n">numOfMacrobunches</span> <span class="o">=</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Run </span><span class="si">{0}</span><span class="s1"> contains </span><span class="si">{1:,}</span><span class="s1"> Macrobunches, from </span><span class="si">{2:,}</span><span class="s1"> to </span><span class="si">{3:,}</span><span class="s1">&#39;</span>\
-                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">numOfMacrobunches</span><span class="p">,</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+
+
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;reading DAQ data from interval </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pulseIdInterval</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="n">pulseIdInterval</span>
@@ -369,12 +361,174 @@
         <span class="n">electronsToCount</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">electronsToCount</span><span class="p">)</span>
         <span class="n">electronsToCount</span> <span class="o">=</span> <span class="n">electronsToCount</span><span class="p">[</span><span class="n">electronsToCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">electronsToCount</span> <span class="o">=</span> <span class="n">electronsToCount</span><span class="p">[</span><span class="n">electronsToCount</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">]</span>
-        <span class="n">numOfElectrons</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">electronsToCount</span><span class="p">)</span>
-        <span class="n">electronsPerMacrobunch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numOfElectrons</span> <span class="o">/</span> <span class="n">numOfMacrobunches</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of electrons: </span><span class="si">{0:,}</span><span class="s2">; </span><span class="si">{1:,}</span><span class="s2"> e/Mb &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">numOfElectrons</span><span class="p">,</span> <span class="n">electronsPerMacrobunch</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numOfElectrons</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">electronsToCount</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">electronsPerMacrobunch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numOfElectrons</span> <span class="o">/</span> <span class="n">numOfMacrobunches</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;runNumber&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span><span class="p">,</span>
+            <span class="s1">&#39;pulseIdInterval&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">,</span>
+            <span class="s1">&#39;numberOfMacrobunches&#39;</span><span class="p">:</span> <span class="n">numOfMacrobunches</span><span class="p">,</span>
+            <span class="s1">&#39;numberOfElectrons&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">numOfElectrons</span><span class="p">,</span>
+            <span class="s1">&#39;electronsPerMacrobunch&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">electronsPerMacrobunch</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampStart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampStop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampDuration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timeStart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timeStop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timeDuration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampStart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampStop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampDuration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timeStart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timeStop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timeDuration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">printRunOverview</span><span class="p">()</span>
+
+        <span class="c1"># Old Print style</span>
+        <span class="c1"># print(&#39;Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}&#39; \</span>
+        <span class="c1">#       .format(runNumber, numOfMacrobunches, pulseIdInterval[0], pulseIdInterval[1]))</span>
+        <span class="c1"># try:</span>
+        <span class="c1">#     print(&quot;start time: {}, end time: {}, total time: {}&quot;</span>
+        <span class="c1">#           .format(datetime.utcfromtimestamp(startEndTime[0]).strftime(&#39;%Y-%m-%d %H:%M:%S&#39;),</span>
+        <span class="c1">#                   datetime.utcfromtimestamp(startEndTime[1]).strftime(&#39;%Y-%m-%d %H:%M:%S&#39;),</span>
+        <span class="c1">#                   datetime.utcfromtimestamp(startEndTime[1] - startEndTime[0]).strftime(&#39;%H:%M:%S&#39;)))</span>
+        <span class="c1"># except:</span>
+        <span class="c1">#     pass</span>
+        <span class="c1">#</span>
+        <span class="c1"># print(&quot;Number of electrons: {0:,}; {1:,} e/Mb &quot;.format(self.numOfElectrons, self.electronsPerMacrobunch))</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating dataframes... Please wait...&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">ProgressBar</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createDataframePerElectron</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Electron dataframe created.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createDataframePerMicrobunch</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Microbunch dataframe created.&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Reading Complete.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DldFlashProcessor.readData_old"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.readData_old">[docs]</a>    <span class="k">def</span> <span class="nf">readData_old</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runNumber</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pulseIdInterval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read data by run number or macrobunch pulseID interval.</span>
+
+<span class="sd">        Useful for scans that would otherwise hit the machine&#39;s memory limit.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">            runNumber : int | None (default to ``self.runNumber``)</span>
+<span class="sd">                number of the run from which to read data. If None, requires pulseIdInterval.</span>
+<span class="sd">            pulseIdInterval : (int, int) | None (default to ``self.pulseIdInterval``)</span>
+<span class="sd">                first and last macrobunches of selected data range. If None, the whole run</span>
+<span class="sd">                defined by runNumber will be taken.</span>
+<span class="sd">            path : str | None (default to ``self.DATA_RAW_DIR``)</span>
+<span class="sd">                path to location where raw HDF5 files are stored</span>
+
+<span class="sd">        This is a union of the readRun and readInterval methods defined in previous versions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Update instance attributes based on input parameters</span>
+        <span class="k">if</span> <span class="n">runNumber</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">runNumber</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="n">runNumber</span>
+
+        <span class="k">if</span> <span class="n">pulseIdInterval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="n">pulseIdInterval</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">pulseIdInterval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">runNumber</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need either runNumber or pulseIdInterval to know what data to read.&#39;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;searching for data...&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">daqAccess</span> <span class="o">=</span> <span class="n">BeamtimeDaqAccess</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">get_path_to_run</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+                <span class="n">daqAccess</span> <span class="o">=</span> <span class="n">BeamtimeDaqAccess</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_RAW_DIR</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">get_path_to_run</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="n">daqAccess</span> <span class="o">=</span> <span class="n">BeamtimeDaqAccess</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Parse the settings file in the DAQ channels section for the list of</span>
+        <span class="c1"># h5 addresses to read from raw and add to the dataframe.</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">camelCaseIt</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">daqAccess</span><span class="o">.</span><span class="n">isChannelAvailable</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getIds</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">path</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">_VERBOSE</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;assigning address: </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span> <span class="n">val</span><span class="p">))</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># if _VERBOSE:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;skipping address missing from data: </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span> <span class="n">val</span><span class="p">))</span>
+
+        <span class="c1"># TODO: get the available pulse id from PAH</span>
+        <span class="k">if</span> <span class="n">pulseIdInterval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Reading DAQ data from run </span><span class="si">{}</span><span class="s1">... Please wait...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">runNumber</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">address_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_VERBOSE</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;reading address: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">address_name</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">attrVal</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address_name</span><span class="p">)</span>
+                    <span class="n">values</span><span class="p">,</span> <span class="n">otherStuff</span> <span class="o">=</span> <span class="n">daqAccess</span><span class="o">.</span><span class="n">allValuesOfRun</span><span class="p">(</span><span class="n">attrVal</span><span class="p">,</span> <span class="n">runNumber</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Assertion error: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">address_name</span><span class="p">,</span> <span class="n">attrVal</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">otherStuff</span> <span class="p">))</span>
+
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address_name</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">address_name</span> <span class="o">==</span> <span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">:</span>  <span class="c1"># catch the value of the first macrobunchID</span>
+                    <span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="p">(</span><span class="n">otherStuff</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">otherStuff</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="n">pulseIdInterval</span>
+                    <span class="n">macroBunchPulseId_correction</span> <span class="o">=</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">address_name</span> <span class="o">==</span> <span class="s1">&#39;timeStamp&#39;</span><span class="p">:</span>  <span class="c1"># catch the time stamps</span>
+                    <span class="n">startEndTime</span> <span class="o">=</span> <span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span> <span class="o">=</span> <span class="n">startEndTime</span>
+
+            <span class="n">numOfMacrobunches</span> <span class="o">=</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Run </span><span class="si">{0}</span><span class="s1"> contains </span><span class="si">{1:,}</span><span class="s1"> Macrobunches, from </span><span class="si">{2:,}</span><span class="s1"> to </span><span class="si">{3:,}</span><span class="s1">&#39;</span>\
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">numOfMacrobunches</span><span class="p">,</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;start time: </span><span class="si">{}</span><span class="s2">, end time: </span><span class="si">{}</span><span class="s2">, total time: </span><span class="si">{}</span><span class="s2">&quot;</span>
+                      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">),</span>
+                              <span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">),</span>
+                              <span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M:%S&#39;</span><span class="p">)))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;reading DAQ data from interval </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pulseIdInterval</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="n">pulseIdInterval</span>
+            <span class="k">for</span> <span class="n">address_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_VERBOSE</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;reading address: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">address_name</span><span class="p">))</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address_name</span><span class="p">,</span> <span class="n">daqAccess</span><span class="o">.</span><span class="n">valuesOfInterval</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address_name</span><span class="p">),</span> <span class="n">pulseIdInterval</span><span class="p">))</span>
+            <span class="n">numOfMacrobunches</span> <span class="o">=</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">macroBunchPulseId_correction</span> <span class="o">=</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># necessary corrections for specific channels:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delayStage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayStage</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">macroBunchPulseId</span> <span class="o">-=</span> <span class="n">macroBunchPulseId_correction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dldMicrobunchId</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UBID_OFFSET</span>
+
+        <span class="k">if</span> <span class="n">_VERBOSE</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Counting electrons...&#39;</span><span class="p">)</span>
+
+        <span class="n">electronsToCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dldPosX</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">electronsToCount</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">electronsToCount</span><span class="p">)</span>
+        <span class="n">electronsToCount</span> <span class="o">=</span> <span class="n">electronsToCount</span><span class="p">[</span><span class="n">electronsToCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">electronsToCount</span> <span class="o">=</span> <span class="n">electronsToCount</span><span class="p">[</span><span class="n">electronsToCount</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numOfElectrons</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">electronsToCount</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">electronsPerMacrobunch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numOfElectrons</span> <span class="o">/</span> <span class="n">numOfMacrobunches</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of electrons: </span><span class="si">{0:,}</span><span class="s2">; </span><span class="si">{1:,}</span><span class="s2"> e/Mb &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numOfElectrons</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">electronsPerMacrobunch</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating dataframes... Please wait...&quot;</span><span class="p">)</span>
+        <span class="n">pbar</span> <span class="o">=</span> <span class="n">ProgressBar</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">pbar</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">createDataframePerElectron</span><span class="p">()</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Electron dataframe created.&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">createDataframePerMicrobunch</span><span class="p">()</span>
@@ -399,24 +553,56 @@
         <span class="c1"># Here all the columns to be stored in the dd dataframe are created from the raw h5 file</span>
         <span class="c1"># Each columns requires an ad hoc treatment, so they all need to be done individually</span>
         <span class="n">arrayCols</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># TODO: find less ad hoc solution</span>
+        <span class="n">colNames</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="s1">&#39;dldPosX&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">daX</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dldPosX</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daX</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;dldPosX&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;dldPosY&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">daY</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dldPosY</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daY</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;dldPosY&#39;</span><span class="p">)</span>
+
 
         <span class="k">if</span> <span class="s1">&#39;dldTime&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">daTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dldTime</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daTime</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;dldTime&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;dldAux0&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
+            <span class="n">daSampleBias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldMicrobunchId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">daSampleBias</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldAux0</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">daSampleBias</span> <span class="o">=</span> <span class="n">daSampleBias</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daSampleBias</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;sampleBias&#39;</span><span class="p">)</span>
+
+            <span class="n">daTofVoltage</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldMicrobunchId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">daTofVoltage</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldAux0</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="mi">1</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">daTofVoltage</span> <span class="o">=</span> <span class="n">daTofVoltage</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daTofVoltage</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;tofVoltage&#39;</span><span class="p">)</span>
+
+            <span class="n">daExtractorVoltage</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldMicrobunchId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">daExtractorVoltage</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldAux0</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="mi">2</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">daExtractorVoltage</span> <span class="o">=</span> <span class="n">daExtractorVoltage</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daExtractorVoltage</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;extractorVoltage&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;delayStage&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">delayStageArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldMicrobunchId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:])</span>
             <span class="n">delayStageArray</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delayStage</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
             <span class="n">daDelaystage</span> <span class="o">=</span> <span class="n">delayStageArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daDelaystage</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;delayStage&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;streakCam&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
+            <span class="n">streakCamArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldMicrobunchId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">streakCamArray</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">streakCam</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">daStreakCam</span> <span class="o">=</span> <span class="n">streakCamArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daStreakCam</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;streakCamera&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;bam&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">bamArray</span> <span class="o">=</span> <span class="n">assignToMircobunch</span><span class="p">(</span>
@@ -424,15 +610,24 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">bam</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
             <span class="n">daBam</span> <span class="o">=</span> <span class="n">bamArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daBam</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;bam&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;dldMicrobunchId&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">daMicrobunchId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dldMicrobunchId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daMicrobunchId</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;dldMicrobunchId&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;dldDetectorId&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">dldDetectorId</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldDetectorId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span>
             <span class="n">daDetectorId</span> <span class="o">=</span> <span class="n">dldDetectorId</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daDetectorId</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;dldDetectorId&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;dldSectorId&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
+            <span class="n">dldSectorId</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldSectorId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span>
+            <span class="n">daSectorId</span> <span class="o">=</span> <span class="n">dldSectorId</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daSectorId</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;dldSectorId&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;bunchCharge&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">bunchChargeArray</span> <span class="o">=</span> <span class="n">assignToMircobunch</span><span class="p">(</span>
@@ -440,6 +635,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">bunchCharge</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
             <span class="n">daBunchCharge</span> <span class="o">=</span> <span class="n">bunchChargeArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daBunchCharge</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;bunchCharge&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;opticalDiode&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">opticalDiodeArray</span> <span class="o">=</span> <span class="n">assignToMircobunch</span><span class="p">(</span>
@@ -447,6 +643,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">opticalDiode</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
             <span class="n">daOpticalDiode</span> <span class="o">=</span> <span class="n">opticalDiodeArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daOpticalDiode</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;opticalDiode&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;gmdTunnel&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">gmdTunnelArray</span> <span class="o">=</span> <span class="n">assignToMircobunch</span><span class="p">(</span>
@@ -454,6 +651,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">gmdTunnel</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
             <span class="n">daGmdTunnel</span> <span class="o">=</span> <span class="n">gmdTunnelArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daGmdTunnel</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;gmdTunnel&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;gmdBda&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">gmdBdaArray</span> <span class="o">=</span> <span class="n">assignToMircobunch</span><span class="p">(</span>
@@ -461,6 +659,27 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">gmdBda</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
             <span class="n">daGmdBda</span> <span class="o">=</span> <span class="n">gmdBdaArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daGmdBda</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;gmdBda&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;i0Monitor&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">I0BunchTrain2Pulses</span><span class="p">():</span>
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Cut, reshape and average the ADC signal of the I0 monitor. </span>
+<span class="sd">                Preliminary procedure: migth be optimized and tunend in to the DAQ </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="n">i0Cutted</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">i0Monitor</span><span class="p">[:,</span><span class="mi">810</span><span class="p">:</span><span class="mi">45090</span><span class="p">],</span><span class="mi">410</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">i0BG</span><span class="o">=</span><span class="n">i0Cutted</span><span class="p">[:,:,:</span><span class="mi">39</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">i0Cutted</span><span class="p">[:,:,</span><span class="mi">39</span><span class="p">:</span><span class="mi">90</span><span class="p">]</span><span class="o">-</span><span class="n">i0BG</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            
+            <span class="n">i0Data</span><span class="o">=</span><span class="n">I0BunchTrain2Pulses</span><span class="p">()</span>
+            
+            <span class="n">i0Array</span> <span class="o">=</span> <span class="n">assignToMircobunch</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dldMicrobunchId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+                <span class="n">i0Data</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+            <span class="n">daI0</span> <span class="o">=</span> <span class="n">i0Array</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daI0</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;i0Monitor&#39;</span><span class="p">)</span>
+
 
         <span class="c1"># convert the laser polarization motor position to the electron format</span>
         <span class="k">if</span> <span class="s1">&#39;pumpPol&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
@@ -468,6 +687,7 @@
             <span class="n">pumpPolArray</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pumpPol</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
             <span class="n">daPumpPol</span> <span class="o">=</span> <span class="n">pumpPolArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daPumpPol</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;pumpPol&#39;</span><span class="p">)</span>
 
         <span class="c1"># convert the MacroBunchPulseId to the electron format. No check because this surely exists</span>
         <span class="k">if</span> <span class="s1">&#39;macroBunchPulseId&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
@@ -475,6 +695,17 @@
             <span class="n">macroBunchPulseIdArray</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">macroBunchPulseId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
             <span class="n">daMacroBunchPulseId</span> <span class="o">=</span> <span class="n">macroBunchPulseIdArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daMacroBunchPulseId</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">)</span>
+
+        <span class="c1"># convert the timeStamp to the electron format. No check because this surely exists</span>
+        <span class="k">if</span> <span class="s1">&#39;timeStamp&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
+            <span class="n">timeStampArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldMicrobunchId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">timeStampArray</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeStamp</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">daTimeStamp</span> <span class="o">=</span> <span class="n">timeStampArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daTimeStamp</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;timeStamp&#39;</span><span class="p">)</span>
+
+
 
         <span class="c1"># the Aux channel: aux0:</span>
         <span class="c1"># aux0Arr= assignToMircobunch(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64), self.dldAux[mbIndexStart:mbIndexEnd, 0].astype(np.float64))</span>
@@ -486,9 +717,11 @@
 
         <span class="c1"># added macroBunchPulseId at last position</span>
         <span class="c1"># da = dask.array.stack([daX, daY, daTime, daDelaystage, daBam, daMicrobunchId,</span>
-        <span class="c1">#                       daDetectorId, daBunchCharge, daOpticalDiode,</span>
+        <span class="c1">#                       daDetectorId, daSectorId, daBunchCharge, daOpticalDiode,</span>
         <span class="c1">#                       daGmdTunnel, daMacroBunchPulseId])</span>
         <span class="n">da</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">arrayCols</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ddColNames</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">colNames</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ddColNames</span> <span class="o">=</span> <span class="n">colNames</span>
         <span class="k">return</span> <span class="n">da</span></div>
 
 <div class="viewcode-block" id="DldFlashProcessor.createDataframePerElectron"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerElectron">[docs]</a>    <span class="k">def</span> <span class="nf">createDataframePerElectron</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -499,12 +732,18 @@
         <span class="c1"># self.dldTime=self.dldTime*self.dldTimeStep</span>
         <span class="k">if</span> <span class="n">_VERBOSE</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;creating electron dataframe...&#39;</span><span class="p">)</span>
-
+            
         <span class="n">maxIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dldTime</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">chunkSize</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">,</span> <span class="n">maxIndex</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">N_CORES</span><span class="p">)</span>  <span class="c1"># ensure minimum one chunk per core.</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">SINGLE_CORE_DATAFRAME_CREATION</span><span class="p">:</span> 
+            <span class="n">n_cores</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># creating dataframes with multiple cores takes much longer...</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n_cores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N_CORES</span>
+
+        <span class="n">chunkSize</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">,</span> <span class="n">maxIndex</span> <span class="o">/</span> <span class="n">n_cores</span><span class="p">)</span>  <span class="c1"># ensure minimum one chunk per core.</span>
         <span class="n">numOfPartitions</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">maxIndex</span> <span class="o">/</span> <span class="n">chunkSize</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">daList</span> <span class="o">=</span> <span class="p">[]</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">ddColNames</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numOfPartitions</span><span class="p">):</span>
             <span class="n">indexFrom</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">chunkSize</span><span class="p">)</span>
             <span class="n">indexTo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">indexFrom</span> <span class="o">+</span> <span class="n">chunkSize</span><span class="p">,</span> <span class="n">maxIndex</span><span class="p">))</span>
@@ -518,15 +757,21 @@
         <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daListResult</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">da</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
 
-        <span class="n">cols</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;dldPosX&#39;</span><span class="p">,</span> <span class="s1">&#39;dldPosY&#39;</span><span class="p">,</span> <span class="s1">&#39;dldTime&#39;</span><span class="p">,</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">,</span> <span class="s1">&#39;bam&#39;</span><span class="p">,</span> <span class="s1">&#39;dldMicrobunchId&#39;</span><span class="p">,</span> <span class="s1">&#39;dldDetectorId&#39;</span><span class="p">,</span> <span class="s1">&#39;bunchCharge&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;opticalDiode&#39;</span><span class="p">,</span> <span class="s1">&#39;gmdTunnel&#39;</span><span class="p">,</span> <span class="s1">&#39;gmdBda&#39;</span><span class="p">,</span> <span class="s1">&#39;pumpPol&#39;</span><span class="p">,</span> <span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">)</span>
+        <span class="c1"># cols = (&#39;dldPosX&#39;, &#39;dldPosY&#39;, &#39;dldTime&#39;, &#39;delayStage&#39;, &#39;bam&#39;, &#39;dldMicrobunchId&#39;, &#39;dldDetectorId&#39;, &#39;dldSectorId&#39;, &#39;bunchCharge&#39;,</span>
+        <span class="c1">#         &#39;opticalDiode&#39;, &#39;gmdTunnel&#39;, &#39;gmdBda&#39;, &#39;i0Monitor&#39;, &#39;pumpPol&#39;, &#39;timeStamp&#39;, &#39;macroBunchPulseId&#39;)</span>
+        <span class="c1">#</span>
+        <span class="c1"># cols = tuple(x for x in cols if x in self.daqAddresses)</span>
 
-        <span class="n">cols</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cols</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">)</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddColNames</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">)</span>
         <span class="c1"># needed as negative values are used to mark bad data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldMicrobunchId&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="c1"># I propose leaving it like this, since energy calibration depends on microscope parameters and photon energy</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">TOF_STEP_TO_NS</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldMicrobunchId&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+        <span class="c1"># I propose leaving it like this, since energy calibration depends on microscope parameters and photon energy;</span>
+        <span class="c1"># CHANGED: default is as before, but if attribute TOF_IN_NS is set to true, it leaves the delay in steps.</span>
+        <span class="c1"># Changed again. there is aliasing if binning in ns, physical binning needs to happen in tof_steps</span>
+        <span class="c1"># if self.TOF_IN_NS:</span>
+        <span class="c1">#     self.dd[&#39;dldTime&#39;] = self.dd[&#39;dldTime&#39;] * self.TOF_STEP_TO_NS</span>
 
 <div class="viewcode-block" id="DldFlashProcessor.createDataframePerMicrobunch"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.createDataframePerMicrobunch">[docs]</a>    <span class="k">def</span> <span class="nf">createDataframePerMicrobunch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a dataframe indexed by the microbunch ID. The method needs no input parameters.</span>
@@ -536,6 +781,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;creating microbunch dataframe...&#39;</span><span class="p">)</span>
 
         <span class="n">arrayCols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ddMicrobunchesColnames</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">numOfMicrobunches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bam</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">lengthToPad</span> <span class="o">=</span> <span class="n">numOfMicrobunches</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">opticalDiode</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
@@ -544,27 +790,41 @@
             <span class="n">delayStageArray</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delayStage</span><span class="p">[:])[:,</span> <span class="kc">None</span><span class="p">]</span>
             <span class="n">daDelayStage</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">delayStageArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">chunks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daDelayStage</span><span class="p">)</span>
+            <span class="n">ddMicrobunchesColnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;delayStage&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;streakCam&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
+            <span class="n">streakCamArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bam</span><span class="p">)</span>
+            <span class="n">streakCamArray</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">streakCam</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">daStreakCamArray</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">streakCamArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">chunks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
+            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daStreakCamArray</span><span class="p">)</span>
+            <span class="n">ddMicrobunchesColnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;streakCamera&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;bam&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">daBam</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bam</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">))</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daBam</span><span class="p">)</span>
+            <span class="n">ddMicrobunchesColnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;bam&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="s1">&#39;dldAux0&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
-            <span class="n">dldAux0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dldAux0</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-            <span class="n">aux0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bam</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">dldAux0</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
-            <span class="n">daAux0</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">aux0</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">))</span>
-            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daAux0</span><span class="p">)</span>
+        <span class="c1"># if &#39;dldAux0&#39; in self.daqAddresses:</span>
+        <span class="c1">#     dldAux0 = self.dldAux0[:, 0]</span>
+        <span class="c1">#     aux0 = np.ones(self.bam.shape) * dldAux0[:, None]</span>
+        <span class="c1">#     daAux0 = dask.array.from_array(aux0.flatten(), chunks=(self.CHUNK_SIZE))</span>
+        <span class="c1">#     arrayCols.append(daAux0)</span>
+        <span class="c1">#     ddMicrobunchesColnames.append(&#39;delayStage&#39;)</span>
+        <span class="c1">#</span>
+        <span class="c1"># if &#39;dldAux1&#39; in self.daqAddresses:</span>
+        <span class="c1">#     dldAux1 = self.dldAux1[:, 1]</span>
+        <span class="c1">#     aux1 = np.ones(self.bam.shape) * dldAux1[:, None]</span>
+        <span class="c1">#     daAux1 = dask.array.from_array(aux1.flatten(), chunks=(self.CHUNK_SIZE))</span>
+        <span class="c1">#     arrayCols.append(daAux1)</span>
+        <span class="c1">#     ddMicrobunchesColnames.append(&#39;delayStage&#39;)</span>
 
-        <span class="k">if</span> <span class="s1">&#39;dldAux1&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
-            <span class="n">dldAux1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dldAux1</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="n">aux1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bam</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">dldAux1</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
-            <span class="n">daAux1</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">aux1</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">))</span>
-            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daAux1</span><span class="p">)</span>
+
 
         <span class="k">if</span> <span class="s1">&#39;bunchCharge&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">daBunchCharge</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bunchCharge</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">numOfMicrobunches</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
                                                   <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">))</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daBunchCharge</span><span class="p">)</span>
+            <span class="n">ddMicrobunchesColnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;bunchCharge&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;opticalDiode&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -576,26 +836,58 @@
                 <span class="n">daOpticalDiode</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opticalDiode</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">numOfMicrobunches</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
                                                        <span class="n">chunks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daOpticalDiode</span><span class="p">)</span>
+            <span class="n">ddMicrobunchesColnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;opticalDiode&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;i0Monitor&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">I0BunchTrain2Pulses</span><span class="p">():</span>
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Cut, reshape and average the ADC signal of the I0 monitor. </span>
+<span class="sd">                Preliminary procedure: migth be optimized and tunend in to the DAQ </span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="n">i0Cutted</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">i0Monitor</span><span class="p">[:,</span><span class="mi">810</span><span class="p">:</span><span class="mi">45090</span><span class="p">],</span><span class="mi">410</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">i0BG</span><span class="o">=</span><span class="n">i0Cutted</span><span class="p">[:,:,:</span><span class="mi">39</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">i0Cutted</span><span class="p">[:,:,</span><span class="mi">39</span><span class="p">:</span><span class="mi">90</span><span class="p">]</span><span class="o">-</span><span class="n">i0BG</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+                
+            <span class="n">i0Data</span><span class="o">=</span><span class="n">I0BunchTrain2Pulses</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">paddedI0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">i0Data</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numOfMicrobunches</span> <span class="o">-</span> <span class="n">i0Data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span>
+                                            <span class="n">constant_values</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                <span class="n">daI0</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">paddedI0</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">chunks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;fix i0 Monitor DAQ: Length: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i0Data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">daI0</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">i0Data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">numOfMicrobunches</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+                                                       <span class="n">chunks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
+            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daI0</span><span class="p">)</span>
+            <span class="n">ddMicrobunchesColnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;i0Monitor&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;pumpPol&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">pumpPolArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bam</span><span class="p">)</span>
             <span class="n">pumpPolArray</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pumpPol</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
             <span class="n">daPumpPol</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">pumpPolArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">chunks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daPumpPol</span><span class="p">)</span>
+            <span class="n">ddMicrobunchesColnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;pumpPol&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;macroBunchPulseId&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="n">macroBunchPulseIdArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bam</span><span class="p">)</span>
             <span class="n">macroBunchPulseIdArray</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">macroBunchPulseId</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
             <span class="n">daMacroBunchPulseId</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">macroBunchPulseIdArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">))</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daMacroBunchPulseId</span><span class="p">)</span>
+            <span class="n">ddMicrobunchesColnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;timeStamp&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
+            <span class="n">timeStampArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bam</span><span class="p">)</span>
+            <span class="n">timeStampArray</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeStamp</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">daTimeStamp</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">timeStampArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">chunks</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">))</span>
+            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daTimeStamp</span><span class="p">)</span>
+            <span class="n">ddMicrobunchesColnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;timeStamp&#39;</span><span class="p">)</span>
 
         <span class="n">da</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">arrayCols</span><span class="p">)</span>
 
         <span class="c1"># Create the microbunch-indexed dataframe</span>
-        <span class="n">cols</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s1">&#39;delayStage&#39;</span><span class="p">,</span> <span class="s1">&#39;bam&#39;</span><span class="p">,</span> <span class="s1">&#39;dldAux0&#39;</span><span class="p">,</span> <span class="s1">&#39;dldAux1&#39;</span><span class="p">,</span> <span class="s1">&#39;bunchCharge&#39;</span><span class="p">,</span> <span class="s1">&#39;opticalDiode&#39;</span><span class="p">,</span> <span class="s1">&#39;pumpPol&#39;</span><span class="p">,</span> <span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">)</span>
-        <span class="n">cols</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cols</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">)</span>
-
+        <span class="c1"># cols = (</span>
+        <span class="c1">#     &#39;delayStage&#39;, &#39;bam&#39;, &#39;dldAux0&#39;, &#39;dldAux1&#39;, &#39;bunchCharge&#39;, &#39;opticalDiode&#39;,  &#39;i0Monitor&#39;, &#39;pumpPol&#39;, &#39;macroBunchPulseId&#39;, &#39;timeStamp&#39;)</span>
+        <span class="c1"># cols = tuple(x for x in cols if x in self.daqAddresses)</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="n">ddMicrobunchesColnames</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DldFlashProcessor.storeDataframes"><a class="viewcode-back" href="../../library/DldFlashDataframeCreator.html#processor.DldFlashDataframeCreator.DldFlashProcessor.storeDataframes">[docs]</a>    <span class="k">def</span> <span class="nf">storeDataframes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;parquet&#39;</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -621,20 +913,41 @@
                 <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_PARQUET_DIR</span>
             <span class="k">elif</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;h5&#39;</span><span class="p">]:</span>
                 <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_H5_DIR</span>
-        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotADirectoryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Could not find directory </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">fileName</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">fileName</span> <span class="o">=</span> <span class="s1">&#39;mb</span><span class="si">{}</span><span class="s1">to</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">fileName</span> <span class="o">=</span> <span class="s1">&#39;run</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span><span class="p">)</span>
+
         <span class="n">fileName</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">fileName</span>  <span class="c1"># TODO: test if naming is correct</span>
 
+
         <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">fileName</span> <span class="o">+</span> <span class="s2">&quot;_el&quot;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s2">&quot;UNCOMPRESSED&quot;</span><span class="p">,</span> \
-                               <span class="n">append</span><span class="o">=</span><span class="n">append</span><span class="p">,</span> <span class="n">ignore_divisions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">fileName</span> <span class="o">+</span> <span class="s2">&quot;_mb&quot;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s2">&quot;UNCOMPRESSED&quot;</span><span class="p">,</span> \
-                                           <span class="n">append</span><span class="o">=</span><span class="n">append</span><span class="p">,</span> <span class="n">ignore_divisions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Appending data to existing parquet container </span><span class="si">{</span><span class="n">fileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Creating parquet container </span><span class="si">{</span><span class="n">fileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">ProgressBar</span><span class="p">():</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">fileName</span> <span class="o">+</span> <span class="s2">&quot;_el&quot;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s2">&quot;UNCOMPRESSED&quot;</span><span class="p">,</span> \
+                                   <span class="n">append</span><span class="o">=</span><span class="n">append</span><span class="p">,</span> <span class="n">ignore_divisions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">fileName</span> <span class="o">+</span> <span class="s2">&quot;_mb&quot;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s2">&quot;UNCOMPRESSED&quot;</span><span class="p">,</span> \
+                                               <span class="n">append</span><span class="o">=</span><span class="n">append</span><span class="p">,</span> <span class="n">ignore_divisions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fileName</span> <span class="o">+</span> <span class="s1">&#39;_el&#39;</span><span class="p">,</span><span class="s1">&#39;run_metadata.txt&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+                        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_dict</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;failed saving metadata&#39;</span><span class="p">)</span>
+
         <span class="k">elif</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;h5&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Appending data to existing h5 container </span><span class="si">{</span><span class="n">fileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Creating h5 container </span><span class="si">{</span><span class="n">fileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">to_hdf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;/electrons&#39;</span><span class="p">)</span>
             <span class="n">dask</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">to_hdf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;/microbunches&#39;</span><span class="p">)</span></div>
 
@@ -661,22 +974,25 @@
             <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_RAW_DIR</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;path_to_run&#39;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_path_to_run</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">get_path_to_run</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 
-        <span class="c1"># Gets paths from settings file.</span>
-        <span class="c1"># Checks for SETTINGS.ini in processor folder.</span>
-        <span class="c1"># If not there, checks parent directory</span>
-        <span class="n">settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)):</span>
-            <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">))</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;DATA_RAW_DIR&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">camp.pah.beamtimedaqaccess</span> <span class="kn">import</span> <span class="n">H5FileDataAccess</span><span class="p">,</span> <span class="n">H5FileManager</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># Gets paths from settings file.</span>
+            <span class="c1"># Checks for SETTINGS.ini in processor folder.</span>
+            <span class="c1"># If not there, checks parent directory</span>
+            <span class="n">settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)):</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">))</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;DATA_RAW_DIR&#39;</span><span class="p">]</span>
 
-        <span class="c1"># needs to import stuff from PAH modules</span>
-        <span class="kn">import</span> <span class="nn">sys</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;PAH_MODULE_DIR&#39;</span><span class="p">])</span>
-        <span class="kn">from</span> <span class="nn">camp.pah.beamtimedaqaccess</span> <span class="k">import</span> <span class="n">H5FileDataAccess</span><span class="p">,</span> <span class="n">H5FileManager</span>
+            <span class="c1"># needs to import stuff from PAH modules</span>
+            <span class="kn">import</span> <span class="nn">sys</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;PAH_MODULE_DIR&#39;</span><span class="p">])</span>
+            <span class="kn">from</span> <span class="nn">camp.pah.beamtimedaqaccess</span> <span class="kn">import</span> <span class="n">H5FileDataAccess</span><span class="p">,</span> <span class="n">H5FileManager</span>
 
         <span class="n">fileAccess</span> <span class="o">=</span> <span class="n">H5FileDataAccess</span><span class="p">(</span><span class="n">H5FileManager</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_to_run</span><span class="p">))</span>
         <span class="n">pulseIdInterval</span> <span class="o">=</span> <span class="n">fileAccess</span><span class="o">.</span><span class="n">availablePulseIdInterval</span><span class="p">(</span><span class="n">runNumber</span><span class="p">)</span>
@@ -865,10 +1181,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">createDataframePerElectron</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">createDataframePerMicrobunch</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;dataframe created&#39;</span><span class="p">)</span></div></div>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
            </div>
@@ -883,7 +1195,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, momentoscope team.
+        &copy; Copyright 2018-2020, momentoscope team.
 
     </p>
   </div>
@@ -915,7 +1227,8 @@
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="../../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

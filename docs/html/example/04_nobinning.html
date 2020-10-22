@@ -1,0 +1,384 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>4. Processing data without binning &mdash; hextof-processor 0.9.5 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
+        <link rel="next" title="5. Corrections to FEL pulse timing" href="05_corrections.html"/>
+        <link rel="prev" title="3. Binning multidimensional data" href="03_binning.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/pah.html">3. Interfacing external pah library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_fullexample.html">6. Complete code examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/howtomaintain.html">2. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li><span class="section-number">4. </span>Processing data without binning</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/example/04_nobinning.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="processing-data-without-binning">
+<h1><span class="section-number">4. </span>Processing data without binning<a class="headerlink" href="#processing-data-without-binning" title="Permalink to this headline">¶</a></h1>
+<p>Sometimes it is not necessary to bin the electrons to extract the data. It is actually possible to directly extract data from the appropriate dataframe. This is useful if, for example, you just want to plot some parameters, not involving the number of electrons that happen to have such a value (this would require
+binning).</p>
+<p>Because of the structure of the dataframe, which is divided in dd and ddMicrobunches, it is possible to get electron-resolved data (the electron number will be on the x axis), or microbunch-resolved data (the microbunch ID, or <cite>uBid</cite>, will be on the x axis).</p>
+<p>The data you can get from the dd dataframe (electron-resolved) includes:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 62%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Proper name</p></th>
+<th class="head"><p>Namestring</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x position of the electron</p></td>
+<td><p>'dldPosX'</p></td>
+</tr>
+<tr class="row-odd"><td><p>y position of the electron</p></td>
+<td><p>'dldPosY'</p></td>
+</tr>
+<tr class="row-even"><td><p>time of flight</p></td>
+<td><p>'dldTime'</p></td>
+</tr>
+<tr class="row-odd"><td><p>pump probe delay stage reading</p></td>
+<td><p>'delayStageTime'</p></td>
+</tr>
+<tr class="row-even"><td><p>beam arrival monitor jitter</p></td>
+<td><p>'bam'</p></td>
+</tr>
+<tr class="row-odd"><td><p>microbunch ID</p></td>
+<td><p>'microbunchId'</p></td>
+</tr>
+<tr class="row-even"><td><p>which detector</p></td>
+<td><p>'dldDetectorId'</p></td>
+</tr>
+<tr class="row-odd"><td><p>electron bunch charge</p></td>
+<td><p>'bunchCharge'</p></td>
+</tr>
+<tr class="row-even"><td><p>pump laser optical diode reading</p></td>
+<td><p>'opticalDiode'</p></td>
+</tr>
+<tr class="row-odd"><td><p>gas monitor detector reading
+before gas attenuator</p></td>
+<td><p>'gmdTunnel'</p></td>
+</tr>
+<tr class="row-even"><td><p>gas monitor detector reading
+after gas attenuator</p></td>
+<td><p>'gmdBda'</p></td>
+</tr>
+<tr class="row-odd"><td><p>macrobunch ID</p></td>
+<td><p>'macroBunchPulseId'</p></td>
+</tr>
+</tbody>
+</table>
+<p>The data you can get from the <cite>ddMicrobunches</cite> (uBID-resolved) dataframe includes:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 62%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Proper name</p></th>
+<th class="head"><p>Namestring</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>pump probe delay stage reading</p></td>
+<td><p>'delayStageTime'</p></td>
+</tr>
+<tr class="row-odd"><td><p>beam arrival monitor jitter</p></td>
+<td><p>'bam'</p></td>
+</tr>
+<tr class="row-even"><td><p>auxillary channel 0</p></td>
+<td><p>'aux0'</p></td>
+</tr>
+<tr class="row-odd"><td><p>auxillary channel 1</p></td>
+<td><p>'aux1'</p></td>
+</tr>
+<tr class="row-even"><td><p>electron bunch charge</p></td>
+<td><p>'bunchCharge'</p></td>
+</tr>
+<tr class="row-odd"><td><p>pump laser optical diode reading</p></td>
+<td><p>'opticalDiode'</p></td>
+</tr>
+<tr class="row-even"><td><p>macrobunch ID</p></td>
+<td><p>'macroBunchPulseId'</p></td>
+</tr>
+</tbody>
+</table>
+<p>Some of the values overlap, and in these cases, you can get the values either uBid-resolved or electron-resolved.</p>
+<p>An example of how to retrieve values both from the <cite>dd</cite> and <cite>ddMicrobunches</cite> dataframes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bam_dd</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;bam&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="n">bam_uBid</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="p">[</span><span class="s1">&#39;bam&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Be careful when reading the data not to include IDs that contain NaNs (usually at the beginning), otherwise this method will return all NaNs.</p>
+<p>It is also possible to access the electron-resolved data on a <cite>uBid</cite> basis by using</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">uBid</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;microbunchId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="n">value</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">uBid</span><span class="p">[</span><span class="n">j</span><span class="p">])]</span>
+</pre></div>
+</div>
+<p>or to plot the values as a function of <cite>uBid</cite> by using</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">uBid</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;microbunchId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="n">MBid</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="n">bam</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;bam&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">uBid</span><span class="o">+</span><span class="n">processor</span><span class="o">.</span><span class="n">bam</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">MBid</span><span class="p">,</span><span class="n">bam</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The following code, as an example, averages <cite>gmdTunnel</cite> values for electrons that have the same <cite>uBid</cite> (it effectively also bins the electrons in <cite>avgNorm</cite> as a side effect):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">uBid</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;microbunchId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+<span class="nb">pow</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;gmdBDA&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+
+<span class="n">avgPow</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">avgNorm</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">uBid</span><span class="p">)):</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">uBid</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">uBid</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">500</span> <span class="ow">and</span> <span class="nb">pow</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">avgNorm</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">uBid</span><span class="p">[</span><span class="n">j</span><span class="p">])]</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">avgPow1</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">uBid</span><span class="p">[</span><span class="n">j</span><span class="p">])]</span><span class="o">=</span><span class="p">(</span><span class="n">avgPow1</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">uBid</span><span class="p">[</span><span class="n">j</span><span class="p">])]</span><span class="o">*</span><span class="p">(</span><span class="n">avgNorm</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">uBid</span><span class="p">[</span><span class="n">j</span><span class="p">])])</span><span class="o">+</span><span class="nb">pow</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">avgNorm</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">uBid</span><span class="p">[</span><span class="n">j</span><span class="p">])]</span><span class="o">+</span><span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="05_corrections.html" class="btn btn-neutral float-right" title="5. Corrections to FEL pulse timing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="03_binning.html" class="btn btn-neutral" title="3. Binning multidimensional data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
