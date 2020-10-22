@@ -209,12 +209,12 @@ def xarray_to_tiff(data, filename, axis_dict=None):
     dims_order = []
 
     if axis_dict is None:
-        axis_dict = {'T': 'delayStage',
-                     'Z': 'dldTime',
-                     'C': 'C',
-                     'Y': 'dldPosY',
-                     'X': 'dldPosX',
-                     'S': 'S'}
+        axis_dict = {'T': ['delayStage','pumpProbeTime'],
+                     'Z': ['dldTime','energy'],
+                     'C': ['C'],
+                     'Y': ['dldPosY'],
+                     'X': ['dldPosX'],
+                     'S': ['S']}
     else:
         for key in ['T', 'Z', 'C', 'Y', 'X', 'S']:
             if key not in axis_dict.keys():
@@ -223,8 +223,11 @@ def xarray_to_tiff(data, filename, axis_dict=None):
     # Sort the dimensions in the correct order, and fill with one-point dimensions
     # the missing axes.
     for key in ['T', 'Z', 'C', 'Y', 'X', 'S']:
-        if axis_dict[key] in data.dims:
-            dims_order.append(axis_dict[key])
+        axis_name_list = [name for name in axis_dict[key] if name in data.dims]
+        if len(axis_name_list) > 1:
+            raise AttributeError(f'Too many dimensions for {key} axis.')
+        elif len(axis_name_list) == 1:
+            dims_order.append(*axis_name_list)
         else:
             dims_to_add[key] = 1
             dims_order.append(key)
