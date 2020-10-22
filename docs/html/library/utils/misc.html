@@ -191,9 +191,9 @@ The units are um for beam diameter, uJ/cm^2 for energy density.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt>Diode<span class="classifier">numeric</span></dt><dd><p>Measured value from photodiode (arb. units)</p>
+<dt>Diode: numeric</dt><dd><p>Measured value from photodiode (arb. units)</p>
 </dd>
-<dt>Diameter<span class="classifier">numeric</span></dt><dd><p>Beam diameter</p>
+<dt>Diameter: numeric | 600</dt><dd><p>Beam diameter.</p>
 </dd>
 </dl>
 </dd>
@@ -205,12 +205,11 @@ The units are um for beam diameter, uJ/cm^2 for energy density.</p>
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">EnergyDensity800</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Diode</span></em>, <em class="sig-param"><span class="n">Diameter</span><span class="o">=</span><span class="default_value">600</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#EnergyDensity800"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.EnergyDensity800" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the pulse energy density of 800nm laser in uJ/cm^2.
 The units are um for beam diameter, uJ/cm^2 for energy density.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>Diode<span class="classifier">numeric</span></dt><dd><p>Measured value from photodiode (arb. units)</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>Diode: numeric</dt><dd><p>Measured value from photodiode (arb. units)</p>
 </dd>
-<dt>Diameter<span class="classifier">numeric</span></dt><dd><p>Beam diameter</p>
+<dt>Diameter: numeric | 600</dt><dd><p>Beam diameter.</p>
 </dd>
 </dl>
 </dd>
@@ -221,10 +220,9 @@ The units are um for beam diameter, uJ/cm^2 for energy density.</p>
 <dt id="processor.utilities.misc.PulseEnergy400">
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">PulseEnergy400</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Diode</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#PulseEnergy400"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.PulseEnergy400" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the pulse energy of 400nm laser in uJ. The unit is um for beam diameter.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameter</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>Diode<span class="classifier">numeric</span></dt><dd><p>Measured value from photodiode (arb. units)</p>
+<dl class="simple">
+<dt>Parameter:</dt><dd><dl class="simple">
+<dt>Diode: numeric</dt><dd><p>Measured value from photodiode (arb. units)</p>
 </dd>
 </dl>
 </dd>
@@ -235,10 +233,9 @@ The units are um for beam diameter, uJ/cm^2 for energy density.</p>
 <dt id="processor.utilities.misc.PulseEnergy800">
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">PulseEnergy800</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Diode</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#PulseEnergy800"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.PulseEnergy800" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the pulse energy of 800nm laser in uJ. The unit is um for beam diameter.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameter</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>Diode<span class="classifier">numeric</span></dt><dd><p>Meausred value from photodiode (arb. units)</p>
+<dl class="simple">
+<dt>Parameter:</dt><dd><dl class="simple">
+<dt>Diode: numeric</dt><dd><p>Meausred value from photodiode (arb. units)</p>
 </dd>
 </dl>
 </dd>
@@ -283,16 +280,14 @@ Returns</p>
 <dt id="processor.utilities.misc.get_available_runs">
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">get_available_runs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rootpath</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#get_available_runs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.get_available_runs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Collects the filepaths to the available experimental run data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>rootpath<span class="classifier">str</span></dt><dd><p>path where to look for data (recursive in subdirectories)</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>rootpath: str</dt><dd><p>path where to look for data (recursive in subdirectories)</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>available_runs<span class="classifier">dict</span></dt><dd><p>dict with run numbers as keys (e.g. 'run12345') and path where to load data from as str.</p>
+<dt>Return:</dt><dd><dl class="simple">
+<dt>available_runs: dict</dt><dd><p>dict with run numbers as keys (e.g. 'run12345') and path where to load data from as str.</p>
 </dd>
 </dl>
 </dd>
@@ -303,18 +298,16 @@ Returns</p>
 <dt id="processor.utilities.misc.get_path_to_run">
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">get_path_to_run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">runNumber</span></em>, <em class="sig-param"><span class="n">rootpath</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#get_path_to_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.get_path_to_run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the path to the data of a given run number</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>runNumber<span class="classifier">str or int</span></dt><dd><p>run number as integer or string.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>runNumber: str or int</dt><dd><p>run number as integer or string.</p>
 </dd>
-<dt>rootpath<span class="classifier">str</span></dt><dd><p>path where to look for data (recursive in subdirectories)</p>
+<dt>rootpath: str</dt><dd><p>path where to look for data (recursive in subdirectories)</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>path<span class="classifier">str</span></dt><dd><p>path to where the raw data of the given run number is stored.</p>
+<dt>Return:</dt><dd><dl class="simple">
+<dt>path: str</dt><dd><p>path to where the raw data of the given run number is stored.</p>
 </dd>
 </dl>
 </dd>
@@ -345,16 +338,14 @@ hist np.array: Histogram values associated with the read data.</p>
 <dl class="py function">
 <dt id="processor.utilities.misc.parse_category">
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">parse_category</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">category</span></em>, <em class="sig-param"><span class="n">settings_file</span><span class="o">=</span><span class="default_value">'default'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#parse_category"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.parse_category" title="Permalink to this definition">¶</a></dt>
-<dd><p>parse setting file and return desired value
-Args:</p>
-<blockquote>
-<div><p>category (str): title of the category
+<dd><p>parse setting file and return desired value</p>
+<dl>
+<dt>Args:</dt><dd><p>category (str): title of the category
 setting_file (str): path to setting file. If set to 'default' it takes</p>
 <blockquote>
 <div><p>a file called SETTINGS.ini in the main folder of the repo.</p>
 </div></blockquote>
-</div></blockquote>
-<dl class="simple">
+</dd>
 <dt>Returns:</dt><dd><p>dictionary containing name and value of all entries present in this
 category.</p>
 </dd>
@@ -381,17 +372,18 @@ category.</p>
 <dl class="py function">
 <dt id="processor.utilities.misc.parse_setting">
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">parse_setting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">category</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">settings_file</span><span class="o">=</span><span class="default_value">'default'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#parse_setting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.parse_setting" title="Permalink to this definition">¶</a></dt>
-<dd><p>parse setting file and return desired value
-Args:</p>
-<blockquote>
-<div><p>category (str): title of the category
-name (str): name of the parameter
-setting_file (str): path to setting file. If set to 'default' it takes</p>
-<blockquote>
-<div><p>a file called SETTINGS.ini in the main folder of the repo.</p>
-</div></blockquote>
-</div></blockquote>
+<dd><p>parse setting file and return desired value</p>
 <dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>category: str</dt><dd><p>title of the category</p>
+</dd>
+<dt>name: str</dt><dd><p>name of the parameter</p>
+</dd>
+<dt>setting_file: str | 'default'</dt><dd><p>path to setting file. If set to 'default' it takes
+a file called SETTINGS.ini in the main folder of the repo.</p>
+</dd>
+</dl>
+</dd>
 <dt>Returns:</dt><dd><p>value of the parameter, None if parameter cannot be found.</p>
 </dd>
 <dt>Notes:</dt><dd><p>Author: Steinn Ymir Agustsson &lt;<a class="reference external" href="mailto:sagustss&#37;&#52;&#48;uni-mainz&#46;de">sagustss<span>&#64;</span>uni-mainz<span>&#46;</span>de</a>&gt;</p>
@@ -423,16 +415,15 @@ Follows same notation as Windows does for files. See: <a class="reference extern
 <dt id="processor.utilities.misc.save_H5_hyperstack">
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">save_H5_hyperstack</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_array</span></em>, <em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#save_H5_hyperstack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.save_H5_hyperstack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>data_array<span class="classifier">numpy array</span></dt><dd><p>4D data array, order must be Kx,Ky,Energy,Time</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>data_array: numpy array</dt><dd><p>4D data array, order must be Kx,Ky,Energy,Time</p>
 </dd>
-<dt>filename<span class="classifier">str</span></dt><dd><p>The name of the file to save</p>
+<dt>filename: str</dt><dd><p>The name of the file to save</p>
 </dd>
-<dt>path<span class="classifier">str</span></dt><dd><p>The path to where to save hdf5 file. If None, uses the &quot;results&quot; folder from SETTINGS.ini</p>
+<dt>path: str</dt><dd><p>The path to where to save hdf5 file. If None, uses the &quot;results&quot; folder from SETTINGS.ini</p>
 </dd>
-<dt>overwrite<span class="classifier">str</span></dt><dd><p>If true, it overwrites existing file with the same
+<dt>overwrite: str</dt><dd><p>If true, it overwrites existing file with the same
 name. Otherwise raises and error.</p>
 </dd>
 </dl>
@@ -443,17 +434,15 @@ name. Otherwise raises and error.</p>
 <dl class="py function">
 <dt id="processor.utilities.misc.write_setting">
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">write_setting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">category</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">settings_file</span><span class="o">=</span><span class="default_value">'default'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#write_setting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.write_setting" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write enrty in the settings file
-Args:</p>
-<blockquote>
-<div><p>category (str): title of the category
+<dd><p>Write enrty in the settings file</p>
+<dl>
+<dt>Args:</dt><dd><p>category (str): title of the category
 name (str): name of the parameter
 setting_file (str): path to setting file. If set to 'default' it takes</p>
 <blockquote>
 <div><p>a file called SETTINGS.ini in the main folder of the repo.</p>
 </div></blockquote>
-</div></blockquote>
-<dl class="simple">
+</dd>
 <dt>Returns:</dt><dd><p>value of the parameter, None if parameter cannot be found.</p>
 </dd>
 <dt>Notes:</dt><dd><p>Author: Steinn Ymir Agustsson &lt;<a class="reference external" href="mailto:sagustss&#37;&#52;&#48;uni-mainz&#46;de">sagustss<span>&#64;</span>uni-mainz<span>&#46;</span>de</a>&gt;</p>
