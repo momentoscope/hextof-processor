@@ -91,6 +91,9 @@ class H5FileDataAccess(H5FileDataAccess):
                or channelName.startswith('/uncategorised/') \
                or channelName.startswith('/FL2/') \
                or channelName.startswith('/FL1/') \
+               or channelName.startswith('/Experiment/') \
+               or channelName.startswith('/Photon Diagnostic/') \
+               or channelName.startswith('/Electron Diagnostic/') \
                or channelName.startswith('/Timing/')  # <--for datasets before 08-2018
 
 
