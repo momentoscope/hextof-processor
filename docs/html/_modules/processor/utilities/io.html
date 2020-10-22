@@ -1,0 +1,507 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>processor.utilities.io &mdash; hextof-processor 0.9.7 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.7 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/pah.html">3. Interfacing external pah library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/06_fullexample.html">6. Complete code examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/howtomaintain.html">2. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>processor.utilities.io</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for processor.utilities.io</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tifffile</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="kn">import</span> <span class="nn">processor.utilities.misc</span> <span class="k">as</span> <span class="nn">utils</span>
+
+
+<div class="viewcode-block" id="res_to_xarray"><a class="viewcode-back" href="../../../library/utils/io.html#processor.utilities.io.res_to_xarray">[docs]</a><span class="k">def</span> <span class="nf">res_to_xarray</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">binNames</span><span class="p">,</span> <span class="n">binAxes</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; creates a BinnedArray (xarray subclass) out of the given np.array</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        res: np.array</span>
+<span class="sd">            nd array of binned data</span>
+<span class="sd">        binNames (list): list of names of the binned axes</span>
+<span class="sd">        binAxes (list): list of np.arrays with the values of the axes</span>
+<span class="sd">    :Returns:</span>
+<span class="sd">        ba: BinnedArray (xarray)</span>
+<span class="sd">            an xarray-like container with binned data, axis, and all available metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dims</span> <span class="o">=</span> <span class="n">binNames</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">binNames</span><span class="p">,</span> <span class="n">binAxes</span><span class="p">):</span>
+        <span class="n">coords</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span>
+
+    <span class="n">xres</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span>
+
+    <span class="n">units</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">default_units</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dldTime&#39;</span><span class="p">:</span> <span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">:</span> <span class="s1">&#39;ps&#39;</span><span class="p">,</span> <span class="s1">&#39;pumpProbeDelay&#39;</span><span class="p">:</span> <span class="s1">&#39;ps&#39;</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">binNames</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">default_units</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">units</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">u</span>
+    <span class="n">xres</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
+
+    <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">xres</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="k">return</span> <span class="n">xres</span></div>
+
+
+<div class="viewcode-block" id="save_binned"><a class="viewcode-back" href="../../../library/utils/io.html#processor.utilities.io.save_binned">[docs]</a><span class="k">def</span> <span class="nf">save_binned</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Save a binned numpy array to h5 file. The file includes the axes</span>
+<span class="sd">    (taken from the scheduled bins) and the delay stage histogram, if it exists.</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Name of the saved file. The extension &#39;.h5&#39; is automatically added.</span>
+<span class="sd">        path : str | None</span>
+<span class="sd">            File path.</span>
+<span class="sd">        mode : str | &#39;w&#39;</span>
+<span class="sd">            Write mode of h5 file (&#39;w&#39; = write).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_abort</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">parse_setting</span><span class="p">(</span><span class="s1">&#39;paths&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA_H5_DIR&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>  <span class="c1"># test if the path exists...</span>
+        <span class="n">answer</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;The folder </span><span class="si">{}</span><span class="s2"> doesn&#39;t exist,&quot;</span>
+                       <span class="s2">&quot;do you want to create it? [y/n]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s1">&#39;y&#39;</span> <span class="ow">in</span> <span class="n">answer</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_abort</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;h5&#39;</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.h5&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="s1">&#39;tif&#39;</span> <span class="ow">in</span> <span class="nb">format</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.tiff&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="n">answer</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;A file named </span><span class="si">{}</span><span class="s2"> already exists. Overwrite it? &quot;</span>
+                       <span class="s2">&quot;[y/n or r for rename]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">answer</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span> <span class="s1">&#39;ja&#39;</span><span class="p">]:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">answer</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">,</span> <span class="s1">&#39;nein&#39;</span><span class="p">]:</span>
+            <span class="n">_abort</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;choose a new name:&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_abort</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;h5&#39;</span><span class="p">:</span>
+            <span class="n">xarray_to_h5</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">path</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39;tif&#39;</span> <span class="ow">in</span> <span class="nb">format</span><span class="p">:</span>
+            <span class="n">to_tiff</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">path</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="xarray_to_h5"><a class="viewcode-back" href="../../../library/utils/io.html#processor.utilities.io.xarray_to_h5">[docs]</a><span class="k">def</span> <span class="nf">xarray_to_h5</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">faddr</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Save xarray formatted data to hdf5</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (xarray.DataArray): input data</span>
+<span class="sd">        faddr (str): complete file name (including path)</span>
+<span class="sd">        mode (str): hdf5 read/write mode</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">faddr</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5File</span><span class="p">:</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;saving data to </span><span class="si">{</span><span class="n">faddr</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;pumpProbeTime&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">)</span>
+            <span class="n">pp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="s1">&#39;delayStage&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;delayStage&#39;</span><span class="p">)</span>
+            <span class="n">pp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pp_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Saving data</span>
+
+        <span class="n">ff</span> <span class="o">=</span> <span class="n">h5File</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s1">&#39;binned&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pp_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># in case there is no time axis, make a single dataset</span>
+            <span class="n">ff</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;f</span><span class="si">{:04d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pp_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>  <span class="c1"># otherwise make a dataset for each time frame.</span>
+                <span class="n">ff</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;f</span><span class="si">{:04d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="n">pp_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
+
+        <span class="c1"># Saving axes</span>
+        <span class="n">aa</span> <span class="o">=</span> <span class="n">h5File</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;axes&quot;</span><span class="p">)</span>
+        <span class="c1"># aa.create_dataset(&#39;axis_order&#39;, data=data.dims)</span>
+        <span class="n">ax_n</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">binName</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">binName</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">,</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">]:</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="n">aa</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ax0 - </span><span class="si">{</span><span class="n">binName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">binName</span><span class="p">])</span>
+                <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binName</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="n">aa</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ax</span><span class="si">{</span><span class="n">ax_n</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">binName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">binName</span><span class="p">])</span>
+                <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binName</span>
+                <span class="n">ax_n</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># Saving delay histograms</span>
+        <span class="c1">#                hh = h5File.create_group(&quot;histograms&quot;)</span>
+        <span class="c1">#                if hasattr(data, &#39;delaystageHistogram&#39;):</span>
+        <span class="c1">#                    hh.create_dataset(</span>
+        <span class="c1">#                        &#39;delaystageHistogram&#39;,</span>
+        <span class="c1">#                        data=data.delaystageHistogram)</span>
+        <span class="c1">#                if hasattr(data, &#39;pumpProbeHistogram&#39;):</span>
+        <span class="c1">#                    hh.create_dataset(</span>
+        <span class="c1">#                        &#39;pumpProbeHistogram&#39;,</span>
+        <span class="c1">#                        data=data.pumpProbeHistogram)\</span>
+
+        <span class="n">meta_group</span> <span class="o">=</span> <span class="n">h5File</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">meta_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">kk</span><span class="p">,</span> <span class="n">vv</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">g</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">kk</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">vv</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vv</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">kkk</span><span class="p">,</span> <span class="n">vvv</span> <span class="ow">in</span> <span class="n">vv</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                            <span class="n">g</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">kk</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">kkk</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">vvv</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">g</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">kk</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">vv</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving complete!&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="array_to_tiff"><a class="viewcode-back" href="../../../library/utils/io.html#processor.utilities.io.array_to_tiff">[docs]</a><span class="k">def</span> <span class="nf">array_to_tiff</span><span class="p">(</span><span class="n">array</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Save array to imageJ compatible tiff stack.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (np.array): array to save. 2D,3D or 4D</span>
+<span class="sd">        filename (str): full path and name of file to save.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">array</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">array</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Only 2-3-4D arrays supported.&#39;</span><span class="p">)</span>
+
+    <span class="n">tifffile</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">imagej</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Successfully saved array with shape </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> to </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="xarray_to_tiff"><a class="viewcode-back" href="../../../library/utils/io.html#processor.utilities.io.xarray_to_tiff">[docs]</a><span class="k">def</span> <span class="nf">xarray_to_tiff</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">axis_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Save data to tiff file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (xarray.DataArray): data to be saved. ImageJ likes tiff files with</span>
+<span class="sd">            axis order as TZCYXS. Therefore, best axis order in input should be:</span>
+<span class="sd">            Time, Energy, posY, posX. The channels &#39;C&#39; and &#39;S&#39; are automatically</span>
+<span class="sd">            added and can be ignored.</span>
+<span class="sd">        filename (str): full path and name of file to save.</span>
+<span class="sd">        axis_dict (dict): name pairs for correct axis ordering. Keys should be</span>
+<span class="sd">            any of T,Z,C,Y,X,S. The Corresponding value will be searched among</span>
+<span class="sd">            the dimensions of the xarray, and placed in the right order for</span>
+<span class="sd">            imagej stacks metadata.</span>
+<span class="sd">        units (bool): Not implemented. Will be used to set units in the tif stack</span>
+<span class="sd">            TODO: expand imagej metadata to include physical units</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">),</span> <span class="s1">&#39;Data must be an xarray.DataArray&#39;</span>
+    <span class="n">dims_to_add</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+    <span class="n">dims_order</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">axis_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">axis_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="s1">&#39;dldTime&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;dldPosY&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="s1">&#39;dldPosX&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;S&#39;</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">axis_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">axis_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
+
+    <span class="c1"># Sort the dimensions in the correct order, and fill with one-point dimensions</span>
+    <span class="c1"># the missing axes.</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">axis_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">dims_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">axis_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dims_to_add</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">dims_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;tif stack dimension order: </span><span class="si">{</span><span class="n">dims_order</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">xres</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">dims_to_add</span><span class="p">)</span>
+    <span class="n">xres</span> <span class="o">=</span> <span class="n">xres</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">*</span><span class="n">dims_order</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;.tif&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">+=</span> <span class="s1">&#39;.tif&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">tifffile</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">xres</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">imagej</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">tifffile</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">xres</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">imagej</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># resolution=(1./2.6755, 1./2.6755),metadata={&#39;spacing&#39;: 3.947368, &#39;unit&#39;: &#39;um&#39;})</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Successfully saved </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="to_tiff"><a class="viewcode-back" href="../../../library/utils/io.html#processor.utilities.io.to_tiff">[docs]</a><span class="k">def</span> <span class="nf">to_tiff</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">filename</span><span class="p">,</span><span class="n">axis_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; save array to imagej tiff sack.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+        <span class="n">xarray_to_tiff</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">filename</span><span class="p">,</span><span class="n">axis_dict</span><span class="o">=</span><span class="n">axis_dict</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+        <span class="n">array_to_tiff</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Input data must be a numpy array or xarray DataArray&#39;</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.9.7',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

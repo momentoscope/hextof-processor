@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2. DldProcessor class (DldProcessor) &mdash; hextof-processor 0.9.5 documentation</title>
+  <title>2. DldProcessor class (DldProcessor) &mdash; hextof-processor 0.9.7 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
+    <link rel="top" title="hextof-processor 0.9.7 documentation" href="../index.html"/>
         <link rel="next" title="3. Interfacing external pah library" href="pah.html"/>
         <link rel="prev" title="1. Dataframe creator class (DldFlashDataframeCreator)" href="DldFlashDataframeCreator.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.9.5
+                0.9.7
               </div>
             
           
@@ -90,21 +90,29 @@
               
             
             
-              <p class="caption"><span class="caption-text">Processor library</span></p>
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">2. DldProcessor class (DldProcessor)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pah.html">3. Interfacing external pah library</a></li>
-<li class="toctree-l1"><a class="reference internal" href="utils.html">4. Utility functions (utils)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="utils/calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../example/readdaq.html">1. Read DAQ data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/parquet.html">2. Save dataset to dask parquet files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/binning.html">3. Binning multidimensional data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/nobinning.html">4. Processing data without binning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/corrections.html">5. Corrections to FEL pulse timing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/fullexample.html">6. Complete code examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/06_fullexample.html">6. Complete code examples</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Miscellaneous</span></p>
 <ul>
@@ -154,7 +162,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>2. DldProcessor class (DldProcessor)</li>
+      <li><span class="section-number">2. </span>DldProcessor class (DldProcessor)</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -174,269 +182,293 @@
            <div itemprop="articleBody">
             
   <div class="section" id="module-processor.DldProcessor">
-<span id="dldprocessor-class-dldprocessor"></span><h1>2. DldProcessor class (DldProcessor)<a class="headerlink" href="#module-processor.DldProcessor" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<span id="dldprocessor-class-dldprocessor"></span><h1><span class="section-number">2. </span>DldProcessor class (DldProcessor)<a class="headerlink" href="#module-processor.DldProcessor" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
 <dt id="processor.DldProcessor.DldProcessor">
-<em class="property">class </em><code class="descclassname">processor.DldProcessor.</code><code class="descname">DldProcessor</code><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">processor.DldProcessor.</code><code class="sig-name descname">DldProcessor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class simplifies the analysis of data files recorded during the
 beamtime of August 2017. It converts the electrons from the DLD into
 a clean table and uses DASK for binning and further analysis.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Attributes (loaded from SETTINGS.ini):</th></tr>
-<tr class="field-odd field"><td>&#160;</td><td class="field-body"><dl class="first last docutils">
-<dt>N_CORES <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">The number of available CPU cores to use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes (loaded from SETTINGS.ini)</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>N_CORES<span class="classifier">int</span></dt><dd><p>The number of available CPU cores to use.</p>
 </dd>
-<dt>CHUNK_SIZE <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">Size of the chunks in which a parquet file will be divided.</p>
+<dt>CHUNK_SIZE<span class="classifier">int</span></dt><dd><p>Size of the chunks in which a parquet file will be divided.</p>
 </dd>
-<dt>TOF_STEP_NS <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">The step size in ns of the dldTime. Used to convert the
+<dt>TOF_STEP_NS<span class="classifier">float</span></dt><dd><p>The step size in ns of the dldTime. Used to convert the
 step number to the ToF time in the delay line detector.</p>
 </dd>
-<dt>TOF_STEP_EV <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">The step size in eV of the dldTime. Used to convert the
+<dt>TOF_STEP_EV<span class="classifier">float</span></dt><dd><p>The step size in eV of the dldTime. Used to convert the
 step number to energy of the photoemitted electrons.</p>
 </dd>
-<dt>DATA_RAW_DIR <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Path to raw data hdf5 files output by FLASH</p>
+<dt>DATA_RAW_DIR<span class="classifier">str</span></dt><dd><p>Path to raw data hdf5 files output by FLASH</p>
 </dd>
-<dt>DATA_PARQUET_DIR <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Path to where parquet files are stored.</p>
+<dt>DATA_PARQUET_DIR<span class="classifier">str</span></dt><dd><p>Path to where parquet files are stored.</p>
 </dd>
-<dt>DATA_H5_DIR <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Path to where hdf5 files containing binned data are stored.</p>
+<dt>DATA_H5_DIR<span class="classifier">str</span></dt><dd><p>Path to where hdf5 files containing binned data are stored.</p>
 </dd>
-<dt>DATA_RESULTS_DIR <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Path to default saving location for results in np.array,
+<dt>DATA_RESULTS_DIR<span class="classifier">str</span></dt><dd><p>Path to default saving location for results in np.array,
 tiff stack formats etc.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
-<dl class="method">
+</dd>
+</dl>
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.addBinning">
-<code class="descname">addBinning</code><span class="sig-paren">(</span><em>name</em>, <em>start</em>, <em>end</em>, <em>steps</em>, <em>useStepSize=True</em>, <em>forceEnds=False</em>, <em>include_last=True</em>, <em>force_legacy=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.addBinning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.addBinning" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add binning of one dimension, to be then computed with <code class="docutils literal"><span class="pre">computeBinnedData</span></code> method.</p>
+<code class="sig-name descname">addBinning</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">end</span></em>, <em class="sig-param"><span class="n">steps</span></em>, <em class="sig-param"><span class="n">useStepSize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">forceEnds</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">include_last</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">force_legacy</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">compute_histograms</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.addBinning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.addBinning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add binning of one dimension, to be then computed with <code class="docutils literal notranslate"><span class="pre">computeBinnedData</span></code> method.</p>
 <p>Creates a list of bin names, (binNameList) to identify the axis on
 which to bin the data. Output array dimensions order will be the same
 as in this list. The attribute binRangeList will contain the ranges of
 the binning used for the corresponding dimension.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Name of the column to apply binning to. Possible column names are`:`
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>name<span class="classifier">str</span></dt><dd><p>Name of the column to apply binning to. Possible column names are`:`
 posX, posY, dldTime, pumpProbeTime, dldDetector, etc.</p>
 </dd>
-<dt>start <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Position of first bin</p>
+<dt>start<span class="classifier">float</span></dt><dd><p>Position of first bin</p>
 </dd>
-<dt>end <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Position of last bin (not included!)</p>
+<dt>end<span class="classifier">float</span></dt><dd><p>Position of last bin (not included!)</p>
 </dd>
-<dt>steps <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">The bin size, if useStepSize=True (default),
+<dt>steps<span class="classifier">float</span></dt><dd><p>The bin size, if useStepSize=True (default),
 this is the step size, while if useStepSize=False, then this is the
 number of bins. In Legacy mode (force_legacy=True, or
 processor._LEGACY_MODE=True)</p>
 </dd>
-<dt>useStepSize <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
-<dd><p class="first">Tells Python how to interpret steps.</p>
-<table class="last docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">True:</th><td class="field-body">interpret steps as a step size.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">False:</th><td class="field-body">interpret steps as the number of steps.</td>
-</tr>
-</tbody>
-</table>
+<dt>useStepSize<span class="classifier">bool | True</span></dt><dd><p>Tells Python how to interpret steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">True</dt>
+<dd class="field-odd"><p>interpret steps as a step size.</p>
 </dd>
-<dt>forceEnds <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
-<dd><p class="first last">Tells python to give priority to the end parameter
+<dt class="field-even">False</dt>
+<dd class="field-even"><p>interpret steps as the number of steps.</p>
+</dd>
+</dl>
+</dd>
+<dt>forceEnds<span class="classifier">bool | False</span></dt><dd><p>Tells python to give priority to the end parameter
 rather than the step parameter (see genBins for more info)</p>
 </dd>
-<dt>include_last <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
-<dd><p class="first last">Closes the interval on the right when true. If
+<dt>include_last<span class="classifier">bool | True</span></dt><dd><p>Closes the interval on the right when true. If
 using step size priority, will expand the interval to include
 the next value when true, will shrink the interval to contain all
 points within the bounds if false.</p>
 </dd>
-<dt>force_legacy <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
-<dd><table class="first last docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">True:</th><td class="field-body">use np.arange method to generate bins.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">False:</th><td class="field-body">use np.linspace method to generate bins.</td>
-</tr>
-</tbody>
-</table>
+<dt>force_legacy<span class="classifier">bool | False</span></dt><dd><dl class="field-list simple">
+<dt class="field-odd">True</dt>
+<dd class="field-odd"><p>use np.arange method to generate bins.</p>
+</dd>
+<dt class="field-even">False</dt>
+<dd class="field-even"><p>use np.linspace method to generate bins.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><dl class="first docutils">
-<dt>axes <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
-<dd><p class="first last">axis of the binned dimesion. The points defined on this axis are the middle points of
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Return</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>axes<span class="classifier">numpy array</span></dt><dd><p>axis of the binned dimesion. The points defined on this axis are the middle points of
 each bin.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Note:</th><td class="field-body"><p class="first last">If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Note</dt>
+<dd class="field-even"><p>If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.</p>
+</dd>
+</dl>
 <div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><code class="docutils literal"><span class="pre">computeBinnedData</span></code> Method to compute all bins created with this function.</p>
+<p class="admonition-title">See also</p>
+<p><code class="docutils literal notranslate"><span class="pre">computeBinnedData</span></code> Method to compute all bins created with this function.</p>
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.addFilter">
-<code class="descname">addFilter</code><span class="sig-paren">(</span><em>colname</em>, <em>lb=None</em>, <em>ub=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.addFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.addFilter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Filters the dataframes contained in the processor instance</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>colname <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">name of the column in the dask dataframes</p>
-</dd>
-<dt>lb <span class="classifier-delimiter">:</span> <span class="classifier">float64 | None</span></dt>
-<dd><p class="first last">lower bound of the filter</p>
-</dd>
-<dt>ub <span class="classifier-delimiter">:</span> <span class="classifier">float64 | None</span></dt>
-<dd><p class="first last">upper bound of the filter</p>
+<code class="sig-name descname">addFilter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">colname</span></em>, <em class="sig-param"><span class="n">lb</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ub</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.addFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.addFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters the dataframes contained in the processor instance.</p>
+<p>Filters the columns of <code class="docutils literal notranslate"><span class="pre">dd</span></code> and <code class="docutils literal notranslate"><span class="pre">ddMicrobunches</span></code> dataframes in place.</p>
+<dl>
+<dt>Args:</dt><dd><p>colname (str): name of the column in the dask dataframes
+lb (:obj:<a href="#id1"><span class="problematic" id="id2">`</span></a>float',optional):  lower bound of the filter</p>
+<blockquote>
+<div><p>if :None: (default), ignores lower boundary</p>
+</div></blockquote>
+<dl class="simple">
+<dt>ub (:obj:<a href="#id3"><span class="problematic" id="id4">`</span></a>float',optional):  upper bound of the filter</dt><dd><p>if :None: (default), ignores upper boundary</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Effect:</th><td class="field-body"><p class="first last">Filters the columns of <code class="docutils literal"><span class="pre">dd</span></code> and <code class="docutils literal"><span class="pre">ddMicrobunches</span></code> dataframes in place.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt>Attention:</dt><dd><p>this is an irreversible process, since the dataframe gets overwritten.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.appendDataframeParquet">
-<code class="descname">appendDataframeParquet</code><span class="sig-paren">(</span><em>fileName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.appendDataframeParquet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.appendDataframeParquet" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">appendDataframeParquet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fileName</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.appendDataframeParquet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.appendDataframeParquet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Append data to an existing dask Parquet dataframe.</p>
 <p>This can be used to concatenate multiple DAQ runs in one dataframe.
 Data is taken from the dd and dd_microbunch dataframe attributes.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first last docutils">
-<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">name (including path) of the folder containing the
+<dl class="field-list simple">
+<dt class="field-odd">Parameter</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>fileName<span class="classifier">str</span></dt><dd><p>name (including path) of the folder containing the
 parquet files to append the new data.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="processor.DldProcessor.DldProcessor.computeBinnedData">
-<code class="descname">computeBinnedData</code><span class="sig-paren">(</span><em>saveName=None</em>, <em>savePath=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use the bin list to bin the data.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>saveName <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
-<dd><p class="first last">filename</p>
-</dd>
-<dt>savePath <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
-<dd><p class="first last">file path</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first docutils">
-<dt>result <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
-<dd><p class="first last">A numpy array of float64 values. Number of bins defined will define the
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.applyJitter">
+<em class="property">static </em><code class="sig-name descname">applyJitter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">amp</span></em>, <em class="sig-param"><span class="n">col</span></em>, <em class="sig-param"><span class="n">type</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.applyJitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.applyJitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add jittering to a dataframe column.</p>
+<p>Adapted from MPES package: <a class="reference external" href="https://github.com/mpes-kit/mpes">https://github.com/mpes-kit/mpes</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>df<span class="classifier">dataframe</span></dt><dd><p>Dataframe to add noise/jittering to.</p>
+</dd>
+<dt>amp<span class="classifier">numeric</span></dt><dd><p>Amplitude scaling for the jittering noise.</p>
+</dd>
+<dt>col<span class="classifier">str</span></dt><dd><p>Name of the column to add jittering to.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Return</dt>
+<dd class="field-even"><p>Uniformly distributed noise vector with specified amplitude and size.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.calibrateEnergy">
+<code class="sig-name descname">calibrateEnergy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">useAvgSampleBias</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">useJitter</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">jitterAmplitude</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">jitterType</span><span class="o">=</span><span class="default_value">'normal'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.calibrateEnergy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.calibrateEnergy" title="Permalink to this definition">¶</a></dt>
+<dd><p>add calibrated energy axis to dataframe</p>
+<p>Uses the same equation as in tof2energy in calibrate.
+Args:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>t<span class="classifier">float</span></dt><dd><p>The time of flight</p>
+</dd>
+<dt>toffset<span class="classifier">float</span></dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
+</dd>
+<dt>eoffset<span class="classifier">float</span></dt><dd><p>The energy offset given by W-hv-V</p>
+</dd>
+<dt>l<span class="classifier">float</span></dt><dd><p>the effective length of the drift section</p>
+</dd>
+<dt>useAvgSampleBias: bool (False)</dt><dd><p>uses the average value for the sample bias across the dataset,
+possibly reducing noise, but cannot be used on runs where the
+sample bias was changed</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.calibratePumpProbeTime">
+<code class="sig-name descname">calibratePumpProbeTime</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t0</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">bamSign</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">streakSign</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">invertTimeAxis</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.calibratePumpProbeTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.calibratePumpProbeTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add pumpProbeTime axis to dataframes.</p>
+<p>Correct pump probe time by BAM and/or streak camera</p>
+<dl>
+<dt>Args:</dt><dd><dl>
+<dt>t0: float</dt><dd><p>pump probe time overlap</p>
+</dd>
+<dt>bamSign: -1,+1</dt><dd><dl>
+<dt>sign of the bam correction:</dt><dd><p>+1 : pumpProbeTime =  delayStage + bam
+-1 : pumpProbeTime =  delayStage - bam</p>
+<blockquote>
+<div><p>0 : ignore bam correction</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+<dt>streakSign: -1,0,+1</dt><dd><dl>
+<dt>sign of the bam correction:</dt><dd><p>+1 : pumpProbeTime =  delayStage + streakCam
+-1 : pumpProbeTime =  delayStage - streakCam</p>
+<blockquote>
+<div><p>0 : ignore streakCamera correction</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+<dt>invertTimeAxis: bool (True)</dt><dd><p>invert time direction on pump probe time</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.computeBinnedData">
+<code class="sig-name descname">computeBinnedData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">saveAs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">return_xarray</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">force_64bit</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">skip_metadata</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">fast_metadata</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">usePbar</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the bin list to bin the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>saveAs<span class="classifier">str | None</span></dt><dd><p>full file name where to save the result (forces return_xarray
+to be true)</p>
+</dd>
+<dt>return_xarray<span class="classifier">bool</span></dt><dd><p>if true, returns and xarray with all available axis and metadata
+information attached, otherwise a numpy.array</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>result<span class="classifier">numpy.array or xarray.DataArray</span></dt><dd><p>A numpy array of float64 values. Number of bins defined will define the
 dimensions of such array.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Notes:</th><td class="field-body"><p class="first last">postProcess method must be used before computing the binned data if binning
+</dd>
+<dt class="field-odd">Notes</dt>
+<dd class="field-odd"><p>postProcess method must be used before computing the binned data if binning
 along pumpProbeDelay or polar k-space coordinates.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="processor.DldProcessor.DldProcessor.computeBinnedDataMulti">
-<code class="descname">computeBinnedDataMulti</code><span class="sig-paren">(</span><em>saveName=None</em>, <em>savePath=None</em>, <em>rank=None</em>, <em>size=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedDataMulti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedDataMulti" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use the bin list to bin the data. Cluster-compatible version (Maciej Dendzik)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>saveName <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
-<dd><p class="first last">filename</p>
-</dd>
-<dt>savePath <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
-<dd><p class="first last">file path</p>
-</dd>
-<dt>rank <span class="classifier-delimiter">:</span> <span class="classifier">int | None</span></dt>
-<dd><p class="first last">Rank number of cluster computer</p>
-</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">int | None</span></dt>
-<dd><p class="first last">Size of partition</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first docutils">
-<dt>result <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
-<dd><p class="first last">A numpy array of float64 values. The number of bins determines the
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.computeBinnedDataMulti">
+<code class="sig-name descname">computeBinnedDataMulti</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">saveName</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">savePath</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rank</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">size</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedDataMulti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedDataMulti" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the bin list to bin the data. Cluster-compatible version (Maciej Dendzik)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>saveName<span class="classifier">str | None</span></dt><dd><p>filename</p>
+</dd>
+<dt>savePath<span class="classifier">str | None</span></dt><dd><p>file path</p>
+</dd>
+<dt>rank<span class="classifier">int | None</span></dt><dd><p>Rank number of cluster computer</p>
+</dd>
+<dt>size<span class="classifier">int | None</span></dt><dd><p>Size of partition</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Return</dt>
+<dd class="field-even"><dl class="simple">
+<dt>result<span class="classifier">numpy array</span></dt><dd><p>A numpy array of float64 values. The number of bins determines the
 dimensionality of the output array.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Notes:</th><td class="field-body"><p class="first last">postProcess method must be used before computing the binned data if binning
+</dd>
+<dt class="field-odd">Notes</dt>
+<dd class="field-odd"><p>postProcess method must be used before computing the binned data if binning
 is applied along pumpProbeDelay or polar k-space coordinates.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.correctBAM">
-<code class="descname">correctBAM</code><span class="sig-paren">(</span><em>sign=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.correctBAM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.correctBAM" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correctBAM</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sign</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.correctBAM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.correctBAM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Correct pump probe time by BAM (beam arrival monitor) data.</p>
 <p>Corrects the pulse to pulse jitter, and changes name from
 delayStageTime to pumpProbeTime. BAM correction shifts the time delay
 by a constant value.</p>
-<p><code class="docutils literal"><span class="pre">/!\</span></code> BAM correction is tricky and will mess up the delay histogram.
+<p><code class="docutils literal notranslate"><span class="pre">/!\</span></code> BAM correction is tricky and will mess up the delay histogram.
 This is because of strong correlation with the microbunch ID of both the
 BAM value and the photoemission yield, i.e. photons at the end of a
 macrobunch give more photoelectrons while becoming systematically
@@ -448,71 +480,68 @@ arrives earlier (FEL before pump is on the more positive side of t0).
 A bigger delay in beam arrival for an FEL pulse means that the photoelectrons
 actually had a more negative delay (probe later than pump) than what the delay stage
 measured, and should therefore be moved to more negative values.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first last docutils">
-<dt>sign <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first">Sign multiplier for BAM correction. Avoid using -1 unless debugging.</p>
-<table border="1" class="last docutils">
+<dl class="field-list">
+<dt class="field-odd">Parameter</dt>
+<dd class="field-odd"><dl>
+<dt>sign<span class="classifier">int</span></dt><dd><p>Sign multiplier for BAM correction. Avoid using -1 unless debugging.</p>
+<table class="docutils align-default">
 <colgroup>
-<col width="16%" />
-<col width="84%" />
+<col style="width: 16%" />
+<col style="width: 84%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Value</th>
-<th class="head">Operation</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>Value</p></th>
+<th class="head"><p>Operation</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>0</td>
-<td>no correction</td>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>no correction</p></td>
 </tr>
-<tr class="row-odd"><td>1</td>
-<td>pumpProbeTime = delayStage - bam</td>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>pumpProbeTime = delayStage - bam</p></td>
 </tr>
-<tr class="row-even"><td>-1</td>
-<td>pumpProbeTime = delayStage + bam</td>
+<tr class="row-even"><td><p>-1</p></td>
+<td><p>pumpProbeTime = delayStage + bam</p></td>
 </tr>
 </tbody>
 </table>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.createPolarCoordinates">
-<code class="descname">createPolarCoordinates</code><span class="sig-paren">(</span><em>kCenter=(250</em>, <em>250)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.createPolarCoordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.createPolarCoordinates" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">createPolarCoordinates</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kCenter</span><span class="o">=</span><span class="default_value">250, 250</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.createPolarCoordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.createPolarCoordinates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate polar coordinates for k-space values.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first last docutils">
-<dt>kCenter <span class="classifier-delimiter">:</span> <span class="classifier">(int,int) | (250, 250)</span></dt>
-<dd><p class="first last">Pixel position of the k-space center in the DLD array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>kCenter<span class="classifier">(int,int) | (250, 250)</span></dt><dd><p>Pixel position of the k-space center in the DLD array</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.delayStageHistogram">
+<em class="property">property </em><code class="sig-name descname">delayStageHistogram</code><a class="headerlink" href="#processor.DldProcessor.DldProcessor.delayStageHistogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Easy access to pump probe normalization array.
+Mostly for retrocompatibility</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.deleteBinners">
-<code class="descname">deleteBinners</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.deleteBinners"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.deleteBinners" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">deleteBinners</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.deleteBinners"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.deleteBinners" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>[DEPRECATED]</strong> use resetBins() instead</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.genBins">
-<code class="descname">genBins</code><span class="sig-paren">(</span><em>start</em>, <em>end</em>, <em>steps</em>, <em>useStepSize=True</em>, <em>forceEnds=False</em>, <em>include_last=True</em>, <em>force_legacy=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.genBins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.genBins" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">genBins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">end</span></em>, <em class="sig-param"><span class="n">steps</span></em>, <em class="sig-param"><span class="n">useStepSize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">forceEnds</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">include_last</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">force_legacy</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.genBins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.genBins" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates bins for use by binning functions.
 Can also be used to generate x axes.</p>
 <p>Binning is created using np.linspace (formerly was done with np.arange).
@@ -526,311 +555,394 @@ be larger than expected. In case forceEnds = true, the stepSize is not
 enforced, and the interval is divided by the closest step that divides it
 cleanly. This of course only has meaning when choosing steps that do not
 cleanly divide the interval.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>start <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Position of first bin</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>start<span class="classifier">float</span></dt><dd><p>Position of first bin</p>
 </dd>
-<dt>end <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Position of last bin (not included!)</p>
+<dt>end<span class="classifier">float</span></dt><dd><p>Position of last bin (not included!)</p>
 </dd>
-<dt>steps <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Define the bin size. If useStepSize=True (default),
+<dt>steps<span class="classifier">float</span></dt><dd><p>Define the bin size. If useStepSize=True (default),
 this is the step size, while if useStepSize=False, then this is the
 number of bins. In Legacy mode (force_legacy=True, or
 processor._LEGACY_MODE=True)</p>
 </dd>
-<dt>useStepSize <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
-<dd><p class="first last">Tells python to interpret steps as a step size if
+<dt>useStepSize<span class="classifier">bool | True</span></dt><dd><p>Tells python to interpret steps as a step size if
 True, or as the number of steps if False</p>
 </dd>
-<dt>forceEnds <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
-<dd><p class="first last">Tells python to give priority to the end parameter
+<dt>forceEnds<span class="classifier">bool | False</span></dt><dd><p>Tells python to give priority to the end parameter
 rather than the step parameter (see above for more info)</p>
 </dd>
-<dt>include_last <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
-<dd><p class="first last">Closes the interval on the right when true. If
+<dt>include_last<span class="classifier">bool | True</span></dt><dd><p>Closes the interval on the right when true. If
 using step size priority, will expand the interval to include
 the next value when true, will shrink the interval to contain all
 points within the bounds if false.</p>
 </dd>
-<dt>force_legacy <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
-<dd><p class="first last">If true, imposes old method for generating bins,
+<dt>force_legacy<span class="classifier">bool | False</span></dt><dd><p>If true, imposes old method for generating bins,
 based on np.arange instead of np.inspace.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.get_metadata">
+<code class="sig-name descname">get_metadata</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fast_mode</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.get_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.get_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a dictionary with the most relevant metadata.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>fast_mode (bool): if False skips the heavy computation steps which</dt><dd><p>take a long time.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>metadata (dict): dictionary with metadata information</p>
+</dd>
+</dl>
+<p># TODO: distribute metadata generation in the appropriate methods.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.initAttributes">
-<code class="descname">initAttributes</code><span class="sig-paren">(</span><em>import_all=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.initAttributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.initAttributes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">initAttributes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">import_all</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.initAttributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.initAttributes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse settings file and assign the variables.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first">import_all : bool | False</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">True:</th><td class="field-body">imports all entries in SETTINGS.ini from the sections [processor] and [paths].</td>
-</tr>
-<tr class="field-even field"><th class="field-name">False:</th><td class="field-body">only imports those that match existing attribute names.</td>
-</tr>
-</tbody>
-</table>
-</div></blockquote>
-<p class="last">Here <code class="docutils literal"><span class="pre">False</span></code> is the better choice, since it keeps better track of attributes.</p>
-</td>
-</tr>
-</tbody>
-</table>
+<dl>
+<dt>Args:</dt><dd><dl>
+<dt>import_all (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>): import method selection.</dt><dd><dl class="field-list simple">
+<dt class="field-odd">True</dt>
+<dd class="field-odd"><p>imports all entries in SETTINGS.ini except those from</p>
+</dd>
+</dl>
+<p>sections [DAQ channels]. These are handled in the DldFlashProcessor subclass.
+Prints a warning when an entry is not found as class attribute
+:False: only imports those that match existing attribute names.</p>
+</dd>
+</dl>
+</dd>
+<dt>Warnings:</dt><dd><dl class="simple">
+<dt>UserWarning: when an entry is found in the SETTINGS.ini file, which</dt><dd><p>is not present as a pre-defined class attribute, it warns the
+user to add id to the code.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.loadSettings">
+<code class="sig-name descname">loadSettings</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings_file_name</span></em>, <em class="sig-param"><span class="n">preserve_path</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.loadSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.loadSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load settings from an other saved setting file.</p>
+<p>To save settings simply copy paste the SETTINGS.ini file to the
+utilities/settings folder, and rename it. Use this name in this method
+to then load its content to the SETTINGS.ini file.</p>
+<dl>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>settings_file_name (str): Name of the settings file to load.</dt><dd><p>This file must be in the folder &quot;hextof-processor/utilities/settings&quot;</p>
+</dd>
+</dl>
+<p>preserve_path: Disables overwriting local file saving paths. Defaults to True</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.load_binned">
-<code class="descname">load_binned</code><span class="sig-paren">(</span><em>namestr</em>, <em>path=None</em>, <em>mode='r'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.load_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.load_binned" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load an HDF5 file saved with <code class="docutils literal"><span class="pre">save_binned()</span></code> method.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>namestr <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Extra namestring tag in the filename.</p>
+<em class="property">static </em><code class="sig-name descname">load_binned</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'r'</span></em>, <em class="sig-param"><span class="n">ret_type</span><span class="o">=</span><span class="default_value">'list'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.load_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.load_binned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an HDF5 file saved with <code class="docutils literal notranslate"><span class="pre">save_binned()</span></code> method.
+wrapper for function utils.load_binned_h5()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>file_name<span class="classifier">str</span></dt><dd><p>name of the file to load, including full path</p>
 </dd>
-<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
-<dd><p class="first last">File path.</p>
+<dt>mode<span class="classifier">str | 'r'</span></dt><dd><p>Read mode of h5 file ('r' = read).</p>
 </dd>
-<dt>mode <span class="classifier-delimiter">:</span> <span class="classifier">str | 'r'</span></dt>
-<dd><p class="first last">Read mode of h5 file ('r' = read).</p>
-</dd>
-</dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
-<dd><p class="first last">Multidimensional data read from h5 file.</p>
-</dd>
-<dt>axes <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
-<dd><p class="first last">The axes values associated with the read data.</p>
-</dd>
-<dt>hist <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
-<dd><p class="first last">Histogram values associated with the read data.</p>
+<dt>ret_type: str | 'list','dict'</dt><dd><p>output format for axes and histograms:
+'list' generates a list of arrays, ordered as
+the corresponding dimensions in data. 'dict'
+generates a dictionary with the names of each axis.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>data<span class="classifier">numpy array</span></dt><dd><p>Multidimensional data read from h5 file.</p>
+</dd>
+<dt>axes<span class="classifier">numpy array</span></dt><dd><p>The axes values associated with the read data.</p>
+</dd>
+<dt>hist<span class="classifier">numpy array</span></dt><dd><p>Histogram values associated with the read data.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="processor.DldProcessor.DldProcessor.normalizePumpProbeTime">
-<code class="descname">normalizePumpProbeTime</code><span class="sig-paren">(</span><em>data_array</em>, <em>ax='pumpProbeTime'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.normalizePumpProbeTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.normalizePumpProbeTime" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.load_settings">
+<code class="sig-name descname">load_settings</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings_file_name</span></em>, <em class="sig-param"><span class="n">preserve_path</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.load_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.load_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrocompatibility naming</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.normalizeAxisMean">
+<code class="sig-name descname">normalizeAxisMean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_array</span></em>, <em class="sig-param"><span class="n">ax</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.normalizeAxisMean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.normalizeAxisMean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize to the mean of the given axis
+Args:</p>
+<blockquote>
+<div><p>data_array (np.ndarray): array to be normalized
+ax (int): axis along which to normalize</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>norm_array (np.ndarray): normalized array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.normalizeDelay">
+<code class="sig-name descname">normalizeDelay</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_array</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">preserve_mean</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.normalizeDelay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.normalizeDelay" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalizes the data array to the number of counts per delay stage step.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first docutils">
-<dt>data_array <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
-<dd><p class="first last">data array containing binned data, as created by the <code class="docutils literal"><span class="pre">computeBinnedData</span></code> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>data_array<span class="classifier">numpy array</span></dt><dd><p>data array containing binned data, as created by the <code class="docutils literal notranslate"><span class="pre">computeBinnedData</span></code> method.</p>
 </dd>
-<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">str | 'pumpProbeTime'</span></dt>
-<dd><p class="first last">axis name</p>
+<dt>ax<span class="classifier">str</span></dt><dd><p>name of the axis to normalize to, default is None, which uses as
+normalization axis &quot;pumpProbeTime&quot; if found, otherwise &quot;delayStage&quot;</p>
 </dd>
-</dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raise:</th><td class="field-body"><p class="first">Throw a ValueError when no pump probe time delay axis is available.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>data_array_normalized <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
-<dd><p class="first last">normalized version of the input array.</p>
+<dt>preserve_mean<span class="classifier">bool | True</span></dt><dd><p>if True, divides the histogram by its mean, preserving the average value of the 
+normalized array.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Raise</dt>
+<dd class="field-even"><p>Throw a ValueError when no pump probe time delay axis is available.</p>
+</dd>
+<dt class="field-odd">Return</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>data_array_normalized<span class="classifier">numpy array</span></dt><dd><p>normalized version of the input array.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.normalizeGMD">
+<code class="sig-name descname">normalizeGMD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_array</span></em>, <em class="sig-param"><span class="n">axis_name</span></em>, <em class="sig-param"><span class="n">axis_values</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.normalizeGMD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.normalizeGMD" title="Permalink to this definition">¶</a></dt>
+<dd><p>create the normalization array for normalizing to the FEL intensity at the GMD
+:Parameter:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>data_array: np.ndarray</dt><dd><p>data to be normalized</p>
+</dd>
+<dt>axis_name:</dt><dd><p>name of the axis along which to perform normalization</p>
+</dd>
+<dt>axis_values:</dt><dd><p>the bins of the axis_name provided.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Return</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>normalized_array: np.ndarray</dt><dd><p>normalized version of the input array</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.normalizePumpProbeTime">
+<code class="sig-name descname">normalizePumpProbeTime</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_array</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">'pumpProbeTime'</span></em>, <em class="sig-param"><span class="n">preserve_mean</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.normalizePumpProbeTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.normalizePumpProbeTime" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Normalizes the data array to the number of counts per delay stage step.</dt><dd><p>[DEPRECATED] this is buggy... the new normalizeDelay function should be used</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>data_array<span class="classifier">numpy array</span></dt><dd><p>data array containing binned data, as created by the <code class="docutils literal notranslate"><span class="pre">computeBinnedData</span></code> method.</p>
+</dd>
+<dt>ax<span class="classifier">str | 'pumpProbeTime'</span></dt><dd><p>axis name</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raise</dt>
+<dd class="field-even"><p>Throw a ValueError when no pump probe time delay axis is available.</p>
+</dd>
+<dt class="field-odd">Return</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>data_array_normalized<span class="classifier">numpy array</span></dt><dd><p>normalized version of the input array.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.postProcess">
-<code class="descname">postProcess</code><span class="sig-paren">(</span><em>bamCorrectionSign=0</em>, <em>kCenter=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.postProcess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.postProcess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">postProcess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bamCorrectionSign</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">kCenter</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.postProcess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.postProcess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply corrections to the dataframe.</p>
 <p>Runs the methods to post-process the dataframe. Includes BAM sign
 correction and polar coordinates axes generation.</p>
-<p><code class="docutils literal"><span class="pre">/!\</span></code> BAM correction is tricky and will mess up the delay histogram.
+<p><code class="docutils literal notranslate"><span class="pre">/!\</span></code> BAM correction is tricky and will mess up the delay histogram.
 This is because of strong correlation with microbunch ID of both the
 BAM value and the photoemission yield, i.e. photons at the end of a
 macrobunch give more photoelectrons while being systematically
 shifted in time.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>bamCorrectionSign <span class="classifier-delimiter">:</span> <span class="classifier">int | 0</span></dt>
-<dd><p class="first last">Sign of to the BAM correction.
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>bamCorrectionSign<span class="classifier">int | 0</span></dt><dd><p>Sign of to the BAM correction.
 Use None to have no correction and no name change.
-See <code class="docutils literal"><span class="pre">correctBAM</span></code> for details.</p>
+See <code class="docutils literal notranslate"><span class="pre">correctBAM</span></code> for details.</p>
 </dd>
-<dt>kCenter <span class="classifier-delimiter">:</span> <span class="classifier">(int, int) | None</span></dt>
-<dd><p class="first last">position of the center of k-space in the DLD detector array.
+<dt>kCenter<span class="classifier">(int, int) | None</span></dt><dd><p>position of the center of k-space in the DLD detector array.
 If set to None, no polar coordinates are added.
 See createPolarCoordinates for details.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.printRunOverview">
+<code class="sig-name descname">printRunOverview</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.printRunOverview"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.printRunOverview" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print run information, used in readData and readDataParquet</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.pumpProbeTimeHistogram">
+<em class="property">property </em><code class="sig-name descname">pumpProbeTimeHistogram</code><a class="headerlink" href="#processor.DldProcessor.DldProcessor.pumpProbeTimeHistogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Easy access to pump probe normalization array.
+Mostly for retrocompatibility</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.readDataframes">
-<code class="descname">readDataframes</code><span class="sig-paren">(</span><em>fileName=None</em>, <em>path=None</em>, <em>format='parquet'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.readDataframes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.readDataframes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">readDataframes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fileName</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'parquet'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.readDataframes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.readDataframes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load data from a parquet or HDF5 dataframe.</p>
 <p>Access the data as hdf5 file (this is the format used internally,
 NOT the FLASH HDF5 files obtained from the DAQ system!)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
-<dd><p class="first last">Shared namestring of data file.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt>fileName<span class="classifier">str | None</span></dt><dd><p>Shared namestring of data file.</p>
 </dd>
-<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None (default to <code class="docutils literal"><span class="pre">self.DATA_PARQUET_DIR</span></code> or <code class="docutils literal"><span class="pre">self.DATA_H5_DIR</span></code>)</span></dt>
-<dd><p class="first last">name of the filepath (down to the lowest-level folder)</p>
+<dt>path<span class="classifier">str | None (default to <code class="docutils literal notranslate"><span class="pre">self.DATA_PARQUET_DIR</span></code> or <code class="docutils literal notranslate"><span class="pre">self.DATA_H5_DIR</span></code>)</span></dt><dd><p>name of the filepath (down to the lowest-level folder)</p>
 </dd>
-<dt>format <span class="classifier-delimiter">:</span> <span class="classifier">str | 'parquet'</span></dt>
-<dd><p class="first last">file format, 'parquet' (parquet file), 'h5' or 'hdf5' (hdf5 file).</p>
+<dt>format<span class="classifier">str | 'parquet'</span></dt><dd><p>file format, 'parquet' (parquet file), 'h5' or 'hdf5' (hdf5 file).</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.readDataframesParquet">
-<code class="descname">readDataframesParquet</code><span class="sig-paren">(</span><em>fileName=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.readDataframesParquet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.readDataframesParquet" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">readDataframesParquet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fileName</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.readDataframesParquet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.readDataframesParquet" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>[DEPRECATED]</strong> Load data from a dask Parquet dataframe.
 Use readDataframesParquet instead.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first last docutils">
-<dt>fileName <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
-<dd><p class="first last">name (including path) of the folder containing
+<dl class="field-list simple">
+<dt class="field-odd">Parameter</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>fileName<span class="classifier">str | None</span></dt><dd><p>name (including path) of the folder containing
 parquet files where the data was saved.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="processor.DldProcessor.DldProcessor.read_h5">
-<code class="descname">read_h5</code><span class="sig-paren">(</span><em>h5FilePath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.read_h5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.read_h5" title="Permalink to this definition">¶</a></dt>
-<dd><p>resad the h5 file at given path and return the contained data.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>h5FilePaht <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Path to the h5 file to read.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
-<dt>result <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
-<dd><p class="first last">array containing binned data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.read_h5">
+<code class="sig-name descname">read_h5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">h5FilePath</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.read_h5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.read_h5" title="Permalink to this definition">¶</a></dt>
+<dd><p>[DEPRECATED] Read the h5 file at given path and return the contained data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>h5FilePaht<span class="classifier">str</span></dt><dd><p>Path to the h5 file to read.</p>
 </dd>
-<dt>axes <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
-<dd><p class="first last">dictionary with axes data labeled by axes name</p>
+</dl>
 </dd>
-<dt>histogram <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span></dt>
-<dd><p class="first last">array of time normalization data.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>result<span class="classifier">np.ndarray</span></dt><dd><p>array containing binned data</p>
+</dd>
+<dt>axes<span class="classifier">dict</span></dt><dd><p>dictionary with axes data labeled by axes name</p>
+</dd>
+<dt>histogram<span class="classifier">np.array</span></dt><dd><p>array of time normalization data.</p>
 </dd>
 </dl>
 </p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.res_to_xarray_old">
+<code class="sig-name descname">res_to_xarray_old</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">res</span></em>, <em class="sig-param"><span class="n">fast_mode</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.res_to_xarray_old"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.res_to_xarray_old" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates a BinnedArray (xarray subclass) out of the given np.array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>res: np.array</dt><dd><p>nd array of binned data</p>
+</dd>
+<dt>fast_mode: bool default True</dt><dd><p>if True, it skips the creation of metadata element which require computation.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>ba: BinnedArray (xarray)</dt><dd><p>an xarray-like container with binned data, axis, and all available metadata</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.resetBins">
-<code class="descname">resetBins</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.resetBins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.resetBins" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">resetBins</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.resetBins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.resetBins" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset the bin list</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.save2hdf5">
-<code class="descname">save2hdf5</code><span class="sig-paren">(</span><em>binnedData</em>, <em>path=None</em>, <em>filename='default.hdf5'</em>, <em>normalizedData=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.save2hdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.save2hdf5" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">save2hdf5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">binnedData</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">'default.hdf5'</span></em>, <em class="sig-param"><span class="n">normalizedData</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.save2hdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.save2hdf5" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>[DEPRECATED]</strong> Store the binned data in a hdf5 file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>binneddata <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd><p class="first last">binned data with bins in dldTime, posX, and posY (and if to be
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>binneddata<span class="classifier">pd.DataFrame</span></dt><dd><p>binned data with bins in dldTime, posX, and posY (and if to be
 normalized, binned in detectors).</p>
 </dd>
-<dt>filename <span class="classifier-delimiter">:</span> <span class="classifier">str | 'default.hdf5'</span></dt>
-<dd><p class="first last">name of the file.</p>
+<dt>filename<span class="classifier">str | 'default.hdf5'</span></dt><dd><p>name of the file.</p>
 </dd>
-<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None | None</span></dt>
-<dd><p class="first last">path to the location where to save the hdf5 file. If <cite>None</cite>, uses the default value
+<dt>path<span class="classifier">str | None | None</span></dt><dd><p>path to the location where to save the hdf5 file. If <cite>None</cite>, uses the default value
 defined in SETTINGS.ini</p>
 </dd>
-<dt>normalizedData <span class="classifier-delimiter">:</span> <span class="classifier">bool | None</span></dt>
-<dd><p class="first last">Normalized data for both detector, so it should be a 3D array
+<dt>normalizedData<span class="classifier">bool | None</span></dt><dd><p>Normalized data for both detector, so it should be a 3D array
 (posX, posY, detectorID).</p>
 </dd>
-<dt>overwrite <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
-<dd><table class="first last docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">True:</th><td class="field-body">overwrites existing files with matching filename.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">False:</th><td class="field-body">no overwriting of files</td>
-</tr>
-</tbody>
-</table>
+<dt>overwrite<span class="classifier">bool | False</span></dt><dd><dl class="field-list simple">
+<dt class="field-odd">True</dt>
+<dd class="field-odd"><p>overwrites existing files with matching filename.</p>
+</dd>
+<dt class="field-even">False</dt>
+<dd class="field-even"><p>no overwriting of files</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first last">Normalization given, for example take it from run 18440.</p>
-</td>
-</tr>
-</tbody>
-</table>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">readRun</span><span class="p">(</span><span class="mi">18440</span><span class="p">)</span>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p>Normalization given, for example take it from run 18440.</p>
+</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">readRun</span><span class="p">(</span><span class="mi">18440</span><span class="p">)</span>
 <span class="n">processor</span><span class="o">.</span><span class="n">addBinning</span><span class="p">(</span><span class="s1">&#39;posX&#39;</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">processor</span><span class="o">.</span><span class="n">addBinning</span><span class="p">(</span><span class="s1">&#39;posY&#39;</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">processor</span><span class="o">.</span><span class="n">addBinning</span><span class="p">(</span><span class="s1">&#39;dldDetectorId&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -847,33 +959,35 @@ defined in SETTINGS.ini</p>
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.save_binned">
-<code class="descname">save_binned</code><span class="sig-paren">(</span><em>binnedData</em>, <em>namestr</em>, <em>path=None</em>, <em>mode='w'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.save_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.save_binned" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">save_binned</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">binnedData</span></em>, <em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'w'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.save_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.save_binned" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save a binned numpy array to h5 file. The file includes the axes
 (taken from the scheduled bins) and the delay stage histogram, if it exists.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>binnedData <span class="classifier-delimiter">:</span> <span class="classifier">numpy array</span></dt>
-<dd><p class="first last">Binned multidimensional data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>binnedData<span class="classifier">numpy array</span></dt><dd><p>Binned multidimensional data.</p>
 </dd>
-<dt>namestr <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Extra namestring tag in the filename.</p>
+<dt>file_name<span class="classifier">str</span></dt><dd><p>Name of the saved file. The extension '.h5' is automatically added.</p>
 </dd>
-<dt>path <span class="classifier-delimiter">:</span> <span class="classifier">str | None</span></dt>
-<dd><p class="first last">File path.</p>
+<dt>path<span class="classifier">str | None</span></dt><dd><p>File path.</p>
 </dd>
-<dt>mode <span class="classifier-delimiter">:</span> <span class="classifier">str | 'w'</span></dt>
-<dd><p class="first last">Write mode of h5 file ('w' = write).</p>
+<dt>mode<span class="classifier">str | 'w'</span></dt><dd><p>Write mode of h5 file ('w' = write).</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.settings">
+<em class="property">property </em><code class="sig-name descname">settings</code><a class="headerlink" href="#processor.DldProcessor.DldProcessor.settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Easy access to settings.ini file</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>dictionary with the settings file structure</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -902,7 +1016,7 @@ defined in SETTINGS.ini</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, momentoscope team.
+        &copy; Copyright 2018-2020, momentoscope team.
 
     </p>
   </div>
@@ -924,7 +1038,7 @@ defined in SETTINGS.ini</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.9.5',
+            VERSION:'0.9.7',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -934,7 +1048,8 @@ defined in SETTINGS.ini</p>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

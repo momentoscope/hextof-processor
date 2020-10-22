@@ -1,0 +1,540 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>6. Miscellaneous (processor.utilities.misc) &mdash; hextof-processor 0.9.7 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.7 documentation" href="../../index.html"/>
+        <link rel="next" title="1. Read DAQ data" href="../../example/01_readdaq.html"/>
+        <link rel="prev" title="5. Input/Output (processor.utilities.io)" href="io.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pah.html">3. Interfacing external pah library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Miscellaneous (processor.utilities.misc)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/06_fullexample.html">6. Complete code examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/howtomaintain.html">2. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li><span class="section-number">6. </span>Miscellaneous (processor.utilities.misc)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/library/utils/misc.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-processor.utilities.misc">
+<span id="miscellaneous-processor-utilities-misc"></span><h1><span class="section-number">6. </span>Miscellaneous (processor.utilities.misc)<a class="headerlink" href="#module-processor.utilities.misc" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="processor.utilities.misc.EnergyDensity400">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">EnergyDensity400</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Diode</span></em>, <em class="sig-param"><span class="n">Diameter</span><span class="o">=</span><span class="default_value">600</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#EnergyDensity400"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.EnergyDensity400" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the pulse energy density of 400nm laser in uJ/cm^2.
+The units are um for beam diameter, uJ/cm^2 for energy density.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>Diode<span class="classifier">numeric</span></dt><dd><p>Measured value from photodiode (arb. units)</p>
+</dd>
+<dt>Diameter<span class="classifier">numeric</span></dt><dd><p>Beam diameter</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.EnergyDensity800">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">EnergyDensity800</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Diode</span></em>, <em class="sig-param"><span class="n">Diameter</span><span class="o">=</span><span class="default_value">600</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#EnergyDensity800"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.EnergyDensity800" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the pulse energy density of 800nm laser in uJ/cm^2.
+The units are um for beam diameter, uJ/cm^2 for energy density.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>Diode<span class="classifier">numeric</span></dt><dd><p>Measured value from photodiode (arb. units)</p>
+</dd>
+<dt>Diameter<span class="classifier">numeric</span></dt><dd><p>Beam diameter</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.PulseEnergy400">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">PulseEnergy400</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Diode</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#PulseEnergy400"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.PulseEnergy400" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the pulse energy of 400nm laser in uJ. The unit is um for beam diameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>Diode<span class="classifier">numeric</span></dt><dd><p>Measured value from photodiode (arb. units)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.PulseEnergy800">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">PulseEnergy800</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Diode</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#PulseEnergy800"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.PulseEnergy800" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the pulse energy of 800nm laser in uJ. The unit is um for beam diameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>Diode<span class="classifier">numeric</span></dt><dd><p>Meausred value from photodiode (arb. units)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.argnearest">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">argnearest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em>, <em class="sig-param"><span class="n">val</span></em>, <em class="sig-param"><span class="n">rettype</span><span class="o">=</span><span class="default_value">'vectorized'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#argnearest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.argnearest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the coordinates of the nD array element nearest to a specified value</p>
+<dl>
+<dt>Args:</dt><dd><p>array (np.array): Numeric data array
+val (int or float) : Look-up value
+rettype (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>,optional): return type specification</p>
+<blockquote>
+<div><p>'vectorized' (default) denotes vectorized coordinates (integer)
+'coordinates' denotes multidimensional coordinates (tuple)</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>argval (int): coordinate position</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.camelCaseIt">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">camelCaseIt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">snake_case_string</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#camelCaseIt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.camelCaseIt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format a string in camel case</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.create_dataframes">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">create_dataframes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">runNumbers</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#create_dataframes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.create_dataframes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a parquet dataframe for each run passed.
+Returns</p>
+<blockquote>
+<div><p>fails: dictionary of runs and error which broke the dataframe generation</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.get_available_runs">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">get_available_runs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rootpath</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#get_available_runs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.get_available_runs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects the filepaths to the available experimental run data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>rootpath<span class="classifier">str</span></dt><dd><p>path where to look for data (recursive in subdirectories)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Return</dt>
+<dd class="field-even"><dl class="simple">
+<dt>available_runs<span class="classifier">dict</span></dt><dd><p>dict with run numbers as keys (e.g. 'run12345') and path where to load data from as str.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.get_path_to_run">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">get_path_to_run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">runNumber</span></em>, <em class="sig-param"><span class="n">rootpath</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#get_path_to_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.get_path_to_run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the path to the data of a given run number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>runNumber<span class="classifier">str or int</span></dt><dd><p>run number as integer or string.</p>
+</dd>
+<dt>rootpath<span class="classifier">str</span></dt><dd><p>path where to look for data (recursive in subdirectories)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Return</dt>
+<dd class="field-even"><dl class="simple">
+<dt>path<span class="classifier">str</span></dt><dd><p>path to where the raw data of the given run number is stored.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.load_binned_h5">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">load_binned_h5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'r'</span></em>, <em class="sig-param"><span class="n">ret_type</span><span class="o">=</span><span class="default_value">'list'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#load_binned_h5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.load_binned_h5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an HDF5 file saved with <code class="docutils literal notranslate"><span class="pre">save_binned()</span></code> method.</p>
+<dl>
+<dt>Args:</dt><dd><p>file_name (str): name of the file to load, including full path
+mode (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional): Read mode of h5 file ('r' = read).
+ret_type (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, optional): output format for axes and histograms:</p>
+<blockquote>
+<div><p>'list' generates a list of arrays, ordered as
+the corresponding dimensions in data. 'dict'
+generates a dictionary with the names of each axis.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>data np.array: Multidimensional data read from h5 file.
+axes np.array: The axes values associated with the read data.
+hist np.array: Histogram values associated with the read data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.parse_category">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">parse_category</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">category</span></em>, <em class="sig-param"><span class="n">settings_file</span><span class="o">=</span><span class="default_value">'default'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#parse_category"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.parse_category" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse setting file and return desired value
+Args:</p>
+<blockquote>
+<div><p>category (str): title of the category
+setting_file (str): path to setting file. If set to 'default' it takes</p>
+<blockquote>
+<div><p>a file called SETTINGS.ini in the main folder of the repo.</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>dictionary containing name and value of all entries present in this
+category.</p>
+</dd>
+<dt>Notes:</dt><dd><p>Author: Steinn Ymir Agustsson &lt;<a class="reference external" href="mailto:sagustss&#37;&#52;&#48;uni-mainz&#46;de">sagustss<span>&#64;</span>uni-mainz<span>&#46;</span>de</a>&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.parse_logbook">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">parse_logbook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log_text</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#parse_logbook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.parse_logbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a log book entry to read out metadata.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>log_text (str or file): file or plain text of the log book, in the
+&quot;correct&quot; format TODO: add example of log entry</p>
+</dd>
+<dt>Returns:</dt><dd><p>logDict (dict): Dictionary with the relevant metadata</p>
+</dd>
+<dt>Notes:</dt><dd><p>Author: Steinn Ymir Agustsson &lt;<a class="reference external" href="mailto:sagustss&#37;&#52;&#48;uni-mainz&#46;de">sagustss<span>&#64;</span>uni-mainz<span>&#46;</span>de</a>&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.parse_setting">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">parse_setting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">category</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">settings_file</span><span class="o">=</span><span class="default_value">'default'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#parse_setting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.parse_setting" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse setting file and return desired value
+Args:</p>
+<blockquote>
+<div><p>category (str): title of the category
+name (str): name of the parameter
+setting_file (str): path to setting file. If set to 'default' it takes</p>
+<blockquote>
+<div><p>a file called SETTINGS.ini in the main folder of the repo.</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>value of the parameter, None if parameter cannot be found.</p>
+</dd>
+<dt>Notes:</dt><dd><p>Author: Steinn Ymir Agustsson &lt;<a class="reference external" href="mailto:sagustss&#37;&#52;&#48;uni-mainz&#46;de">sagustss<span>&#64;</span>uni-mainz<span>&#46;</span>de</a>&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.plot_lines">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">plot_lines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">normalization</span><span class="o">=</span><span class="default_value">'None'</span></em>, <em class="sig-param"><span class="n">range</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">color_range</span><span class="o">=</span><span class="default_value">0, 1</span></em>, <em class="sig-param"><span class="n">x_label</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">y_label</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">xlim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ylim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">savefig</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">save_dir</span><span class="o">=</span><span class="default_value">'E:/data/FLASH/'</span></em>, <em class="sig-param"><span class="n">save_name</span><span class="o">=</span><span class="default_value">'fig'</span></em>, <em class="sig-param"><span class="n">static_curve</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#plot_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.plot_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>function to fit a series of curves with nice colorplot.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.radius">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">radius</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">center</span><span class="o">=</span><span class="default_value">0, 0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#radius"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the radius</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.repr_byte_size">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">repr_byte_size</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size_bytes</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#repr_byte_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.repr_byte_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represent in a string the size in Bytes in a compact format.</p>
+<p>Adapted from <a class="reference external" href="https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python">https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python</a>
+Follows same notation as Windows does for files. See: <a class="reference external" href="https://en.wikipedia.org/wiki/Mebibyte">https://en.wikipedia.org/wiki/Mebibyte</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.save_H5_hyperstack">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">save_H5_hyperstack</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_array</span></em>, <em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#save_H5_hyperstack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.save_H5_hyperstack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>data_array<span class="classifier">numpy array</span></dt><dd><p>4D data array, order must be Kx,Ky,Energy,Time</p>
+</dd>
+<dt>filename<span class="classifier">str</span></dt><dd><p>The name of the file to save</p>
+</dd>
+<dt>path<span class="classifier">str</span></dt><dd><p>The path to where to save hdf5 file. If None, uses the &quot;results&quot; folder from SETTINGS.ini</p>
+</dd>
+<dt>overwrite<span class="classifier">str</span></dt><dd><p>If true, it overwrites existing file with the same
+name. Otherwise raises and error.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.misc.write_setting">
+<code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">write_setting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">category</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">settings_file</span><span class="o">=</span><span class="default_value">'default'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#write_setting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.write_setting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write enrty in the settings file
+Args:</p>
+<blockquote>
+<div><p>category (str): title of the category
+name (str): name of the parameter
+setting_file (str): path to setting file. If set to 'default' it takes</p>
+<blockquote>
+<div><p>a file called SETTINGS.ini in the main folder of the repo.</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>value of the parameter, None if parameter cannot be found.</p>
+</dd>
+<dt>Notes:</dt><dd><p>Author: Steinn Ymir Agustsson &lt;<a class="reference external" href="mailto:sagustss&#37;&#52;&#48;uni-mainz&#46;de">sagustss<span>&#64;</span>uni-mainz<span>&#46;</span>de</a>&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../example/01_readdaq.html" class="btn btn-neutral float-right" title="1. Read DAQ data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="io.html" class="btn btn-neutral" title="5. Input/Output (processor.utilities.io)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.9.7',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
