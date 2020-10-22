@@ -225,15 +225,15 @@
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">rootDirectoryOfH5Files</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Creates a BeamtimeDaqAccess object for the given root directory - API</span>
 
-<span class="sd">        **Parameter**</span>
-<span class="sd">            rootDirectoryOfH5Files (str): The root directory of the HDF files. The root</span>
-<span class="sd">                    directory contains sub directories for different FLASH DAQ streams.</span>
+<span class="sd">        **Parameter**\n</span>
+<span class="sd">        rootDirectoryOfH5Files (str): The root directory of the HDF files. The root</span>
+<span class="sd">                directory contains sub directories for different FLASH DAQ streams.</span>
 
-<span class="sd">        **Return**</span>
-<span class="sd">            BeamtimeDaqAccess: The ready to use beamtime DAQ access object.</span>
+<span class="sd">        **Return**\n</span>
+<span class="sd">        BeamtimeDaqAccess: The ready to use beamtime DAQ access object.</span>
 
-<span class="sd">        **Raise**</span>
-<span class="sd">            AssertionError: If the given rootDirectoryOfH5Files does not exist.</span>
+<span class="sd">        **Raise**\n</span>
+<span class="sd">        AssertionError: If the given rootDirectoryOfH5Files does not exist.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="n">fileAccess</span> <span class="o">=</span> <span class="n">H5FileDataAccess</span><span class="p">(</span><span class="n">H5FileManager</span><span class="p">(</span><span class="n">rootDirectoryOfH5Files</span><span class="p">))</span>
@@ -255,13 +255,16 @@
 <span class="sd">        timing channel was not considered a valid channel in the original</span>
 <span class="sd">        PAH code.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            (bool): True: channel is valid, False: channel not valid.</span>
+<span class="sd">        **Return**\n</span>
+<span class="sd">        (bool): True: channel is valid, False: channel not valid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">channelName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allChannelNames</span><span class="p">()</span> \
                <span class="ow">or</span> <span class="n">channelName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/uncategorised/&#39;</span><span class="p">)</span> \
                <span class="ow">or</span> <span class="n">channelName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/FL2/&#39;</span><span class="p">)</span> \
                <span class="ow">or</span> <span class="n">channelName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/FL1/&#39;</span><span class="p">)</span> \
+               <span class="ow">or</span> <span class="n">channelName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/Experiment/&#39;</span><span class="p">)</span> \
+               <span class="ow">or</span> <span class="n">channelName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/Photon Diagnostic/&#39;</span><span class="p">)</span> \
+               <span class="ow">or</span> <span class="n">channelName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/Electron Diagnostic/&#39;</span><span class="p">)</span> \
                <span class="ow">or</span> <span class="n">channelName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/Timing/&#39;</span><span class="p">)</span>  <span class="c1"># &lt;--for datasets before 08-2018</span></div></div>
 
 

@@ -770,14 +770,15 @@ class DldProcessor:
 
         Filters the columns of ``dd`` and ``ddMicrobunches`` dataframes in place.
 
-        Args:
-            colname (str): name of the column in the dask dataframes
-            lb (:obj:`float',optional):  lower bound of the filter
-                if :None: (default), ignores lower boundary
-            ub (:obj:`float',optional):  upper bound of the filter
-                if :None: (default), ignores upper boundary
-        Attention:
-            this is an irreversible process, since the dataframe gets overwritten.
+        **Parameters**\n
+        colname (str): name of the column in the dask dataframes
+        lb (:obj:`float',optional):  lower bound of the filter
+            if :None: (default), ignores lower boundary
+        ub (:obj:`float',optional):  upper bound of the filter
+            if :None: (default), ignores upper boundary
+        
+        **Attention**\n
+        This is an irreversible process, since the dataframe gets overwritten.
         """
 
         if colname in self.dd.columns:
@@ -810,30 +811,30 @@ class DldProcessor:
         cleanly. This of course only has meaning when choosing steps that do not
         cleanly divide the interval.
 
-        :Parameters:
-            start : float
-                Position of first bin
-            end : float
-                Position of last bin (not included!)
-            steps : float
-                Define the bin size. If useStepSize=True (default),
-                this is the step size, while if useStepSize=False, then this is the
-                number of bins. In Legacy mode (force_legacy=True, or
-                processor._LEGACY_MODE=True)
-            useStepSize : bool | True
-                Tells python to interpret steps as a step size if
-                True, or as the number of steps if False
-            forceEnds : bool | False
-                Tells python to give priority to the end parameter
-                rather than the step parameter (see above for more info)
-            include_last : bool | True
-                Closes the interval on the right when true. If
-                using step size priority, will expand the interval to include
-                the next value when true, will shrink the interval to contain all
-                points within the bounds if false.
-            force_legacy : bool | False
-                If true, imposes old method for generating bins,
-                based on np.arange instead of np.inspace.
+        **Parameters**\n
+        start: float
+            Position of first bin
+        end: float
+            Position of last bin (not included!)
+        steps: float
+            Define the bin size. If useStepSize=True (default),
+            this is the step size, while if useStepSize=False, then this is the
+            number of bins. In Legacy mode (force_legacy=True, or
+            processor._LEGACY_MODE=True)
+        useStepSize: bool | True
+            Tells python to interpret steps as a step size if
+            True, or as the number of steps if False
+        forceEnds: bool | False
+            Tells python to give priority to the end parameter
+            rather than the step parameter (see above for more info)
+        include_last: bool | True
+            Closes the interval on the right when true. If
+            using step size priority, will expand the interval to include
+            the next value when true, will shrink the interval to contain all
+            points within the bounds if false.
+        force_legacy: bool | False
+            If true, imposes old method for generating bins,
+            based on np.arange instead of np.inspace.
         """
 
         from decimal import Decimal
@@ -880,43 +881,43 @@ class DldProcessor:
         as in this list. The attribute binRangeList will contain the ranges of
         the binning used for the corresponding dimension.
 
-        :Parameters:
-            name : str
-                Name of the column to apply binning to. Possible column names are`:`
-                posX, posY, dldTime, pumpProbeTime, dldDetector, etc.
-            start : float
-                Position of first bin
-            end : float
-                Position of last bin (not included!)
-            steps : float
-                The bin size, if useStepSize=True (default),
-                this is the step size, while if useStepSize=False, then this is the
-                number of bins. In Legacy mode (force_legacy=True, or
-                processor._LEGACY_MODE=True)
-            useStepSize : bool | True
-                Tells Python how to interpret steps.
+        **Parameters**\n
+        name: str
+            Name of the column to apply binning to. Possible column names are`:`
+            posX, posY, dldTime, pumpProbeTime, dldDetector, etc.
+        start: float
+            Position of first bin
+        end: float
+            Position of last bin (not included!)
+        steps: float
+            The bin size, if useStepSize=True (default),
+            this is the step size, while if useStepSize=False, then this is the
+            number of bins. In Legacy mode (force_legacy=True, or
+            processor._LEGACY_MODE=True)
+        useStepSize: bool | True
+            Tells Python how to interpret steps.
+            
+            :True: interpret steps as a step size.
+            :False: interpret steps as the number of steps.
+        forceEnds: bool | False
+            Tells python to give priority to the end parameter
+            rather than the step parameter (see genBins for more info)
+        include_last: bool | True
+            Closes the interval on the right when true. If
+            using step size priority, will expand the interval to include
+            the next value when true, will shrink the interval to contain all
+            points within the bounds if false.
+        force_legacy: bool | False
+            :True: use np.arange method to generate bins.
+            :False: use np.linspace method to generate bins.
                 
-                :True: interpret steps as a step size.
-                :False: interpret steps as the number of steps.
-            forceEnds : bool | False
-                Tells python to give priority to the end parameter
-                rather than the step parameter (see genBins for more info)
-            include_last : bool | True
-                Closes the interval on the right when true. If
-                using step size priority, will expand the interval to include
-                the next value when true, will shrink the interval to contain all
-                points within the bounds if false.
-            force_legacy : bool | False
-                :True: use np.arange method to generate bins.
-                :False: use np.linspace method to generate bins.
+        **Return**\n
+        axes: numpy array
+            axis of the binned dimesion. The points defined on this axis are the middle points of
+            each bin.
                 
-        :Return:
-            axes : numpy array
-                axis of the binned dimesion. The points defined on this axis are the middle points of
-                each bin.
-                
-        :Note:
-            If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.
+        **Note**\n
+        If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.
         
         .. seealso::
         
@@ -963,21 +964,22 @@ class DldProcessor:
     def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False, usePbar=True):
         """ Use the bin list to bin the data.
         
-        :Parameters:
-            saveAs : str | None
-                full file name where to save the result (forces return_xarray
-                to be true)
-            return_xarray : bool
-                if true, returns and xarray with all available axis and metadata
-                information attached, otherwise a numpy.array
-        :Returns:
-            result : numpy.array or xarray.DataArray
-                A numpy array of float64 values. Number of bins defined will define the
-                dimensions of such array.
+        **Parameters**\n
+        saveAs: str | None
+            full file name where to save the result (forces return_xarray
+            to be true).
+        return_xarray: bool
+            if true, returns and xarray with all available axis and metadata
+            information attached, otherwise a numpy.array.
+        
+        **Returns**\n
+        result: numpy.array or xarray.DataArray
+            A numpy array of float64 values. Number of bins defined will define the
+            dimensions of such array.
 
-        :Notes:
-            postProcess method must be used before computing the binned data if binning
-            along pumpProbeDelay or polar k-space coordinates.
+        **Notes**\n
+        postProcess method must be used before computing the binned data if binning
+        along pumpProbeDelay or polar k-space coordinates.
         """
         if return_xarray is None:
             try:
@@ -1004,12 +1006,14 @@ class DldProcessor:
         # be faster!
         def analyzePartNumpy(part):
             """ Function called by each thread of the analysis.
-
-            This now should be faster.
-            Args:
-                part : partition to process
-            Returns:
-                res: binned array calculated from this partition
+            
+            **Parameter**\n
+            part: partition
+                partition to process.
+            
+            **Returns**\n
+            res: numpy array
+                binned array calculated from this partition.
             """
             # get the data as numpy:
             vals = part.values
@@ -1099,11 +1103,12 @@ class DldProcessor:
     def get_metadata(self, fast_mode=False):
         """  Creates a dictionary with the most relevant metadata.
 
-        Args:
-            fast_mode (bool): if False skips the heavy computation steps which
-                take a long time.
-        Returns:
-            metadata (dict): dictionary with metadata information
+        **Args**\n
+        fast_mode (bool): if False skips the heavy computation steps which
+            take a long time.
+        
+        **Returns**\n
+        metadata (dict): dictionary with metadata information
         # TODO: distribute metadata generation in the appropriate methods.
         """
         print('Generating metadata...')
@@ -1166,16 +1171,17 @@ class DldProcessor:
         return metadata
 
     def res_to_xarray_old(self, res, fast_mode=False):
-        """ creates a BinnedArray (xarray subclass) out of the given np.array
+        """ Creates a BinnedArray (xarray subclass) out of the given numpy.array.
         
-        :Parameters:
-            res: np.array
-                nd array of binned data
-            fast_mode: bool default True
-                if True, it skips the creation of metadata element which require computation.
-        :Returns:
-            ba: BinnedArray (xarray)
-                an xarray-like container with binned data, axis, and all available metadata
+        **Parameters**\n
+        res: np.array
+            nd array of binned data
+        fast_mode: bool default True
+            if True, it skips the creation of metadata element which require computation.
+        
+        **Returns**\n
+        ba: BinnedArray (xarray)
+            an xarray-like container with binned data, axis, and all available metadata.
         """
         dims = self.binNameList
         coords = {}
@@ -1254,24 +1260,24 @@ class DldProcessor:
                                rank=None, size=None):
         """ Use the bin list to bin the data. Cluster-compatible version (Maciej Dendzik)
         
-        :Parameters:
-            saveName : str | None
-                filename
-            savePath : str | None
-                file path
-            rank : int | None
-                Rank number of cluster computer
-            size : int | None
-                Size of partition
+        **Parameters**\n
+        saveName: str | None
+            filename
+        savePath: str | None
+            file path
+        rank: int | None
+            Rank number of cluster computer
+        size: int | None
+            Size of partition
         
-        :Return:
-            result : numpy array
-                A numpy array of float64 values. The number of bins determines the
-                dimensionality of the output array.
+        **Return**\n
+        result: numpy array
+            A numpy array of float64 values. The number of bins determines the
+            dimensionality of the output array.
 
-        :Notes:
-            postProcess method must be used before computing the binned data if binning
-            is applied along pumpProbeDelay or polar k-space coordinates.
+        **Notes**\n
+        postProcess method must be used before computing the binned data if binning
+        is applied along pumpProbeDelay or polar k-space coordinates.
         """
 
         def analyzePart(part):
@@ -1348,15 +1354,15 @@ class DldProcessor:
         """ Save a binned numpy array to h5 file. The file includes the axes
         (taken from the scheduled bins) and the delay stage histogram, if it exists.
 
-        :Parameters:
-            binnedData : numpy array
-                Binned multidimensional data.
-            file_name : str
-                Name of the saved file. The extension '.h5' is automatically added.
-            path : str | None
-                File path.
-            mode : str | 'w'
-                Write mode of h5 file ('w' = write).
+        **Parameters**\n
+        binnedData: numpy array
+            Binned multidimensional data.
+        file_name: str
+            Name of the saved file. The extension '.h5' is automatically added.
+        path: str | None
+            File path.
+        mode: str | 'w'
+            Write mode of h5 file ('w' = write).
         """
         _abort = False
         if path is None:
@@ -1433,25 +1439,24 @@ class DldProcessor:
         """ Load an HDF5 file saved with ``save_binned()`` method.
         wrapper for function utils.load_binned_h5()
 
-        :Parameters:
-            file_name : str
-                name of the file to load, including full path
+        **Parameters**\n
+        file_name: str
+            name of the file to load, including full path
+        mode: str | 'r'
+            Read mode of h5 file ('r' = read).
+        ret_type: str | 'list','dict'
+            output format for axes and histograms:
+            'list' generates a list of arrays, ordered as
+            the corresponding dimensions in data. 'dict'
+            generates a dictionary with the names of each axis.
 
-            mode : str | 'r'
-                Read mode of h5 file ('r' = read).
-            ret_type: str | 'list','dict'
-                output format for axes and histograms:
-                'list' generates a list of arrays, ordered as
-                the corresponding dimensions in data. 'dict'
-                generates a dictionary with the names of each axis.
-
-        :Returns:
-            data : numpy array
-                Multidimensional data read from h5 file.
-            axes : numpy array
-                The axes values associated with the read data.
-            hist : numpy array
-                Histogram values associated with the read data.
+        **Returns**\n
+        data: numpy array
+            Multidimensional data read from h5 file.
+        axes: numpy array
+            The axes values associated with the read data.
+        hist: numpy array
+            Histogram values associated with the read data.
         """
         return misc.load_binned_h5(file_name, mode=mode, ret_type=ret_type)
 
@@ -1472,10 +1477,10 @@ class DldProcessor:
         """ **[DEPRECATED]** Load data from a dask Parquet dataframe.
         Use readDataframesParquet instead.
 
-        :Parameter:
-            fileName : str | None
-                name (including path) of the folder containing
-                parquet files where the data was saved.
+        **Parameter**\n
+        fileName: str | None
+            name (including path) of the folder containing
+            parquet files where the data was saved.
         """
         # TODO: remove this function once retro-compatibility is ensured
 
