@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1. List of terms and abbreviations &mdash; hextof-processor 0.9.5 documentation</title>
+  <title>1. List of terms and abbreviations &mdash; hextof-processor 0.9.7 documentation</title>
   
 
   
@@ -35,9 +35,9 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
+    <link rel="top" title="hextof-processor 0.9.7 documentation" href="../index.html"/>
         <link rel="next" title="2. Package maintenance" href="howtomaintain.html"/>
-        <link rel="prev" title="6. Complete code examples" href="../example/fullexample.html"/> 
+        <link rel="prev" title="6. Complete code examples" href="../example/06_fullexample.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.9.5
+                0.9.7
               </div>
             
           
@@ -90,21 +90,29 @@
               
             
             
-              <p class="caption"><span class="caption-text">Processor library</span></p>
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../library/pah.html">3. Interfacing external pah library</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../library/utils.html">4. Utility functions (utils)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../example/readdaq.html">1. Read DAQ data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/parquet.html">2. Save dataset to dask parquet files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/binning.html">3. Binning multidimensional data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/nobinning.html">4. Processing data without binning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/corrections.html">5. Corrections to FEL pulse timing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/fullexample.html">6. Complete code examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/06_fullexample.html">6. Complete code examples</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Miscellaneous</span></p>
 <ul class="current">
@@ -154,13 +162,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>1. List of terms and abbreviations</li>
+      <li><span class="section-number">1. </span>List of terms and abbreviations</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/misc/listofterms.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/misc/listofterms.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -174,13 +182,13 @@
            <div itemprop="articleBody">
             
   <div class="section" id="list-of-terms-and-abbreviations">
-<span id="list-of-terms-and-abbreviations"></span><h1>1. List of terms and abbreviations<a class="headerlink" href="#list-of-terms-and-abbreviations" title="Permalink to this headline">¶</a></h1>
+<h1><span class="section-number">1. </span>List of terms and abbreviations<a class="headerlink" href="#list-of-terms-and-abbreviations" title="Permalink to this headline">¶</a></h1>
 <p><strong>BAM</strong> = beam arrival monitor, monitors the time when the FEL beam arrives.</p>
 <p><strong>BDA</strong> = beam distribution area (behind the gas monitor detector)</p>
 <p><strong>bunch charge</strong> -- the total charge of an electron microbunch</p>
 <p><strong>CAMP chamber</strong> -- CFEL ASG multipurpose chamber</p>
 <p><strong>DLD</strong> = delay line detector, measures the (x,y) positions of electrons by two pairs of timing difference measurements.</p>
-<p><strong>GMD</strong> = gas monitor detector, measures the intensity of the FEL beam before and after the gas attenuator. It contains the parts before (<strong>GMD_Tunnel</strong>) and after (<strong>GMD_BDA</strong>) the FEL undulator tunnel. Technical details of the detector see <code class="docutils literal"><span class="pre">[Tiedke08]</span></code>.</p>
+<p><strong>GMD</strong> = gas monitor detector, measures the intensity of the FEL beam before and after the gas attenuator. It contains the parts before (<strong>GMD_Tunnel</strong>) and after (<strong>GMD_BDA</strong>) the FEL undulator tunnel. Technical details of the detector see <cite>[Tiedke08]</cite>.</p>
 <p><strong>FEL</strong> = free electron laser</p>
 <p><strong>HEXTOF analyzer</strong> = high energy X-ray time of flight analyzer. A measurement device that records simultaneously the (kx, ky, E) coordinates of the photoelectrons emitted within the X-ray photoemission horizon. It is later rebranded and sold by SPECS GmbH under the name METIS.</p>
 <p><strong>SASE</strong> = self-amplified spontaneous emission</p>
@@ -192,7 +200,7 @@
 <p><strong>file number</strong> -- integer label of a file in an experimental run.</p>
 <p>$$~$$</p>
 <p><strong>Bibliography</strong></p>
-<p><code class="docutils literal"><span class="pre">[Tiedke08]</span></code> Gas-detector for X-ray lasers. <a class="reference external" href="http://bib-pubdb1.desy.de/record/85584/files/GetPDFServlet.pdf">pdf</a></p>
+<p><cite>[Tiedke08]</cite> Gas-detector for X-ray lasers. <a class="reference external" href="http://bib-pubdb1.desy.de/record/85584/files/GetPDFServlet.pdf">pdf</a></p>
 </div>
 
 
@@ -208,7 +216,7 @@
         <a href="howtomaintain.html" class="btn btn-neutral float-right" title="2. Package maintenance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../example/fullexample.html" class="btn btn-neutral" title="6. Complete code examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../example/06_fullexample.html" class="btn btn-neutral" title="6. Complete code examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -217,7 +225,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, momentoscope team.
+        &copy; Copyright 2018-2020, momentoscope team.
 
     </p>
   </div>
@@ -239,7 +247,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.9.5',
+            VERSION:'0.9.7',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -249,7 +257,8 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

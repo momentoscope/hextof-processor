@@ -2,7 +2,9 @@
 """
 @author: Steinn Ymir Agustsson
 """
+
 import sys, os
+import configparser
 
 # settings = configparser.ConfigParser() # TODO: find a smarter way
 # if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
@@ -12,28 +14,15 @@ import sys, os
 
 # importing stuff from PAH modules
 # sys.path.append(settings['paths']['PAH_MODULE_DIR'])
-try:
-    from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess, H5FileDataAccess, H5FileManager
-except:
-    import configparser
-
-    settings = configparser.ConfigParser() # TODO: find a smarter way
-    if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-        settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
-    else:
-        settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
-
-    # importing stuff from PAH modules
-    sys.path.append(settings['paths']['PAH_MODULE_DIR'])
-    from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess, H5FileDataAccess, H5FileManager
+from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess as _BeamtimeDaqAccess, H5FileDataAccess as _H5FileDataAccess, H5FileManager as _H5FileManager
 
 # Below are the redefined classes belonging to PAH that should correct the 
 # problems induced by adding the macrobunchID information to the data.
 
 
 def main():
-    import configparser
-
+    """ Configuring local settings.
+    """
     settings = configparser.ConfigParser()
     settings.read('SETTINGS.ini')
     path = settings['paths']['DATA_RAW_DIR']
@@ -42,9 +31,8 @@ def main():
     dldPosY, otherStuff = daqAccess.allValuesOfRun(dldPosXName, 19135)
 
 
-class BeamtimeDaqAccess(BeamtimeDaqAccess):
-    """Overwriting original class to apply local corrections to PAH code.
-
+class BeamtimeDaqAccess(_BeamtimeDaqAccess):
+    """ Overwriting original class to apply local corrections to PAH code.
     """
 
     def __init__(self, fileAccess):
@@ -69,7 +57,7 @@ class BeamtimeDaqAccess(BeamtimeDaqAccess):
         return BeamtimeDaqAccess(fileAccess)
 
 
-class H5FileDataAccess(H5FileDataAccess):
+class H5FileDataAccess(_H5FileDataAccess):
     """ Wrapper class for correcting PAH code for defining valid channels to read from.
     """
 
@@ -97,7 +85,7 @@ class H5FileDataAccess(H5FileDataAccess):
                or channelName.startswith('/Timing/')  # <--for datasets before 08-2018
 
 
-class H5FileManager(H5FileManager):
+class H5FileManager(_H5FileManager):
     """ Wrapper for pointing to original class in  PAH module.
     """
 
