@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2. Package maintenance &mdash; hextof-processor 0.9.5 documentation</title>
+  <title>2. Package maintenance &mdash; hextof-processor 0.9.7 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
+    <link rel="top" title="hextof-processor 0.9.7 documentation" href="../index.html"/>
         <link rel="prev" title="1. List of terms and abbreviations" href="listofterms.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.9.5
+                0.9.7
               </div>
             
           
@@ -89,30 +89,34 @@
               
             
             
-              <p class="caption"><span class="caption-text">Processor library</span></p>
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../library/pah.html">3. Interfacing external pah library</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../library/utils.html">4. Utility functions (utils)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../example/readdaq.html">1. Read DAQ data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/parquet.html">2. Save dataset to dask parquet files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/binning.html">3. Binning multidimensional data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/nobinning.html">4. Processing data without binning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/corrections.html">5. Corrections to FEL pulse timing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../example/fullexample.html">6. Complete code examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/06_fullexample.html">6. Complete code examples</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Miscellaneous</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="listofterms.html">1. List of terms and abbreviations</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Package maintenance</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#main-dependencies">2.1. Main dependencies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#how-to-document">2.2. How to document</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Package maintenance</a></li>
 </ul>
 
             
@@ -157,13 +161,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>2. Package maintenance</li>
+      <li><span class="section-number">2. </span>Package maintenance</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/misc/howtomaintain.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/misc/howtomaintain.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -177,61 +181,52 @@
            <div itemprop="articleBody">
             
   <div class="section" id="package-maintenance">
-<span id="package-maintenance"></span><h1>2. Package maintenance<a class="headerlink" href="#package-maintenance" title="Permalink to this headline">¶</a></h1>
+<h1><span class="section-number">2. </span>Package maintenance<a class="headerlink" href="#package-maintenance" title="Permalink to this headline">¶</a></h1>
 <p>The following guidelines are meant for future package updates by an extended user base. Please adhere to the original settings unless a significantly better version of things is available.</p>
-<div class="section" id="main-dependencies">
-<span id="main-dependencies"></span><h2>2.1. Main dependencies<a class="headerlink" href="#main-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>2.1 Main dependencies</p>
 <p>For future updates on the <strong>hextof-processor</strong> package, the following main dependencies should be checked for compatibility,</p>
 <ul class="simple">
-<li><strong>pah</strong> -- the library from the FLASH beamline for parsing the raw hdf5 file generated in the experiment</li>
-<li><strong>dask</strong> -- contains the distributed version of numpy array and pandas dataframe</li>
-<li><strong>numpy</strong>, <strong>pandas</strong></li>
+<li><p><strong>pah</strong> -- the library from the FLASH beamline for parsing the raw hdf5 file generated in the experiment</p></li>
+<li><p><strong>dask</strong> -- contains the distributed version of numpy array and pandas dataframe</p></li>
+<li><p><strong>numpy</strong>, <strong>pandas</strong></p></li>
 </ul>
-</div>
-<div class="section" id="how-to-document">
-<span id="how-to-document"></span><h2>2.2. How to document<a class="headerlink" href="#how-to-document" title="Permalink to this headline">¶</a></h2>
-<p>Documentation of the package follows the <a class="reference external" href="http://docs.readthedocs.io/en/latest/getting_started.html">readthedocs</a> (a.k.a. rtd) style and uses the <a class="reference external" href="https://github.com/rtfd/sphinx_rtd_theme">sphinx rtd theme</a>. The generated htmls are self-hosted on the GitHub repository. This is partially due to the fact that the current version of the <strong>setup.py</strong> file in <strong>hextof-processor</strong> cannot be properly parsed by the readthedocs webhost to be installed and hosted there. Future improvements on the code packaging side may eliminate such problem. Nevertheless, self-hosting on GitHub has its own advantage such that one may include both <strong>rst</strong> (reStructuredText) and <strong>md</strong> (Markdown) formats. In the current version of the documentation, the description of the functions and classes were generated through the docstrings, the other files are generated directly from Markdown files.</p>
-<p><strong>To update the documentation, follow the steps below,</strong></p>
-<ol>
-<li><p class="first">Install the prerequisite packages, if not yet present on your local computer.</p>
+<p>2.2 How to document</p>
+<p>Documentation of the package follows the <cite>readthedocs &lt;http://docs.readthedocs.io/en/latest/getting_started.html&gt;</cite> (a.k.a. rtd) style and uses the <a class="reference external" href="https://github.com/rtfd/sphinx_rtd_theme">sphinx rtd theme</a>. The generated htmls are self-hosted on the GitHub repository. This is partially due to the fact that the current version of the <strong>setup.py</strong> file in <strong>hextof-processor</strong> cannot be properly parsed by the readthedocs webhost to be installed and hosted there. Future improvements on the code packaging side may eliminate such problem. Nevertheless, self-hosting on GitHub has its own advantage such that one may include both <strong>rst</strong> (reStructuredText) and <strong>md</strong> (Markdown) formats. In the current version of the documentation, the description of the functions and classes were generated through the docstrings, the other files are generated directly from Markdown files.</p>
+<p>To update the documentation, follow the steps below,</p>
+<ol class="arabic simple">
+<li><p>Install the prerequisite packages, if not yet present on your local computer.</p></li>
+</ol>
 <ul class="simple">
-<li><strong>sphinx</strong> -- python rst parser package</li>
-<li><strong>sphinx_rtd_theme</strong> -- readthedocs theme package for sphinx</li>
-<li><strong>recommonmark</strong> -- allows sphinx to use <a class="reference external" href="http://commonmark.org/">Commonmark</a> to parse Markdown</li>
+<li><p><strong>sphinx</strong> -- python rst parser package</p></li>
+<li><p><strong>sphinx_rtd_theme</strong> -- readthedocs theme package for sphinx</p></li>
 </ul>
-</li>
-<li><p class="first">Have a local git-clone of the <strong>hextof-processor</strong> package.</p>
-</li>
-<li><p class="first">Rename the <strong>docs</strong> folder under hextof-processor to <strong>html</strong>.</p>
-</li>
-<li><p class="first">Update any of the documentation-related source files. These include,</p>
+<ol class="arabic simple" start="2">
+<li><p>Have a local git-clone of the <strong>hextof-processor</strong> package.</p></li>
+<li><p>Update any of the documentation-related source files. These include,</p></li>
+</ol>
 <ul class="simple">
-<li>The code docstrings in the .py files under the <strong>processor</strong> folder.</li>
-<li>The rst files for formatting code docstrings, currently in the <strong>library</strong> subfolder of the <strong>source</strong> folder.</li>
-<li>The Markdown files of each section, currently in the <strong>example</strong> and <strong>misc</strong> subfolders of the <strong>source</strong> folder.</li>
-<li>The main index file <strong>index.rst</strong> under the <strong>source</strong> folder, which controls the formatting of the <strong>index.html</strong> page.</li>
-<li>The main configuration file <strong>conf.py</strong> under the <strong>source</strong> folder. This includes most of the basic settings in documentation such as html theme, parsers, code version, etc.</li>
-<li>Any other html styling files in .js or .css formats.</li>
+<li><p>The code docstrings in the .py files under the <strong>processor</strong> folder.</p></li>
+<li><p>The rst files for formatting code docstrings, currently in the <strong>library</strong> subfolder of the <strong>source</strong> folder.</p></li>
+<li><p>The Markdown files of each section, currently in the <strong>example</strong> and <strong>misc</strong> subfolders of the <strong>source</strong> folder.</p></li>
+<li><p>The main index file <strong>index.rst</strong> under the <strong>source</strong> folder, which controls the formatting of the <strong>index.html</strong> page.</p></li>
+<li><p>The main configuration file <strong>conf.py</strong> under the <strong>source</strong> folder. This includes most of the basic settings in documentation such as html theme, parsers, code version, etc.</p></li>
+<li><p>Any other html styling files in .js or .css formats.</p></li>
 </ul>
-</li>
-<li><p class="first">cd into the <strong>html</strong> folder on the terminal and run</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>make html
+<ol class="arabic simple" start="4">
+<li><p>cd into the <strong>html</strong> folder on the terminal and run</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make html
 </pre></div>
 </div>
 <p>The original build contains the <strong>Makefiles</strong> for both Windows and Linux systems. This step initiates the build process locally on your computer. In the process, a series of messages will be generated in the terminal. Most of the times, the warnings on the formatting issues can be ignored, if they don't causing the build process to fail.</p>
-</li>
-<li><p class="first">Check for the local build by viewing the <strong>index.html</strong> file in the <strong>html</strong> folder and browse through the newly added changes. On special occasions, one needs to start a clean build from (almost) nothing in order to implement all the changes. In this case, one can delete most of the content in the docs folder except <strong>source</strong> folder and <strong>index.html</strong> and redo step 4.</p>
-</li>
-<li><p class="first">Rename the <strong>html</strong> folder back to <strong>docs</strong>. This completes the documentation rebuilding locally.</p>
-</li>
-<li><p class="first">Push the local changes to the <strong>hextof-processor</strong> repository. If necessary, use force at the end.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>git push origin master -f
+<ol class="arabic simple" start="5">
+<li><p>Check for the local build by viewing the <strong>index.html</strong> file in the <strong>html</strong> folder and browse through the newly added changes. On special occasions, one needs to start a clean build from (almost) nothing in order to implement all the changes. In this case, one can delete most of the content in the docs folder except <strong>source</strong> folder and <strong>index.html</strong> and redo step 4.</p></li>
+<li><p>Push the local changes to the <strong>hextof-processor</strong> repository. If necessary, use force at the end.</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git push origin master -f
 </pre></div>
 </div>
 <p>This can eliminate some of the unnecessary conflicts from the various javascript, CSS files generated in the rebuilding process.</p>
-</li>
-</ol>
-</div>
 </div>
 
 
@@ -254,7 +249,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, momentoscope team.
+        &copy; Copyright 2018-2020, momentoscope team.
 
     </p>
   </div>
@@ -276,7 +271,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.9.5',
+            VERSION:'0.9.7',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -286,7 +281,8 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

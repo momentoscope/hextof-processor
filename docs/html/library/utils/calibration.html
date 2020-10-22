@@ -1,0 +1,459 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>1. Calibration (processor.utilities.calibration) &mdash; hextof-processor 0.9.7 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.7 documentation" href="../../index.html"/>
+        <link rel="next" title="2. Diagnostics (processor.utilities.diagnostics)" href="diagnostics.html"/>
+        <link rel="prev" title="3. Interfacing external pah library" href="../pah.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pah.html">3. Interfacing external pah library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example/06_fullexample.html">6. Complete code examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc/howtomaintain.html">2. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li><span class="section-number">1. </span>Calibration (processor.utilities.calibration)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/library/utils/calibration.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-processor.utilities.calibration">
+<span id="calibration-processor-utilities-calibration"></span><h1><span class="section-number">1. </span>Calibration (processor.utilities.calibration)<a class="headerlink" href="#module-processor.utilities.calibration" title="Permalink to this headline">¶</a></h1>
+<p>&#64;author: Steinn Ymir Agustsson</p>
+<dl class="py function">
+<dt id="processor.utilities.calibration.correctOpticalPath">
+<code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">correctOpticalPath</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">poly1</span><span class="o">=</span><span class="default_value">- 0.00020578</span></em>, <em class="sig-param"><span class="n">poly2</span><span class="o">=</span><span class="default_value">4.6813e-07</span></em>, <em class="sig-param"><span class="n">xCenter</span><span class="o">=</span><span class="default_value">1334</span></em>, <em class="sig-param"><span class="n">yCenter</span><span class="o">=</span><span class="default_value">1426</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#correctOpticalPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.correctOpticalPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply corrections to the dataframe. (Maciej Dendzik)</p>
+<p>Each DLD time is subtracted with a polynomial poly1*r + poly2*r^2,
+where r=sqrt((posx-xCenter)^2+(posy-yCenter)^2)</p>
+<p>This function makes corrections to the time of flight which take into account
+the path difference between the center of the detector and the edges of the detector</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.calibration.e2t">
+<code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">e2t</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">0.77</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#e2t"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.e2t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as energy2tof, but different name for retrocompatibility</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>e<span class="classifier">float</span></dt><dd><p>The binding energy</p>
+</dd>
+<dt>toffset<span class="classifier">float</span></dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
+</dd>
+<dt>eoffset<span class="classifier">float</span></dt><dd><p>The energy offset given by W-hv-V</p>
+</dd>
+<dt>l<span class="classifier">float</span></dt><dd><p>the effective length of the drift section</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Return</dt>
+<dd class="field-even"><dl class="simple">
+<dt>t<span class="classifier">float</span></dt><dd><p>The time of flight</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Authors</dt>
+<dd class="field-odd"><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.calibration.energy2tof">
+<code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">energy2tof</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#energy2tof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.energy2tof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform eV to time of flight (ToF).</p>
+<p>The functions (tof2energy and energy2tof) convert between binding energy (<span class="math notranslate nohighlight">\(E_b\)</span>) in eV (negative convention)
+and time of flight (ToF) in ns.</p>
+<p>The formula used is based on the ToF for an electron with a kinetic energy <span class="math notranslate nohighlight">\(E_k\)</span>. Then the
+binding energy <span class="math notranslate nohighlight">\(E_b\)</span> is given by</p>
+<p>-Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V</p>
+<p>With W the work function, hv the photon energy, V the electrostatic potential applied to
+the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
+The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
+time in the drift tube. The measured ToF, however, has some offset due to clock start not
+coinciding with entry in the drift section.</p>
+<p>offs is supposed to include the time offset for when the electrons enter the drift section.
+Its main mainly affects peak spacing, and there are several strategies for calibrating this value,</p>
+<ol class="arabic simple">
+<li><p>By measuring the photon peak and correcting by some extractor voltage-dependent offset</p></li>
+<li><p>Shifting the potential by 1V and imposing the same shift in the measured spectrum</p></li>
+<li><p>Imposing some calibrated spacing between features in a spectrum</p></li>
+</ol>
+<p>eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
+there are several strategies for calibrating this value,</p>
+<ol class="arabic simple">
+<li><p>By getting the correct values for W, hv, and V</p></li>
+<li><p>It can be calibrated by imposing peak position</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>e<span class="classifier">float</span></dt><dd><p>The binding energy</p>
+</dd>
+<dt>toffset<span class="classifier">float</span></dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
+</dd>
+<dt>eoffset<span class="classifier">float</span></dt><dd><p>The energy offset given by W-hv-V</p>
+</dd>
+<dt>l<span class="classifier">float</span></dt><dd><p>the effective length of the drift section</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Return</dt>
+<dd class="field-even"><dl class="simple">
+<dt>t<span class="classifier">float</span></dt><dd><p>The time of flight</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Authors</dt>
+<dd class="field-odd"><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.calibration.filterCircleDLDPos">
+<code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">filterCircleDLDPos</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">xCenter</span><span class="o">=</span><span class="default_value">1334</span></em>, <em class="sig-param"><span class="n">yCenter</span><span class="o">=</span><span class="default_value">1426</span></em>, <em class="sig-param"><span class="n">radius</span><span class="o">=</span><span class="default_value">1250</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#filterCircleDLDPos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.filterCircleDLDPos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply corrections to the dataframe. (Maciej Dendzik)</p>
+<p>Filters events with dldPosX and dldPosY within the radius from (xCenter,yCenter)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.calibration.shiftQuadrants">
+<code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">shiftQuadrants</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">shiftQ1</span><span class="o">=</span><span class="default_value">0.231725</span></em>, <em class="sig-param"><span class="n">shiftQ2</span><span class="o">=</span><span class="default_value">- 0.221625</span></em>, <em class="sig-param"><span class="n">shiftQ3</span><span class="o">=</span><span class="default_value">0.096575</span></em>, <em class="sig-param"><span class="n">shiftQ4</span><span class="o">=</span><span class="default_value">- 0.106675</span></em>, <em class="sig-param"><span class="n">xCenter</span><span class="o">=</span><span class="default_value">1350</span></em>, <em class="sig-param"><span class="n">yCenter</span><span class="o">=</span><span class="default_value">1440</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#shiftQuadrants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.shiftQuadrants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply corrections to the dataframe. (Maciej Dendzik)</p>
+<p>Each quadrant of DLD is shifted in DLD time by shiftQn.
+xCenter and yCenter are used to define the center of the division.</p>
+<blockquote>
+<div><p>Q2     |     Q4</p>
+</div></blockquote>
+<dl class="simple">
+<dt>------------<a href="#id1"><span class="problematic" id="id2">|</span></a>------------</dt><dd><p>Q1     |     Q3</p>
+</dd>
+</dl>
+<p>this picture is upside-down in plt.imshow because it starts from 0 in top right corner</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.calibration.t2e">
+<code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">t2e</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">0.77</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#t2e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.t2e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as tof2energy, but different name for retrocompatibility</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>t<span class="classifier">float</span></dt><dd><p>The time of flight</p>
+</dd>
+<dt>toffset<span class="classifier">float</span></dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
+</dd>
+<dt>eoffset<span class="classifier">float</span></dt><dd><p>The energy offset given by W-hv-V</p>
+</dd>
+<dt>l<span class="classifier">float</span></dt><dd><p>the effective length of the drift section</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Return</dt>
+<dd class="field-even"><dl class="simple">
+<dt>e<span class="classifier">float</span></dt><dd><p>The binding energy</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Authors</dt>
+<dd class="field-odd"><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.calibration.tof2energy">
+<code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">tof2energy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#tof2energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.tof2energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform ToF to eV.</p>
+<p>The functions (tof2energy and energy2tof) convert between binding energy (<span class="math notranslate nohighlight">\(E_b\)</span>) in eV (negative convention)
+and time of flight (ToF) in ns.</p>
+<p>The formula used is based on the ToF for an electron with a kinetic energy <span class="math notranslate nohighlight">\(E_k\)</span>. Then the
+binding energy <span class="math notranslate nohighlight">\(E_b\)</span> is given by</p>
+<p>-Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V</p>
+<p>With W the work function, hv the photon energy, V the electrostatic potential applied to
+the sample with respect to the drift section voltage, v the velocity of the electrons in the drift tube,
+m the mass of the electron.</p>
+<p>The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
+time in the drift tube. The measured ToF, however, has some offset due to clock start not
+coinciding with entry in the drift section.</p>
+<p>toffset is supposed to include the time offset for when the electrons enter the drift section.
+Its main mainly affects peak spacing, and there are several strategies for calibrating this value,</p>
+<ol class="arabic simple">
+<li><p>By measuring the photon peak and correcting by some extractor voltage-dependent offset</p></li>
+<li><p>Shifting the potential by 1V and imposing the same shift in the measured spectrum</p></li>
+<li><p>Imposing some calibrated spacing between features in a spectrum</p></li>
+</ol>
+<p>eoffset is supposed to include -W+hv+V. It mainly affects absolute position of the peaks, and
+there are several strategies for calibrating this value,</p>
+<ol class="arabic simple">
+<li><p>By getting the correct values for W, hv, and V</p></li>
+<li><p>It can be calibrated by imposing peak position</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>t<span class="classifier">float</span></dt><dd><p>The time of flight</p>
+</dd>
+<dt>toffset<span class="classifier">float</span></dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
+</dd>
+<dt>eoffset<span class="classifier">float</span></dt><dd><p>The energy offset given by W-hv-V</p>
+</dd>
+<dt>l<span class="classifier">float</span></dt><dd><p>the effective length of the drift section</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Return</dt>
+<dd class="field-even"><dl class="simple">
+<dt>e<span class="classifier">float</span></dt><dd><p>The binding energy</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Authors</dt>
+<dd class="field-odd"><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="diagnostics.html" class="btn btn-neutral float-right" title="2. Diagnostics (processor.utilities.diagnostics)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../pah.html" class="btn btn-neutral" title="3. Interfacing external pah library" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.9.7',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
