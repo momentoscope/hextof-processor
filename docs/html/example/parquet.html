@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2. Save dataset to dask parquet files &mdash; hextof-processor 0.9.5 documentation</title>
+  <title>&lt;no title&gt; &mdash; hextof-processor 0.9.5 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
-        <link rel="next" title="3. Binning multidimensional data" href="binning.html"/>
+        <link rel="next" title="&lt;no title&gt;" href="binning.html"/>
         <link rel="prev" title="1. Read DAQ data" href="readdaq.html"/> 
 
   
@@ -95,21 +95,19 @@
 <li class="toctree-l1"><a class="reference internal" href="../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../library/pah.html">3. Interfacing external pah library</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../library/utils.html">4. Utility functions (utils)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/util_calibration.html">4. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/util_diagnostics.html">5. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/util_io.html">6. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/util_vis.html">7. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/util_misc.html">8. Miscellaneous (processor.utilities.misc)</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="readdaq.html">1. Read DAQ data</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Save dataset to dask parquet files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="binning.html">3. Binning multidimensional data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nobinning.html">4. Processing data without binning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="corrections.html">5. Corrections to FEL pulse timing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fullexample.html">6. Complete code examples</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Miscellaneous</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../misc/listofterms.html">1. List of terms and abbreviations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../misc/howtomaintain.html">2. Package maintenance</a></li>
 </ul>
 
             
@@ -154,7 +152,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>2. Save dataset to dask parquet files</li>
+      <li>&lt;no title&gt;</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -173,25 +171,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="save-dataset-to-dask-parquet-files">
-<span id="save-dataset-to-dask-parquet-files"></span><h1>2. Save dataset to dask parquet files<a class="headerlink" href="#save-dataset-to-dask-parquet-files" title="Permalink to this headline">¶</a></h1>
-<p>For faster access to these dataframes in extended offline analysis, it is convenient to store the datasets in dask parquet dataframes. This is done using</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">storeDataframes</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>This saves two folders in path/to/file: <strong>name_el</strong> and <strong>name_mb</strong>. These are the two datasets <code class="docutils literal"><span class="pre">processor.dd</span></code> and <code class="docutils literal"><span class="pre">processor.ddMicrobunches</span></code>. If <code class="docutils literal"><span class="pre">'filename'</span></code> is not specified, it uses either <code class="docutils literal"><span class="pre">'run{runNumber}'</span></code> or <code class="docutils literal"><span class="pre">'mb{firstMacrobunch}to{lastMacrobunch}'</span></code>, for example, <code class="docutils literal"><span class="pre">run18843</span></code>, or <code class="docutils literal"><span class="pre">mb90000000to900000500</span></code>.</p>
-<p>Datasets in parquet format can be loaded back into the processor using the <code class="docutils literal"><span class="pre">readDataframes</span></code> method.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
-<span class="n">processor</span><span class="o">.</span><span class="n">readDataframes</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>An optional parameter for both <code class="docutils literal"><span class="pre">storeDataframes</span></code> and <code class="docutils literal"><span class="pre">readDataframes</span></code> is <code class="docutils literal"><span class="pre">path=''</span></code>. If it is unspecified, (left as default None) the values from<code class="docutils literal"><span class="pre">DATA_PARQUET_DIR</span></code> or <code class="docutils literal"><span class="pre">DATA_H5_DIR</span></code> in <strong>SETTINGS.ini</strong> is used.</p>
-<p>Alternatively, it is possible to store these datasets similarly in hdf5 format, using the same function,</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">storeDataframes</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;hdf5&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>However, this is NOT advised, since the parquet format outperforms the hdf5 in reading and data manipulation. This functionality is mainly kept for retro-compatibility with older datasets.</p>
-</div>
+  <p>## Save dataset to dask parquet files</p>
+<p>For faster access to these dataframes in extended offline analysis, it is convenient to store the datasets in dask parquet dataframes. This is done using
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">processor.storeDataframes('filename')</span>
+<span class="pre">`</span></code></p>
+<p>This saves two folders in path/to/file: <strong>name_el</strong> and <strong>name_mb</strong>. These are the two datasets <cite>processor.dd</cite> and <cite>processor.ddMicrobunches</cite>. If <cite>'filename'</cite> is not specified, it uses either <cite>'run{runNumber}'</cite> or <cite>'mb{firstMacrobunch}to{lastMacrobunch}'</cite>, for example, <cite>run18843</cite>, or <cite>mb90000000to900000500</cite>.</p>
+<p>Datasets in parquet format can be loaded back into the processor using the <cite>readDataframes</cite> method.
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">processor</span> <span class="pre">=</span> <span class="pre">DldFlashProcessor()</span>
+<span class="pre">processor.readDataframes('filename')</span>
+<span class="pre">`</span></code></p>
+<p>An optional parameter for both <cite>storeDataframes</cite> and <cite>readDataframes</cite> is <cite>path=''</cite>. If it is unspecified, (left as default None) the values from`DATA_PARQUET_DIR` or <cite>DATA_H5_DIR</cite> in <strong>SETTINGS.ini</strong> is used.</p>
+<p>Alternatively, it is possible to store these datasets similarly in hdf5 format, using the same function,
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">processor.storeDataframes('filename',</span> <span class="pre">format='hdf5')</span>
+<span class="pre">`</span></code>
+However, this is NOT advised, since the parquet format outperforms the hdf5 in reading and data manipulation. This functionality is mainly kept for retro-compatibility with older datasets.</p>
 
 
            </div>
@@ -203,7 +199,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="binning.html" class="btn btn-neutral float-right" title="3. Binning multidimensional data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="binning.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="readdaq.html" class="btn btn-neutral" title="1. Read DAQ data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -215,7 +211,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, momentoscope team.
+        &copy; Copyright 2018-2020, momentoscope team.
 
     </p>
   </div>
@@ -247,7 +243,8 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

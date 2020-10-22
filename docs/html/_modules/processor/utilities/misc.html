@@ -1,0 +1,851 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>processor.utilities.misc &mdash; hextof-processor 0.9.5 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/pah.html">3. Interfacing external pah library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/06_fullexample.html">6. Complete code examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/howtomaintain.html">2. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>processor.utilities.misc</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for processor.utilities.misc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">psutil</span>
+<span class="kn">import</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">from</span> <span class="nn">processor</span> <span class="kn">import</span> <span class="n">DldFlashDataframeCreator</span> <span class="k">as</span> <span class="n">DldFlashProcessor</span>
+
+<span class="c1"># ================================================================================</span>
+<span class="sd">&quot;&quot;&quot;Functions for calculation of pulse energy and pulse energy density of optical laser.</span>
+<span class="sd">Calibration values taken from Pump beam energy converter 800 400.xls</span>
+<span class="sd">Units are uJ for energy, um for beam diameter, uJ/cm^2 for energy density (and arb. for diode signal)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="PulseEnergy400"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.PulseEnergy400">[docs]</a><span class="k">def</span> <span class="nf">PulseEnergy400</span><span class="p">(</span><span class="n">Diode</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the pulse energy of 400nm laser in uJ. The unit is um for beam diameter.</span>
+<span class="sd">    </span>
+<span class="sd">        :Parameter:</span>
+<span class="sd">            Diode : numeric</span>
+<span class="sd">                Measured value from photodiode (arb. units)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">0.86</span> <span class="o">*</span> <span class="p">(</span><span class="n">Diode</span> <span class="o">*</span> <span class="mf">0.0008010439</span> <span class="o">+</span> <span class="mf">0.0352573</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PulseEnergy800"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.PulseEnergy800">[docs]</a><span class="k">def</span> <span class="nf">PulseEnergy800</span><span class="p">(</span><span class="n">Diode</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the pulse energy of 800nm laser in uJ. The unit is um for beam diameter.</span>
+<span class="sd">    </span>
+<span class="sd">        :Parameter:</span>
+<span class="sd">            Diode : numeric</span>
+<span class="sd">                Meausred value from photodiode (arb. units)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="mf">0.86</span> <span class="o">*</span> <span class="p">(</span><span class="n">Diode</span> <span class="o">*</span> <span class="mf">0.0009484577</span> <span class="o">+</span> <span class="mf">0.1576</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EnergyDensity400"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.EnergyDensity400">[docs]</a><span class="k">def</span> <span class="nf">EnergyDensity400</span><span class="p">(</span><span class="n">Diode</span><span class="p">,</span> <span class="n">Diameter</span><span class="o">=</span><span class="mi">600</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the pulse energy density of 400nm laser in uJ/cm^2.</span>
+<span class="sd">    The units are um for beam diameter, uJ/cm^2 for energy density.</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">        Diode : numeric</span>
+<span class="sd">            Measured value from photodiode (arb. units)</span>
+<span class="sd">        Diameter : numeric</span>
+<span class="sd">            Beam diameter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">PulseEnergy400</span><span class="p">(</span><span class="n">Diode</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">((</span><span class="n">Diameter</span> <span class="o">*</span> <span class="mf">0.0001</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="EnergyDensity800"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.EnergyDensity800">[docs]</a><span class="k">def</span> <span class="nf">EnergyDensity800</span><span class="p">(</span><span class="n">Diode</span><span class="p">,</span> <span class="n">Diameter</span><span class="o">=</span><span class="mi">600</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the pulse energy density of 800nm laser in uJ/cm^2.</span>
+<span class="sd">    The units are um for beam diameter, uJ/cm^2 for energy density.</span>
+<span class="sd">    </span>
+<span class="sd">    :Parameters:</span>
+<span class="sd">        Diode : numeric</span>
+<span class="sd">            Measured value from photodiode (arb. units)</span>
+<span class="sd">        Diameter : numeric</span>
+<span class="sd">            Beam diameter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">PulseEnergy800</span><span class="p">(</span><span class="n">Diode</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">((</span><span class="n">Diameter</span> <span class="o">*</span> <span class="mf">0.0001</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span></div>
+
+
+<span class="c1"># %% Settings</span>
+<span class="c1"># ================================================================================</span>
+
+
+<div class="viewcode-block" id="parse_category"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.parse_category">[docs]</a><span class="k">def</span> <span class="nf">parse_category</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">settings_file</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; parse setting file and return desired value</span>
+<span class="sd">    Args:</span>
+<span class="sd">        category (str): title of the category</span>
+<span class="sd">        setting_file (str): path to setting file. If set to &#39;default&#39; it takes</span>
+<span class="sd">            a file called SETTINGS.ini in the main folder of the repo.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dictionary containing name and value of all entries present in this</span>
+<span class="sd">        category.</span>
+<span class="sd">    Notes:</span>
+<span class="sd">        Author: Steinn Ymir Agustsson &lt;sagustss@uni-mainz.de&gt;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">settings_file</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+        <span class="n">current_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_path</span><span class="p">,</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)):</span>
+            <span class="n">current_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">current_path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">settings_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_path</span><span class="p">,</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">settings_file</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cat_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">[</span><span class="n">category</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;/&quot;</span><span class="p">:</span>
+                    <span class="n">cat_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cat_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">cat_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="k">return</span> <span class="n">cat_dict</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No category </span><span class="si">{}</span><span class="s1"> found in SETTINGS.ini&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">category</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="parse_setting"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.parse_setting">[docs]</a><span class="k">def</span> <span class="nf">parse_setting</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">settings_file</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; parse setting file and return desired value</span>
+<span class="sd">    Args:</span>
+<span class="sd">        category (str): title of the category</span>
+<span class="sd">        name (str): name of the parameter</span>
+<span class="sd">        setting_file (str): path to setting file. If set to &#39;default&#39; it takes</span>
+<span class="sd">            a file called SETTINGS.ini in the main folder of the repo.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        value of the parameter, None if parameter cannot be found.</span>
+<span class="sd">    Notes:</span>
+<span class="sd">        Author: Steinn Ymir Agustsson &lt;sagustss@uni-mainz.de&gt;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">settings_file</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+        <span class="n">current_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_path</span><span class="p">,</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)):</span>
+            <span class="n">current_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">current_path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">settings_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_path</span><span class="p">,</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">settings_file</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="n">category</span><span class="p">][</span><span class="n">name</span><span class="p">]</span>
+        <span class="c1"># if value[0] == &quot;/&quot;:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No entry </span><span class="si">{}</span><span class="s1"> in category </span><span class="si">{}</span><span class="s1"> found in SETTINGS.ini&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">settings</span><span class="p">[</span><span class="n">category</span><span class="p">][</span><span class="n">name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="write_setting"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.write_setting">[docs]</a><span class="k">def</span> <span class="nf">write_setting</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">settings_file</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Write enrty in the settings file</span>
+<span class="sd">    Args:</span>
+<span class="sd">        category (str): title of the category</span>
+<span class="sd">        name (str): name of the parameter</span>
+<span class="sd">        setting_file (str): path to setting file. If set to &#39;default&#39; it takes</span>
+<span class="sd">            a file called SETTINGS.ini in the main folder of the repo.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        value of the parameter, None if parameter cannot be found.</span>
+<span class="sd">    Notes:</span>
+<span class="sd">        Author: Steinn Ymir Agustsson &lt;sagustss@uni-mainz.de&gt;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">settings_file</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+        <span class="n">current_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_path</span><span class="p">,</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)):</span>
+            <span class="n">current_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">current_path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">settings_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_path</span><span class="p">,</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">settings_file</span><span class="p">)</span>
+
+    <span class="n">settings</span><span class="p">[</span><span class="n">category</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">settings_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">configfile</span><span class="p">:</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="parse_logbook"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.parse_logbook">[docs]</a><span class="k">def</span> <span class="nf">parse_logbook</span><span class="p">(</span><span class="n">log_text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Parse a log book entry to read out metadata.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        log_text (str or file): file or plain text of the log book, in the</span>
+<span class="sd">        &quot;correct&quot; format TODO: add example of log entry</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        logDict (dict): Dictionary with the relevant metadata</span>
+<span class="sd">    Notes:</span>
+<span class="sd">        Author: Steinn Ymir Agustsson &lt;sagustss@uni-mainz.de&gt;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">log_text</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">log_text</span><span class="p">),</span> <span class="s1">&#39;Unrecognized format for logbook text&#39;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">log_text</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_text</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">log_text</span>
+    <span class="n">logDict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+    <span class="n">t_split</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">FEL:&#39;</span><span class="p">)</span>
+    <span class="n">logDict</span><span class="p">[</span><span class="s1">&#39;comments&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t_split</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;FEL:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t_split</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">log_sections</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="n">log_sections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">log_sections</span> <span class="o">=</span> <span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;||&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">log_sections</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">section</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;|&#39;</span><span class="p">:</span>
+            <span class="n">section</span> <span class="o">=</span> <span class="n">section</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">slist</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">slist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">title</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">logDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">title</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">status</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">logDict</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">slist</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">linelist</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;=&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">logDict</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="n">logDict</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">logDict</span></div>
+
+
+<span class="c1"># %% Math</span>
+<span class="c1"># ================================================================================</span>
+
+
+<div class="viewcode-block" id="radius"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.radius">[docs]</a><span class="k">def</span> <span class="nf">radius</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the radius</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">posX</span> <span class="o">-</span> <span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">posY</span> <span class="o">-</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="argnearest"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.argnearest">[docs]</a><span class="k">def</span> <span class="nf">argnearest</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">rettype</span><span class="o">=</span><span class="s1">&#39;vectorized&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find the coordinates of the nD array element nearest to a specified value</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (np.array): Numeric data array</span>
+<span class="sd">        val (int or float) : Look-up value</span>
+<span class="sd">        rettype (:obj:`str`,optional): return type specification</span>
+<span class="sd">            &#39;vectorized&#39; (default) denotes vectorized coordinates (integer)</span>
+<span class="sd">            &#39;coordinates&#39; denotes multidimensional coordinates (tuple)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        argval (int): coordinate position</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">vnz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">array</span> <span class="o">-</span> <span class="n">val</span><span class="p">)</span>
+    <span class="n">argval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">vnz</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rettype</span> <span class="o">==</span> <span class="s1">&#39;vectorized&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">argval</span>
+    <span class="k">elif</span> <span class="n">rettype</span> <span class="o">==</span> <span class="s1">&#39;coordinates&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">argval</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></div>
+
+
+<span class="c1"># %% Data Input/Output</span>
+<span class="c1"># ================================================================================</span>
+
+<div class="viewcode-block" id="save_H5_hyperstack"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.save_H5_hyperstack">[docs]</a><span class="k">def</span> <span class="nf">save_H5_hyperstack</span><span class="p">(</span><span class="n">data_array</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        data_array : numpy array</span>
+<span class="sd">            4D data array, order must be Kx,Ky,Energy,Time</span>
+<span class="sd">        filename : str</span>
+<span class="sd">            The name of the file to save</span>
+<span class="sd">        path : str</span>
+<span class="sd">            The path to where to save hdf5 file. If None, uses the &quot;results&quot; folder from SETTINGS.ini</span>
+<span class="sd">        overwrite : str</span>
+<span class="sd">            If true, it overwrites existing file with the same</span>
+<span class="sd">            name. Otherwise raises and error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;w-&quot;</span>  <span class="c1"># fail if file exists</span>
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span>
+
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">settings</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;RESULTS_PATH&#39;</span><span class="p">]</span>
+
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">filename</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+            <span class="n">filepath</span><span class="p">):</span>  <span class="c1"># create new files every time, with new trailing number</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">new_filepath</span> <span class="o">=</span> <span class="n">filepath</span> <span class="o">+</span> <span class="s2">&quot;_1&quot;</span>
+        <span class="k">while</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">new_filepath</span><span class="p">):</span>
+            <span class="n">new_filepath</span> <span class="o">=</span> <span class="n">filepath</span> <span class="o">+</span> <span class="s2">&quot;_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">new_filepath</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="n">pumpProbeTimeSteps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:])</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s1">&#39;Creating HDF5 dataset with </span><span class="si">{}</span><span class="s1"> time steps&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pumpProbeTimeSteps</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">timeStep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pumpProbeTimeSteps</span><span class="p">):</span>
+        <span class="n">xyeData</span> <span class="o">=</span> <span class="n">data_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">timeStep</span><span class="p">]</span>
+        <span class="n">dset</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
+            <span class="s2">&quot;experiment/xyE_tstep</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timeStep</span><span class="p">),</span>
+            <span class="n">xyeData</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="n">dset</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">xyeData</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Created file &quot;</span> <span class="o">+</span> <span class="n">filepath</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_binned_h5"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.load_binned_h5">[docs]</a><span class="k">def</span> <span class="nf">load_binned_h5</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">ret_type</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Load an HDF5 file saved with ``save_binned()`` method.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file_name (str): name of the file to load, including full path</span>
+<span class="sd">        mode (:obj:`str`, optional): Read mode of h5 file (&#39;r&#39; = read).</span>
+<span class="sd">        ret_type (:obj:`str`, optional): output format for axes and histograms:</span>
+<span class="sd">            &#39;list&#39; generates a list of arrays, ordered as</span>
+<span class="sd">            the corresponding dimensions in data. &#39;dict&#39;</span>
+<span class="sd">            generates a dictionary with the names of each axis.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        data np.array: Multidimensional data read from h5 file.</span>
+<span class="sd">        axes np.array: The axes values associated with the read data.</span>
+<span class="sd">        hist np.array: Histogram values associated with the read data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">file_name</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.h5&#39;</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">file_name</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.h5&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">h5File</span><span class="p">:</span>
+
+        <span class="c1"># Retrieving binned data</span>
+        <span class="n">frames</span> <span class="o">=</span> <span class="n">h5File</span><span class="p">[</span><span class="s1">&#39;frames&#39;</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frames</span><span class="p">[</span><span class="s1">&#39;f0000&#39;</span><span class="p">])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frames</span><span class="p">[</span><span class="n">frame</span><span class="p">]))</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># Retrieving axes</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+        <span class="n">axes_d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">h5File</span><span class="p">[</span><span class="s1">&#39;axes/&#39;</span><span class="p">]:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">h5File</span><span class="p">[</span><span class="s1">&#39;axes/&#39;</span> <span class="o">+</span> <span class="n">ax</span><span class="p">][()]</span>
+            <span class="c1">#             axes_d[ax] = vals</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; - &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">:])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># shift index to compensate missing time dimension</span>
+                <span class="n">idx</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span>
+
+            <span class="c1"># Retrieving delay histograms</span>
+        <span class="n">hists</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hists_d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">hist</span> <span class="ow">in</span> <span class="n">h5File</span><span class="p">[</span><span class="s1">&#39;histograms/&#39;</span><span class="p">]:</span>
+            <span class="n">hists_d</span><span class="p">[</span><span class="n">hist</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5File</span><span class="p">[</span><span class="s1">&#39;histograms/&#39;</span> <span class="o">+</span> <span class="n">hist</span><span class="p">][()]</span>
+            <span class="n">hists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">h5File</span><span class="p">[</span><span class="s1">&#39;histograms/&#39;</span> <span class="o">+</span> <span class="n">hist</span><span class="p">][()])</span>
+
+    <span class="k">if</span> <span class="n">ret_type</span> <span class="o">==</span> <span class="s1">&#39;list&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">hists</span>
+    <span class="k">elif</span> <span class="n">ret_type</span> <span class="o">==</span> <span class="s1">&#39;dict&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">axes_d</span><span class="p">,</span> <span class="n">hists_d</span></div>
+
+
+<div class="viewcode-block" id="get_available_runs"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.get_available_runs">[docs]</a><span class="k">def</span> <span class="nf">get_available_runs</span><span class="p">(</span><span class="n">rootpath</span><span class="p">):</span>  <span class="c1"># TODO: store the resulting dictionary to improve performance.</span>
+    <span class="sd">&quot;&quot;&quot; Collects the filepaths to the available experimental run data.</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        rootpath : str</span>
+<span class="sd">            path where to look for data (recursive in subdirectories)</span>
+
+<span class="sd">    :Return:</span>
+<span class="sd">        available_runs : dict</span>
+<span class="sd">            dict with run numbers as keys (e.g. &#39;run12345&#39;) and path where to load data from as str.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">available_runs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">rootpath</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;fl1user2&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">run_path</span> <span class="o">=</span> <span class="nb">dir</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">8</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                    <span class="n">runNumber</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">4</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">runNumber</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_runs</span><span class="p">:</span>
+                        <span class="n">available_runs</span><span class="p">[</span><span class="n">runNumber</span><span class="p">]</span> <span class="o">=</span> <span class="n">run_path</span>
+            <span class="k">except</span><span class="p">:</span>  <span class="c1"># TODO: use an assertion method for more solid error tracking.</span>
+                <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">available_runs</span></div>
+
+
+<div class="viewcode-block" id="get_path_to_run"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.get_path_to_run">[docs]</a><span class="k">def</span> <span class="nf">get_path_to_run</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">rootpath</span><span class="p">):</span> <span class="c1"># TODO: improve performance</span>
+    <span class="sd">&quot;&quot;&quot; Returns the path to the data of a given run number</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        runNumber : str or int</span>
+<span class="sd">            run number as integer or string.</span>
+<span class="sd">        rootpath : str</span>
+<span class="sd">            path where to look for data (recursive in subdirectories)</span>
+
+
+<span class="sd">    :Return:</span>
+<span class="sd">        path : str</span>
+<span class="sd">            path to where the raw data of the given run number is stored.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">available_runs</span> <span class="o">=</span> <span class="n">get_available_runs</span><span class="p">(</span><span class="n">rootpath</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">available_runs</span><span class="p">[</span><span class="s1">&#39;run</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">runNumber</span><span class="p">)])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;No run number </span><span class="si">{}</span><span class="s1"> under path </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">rootpath</span><span class="p">))</span></div>
+
+
+<span class="c1"># %% String operations</span>
+<span class="c1"># ================================================================================</span>
+
+<div class="viewcode-block" id="camelCaseIt"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.camelCaseIt">[docs]</a><span class="k">def</span> <span class="nf">camelCaseIt</span><span class="p">(</span><span class="n">snake_case_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Format a string in camel case</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">titleCaseVersion</span> <span class="o">=</span> <span class="n">snake_case_string</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">camelCaseVersion</span> <span class="o">=</span> <span class="n">titleCaseVersion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="n">titleCaseVersion</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">camelCaseVersion</span></div>
+
+<div class="viewcode-block" id="repr_byte_size"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.repr_byte_size">[docs]</a><span class="k">def</span> <span class="nf">repr_byte_size</span><span class="p">(</span><span class="n">size_bytes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Represent in a string the size in Bytes in a compact format.</span>
+
+<span class="sd">    Adapted from https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python</span>
+<span class="sd">    Follows same notation as Windows does for files. See: https://en.wikipedia.org/wiki/Mebibyte</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">size_bytes</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;0B&quot;</span>
+    <span class="n">size_name</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;KB&quot;</span><span class="p">,</span> <span class="s2">&quot;MB&quot;</span><span class="p">,</span> <span class="s2">&quot;GB&quot;</span><span class="p">,</span> <span class="s2">&quot;TB&quot;</span><span class="p">,</span> <span class="s2">&quot;PB&quot;</span><span class="p">,</span> <span class="s2">&quot;EB&quot;</span><span class="p">,</span> <span class="s2">&quot;ZB&quot;</span><span class="p">,</span> <span class="s2">&quot;YB&quot;</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">size_bytes</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)))</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">size_bytes</span> <span class="o">/</span> <span class="n">p</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">size_name</span><span class="p">[</span><span class="n">i</span><span class="p">])</span></div>
+<span class="c1"># %% plotting</span>
+<span class="c1"># # ================================================================================</span>
+
+<div class="viewcode-block" id="plot_lines"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.plot_lines">[docs]</a><span class="k">def</span> <span class="nf">plot_lines</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+               <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">savefig</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;E:/data/FLASH/&#39;</span><span class="p">,</span> <span class="n">save_name</span><span class="o">=</span><span class="s1">&#39;fig&#39;</span><span class="p">,</span> <span class="n">static_curve</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; function to fit a series of curves with nice colorplot. &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span><span class="p">,</span> <span class="n">cm</span>
+
+    <span class="n">f</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">from_</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">to_</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="o">...</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">from_</span> <span class="o">=</span> <span class="nb">range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">to_</span> <span class="o">=</span> <span class="nb">range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">n_curves</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">from_</span><span class="p">:</span><span class="n">to_</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of curves: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_curves</span><span class="p">))</span>
+    <span class="n">cm_subsection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">color_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">n_curves</span><span class="p">)</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">cm</span><span class="o">.</span><span class="n">coolwarm</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cm_subsection</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="n">from_</span><span class="p">:</span><span class="n">to_</span><span class="p">]):</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>  <span class="c1"># 20*(i+from_),</span>
+        <span class="n">curve</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">from_</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># result_unpumped[i]</span>
+        <span class="k">if</span> <span class="n">normalization</span> <span class="o">==</span> <span class="s1">&#39;sum&#39;</span><span class="p">:</span>
+            <span class="n">curve</span> <span class="o">/=</span> <span class="n">curve</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">normalization</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+            <span class="n">curve</span> <span class="o">/=</span> <span class="n">curve</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">curve</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+    <span class="c1">#    axis[1].plot(x_axis_energy,curve_pump, &#39;-&#39;, color=color,label=label)</span>
+    <span class="k">if</span> <span class="n">static_curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">static_curve</span><span class="p">,</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;static&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;large&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">x_label</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;xx-large&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">y_label</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;xx-large&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;large&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;large&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">xlim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xlim</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xlim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">ylim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">savefig</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}{}</span><span class="s1">.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="n">save_name</span><span class="p">),</span>
+                    <span class="n">dpi</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;portrait&#39;</span><span class="p">,</span>
+                    <span class="n">papertype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<span class="c1"># ==================</span>
+<span class="c1"># Methods by Steinn!</span>
+<span class="c1"># ==================</span>
+
+
+<span class="k">def</span> <span class="nf">get_system_memory_status</span><span class="p">(</span><span class="n">print_</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">mem_labels</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">,</span> <span class="s1">&#39;available&#39;</span><span class="p">,</span> <span class="s1">&#39;percent&#39;</span><span class="p">,</span> <span class="s1">&#39;used&#39;</span><span class="p">,</span> <span class="s1">&#39;free&#39;</span><span class="p">)</span>
+    <span class="n">mem</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()</span>
+    <span class="n">memstatus</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mem</span><span class="p">):</span>
+        <span class="n">memstatus</span><span class="p">[</span><span class="n">mem_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">val</span>
+    <span class="k">if</span> <span class="n">print_</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">memstatus</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;percent&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{:0.3}</span><span class="s1">%&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{:0,.4}</span><span class="s1"> GB&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">30</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">memstatus</span>
+
+
+<span class="k">def</span> <span class="nf">read_and_binn</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">static_bunches</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+
+    <span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="o">.</span><span class="n">DldFlashProcessor</span><span class="p">()</span>
+    <span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="n">runNumber</span>
+    <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;raw&#39;</span><span class="p">:</span>
+        <span class="n">processor</span><span class="o">.</span><span class="n">readData</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">processor</span><span class="o">.</span><span class="n">readDataframes</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No Parquet data found, loading raw data.&#39;</span><span class="p">)</span>
+            <span class="n">processor</span><span class="o">.</span><span class="n">readData</span><span class="p">()</span>
+            <span class="n">processor</span><span class="o">.</span><span class="n">storeDataframes</span><span class="p">()</span>
+    <span class="n">processor</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">static_bunches</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">processor</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldMicrobunchId&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">400</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">processor</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldMicrobunchId&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">]</span>
+        <span class="n">processor</span><span class="o">.</span><span class="n">dd</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="n">processor</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldMicrobunchId&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">400</span><span class="p">]</span>
+    <span class="n">shortname</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">processor</span><span class="o">.</span><span class="n">resetBins</span><span class="p">()</span>
+    <span class="n">dldTime</span> <span class="o">=</span> <span class="n">delayStage</span> <span class="o">=</span> <span class="n">dldPos</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dldTime&#39;</span><span class="p">:</span>
+            <span class="n">dldTime</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">:</span>
+            <span class="n">delayStage</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dldPos&#39;</span><span class="p">:</span>
+            <span class="n">dldPos</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">if</span> <span class="n">dldTime</span><span class="p">:</span>
+        <span class="n">processor</span><span class="o">.</span><span class="n">addBinning</span><span class="p">(</span><span class="s1">&#39;dldTime&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">dldTime</span><span class="p">)</span>
+        <span class="n">shortname</span> <span class="o">+=</span> <span class="s1">&#39;E&#39;</span>
+    <span class="k">if</span> <span class="n">delayStage</span><span class="p">:</span>
+        <span class="n">processor</span><span class="o">.</span><span class="n">addBinning</span><span class="p">(</span><span class="s1">&#39;delayStage&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">delayStage</span><span class="p">)</span>
+        <span class="n">shortname</span> <span class="o">+=</span> <span class="s1">&#39;T&#39;</span>
+    <span class="k">if</span> <span class="n">dldPos</span><span class="p">:</span>
+        <span class="n">processor</span><span class="o">.</span><span class="n">addBinning</span><span class="p">(</span><span class="s1">&#39;dldPosX&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">dldPos</span><span class="p">)</span>
+        <span class="n">processor</span><span class="o">.</span><span class="n">addBinning</span><span class="p">(</span><span class="s1">&#39;dldPosY&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">dldPos</span><span class="p">)</span>
+        <span class="n">shortname</span> <span class="o">+=</span> <span class="s1">&#39;KxKy&#39;</span>
+
+    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+        <span class="n">saveName</span> <span class="o">=</span> <span class="s1">&#39;run</span><span class="si">{}</span><span class="s1"> - </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">shortname</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">computeBinnedData</span><span class="p">(</span><span class="n">saveName</span><span class="o">=</span><span class="n">saveName</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">computeBinnedData</span><span class="p">()</span>
+    <span class="n">axes</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">binRangeList</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">processor</span>
+
+
+<div class="viewcode-block" id="create_dataframes"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.create_dataframes">[docs]</a><span class="k">def</span> <span class="nf">create_dataframes</span><span class="p">(</span><span class="n">runNumbers</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Creates a parquet dataframe for each run passed.</span>
+<span class="sd">    Returns</span>
+<span class="sd">        fails: dictionary of runs and error which broke the dataframe generation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">runNumbers</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">runNumbers</span> <span class="o">=</span> <span class="p">[</span><span class="n">runNumbers</span><span class="p">,</span> <span class="p">]</span>
+    <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">runNumbers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">runNumbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+    <span class="n">fails</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runNumbers</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">prc</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="o">.</span><span class="n">DldFlashProcessor</span><span class="p">()</span>
+            <span class="n">prc</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="n">run</span>
+            <span class="n">prc</span><span class="o">.</span><span class="n">readData</span><span class="p">()</span>
+            <span class="n">prc</span><span class="o">.</span><span class="n">storeDataframes</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Stored dataframe for run </span><span class="si">{}</span><span class="s1"> in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">prc</span><span class="o">.</span><span class="n">DATA_PARQUET_DIR</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">E</span><span class="p">:</span>
+            <span class="n">fails</span><span class="p">[</span><span class="n">run</span><span class="p">]</span> <span class="o">=</span> <span class="n">E</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">fails</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> failed with error </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">fails</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.9.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

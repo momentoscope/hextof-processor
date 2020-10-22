@@ -1,0 +1,673 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>processor.utilities.vis &mdash; hextof-processor 0.9.5 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/pah.html">3. Interfacing external pah library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/utils/misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example/06_fullexample.html">6. Complete code examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/howtomaintain.html">2. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>processor.utilities.vis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for processor.utilities.vis</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">@author: Steinn Ymir Agustsson</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="kn">import</span> <span class="n">widgets</span><span class="p">,</span> <span class="n">interactive_output</span>
+
+<span class="n">cmaps</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span> <span class="s1">&#39;plasma&#39;</span><span class="p">,</span> <span class="s1">&#39;inferno&#39;</span><span class="p">,</span> <span class="s1">&#39;magma&#39;</span><span class="p">,</span> <span class="s1">&#39;Greys&#39;</span><span class="p">,</span> <span class="s1">&#39;Purples&#39;</span><span class="p">,</span> <span class="s1">&#39;Blues&#39;</span><span class="p">,</span> <span class="s1">&#39;Greens&#39;</span><span class="p">,</span> <span class="s1">&#39;Oranges&#39;</span><span class="p">,</span> <span class="s1">&#39;Reds&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;YlOrBr&#39;</span><span class="p">,</span> <span class="s1">&#39;YlOrRd&#39;</span><span class="p">,</span> <span class="s1">&#39;OrRd&#39;</span><span class="p">,</span> <span class="s1">&#39;PuRd&#39;</span><span class="p">,</span> <span class="s1">&#39;RdPu&#39;</span><span class="p">,</span> <span class="s1">&#39;BuPu&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;GnBu&#39;</span><span class="p">,</span> <span class="s1">&#39;PuBu&#39;</span><span class="p">,</span> <span class="s1">&#39;YlGnBu&#39;</span><span class="p">,</span> <span class="s1">&#39;PuBuGn&#39;</span><span class="p">,</span> <span class="s1">&#39;BuGn&#39;</span><span class="p">,</span> <span class="s1">&#39;YlGn&#39;</span><span class="p">,</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;gist_yarg&#39;</span><span class="p">,</span> <span class="s1">&#39;gist_gray&#39;</span><span class="p">,</span> <span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="s1">&#39;bone&#39;</span><span class="p">,</span> <span class="s1">&#39;pink&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;spring&#39;</span><span class="p">,</span> <span class="s1">&#39;summer&#39;</span><span class="p">,</span> <span class="s1">&#39;autumn&#39;</span><span class="p">,</span> <span class="s1">&#39;winter&#39;</span><span class="p">,</span> <span class="s1">&#39;cool&#39;</span><span class="p">,</span> <span class="s1">&#39;Wistia&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;hot&#39;</span><span class="p">,</span> <span class="s1">&#39;afmhot&#39;</span><span class="p">,</span> <span class="s1">&#39;gist_heat&#39;</span><span class="p">,</span> <span class="s1">&#39;copper&#39;</span><span class="p">,</span> <span class="s1">&#39;PiYG&#39;</span><span class="p">,</span> <span class="s1">&#39;PRGn&#39;</span><span class="p">,</span> <span class="s1">&#39;BrBG&#39;</span><span class="p">,</span> <span class="s1">&#39;PuOr&#39;</span><span class="p">,</span> <span class="s1">&#39;RdGy&#39;</span><span class="p">,</span> <span class="s1">&#39;RdBu&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;RdYlBu&#39;</span><span class="p">,</span> <span class="s1">&#39;RdYlGn&#39;</span><span class="p">,</span> <span class="s1">&#39;Spectral&#39;</span><span class="p">,</span> <span class="s1">&#39;coolwarm&#39;</span><span class="p">,</span> <span class="s1">&#39;bwr&#39;</span><span class="p">,</span> <span class="s1">&#39;seismic&#39;</span><span class="p">,</span> <span class="s1">&#39;Pastel1&#39;</span><span class="p">,</span> <span class="s1">&#39;Pastel2&#39;</span><span class="p">,</span> <span class="s1">&#39;Paired&#39;</span><span class="p">,</span> <span class="s1">&#39;Accent&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Dark2&#39;</span><span class="p">,</span> <span class="s1">&#39;Set1&#39;</span><span class="p">,</span> <span class="s1">&#39;Set2&#39;</span><span class="p">,</span> <span class="s1">&#39;Set3&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;tab10&#39;</span><span class="p">,</span> <span class="s1">&#39;tab20&#39;</span><span class="p">,</span> <span class="s1">&#39;tab20b&#39;</span><span class="p">,</span> <span class="s1">&#39;tab20c&#39;</span><span class="p">,</span> <span class="s1">&#39;flag&#39;</span><span class="p">,</span> <span class="s1">&#39;prism&#39;</span><span class="p">,</span> <span class="s1">&#39;ocean&#39;</span><span class="p">,</span> <span class="s1">&#39;gist_earth&#39;</span><span class="p">,</span> <span class="s1">&#39;terrain&#39;</span><span class="p">,</span> <span class="s1">&#39;gist_stern&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;gnuplot&#39;</span><span class="p">,</span> <span class="s1">&#39;gnuplot2&#39;</span><span class="p">,</span> <span class="s1">&#39;CMRmap&#39;</span><span class="p">,</span> <span class="s1">&#39;cubehelix&#39;</span><span class="p">,</span> <span class="s1">&#39;brg&#39;</span><span class="p">,</span> <span class="s1">&#39;hsv&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;gist_rainbow&#39;</span><span class="p">,</span> <span class="s1">&#39;rainbow&#39;</span><span class="p">,</span> <span class="s1">&#39;jet&#39;</span><span class="p">,</span> <span class="s1">&#39;nipy_spectral&#39;</span><span class="p">,</span> <span class="s1">&#39;gist_ncar&#39;</span><span class="p">]</span>
+         
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="k">pass</span>
+    
+<span class="k">def</span> <span class="nf">isnotebook</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">shell</span> <span class="o">=</span> <span class="n">get_ipython</span><span class="p">()</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">if</span> <span class="n">shell</span> <span class="o">==</span> <span class="s1">&#39;ZMQInteractiveShell&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># Jupyter notebook or qtconsole</span>
+        <span class="k">elif</span> <span class="n">shell</span> <span class="o">==</span> <span class="s1">&#39;TerminalInteractiveShell&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Terminal running IPython</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Other type (?)</span>
+    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Probably standard Python interpreter</span>
+
+<span class="k">def</span> <span class="nf">orthoslices_3D</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">continuous_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isnotebook</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Function not suited for working outside of Jupyter notebooks!&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">get_ipython</span><span class="p">()</span><span class="o">.</span><span class="n">magic</span><span class="p">(</span><span class="s1">&#39;matplotlib notebook&#39;</span><span class="p">)</span>
+        <span class="n">get_ipython</span><span class="p">()</span><span class="o">.</span><span class="n">magic</span><span class="p">(</span><span class="s1">&#39;matplotlib notebook&#39;</span><span class="p">)</span>
+
+    <span class="n">e_range</span><span class="p">,</span> <span class="n">x_range</span><span class="p">,</span> <span class="n">y_range</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">dmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">dmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">w_e</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">e_range</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">e_range</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Energy:&#39;</span><span class="p">,</span>
+                            <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">continuous_update</span><span class="o">=</span><span class="n">continuous_update</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">readout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">readout_format</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+    <span class="n">w_kx</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">x_range</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">x_range</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;kx:&#39;</span><span class="p">,</span>
+                             <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">continuous_update</span><span class="o">=</span><span class="n">continuous_update</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
+                             <span class="n">readout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">readout_format</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+    <span class="n">w_ky</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">y_range</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">y_range</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;ky:&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">continuous_update</span><span class="o">=</span><span class="n">continuous_update</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">readout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">readout_format</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+    <span class="n">w_clim</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">FloatRangeSlider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">9</span><span class="p">],</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Contrast:&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                      <span class="n">continuous_update</span><span class="o">=</span><span class="n">continuous_update</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">readout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                      <span class="n">readout_format</span><span class="o">=</span><span class="s1">&#39;.1f&#39;</span><span class="p">)</span>
+    <span class="n">w_cmap</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">cmaps</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;terrain&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;colormap:&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">w_bin</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">BoundedIntText</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;resample:&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">w_interpolate</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Interpolate&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">w_grid</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Grid&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">w_trackers</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Trackers&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">w_trackercol</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">ColorPicker</span><span class="p">(</span><span class="n">concise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;tracker line color&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+
+    <span class="n">ui_pos</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="n">w_e</span><span class="p">,</span> <span class="n">w_kx</span><span class="p">,</span> <span class="n">w_ky</span><span class="p">])</span>
+    <span class="n">ui_color</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">w_clim</span><span class="p">,</span> <span class="n">w_cmap</span><span class="p">]),</span>
+                             <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">w_bin</span><span class="p">,</span> <span class="n">w_interpolate</span><span class="p">,</span> <span class="n">w_grid</span><span class="p">]),</span>
+                             <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">w_trackers</span><span class="p">,</span> <span class="n">w_trackercol</span><span class="p">]),</span>
+                             <span class="p">])</span>
+
+    <span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">ui_pos</span><span class="p">,</span> <span class="n">ui_color</span><span class="p">]</span>
+    <span class="n">tab</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Tab</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="n">children</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">tab</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;data select&#39;</span><span class="p">)</span>
+    <span class="n">tab</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;colormap&#39;</span><span class="p">)</span>
+
+    <span class="n">figsize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;figsize&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="c1"># [left, bottom, width, height]</span>
+    <span class="c1"># fig.locator_params(nbins=4)</span>
+
+    <span class="c1"># cbar_ax = fig.add_axes([.05,.4,.05,4], xticklabels=[], yticklabels=[])</span>
+    <span class="c1"># cbar_ax.yaxis.set_major_locator(plt.LinearLocator(5))</span>
+
+    <span class="n">img_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="o">.</span><span class="mi">15</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">],</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">img_ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">LinearLocator</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+    <span class="n">img_ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">LinearLocator</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+    <span class="n">xproj_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="o">.</span><span class="mi">15</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">,</span> <span class="o">.</span><span class="mi">28</span><span class="p">],</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">xproj_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$k_x$&#39;</span><span class="p">)</span>
+    <span class="n">xproj_ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">LinearLocator</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+    <span class="n">yproj_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="o">.</span><span class="mi">57</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">,</span> <span class="o">.</span><span class="mi">28</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">],</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">yproj_ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+    <span class="n">yproj_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$k_y$&#39;</span><span class="p">)</span>
+    <span class="n">yproj_ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">LinearLocator</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">[</span><span class="n">img_ax</span><span class="p">,</span> <span class="n">yproj_ax</span><span class="p">,</span> <span class="n">xproj_ax</span><span class="p">]:</span>  <span class="c1"># ,cbar_ax]:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">)</span>
+
+    <span class="n">clim_</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="o">.</span><span class="mi">99</span>
+
+    <span class="n">e_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
+    <span class="n">y_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:])</span>
+    <span class="n">x_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">e_plot</span> <span class="o">=</span> <span class="n">img_ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">e_img</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;terrain&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span>
+                           <span class="n">clim</span><span class="o">=</span><span class="n">clim_</span><span class="p">,</span> <span class="p">)</span>  <span class="c1"># origin=&#39;lower&#39;)</span>
+    <span class="n">x_plot</span> <span class="o">=</span> <span class="n">yproj_ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">x_img</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;terrain&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span>
+                             <span class="n">clim</span><span class="o">=</span><span class="n">clim_</span><span class="p">,</span> <span class="p">)</span>  <span class="c1"># origin=&#39;lower&#39;)</span>
+    <span class="n">y_plot</span> <span class="o">=</span> <span class="n">xproj_ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">y_img</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;terrain&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span>
+                             <span class="n">clim</span><span class="o">=</span><span class="n">clim_</span><span class="p">,</span> <span class="p">)</span>  <span class="c1"># origin=&#39;lower&#39;)</span>
+
+    <span class="n">pe_x</span> <span class="o">=</span> <span class="n">img_ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">pe_y</span> <span class="o">=</span> <span class="n">img_ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">px_x</span> <span class="o">=</span> <span class="n">xproj_ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">px_e</span> <span class="o">=</span> <span class="n">xproj_ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">e_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">py_y</span> <span class="o">=</span> <span class="n">yproj_ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">py_e</span> <span class="o">=</span> <span class="n">yproj_ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">e_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">clim</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">binning</span><span class="p">,</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">trackers</span><span class="p">,</span> <span class="n">trackerscol</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
+            <span class="n">e_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">])</span>
+            <span class="n">y_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="n">ky</span><span class="p">,</span> <span class="p">:][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">])</span>
+            <span class="n">x_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">kx</span><span class="p">][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">e_img</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">]</span>
+            <span class="n">y_img</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">ky</span><span class="p">,</span> <span class="p">:][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">]</span>
+            <span class="n">x_img</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">kx</span><span class="p">][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">img_ax</span><span class="p">,</span> <span class="n">yproj_ax</span><span class="p">,</span> <span class="n">xproj_ax</span><span class="p">],</span> <span class="p">[</span><span class="n">e_plot</span><span class="p">,</span> <span class="n">x_plot</span><span class="p">,</span> <span class="n">y_plot</span><span class="p">],</span> <span class="p">[</span><span class="n">e_img</span><span class="p">,</span> <span class="n">x_img</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">y_img</span><span class="p">]):</span>
+
+            <span class="n">plot</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="n">clim</span><span class="p">)</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">interpolate</span><span class="p">:</span>
+                <span class="n">plot</span><span class="o">.</span><span class="n">set_interpolation</span><span class="p">(</span><span class="s1">&#39;gaussian&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plot</span><span class="o">.</span><span class="n">set_interpolation</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">trackers</span><span class="p">:</span>
+                <span class="n">pe_x</span><span class="o">.</span><span class="n">set_xdata</span><span class="p">(</span><span class="n">kx</span><span class="p">)</span>
+                <span class="n">pe_x</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+                <span class="n">pe_y</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span>
+                <span class="n">pe_y</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+                <span class="n">px_x</span><span class="o">.</span><span class="n">set_xdata</span><span class="p">(</span><span class="n">kx</span><span class="p">)</span>
+                <span class="n">px_x</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+                <span class="n">px_e</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">px_e</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+                <span class="n">py_y</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span>
+                <span class="n">py_y</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+                <span class="n">py_e</span><span class="o">.</span><span class="n">set_xdata</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">py_e</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+
+    <span class="n">interactive_plot</span> <span class="o">=</span> <span class="n">interactive_output</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">w_e</span><span class="p">,</span>
+                                                   <span class="s1">&#39;kx&#39;</span><span class="p">:</span> <span class="n">w_kx</span><span class="p">,</span>
+                                                   <span class="s1">&#39;ky&#39;</span><span class="p">:</span> <span class="n">w_ky</span><span class="p">,</span>
+                                                   <span class="s1">&#39;clim&#39;</span><span class="p">:</span> <span class="n">w_clim</span><span class="p">,</span>
+                                                   <span class="s1">&#39;cmap&#39;</span><span class="p">:</span> <span class="n">w_cmap</span><span class="p">,</span>
+                                                   <span class="s1">&#39;binning&#39;</span><span class="p">:</span> <span class="n">w_bin</span><span class="p">,</span>
+                                                   <span class="s1">&#39;interpolate&#39;</span><span class="p">:</span> <span class="n">w_interpolate</span><span class="p">,</span>
+                                                   <span class="s1">&#39;grid&#39;</span><span class="p">:</span> <span class="n">w_grid</span><span class="p">,</span>
+                                                   <span class="s1">&#39;trackers&#39;</span><span class="p">:</span> <span class="n">w_trackers</span><span class="p">,</span>
+                                                   <span class="s1">&#39;trackerscol&#39;</span><span class="p">:</span> <span class="n">w_trackercol</span><span class="p">,</span> <span class="p">});</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">interactive_plot</span><span class="p">,</span> <span class="n">tab</span><span class="p">)</span>
+    <span class="c1"># display(tab)</span>
+
+    <span class="c1"># return fig</span>
+
+
+<span class="k">def</span> <span class="nf">orthoslices_4D</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;kx&#39;</span><span class="p">,</span> <span class="s1">&#39;ky&#39;</span><span class="p">,</span> <span class="s1">&#39;kz&#39;</span><span class="p">],</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">continuous_update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isnotebook</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span><span class="s1">&#39;Function not suited for working outside of Jupyter notebooks!&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">get_ipython</span><span class="p">()</span><span class="o">.</span><span class="n">magic</span><span class="p">(</span><span class="s1">&#39;matplotlib notebook&#39;</span><span class="p">)</span>
+        <span class="n">get_ipython</span><span class="p">()</span><span class="o">.</span><span class="n">magic</span><span class="p">(</span><span class="s1">&#39;matplotlib notebook&#39;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;Data should be 4-dimensional, but data has </span><span class="si">{}</span><span class="s1"> dimensions&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="c1"># make controls for data slicers</span>
+    <span class="c1"># slicers = []</span>
+    <span class="c1"># for shape, name in zip(data.shape, axis_order):</span>
+    <span class="c1">#     slicers.append(widgets.IntSlider(value=shape // 2,</span>
+    <span class="c1">#                                      min=0,</span>
+    <span class="c1">#                                      max=shape - 1,</span>
+    <span class="c1">#                                      step=1,</span>
+    <span class="c1">#                                      description=name,</span>
+    <span class="c1">#                                      disabled=False,</span>
+    <span class="c1">#                                      continuous_update=False,</span>
+    <span class="c1">#                                      orientation=&#39;horizontal&#39;,</span>
+    <span class="c1">#                                      readout=True,</span>
+    <span class="c1">#                                      readout_format=&#39;d&#39;</span>
+    <span class="c1">#                                      ))</span>
+
+    <span class="n">e_range</span><span class="p">,</span> <span class="n">x_range</span><span class="p">,</span> <span class="n">y_range</span><span class="p">,</span> <span class="n">z_range</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">w_e</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">e_range</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">e_range</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Energy:&#39;</span><span class="p">,</span>
+                            <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">continuous_update</span><span class="o">=</span><span class="n">continuous_update</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">readout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">readout_format</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+    <span class="n">w_kx</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">x_range</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">x_range</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;kx:&#39;</span><span class="p">,</span>
+                             <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">continuous_update</span><span class="o">=</span><span class="n">continuous_update</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
+                             <span class="n">readout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">readout_format</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+    <span class="n">w_ky</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">y_range</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">y_range</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;ky:&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">continuous_update</span><span class="o">=</span><span class="n">continuous_update</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">readout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">readout_format</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+    <span class="n">w_kz</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">z_range</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">z_range</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;kz:&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">continuous_update</span><span class="o">=</span><span class="n">continuous_update</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">readout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">readout_format</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+
+    <span class="n">slicers</span> <span class="o">=</span> <span class="p">[</span><span class="n">w_e</span><span class="p">,</span> <span class="n">w_kx</span><span class="p">,</span> <span class="n">w_ky</span><span class="p">,</span> <span class="n">w_kz</span><span class="p">]</span>
+    <span class="n">ui_slicers</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">(</span><span class="n">slicers</span><span class="p">)</span>
+
+    <span class="c1"># make controls for graphics appearance</span>
+    <span class="n">w_clim</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">FloatRangeSlider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">9</span><span class="p">],</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Contrast:&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                      <span class="n">continuous_update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">readout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                      <span class="n">readout_format</span><span class="o">=</span><span class="s1">&#39;.1f&#39;</span><span class="p">)</span>
+    <span class="n">w_cmap</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">cmaps</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;terrain&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;colormap:&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">w_bin</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">BoundedIntText</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;resample:&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">w_interpolate</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Interpolate&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">w_grid</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Grid&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">w_trackers</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Checkbox</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Trackers&#39;</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">w_trackercol</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">ColorPicker</span><span class="p">(</span><span class="n">concise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;tracker line color&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">ui_color</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">w_clim</span><span class="p">,</span> <span class="n">w_cmap</span><span class="p">]),</span>
+                             <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">w_bin</span><span class="p">,</span> <span class="n">w_interpolate</span><span class="p">,</span> <span class="n">w_grid</span><span class="p">]),</span>
+                             <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">w_trackers</span><span class="p">,</span> <span class="n">w_trackercol</span><span class="p">]),</span>
+                             <span class="p">])</span>
+
+    <span class="n">tab</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Tab</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="n">ui_slicers</span><span class="p">,</span> <span class="n">ui_color</span><span class="p">],</span> <span class="p">)</span>
+    <span class="n">tab</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Data slicing&#39;</span><span class="p">)</span>
+    <span class="n">tab</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Graphics&#39;</span><span class="p">)</span>
+
+    <span class="n">figsize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;figsize&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="n">img_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="o">.</span><span class="mi">15</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">],</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">img_ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">LinearLocator</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+    <span class="n">img_ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">LinearLocator</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+    <span class="n">xproj_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="o">.</span><span class="mi">15</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">,</span> <span class="o">.</span><span class="mi">28</span><span class="p">],</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">xproj_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$k_x$&#39;</span><span class="p">)</span>
+    <span class="n">xproj_ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">LinearLocator</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+    <span class="n">yproj_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="o">.</span><span class="mi">57</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">,</span> <span class="o">.</span><span class="mi">28</span><span class="p">,</span> <span class="o">.</span><span class="mi">4</span><span class="p">],</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">yproj_ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+    <span class="n">yproj_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$k_y$&#39;</span><span class="p">)</span>
+    <span class="n">yproj_ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">LinearLocator</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">[</span><span class="n">img_ax</span><span class="p">,</span> <span class="n">yproj_ax</span><span class="p">,</span> <span class="n">xproj_ax</span><span class="p">]:</span>  <span class="c1"># ,cbar_ax]:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">)</span>
+
+    <span class="n">clim_</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="o">.</span><span class="mi">99</span>
+
+    <span class="n">e_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="n">y_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="n">x_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">e_plot</span> <span class="o">=</span> <span class="n">img_ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">e_img</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;terrain&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span>
+                           <span class="n">clim</span><span class="o">=</span><span class="n">clim_</span><span class="p">,</span> <span class="p">)</span>  <span class="c1"># origin=&#39;lower&#39;)</span>
+    <span class="n">x_plot</span> <span class="o">=</span> <span class="n">yproj_ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">x_img</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;terrain&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span>
+                             <span class="n">clim</span><span class="o">=</span><span class="n">clim_</span><span class="p">,</span> <span class="p">)</span>  <span class="c1"># origin=&#39;lower&#39;)</span>
+    <span class="n">y_plot</span> <span class="o">=</span> <span class="n">xproj_ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">y_img</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;terrain&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span>
+                             <span class="n">clim</span><span class="o">=</span><span class="n">clim_</span><span class="p">,</span> <span class="p">)</span>  <span class="c1"># origin=&#39;lower&#39;)</span>
+
+    <span class="n">pe_x</span> <span class="o">=</span> <span class="n">img_ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">pe_y</span> <span class="o">=</span> <span class="n">img_ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">px_x</span> <span class="o">=</span> <span class="n">xproj_ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">px_e</span> <span class="o">=</span> <span class="n">xproj_ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">e_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">py_y</span> <span class="o">=</span> <span class="n">yproj_ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">py_e</span> <span class="o">=</span> <span class="n">yproj_ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">e_range</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">,</span> <span class="n">clim</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">binning</span><span class="p">,</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">trackers</span><span class="p">,</span> <span class="n">trackerscol</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
+            <span class="n">e_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">kz</span><span class="p">][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">])</span>
+            <span class="n">y_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="n">ky</span><span class="p">,</span> <span class="p">:,</span> <span class="n">kz</span><span class="p">][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">])</span>
+            <span class="n">x_img</span> <span class="o">=</span> <span class="n">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">kx</span><span class="p">,</span> <span class="n">kz</span><span class="p">][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">e_img</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">e</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">kz</span><span class="p">][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">]</span>
+            <span class="n">y_img</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">ky</span><span class="p">,</span> <span class="p">:,</span> <span class="n">kz</span><span class="p">][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">]</span>
+            <span class="n">x_img</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">kx</span><span class="p">,</span> <span class="n">kz</span><span class="p">][::</span><span class="n">binning</span><span class="p">,</span> <span class="p">::</span><span class="n">binning</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">img_ax</span><span class="p">,</span> <span class="n">yproj_ax</span><span class="p">,</span> <span class="n">xproj_ax</span><span class="p">],</span> <span class="p">[</span><span class="n">e_plot</span><span class="p">,</span> <span class="n">x_plot</span><span class="p">,</span> <span class="n">y_plot</span><span class="p">],</span> <span class="p">[</span><span class="n">e_img</span><span class="p">,</span> <span class="n">x_img</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">y_img</span><span class="p">]):</span>
+
+            <span class="n">plot</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="n">clim</span><span class="p">)</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">interpolate</span><span class="p">:</span>
+                <span class="n">plot</span><span class="o">.</span><span class="n">set_interpolation</span><span class="p">(</span><span class="s1">&#39;gaussian&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plot</span><span class="o">.</span><span class="n">set_interpolation</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">trackers</span><span class="p">:</span>
+                <span class="n">pe_x</span><span class="o">.</span><span class="n">set_xdata</span><span class="p">(</span><span class="n">kx</span><span class="p">)</span>
+                <span class="n">pe_x</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+                <span class="n">pe_y</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span>
+                <span class="n">pe_y</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+                <span class="n">px_x</span><span class="o">.</span><span class="n">set_xdata</span><span class="p">(</span><span class="n">kx</span><span class="p">)</span>
+                <span class="n">px_x</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+                <span class="n">px_e</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">px_e</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+                <span class="n">py_y</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span>
+                <span class="n">py_y</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+                <span class="n">py_e</span><span class="o">.</span><span class="n">set_xdata</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">py_e</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">trackerscol</span><span class="p">)</span>
+
+    <span class="n">interactive_plot</span> <span class="o">=</span> <span class="n">interactive_output</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">w_e</span><span class="p">,</span>
+                                                   <span class="s1">&#39;kx&#39;</span><span class="p">:</span> <span class="n">w_kx</span><span class="p">,</span>
+                                                   <span class="s1">&#39;ky&#39;</span><span class="p">:</span> <span class="n">w_ky</span><span class="p">,</span>
+                                                   <span class="s1">&#39;kz&#39;</span><span class="p">:</span> <span class="n">w_kz</span><span class="p">,</span>
+                                                   <span class="s1">&#39;clim&#39;</span><span class="p">:</span> <span class="n">w_clim</span><span class="p">,</span>
+                                                   <span class="s1">&#39;cmap&#39;</span><span class="p">:</span> <span class="n">w_cmap</span><span class="p">,</span>
+                                                   <span class="s1">&#39;binning&#39;</span><span class="p">:</span> <span class="n">w_bin</span><span class="p">,</span>
+                                                   <span class="s1">&#39;interpolate&#39;</span><span class="p">:</span> <span class="n">w_interpolate</span><span class="p">,</span>
+                                                   <span class="s1">&#39;grid&#39;</span><span class="p">:</span> <span class="n">w_grid</span><span class="p">,</span>
+                                                   <span class="s1">&#39;trackers&#39;</span><span class="p">:</span> <span class="n">w_trackers</span><span class="p">,</span>
+                                                   <span class="s1">&#39;trackerscol&#39;</span><span class="p">:</span> <span class="n">w_trackercol</span><span class="p">,</span> <span class="p">});</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">interactive_plot</span><span class="p">,</span> <span class="n">tab</span><span class="p">)</span>
+    <span class="c1"># display(tab)</span>
+
+    <span class="c1"># return fig</span>
+
+
+<span class="k">def</span> <span class="nf">norm_img</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">amean</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<div class="viewcode-block" id="det_to_k"><a class="viewcode-back" href="../../../library/utils/vis.html#processor.utilities.vis.det_to_k">[docs]</a><span class="k">def</span> <span class="nf">det_to_k</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Detector pixel coordinate to momentum coordinate (in pixel)&#39;&#39;&#39;</span>
+    <span class="n">kx</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">kx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">d</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">kx</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">kx</span><span class="p">)</span> <span class="o">*</span> <span class="n">d</span>
+    <span class="k">return</span> <span class="n">kx</span></div>
+
+
+<span class="k">def</span> <span class="nf">reduce_to_first_bz</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">reciprocal_lattice_vector</span><span class="p">):</span>
+    <span class="n">kx</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">kx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">reciprocal_lattice_vector</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">kx</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">kx</span><span class="p">)</span> <span class="o">*</span> <span class="n">reciprocal_lattice_vector</span>
+    <span class="k">return</span> <span class="n">kx</span>
+
+
+<div class="viewcode-block" id="to_reduced_scheme"><a class="viewcode-back" href="../../../library/utils/vis.html#processor.utilities.vis.to_reduced_scheme">[docs]</a><span class="k">def</span> <span class="nf">to_reduced_scheme</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">aoi_k</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; obtain momentum coordinate in the reduced scheme.</span>
+
+<span class="sd">    Follow Bloch theorem.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">aoi_k</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">aoi_k</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="n">aoi_k</span></div>
+
+
+<span class="k">def</span> <span class="nf">to_k_parallel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">aoi_px</span><span class="p">,</span> <span class="n">aoi_k</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">*</span> <span class="n">aoi_k</span> <span class="o">/</span> <span class="n">aoi_px</span>
+
+
+<div class="viewcode-block" id="to_k_parallel_reduced"><a class="viewcode-back" href="../../../library/utils/vis.html#processor.utilities.vis.to_k_parallel_reduced">[docs]</a><span class="k">def</span> <span class="nf">to_k_parallel_reduced</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">w_px</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Transform pixel to momentum and correct to the reduced brillouin scheme&quot;&quot;&quot;</span>
+    <span class="n">kx</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">w_px</span>
+    <span class="k">return</span> <span class="n">kx</span> <span class="o">-</span> <span class="p">(</span><span class="n">kx</span> <span class="o">+</span> <span class="n">w</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">//</span> <span class="n">w</span></div>
+
+
+<span class="k">def</span> <span class="nf">to_k_perpendicular</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">xy0</span><span class="p">,</span> <span class="n">kf</span><span class="o">=</span><span class="mf">37.285</span><span class="p">,</span> <span class="n">aoi_px</span><span class="o">=</span><span class="mi">219</span><span class="p">,</span> <span class="n">aoi_k</span><span class="o">=</span><span class="mf">2.215</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">point_distance</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">xy0</span><span class="p">)</span>
+    <span class="n">px_to_k</span> <span class="o">=</span> <span class="n">aoi_k</span> <span class="o">/</span> <span class="n">aoi_px</span>
+    <span class="k">return</span> <span class="n">kf</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">d</span> <span class="o">*</span> <span class="n">px_to_k</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)))</span>
+
+
+<div class="viewcode-block" id="k_par"><a class="viewcode-back" href="../../../library/utils/vis.html#processor.utilities.vis.k_par">[docs]</a><span class="k">def</span> <span class="nf">k_par</span><span class="p">(</span><span class="n">px</span><span class="p">,</span> <span class="n">bz_w_px</span><span class="o">=</span><span class="mi">219</span><span class="p">,</span> <span class="n">bz_w</span><span class="o">=</span><span class="mf">2.215</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Pixel to momentum converter</span>
+<span class="sd">    bz_w_px: Brillouin zone width in pixel</span>
+<span class="sd">    bz_w: Brillouin zone width in inverse Angstroms&#39;&#39;&#39;</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="d_to_kz"><a class="viewcode-back" href="../../../library/utils/vis.html#processor.utilities.vis.d_to_kz">[docs]</a><span class="k">def</span> <span class="nf">d_to_kz</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">kf</span><span class="o">=</span><span class="mf">37.285</span><span class="p">,</span> <span class="n">bz_w_px</span><span class="o">=</span><span class="mi">219</span><span class="p">,</span> <span class="n">bz_w</span><span class="o">=</span><span class="mf">2.215</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Evaluate k_z from Ewald sphere radius</span>
+<span class="sd">    d: distance in pixels from the center of momentum space on the detector</span>
+<span class="sd">    kf: photon momentum</span>
+<span class="sd">    bz_w_px: Brillouin zone width in pixels</span>
+<span class="sd">    bz_w: Brillouin zone width in inverse Angstroms&#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">kf</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">k_par</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">bz_w_px</span><span class="p">,</span> <span class="n">bz_w</span><span class="p">)</span> <span class="o">/</span> <span class="n">kf</span><span class="p">)))</span></div>
+
+
+<span class="k">def</span> <span class="nf">point_distance</span><span class="p">(</span><span class="n">pt1</span><span class="p">,</span> <span class="n">pt2</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">pt2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">pt1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">pt2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pt1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="get_k_xyz"><a class="viewcode-back" href="../../../library/utils/vis.html#processor.utilities.vis.get_k_xyz">[docs]</a><span class="k">def</span> <span class="nf">get_k_xyz</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">k_center</span><span class="o">=</span><span class="p">(</span><span class="mi">179</span><span class="p">,</span> <span class="mi">737</span><span class="p">),</span> <span class="n">reciprocal_lattice_vector</span><span class="o">=</span><span class="p">(</span><span class="mi">218</span><span class="p">,</span> <span class="mi">218</span><span class="p">),</span> <span class="n">reciprocal_unit_cell</span><span class="o">=</span><span class="p">(</span><span class="mf">2.215</span><span class="p">,</span> <span class="mf">2.215</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+              <span class="n">kf</span><span class="o">=</span><span class="mf">37.285</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; return the kx,ky,kz coordinates of a point.</span>
+<span class="sd">    param:</span>
+<span class="sd">        pt: tuple(float,float)</span>
+<span class="sd">            point to evaluate (row,col)</span>
+<span class="sd">        k_center:</span>
+<span class="sd">            center of momentum space</span>
+<span class="sd">        reciprocal_lattice_vector: float</span>
+<span class="sd">            distance between 2 gamma points - BZ width</span>
+<span class="sd">        kf: float</span>
+<span class="sd">            final momentum from energy of photoemission photon</span>
+
+<span class="sd">    given distance from gamma point and size of the brillouin zone&quot;&quot;&quot;</span>
+    <span class="n">y_c</span><span class="p">,</span> <span class="n">x_c</span> <span class="o">=</span> <span class="n">k_center</span>
+    <span class="n">y_w</span><span class="p">,</span> <span class="n">x_w</span> <span class="o">=</span> <span class="n">reciprocal_lattice_vector</span>
+    <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">pt</span>
+
+    <span class="n">kx</span> <span class="o">=</span> <span class="n">k_par</span><span class="p">(</span><span class="n">det_to_k</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_c</span><span class="p">,</span> <span class="n">reciprocal_lattice_vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">bz_w_px</span><span class="o">=</span><span class="n">reciprocal_lattice_vector</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+               <span class="n">bz_w</span><span class="o">=</span><span class="n">reciprocal_unit_cell</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ky</span> <span class="o">=</span> <span class="n">k_par</span><span class="p">(</span><span class="n">det_to_k</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y_c</span><span class="p">,</span> <span class="n">reciprocal_lattice_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">bz_w_px</span><span class="o">=</span><span class="n">reciprocal_lattice_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+               <span class="n">bz_w</span><span class="o">=</span><span class="n">reciprocal_unit_cell</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">point_distance</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">k_center</span><span class="p">)</span>
+    <span class="n">kz</span> <span class="o">=</span> <span class="n">d_to_kz</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">kf</span><span class="o">=</span><span class="n">kf</span><span class="p">,</span> <span class="n">bz_w_px</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">reciprocal_lattice_vector</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span></div>
+
+
+<span class="k">def</span> <span class="nf">slice_to_ev</span><span class="p">(</span><span class="n">ToF</span><span class="p">,</span> <span class="n">ToF_to_ev</span><span class="p">,</span> <span class="n">t0</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">ToF</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="n">ToF_to_ev</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.9.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

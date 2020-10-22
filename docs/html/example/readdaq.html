@@ -36,8 +36,8 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
-        <link rel="next" title="2. Save dataset to dask parquet files" href="parquet.html"/>
-        <link rel="prev" title="4. Utility functions (utils)" href="../library/utils.html"/> 
+        <link rel="next" title="&lt;no title&gt;" href="parquet.html"/>
+        <link rel="prev" title="8. Miscellaneous (processor.utilities.misc)" href="../library/util_misc.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -95,21 +95,19 @@
 <li class="toctree-l1"><a class="reference internal" href="../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../library/pah.html">3. Interfacing external pah library</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../library/utils.html">4. Utility functions (utils)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/util_calibration.html">4. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/util_diagnostics.html">5. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/util_io.html">6. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/util_vis.html">7. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/util_misc.html">8. Miscellaneous (processor.utilities.misc)</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">1. Read DAQ data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="parquet.html">2. Save dataset to dask parquet files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="binning.html">3. Binning multidimensional data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nobinning.html">4. Processing data without binning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="corrections.html">5. Corrections to FEL pulse timing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fullexample.html">6. Complete code examples</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Miscellaneous</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../misc/listofterms.html">1. List of terms and abbreviations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../misc/howtomaintain.html">2. Package maintenance</a></li>
 </ul>
 
             
@@ -154,13 +152,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>1. Read DAQ data</li>
+      <li><span class="section-number">1. </span>Read DAQ data</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/example/readdaq.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/example/readdaq.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -174,31 +172,31 @@
            <div itemprop="articleBody">
             
   <div class="section" id="read-daq-data">
-<span id="read-daq-data"></span><h1>1. Read DAQ data<a class="headerlink" href="#read-daq-data" title="Permalink to this headline">¶</a></h1>
-<p><strong>(1)</strong> Load the data with a given DAQ run number</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># create a processor isntance</span>
+<h1><span class="section-number">1. </span>Read DAQ data<a class="headerlink" href="#read-daq-data" title="Permalink to this headline">¶</a></h1>
+<p>#.# Load the data with a given DAQ run number</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># create a processor isntance</span>
 <span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
 <span class="c1"># assign a run number</span>
 <span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="mi">18843</span>
 </pre></div>
 </div>
 <p>The data can now be loaded from either a full DAQ run:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#read the data from the DAQ hdf5 dataframes</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># read the data from the DAQ hdf5 dataframes</span>
 <span class="n">processor</span><span class="o">.</span><span class="n">readData</span><span class="p">(</span><span class="n">runNumber</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>or from a selected range of the <code class="docutils literal"><span class="pre">pulseIdInterval</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">mbFrom</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c1"># first macrobunch</span>
+<p>or from a selected range of the <cite>pulseIdInterval</cite>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mbFrom</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c1"># first macrobunch</span>
 <span class="n">mbTo</span> <span class="o">=</span> <span class="mi">2000</span> <span class="c1"># last macrobunch</span>
 <span class="n">processor</span><span class="o">.</span><span class="n">readData</span><span class="p">(</span><span class="n">pulseIdInterval</span><span class="o">=</span><span class="p">(</span><span class="n">mbFrom</span><span class="p">,</span><span class="n">mbTo</span><span class="p">))</span>
 </pre></div>
 </div>
-<p><strong>(2)</strong> Run the <code class="docutils literal"><span class="pre">postProcess</span></code> method, which generates a BAM-corrected <code class="docutils literal"><span class="pre">pumpProbeDelay</span></code> array, together with polar coordinates for the momentum axes.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
+<p>#.# Run the <cite>postProcess</cite> method, which generates a BAM-corrected <cite>pumpProbeDelay</cite> array, together with polar coordinates for the momentum axes.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">processor</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>The dask dataframe is now created and can be used directly or stored in parquet format (optimized for speed) for future use. A shorter code summary is in the following:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">processor</span> <span class="o">=</span> <span class="n">DldFlashProcessor</span><span class="p">()</span>
 <span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span> <span class="o">=</span> <span class="mi">18843</span>
 <span class="n">processor</span><span class="o">.</span><span class="n">readData</span><span class="p">(</span><span class="n">runNumber</span><span class="o">=</span><span class="n">processor</span><span class="o">.</span><span class="n">runNumber</span><span class="p">)</span>
 <span class="n">processor</span><span class="o">.</span><span class="n">postProcess</span><span class="p">()</span>
@@ -216,10 +214,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="parquet.html" class="btn btn-neutral float-right" title="2. Save dataset to dask parquet files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="parquet.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../library/utils.html" class="btn btn-neutral" title="4. Utility functions (utils)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../library/util_misc.html" class="btn btn-neutral" title="8. Miscellaneous (processor.utilities.misc)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -228,7 +226,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, momentoscope team.
+        &copy; Copyright 2018-2020, momentoscope team.
 
     </p>
   </div>
@@ -260,7 +258,8 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
