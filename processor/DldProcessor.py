@@ -491,8 +491,10 @@ class DldProcessor:
         if l is None:
             l = float(self.settings['processor']['ET_CONV_L'])
 
-        self.dd['energy'] = self.dd['dldTime'] - self.dd['dldSectorId']
-
+        # self.dd['energy'] = self.dd['dldTime'] - self.dd['dldSectorId']
+        self.dd['energy'] = self.dd['dldTime']
+        if 'dldSectorId' in self.dd.columns:
+            self.dd['energy'] -= self.dd['dldSectorId']
         if useJitter:
             self.dd['energy'] = self.dd.map_partitions(self.applyJitter, amp=jitterAmplitude, col='energy', type=jitterType)
 
