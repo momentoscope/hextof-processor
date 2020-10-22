@@ -392,12 +392,12 @@
     <span class="n">dims_order</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">if</span> <span class="n">axis_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">axis_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="s1">&#39;dldTime&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;dldPosY&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="s1">&#39;dldPosX&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;S&#39;</span><span class="p">}</span>
+        <span class="n">axis_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;delayStage&#39;</span><span class="p">,</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">,</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;dldPosY&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;dldPosX&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">]}</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">axis_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -406,8 +406,11 @@
     <span class="c1"># Sort the dimensions in the correct order, and fill with one-point dimensions</span>
     <span class="c1"># the missing axes.</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="n">axis_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
-            <span class="n">dims_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">axis_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="n">axis_name_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">axis_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axis_name_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Too many dimensions for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> axis.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">axis_name_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">dims_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">*</span><span class="n">axis_name_list</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dims_to_add</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">dims_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
