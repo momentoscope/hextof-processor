@@ -182,6 +182,7 @@
             
   <h1>Source code for processor.DldProcessor</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">)</span>  <span class="c1"># avoid printing FutureWarnings from other packages</span>
@@ -308,16 +309,16 @@
 <div class="viewcode-block" id="DldProcessor.initAttributes"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.initAttributes">[docs]</a>    <span class="k">def</span> <span class="nf">initAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">import_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Parse settings file and assign the variables.</span>
 
-
-
 <span class="sd">        Args:</span>
-<span class="sd">            import_all (:obj:`bool`): import method selection.</span>
-<span class="sd">                :True: imports all entries in SETTINGS.ini except those from</span>
-<span class="sd">                sections [DAQ channels]. These are handled in the DldFlashProcessor subclass.</span>
-<span class="sd">                Prints a warning when an entry is not found as class attribute</span>
-<span class="sd">                :False: only imports those that match existing attribute names.</span>
+<span class="sd">            import_all: bool | False</span>
+<span class="sd">                Option to import method selection.\n</span>
+<span class="sd">                ``True`` imports all entries in SETTINGS.ini except those from sections [DAQ channels].</span>
+<span class="sd">                These are handled in the DldFlashProcessor subclass. Prints a warning when an entry</span>
+<span class="sd">                is not found as class attribute\n</span>
+<span class="sd">                ``False`` only imports those that match existing attribute names.</span>
 <span class="sd">        Warnings:</span>
-<span class="sd">            UserWarning: when an entry is found in the SETTINGS.ini file, which</span>
+<span class="sd">            UserWarning:</span>
+<span class="sd">                when an entry is found in the SETTINGS.ini file, which</span>
 <span class="sd">                is not present as a pre-defined class attribute, it warns the</span>
 <span class="sd">                user to add id to the code.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -416,9 +417,11 @@
 <span class="sd">        to then load its content to the SETTINGS.ini file.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            settings_file_name (str): Name of the settings file to load.</span>
-<span class="sd">                This file must be in the folder &quot;hextof-processor/utilities/settings&quot;</span>
-<span class="sd">            preserve_path: Disables overwriting local file saving paths. Defaults to True</span>
+<span class="sd">            settings_file_name: str</span>
+<span class="sd">                Name of the settings file to load.</span>
+<span class="sd">                This file must be in the folder &quot;hextof-processor/utilities/settings&quot;.</span>
+<span class="sd">            preserve_path: bool | True</span>
+<span class="sd">                Disables overwriting local file saving paths. Defaults to True.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -674,8 +677,10 @@
         <span class="k">if</span> <span class="n">l</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">l</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">][</span><span class="s1">&#39;ET_CONV_L&#39;</span><span class="p">])</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldSectorId&#39;</span><span class="p">]</span>
-
+        <span class="c1"># self.dd[&#39;energy&#39;] = self.dd[&#39;dldTime&#39;] - self.dd[&#39;dldSectorId&#39;]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;dldSectorId&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldSectorId&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">useJitter</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">map_partitions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">applyJitter</span><span class="p">,</span> <span class="n">amp</span><span class="o">=</span><span class="n">jitterAmplitude</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="s1">&#39;energy&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">jitterType</span><span class="p">)</span>
 
@@ -873,12 +878,16 @@
         <span class="k">return</span> <span class="n">norm_array</span>
 
 <div class="viewcode-block" id="DldProcessor.normalizeAxisMean"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.normalizeAxisMean">[docs]</a>    <span class="k">def</span> <span class="nf">normalizeAxisMean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_array</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Normalize to the mean of the given axis</span>
+        <span class="sd">&quot;&quot;&quot; Normalize to the mean of the given axis.</span>
+<span class="sd">        </span>
 <span class="sd">        Args:</span>
-<span class="sd">            data_array (np.ndarray): array to be normalized</span>
-<span class="sd">            ax (int): axis along which to normalize</span>
+<span class="sd">            data_array: np.ndarray</span>
+<span class="sd">                array to be normalized</span>
+<span class="sd">            ax: int</span>
+<span class="sd">                axis along which to normalize</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            norm_array (np.ndarray): normalized array</span>
+<span class="sd">            norm_array: np.ndarray</span>
+<span class="sd">                normalized array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;normalizing mean on axis </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ax</span><span class="p">))</span>
         <span class="k">try</span><span class="p">:</span>
@@ -951,14 +960,15 @@
 
 <span class="sd">        Filters the columns of ``dd`` and ``ddMicrobunches`` dataframes in place.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            colname (str): name of the column in the dask dataframes</span>
-<span class="sd">            lb (:obj:`float&#39;,optional):  lower bound of the filter</span>
-<span class="sd">                if :None: (default), ignores lower boundary</span>
-<span class="sd">            ub (:obj:`float&#39;,optional):  upper bound of the filter</span>
-<span class="sd">                if :None: (default), ignores upper boundary</span>
-<span class="sd">        Attention:</span>
-<span class="sd">            this is an irreversible process, since the dataframe gets overwritten.</span>
+<span class="sd">        **Parameters**\n</span>
+<span class="sd">        colname (str): name of the column in the dask dataframes</span>
+<span class="sd">        lb (:obj:`float&#39;,optional):  lower bound of the filter</span>
+<span class="sd">            if :None: (default), ignores lower boundary</span>
+<span class="sd">        ub (:obj:`float&#39;,optional):  upper bound of the filter</span>
+<span class="sd">            if :None: (default), ignores upper boundary</span>
+<span class="sd">        </span>
+<span class="sd">        **Attention**\n</span>
+<span class="sd">        This is an irreversible process, since the dataframe gets overwritten.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">colname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -991,30 +1001,30 @@
 <span class="sd">        cleanly. This of course only has meaning when choosing steps that do not</span>
 <span class="sd">        cleanly divide the interval.</span>
 
-<span class="sd">        :Parameters:</span>
-<span class="sd">            start : float</span>
-<span class="sd">                Position of first bin</span>
-<span class="sd">            end : float</span>
-<span class="sd">                Position of last bin (not included!)</span>
-<span class="sd">            steps : float</span>
-<span class="sd">                Define the bin size. If useStepSize=True (default),</span>
-<span class="sd">                this is the step size, while if useStepSize=False, then this is the</span>
-<span class="sd">                number of bins. In Legacy mode (force_legacy=True, or</span>
-<span class="sd">                processor._LEGACY_MODE=True)</span>
-<span class="sd">            useStepSize : bool | True</span>
-<span class="sd">                Tells python to interpret steps as a step size if</span>
-<span class="sd">                True, or as the number of steps if False</span>
-<span class="sd">            forceEnds : bool | False</span>
-<span class="sd">                Tells python to give priority to the end parameter</span>
-<span class="sd">                rather than the step parameter (see above for more info)</span>
-<span class="sd">            include_last : bool | True</span>
-<span class="sd">                Closes the interval on the right when true. If</span>
-<span class="sd">                using step size priority, will expand the interval to include</span>
-<span class="sd">                the next value when true, will shrink the interval to contain all</span>
-<span class="sd">                points within the bounds if false.</span>
-<span class="sd">            force_legacy : bool | False</span>
-<span class="sd">                If true, imposes old method for generating bins,</span>
-<span class="sd">                based on np.arange instead of np.inspace.</span>
+<span class="sd">        **Parameters**\n</span>
+<span class="sd">        start: float</span>
+<span class="sd">            Position of first bin</span>
+<span class="sd">        end: float</span>
+<span class="sd">            Position of last bin (not included!)</span>
+<span class="sd">        steps: float</span>
+<span class="sd">            Define the bin size. If useStepSize=True (default),</span>
+<span class="sd">            this is the step size, while if useStepSize=False, then this is the</span>
+<span class="sd">            number of bins. In Legacy mode (force_legacy=True, or</span>
+<span class="sd">            processor._LEGACY_MODE=True)</span>
+<span class="sd">        useStepSize: bool | True</span>
+<span class="sd">            Tells python to interpret steps as a step size if</span>
+<span class="sd">            True, or as the number of steps if False</span>
+<span class="sd">        forceEnds: bool | False</span>
+<span class="sd">            Tells python to give priority to the end parameter</span>
+<span class="sd">            rather than the step parameter (see above for more info)</span>
+<span class="sd">        include_last: bool | True</span>
+<span class="sd">            Closes the interval on the right when true. If</span>
+<span class="sd">            using step size priority, will expand the interval to include</span>
+<span class="sd">            the next value when true, will shrink the interval to contain all</span>
+<span class="sd">            points within the bounds if false.</span>
+<span class="sd">        force_legacy: bool | False</span>
+<span class="sd">            If true, imposes old method for generating bins,</span>
+<span class="sd">            based on np.arange instead of np.inspace.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">Decimal</span>
@@ -1061,43 +1071,43 @@
 <span class="sd">        as in this list. The attribute binRangeList will contain the ranges of</span>
 <span class="sd">        the binning used for the corresponding dimension.</span>
 
-<span class="sd">        :Parameters:</span>
-<span class="sd">            name : str</span>
-<span class="sd">                Name of the column to apply binning to. Possible column names are`:`</span>
-<span class="sd">                posX, posY, dldTime, pumpProbeTime, dldDetector, etc.</span>
-<span class="sd">            start : float</span>
-<span class="sd">                Position of first bin</span>
-<span class="sd">            end : float</span>
-<span class="sd">                Position of last bin (not included!)</span>
-<span class="sd">            steps : float</span>
-<span class="sd">                The bin size, if useStepSize=True (default),</span>
-<span class="sd">                this is the step size, while if useStepSize=False, then this is the</span>
-<span class="sd">                number of bins. In Legacy mode (force_legacy=True, or</span>
-<span class="sd">                processor._LEGACY_MODE=True)</span>
-<span class="sd">            useStepSize : bool | True</span>
-<span class="sd">                Tells Python how to interpret steps.</span>
+<span class="sd">        **Parameters**\n</span>
+<span class="sd">        name: str</span>
+<span class="sd">            Name of the column to apply binning to. Possible column names are`:`</span>
+<span class="sd">            posX, posY, dldTime, pumpProbeTime, dldDetector, etc.</span>
+<span class="sd">        start: float</span>
+<span class="sd">            Position of first bin</span>
+<span class="sd">        end: float</span>
+<span class="sd">            Position of last bin (not included!)</span>
+<span class="sd">        steps: float</span>
+<span class="sd">            The bin size, if useStepSize=True (default),</span>
+<span class="sd">            this is the step size, while if useStepSize=False, then this is the</span>
+<span class="sd">            number of bins. In Legacy mode (force_legacy=True, or</span>
+<span class="sd">            processor._LEGACY_MODE=True)</span>
+<span class="sd">        useStepSize: bool | True</span>
+<span class="sd">            Tells Python how to interpret steps.</span>
+<span class="sd">            </span>
+<span class="sd">            :True: interpret steps as a step size.</span>
+<span class="sd">            :False: interpret steps as the number of steps.</span>
+<span class="sd">        forceEnds: bool | False</span>
+<span class="sd">            Tells python to give priority to the end parameter</span>
+<span class="sd">            rather than the step parameter (see genBins for more info)</span>
+<span class="sd">        include_last: bool | True</span>
+<span class="sd">            Closes the interval on the right when true. If</span>
+<span class="sd">            using step size priority, will expand the interval to include</span>
+<span class="sd">            the next value when true, will shrink the interval to contain all</span>
+<span class="sd">            points within the bounds if false.</span>
+<span class="sd">        force_legacy: bool | False</span>
+<span class="sd">            :True: use np.arange method to generate bins.</span>
+<span class="sd">            :False: use np.linspace method to generate bins.</span>
 <span class="sd">                </span>
-<span class="sd">                :True: interpret steps as a step size.</span>
-<span class="sd">                :False: interpret steps as the number of steps.</span>
-<span class="sd">            forceEnds : bool | False</span>
-<span class="sd">                Tells python to give priority to the end parameter</span>
-<span class="sd">                rather than the step parameter (see genBins for more info)</span>
-<span class="sd">            include_last : bool | True</span>
-<span class="sd">                Closes the interval on the right when true. If</span>
-<span class="sd">                using step size priority, will expand the interval to include</span>
-<span class="sd">                the next value when true, will shrink the interval to contain all</span>
-<span class="sd">                points within the bounds if false.</span>
-<span class="sd">            force_legacy : bool | False</span>
-<span class="sd">                :True: use np.arange method to generate bins.</span>
-<span class="sd">                :False: use np.linspace method to generate bins.</span>
+<span class="sd">        **Return**\n</span>
+<span class="sd">        axes: numpy array</span>
+<span class="sd">            axis of the binned dimesion. The points defined on this axis are the middle points of</span>
+<span class="sd">            each bin.</span>
 <span class="sd">                </span>
-<span class="sd">        :Return:</span>
-<span class="sd">            axes : numpy array</span>
-<span class="sd">                axis of the binned dimesion. The points defined on this axis are the middle points of</span>
-<span class="sd">                each bin.</span>
-<span class="sd">                </span>
-<span class="sd">        :Note:</span>
-<span class="sd">            If the name is &#39;pumpProbeTime&#39;: sets self.delaystageHistogram for normalization.</span>
+<span class="sd">        **Note**\n</span>
+<span class="sd">        If the name is &#39;pumpProbeTime&#39;: sets self.delaystageHistogram for normalization.</span>
 <span class="sd">        </span>
 <span class="sd">        .. seealso::</span>
 <span class="sd">        </span>
@@ -1144,21 +1154,22 @@
 <div class="viewcode-block" id="DldProcessor.computeBinnedData"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.computeBinnedData">[docs]</a>    <span class="k">def</span> <span class="nf">computeBinnedData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveAs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_xarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_64bit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">skip_metadata</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fast_metadata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">usePbar</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Use the bin list to bin the data.</span>
 <span class="sd">        </span>
-<span class="sd">        :Parameters:</span>
-<span class="sd">            saveAs : str | None</span>
-<span class="sd">                full file name where to save the result (forces return_xarray</span>
-<span class="sd">                to be true)</span>
-<span class="sd">            return_xarray : bool</span>
-<span class="sd">                if true, returns and xarray with all available axis and metadata</span>
-<span class="sd">                information attached, otherwise a numpy.array</span>
-<span class="sd">        :Returns:</span>
-<span class="sd">            result : numpy.array or xarray.DataArray</span>
-<span class="sd">                A numpy array of float64 values. Number of bins defined will define the</span>
-<span class="sd">                dimensions of such array.</span>
+<span class="sd">        **Parameters**\n</span>
+<span class="sd">        saveAs: str | None</span>
+<span class="sd">            full file name where to save the result (forces return_xarray</span>
+<span class="sd">            to be true).</span>
+<span class="sd">        return_xarray: bool</span>
+<span class="sd">            if true, returns and xarray with all available axis and metadata</span>
+<span class="sd">            information attached, otherwise a numpy.array.</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**\n</span>
+<span class="sd">        result: numpy.array or xarray.DataArray</span>
+<span class="sd">            A numpy array of float64 values. Number of bins defined will define the</span>
+<span class="sd">            dimensions of such array.</span>
 
-<span class="sd">        :Notes:</span>
-<span class="sd">            postProcess method must be used before computing the binned data if binning</span>
-<span class="sd">            along pumpProbeDelay or polar k-space coordinates.</span>
+<span class="sd">        **Notes**\n</span>
+<span class="sd">        postProcess method must be used before computing the binned data if binning</span>
+<span class="sd">        along pumpProbeDelay or polar k-space coordinates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">return_xarray</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1185,12 +1196,14 @@
         <span class="c1"># be faster!</span>
         <span class="k">def</span> <span class="nf">analyzePartNumpy</span><span class="p">(</span><span class="n">part</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot; Function called by each thread of the analysis.</span>
-
-<span class="sd">            This now should be faster.</span>
-<span class="sd">            Args:</span>
-<span class="sd">                part : partition to process</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                res: binned array calculated from this partition</span>
+<span class="sd">            </span>
+<span class="sd">            **Parameter**\n</span>
+<span class="sd">            part: partition</span>
+<span class="sd">                partition to process.</span>
+<span class="sd">            </span>
+<span class="sd">            **Returns**\n</span>
+<span class="sd">            res: numpy array</span>
+<span class="sd">                binned array calculated from this partition.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="c1"># get the data as numpy:</span>
             <span class="n">vals</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">values</span>
@@ -1280,11 +1293,13 @@
 <div class="viewcode-block" id="DldProcessor.get_metadata"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.get_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fast_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;  Creates a dictionary with the most relevant metadata.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            fast_mode (bool): if False skips the heavy computation steps which</span>
-<span class="sd">                take a long time.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            metadata (dict): dictionary with metadata information</span>
+<span class="sd">        **Args**\n</span>
+<span class="sd">        fast_mode: bool | False</span>
+<span class="sd">            if False skips the heavy computation steps which take a long time.</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**\n</span>
+<span class="sd">        metadata: dict</span>
+<span class="sd">            dictionary with metadata information</span>
 <span class="sd">        # TODO: distribute metadata generation in the appropriate methods.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generating metadata...&#39;</span><span class="p">)</span>
@@ -1347,16 +1362,17 @@
         <span class="k">return</span> <span class="n">metadata</span></div>
 
 <div class="viewcode-block" id="DldProcessor.res_to_xarray_old"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.res_to_xarray_old">[docs]</a>    <span class="k">def</span> <span class="nf">res_to_xarray_old</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">fast_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; creates a BinnedArray (xarray subclass) out of the given np.array</span>
+        <span class="sd">&quot;&quot;&quot; Creates a BinnedArray (xarray subclass) out of the given numpy.array.</span>
 <span class="sd">        </span>
-<span class="sd">        :Parameters:</span>
-<span class="sd">            res: np.array</span>
-<span class="sd">                nd array of binned data</span>
-<span class="sd">            fast_mode: bool default True</span>
-<span class="sd">                if True, it skips the creation of metadata element which require computation.</span>
-<span class="sd">        :Returns:</span>
-<span class="sd">            ba: BinnedArray (xarray)</span>
-<span class="sd">                an xarray-like container with binned data, axis, and all available metadata</span>
+<span class="sd">        **Parameters**\n</span>
+<span class="sd">        res: np.array</span>
+<span class="sd">            nd array of binned data</span>
+<span class="sd">        fast_mode: bool default True</span>
+<span class="sd">            if True, it skips the creation of metadata element which require computation.</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**\n</span>
+<span class="sd">        ba: BinnedArray (xarray)</span>
+<span class="sd">            an xarray-like container with binned data, axis, and all available metadata.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1435,24 +1451,24 @@
                                <span class="n">rank</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Use the bin list to bin the data. Cluster-compatible version (Maciej Dendzik)</span>
 <span class="sd">        </span>
-<span class="sd">        :Parameters:</span>
-<span class="sd">            saveName : str | None</span>
-<span class="sd">                filename</span>
-<span class="sd">            savePath : str | None</span>
-<span class="sd">                file path</span>
-<span class="sd">            rank : int | None</span>
-<span class="sd">                Rank number of cluster computer</span>
-<span class="sd">            size : int | None</span>
-<span class="sd">                Size of partition</span>
+<span class="sd">        **Parameters**\n</span>
+<span class="sd">        saveName: str | None</span>
+<span class="sd">            filename</span>
+<span class="sd">        savePath: str | None</span>
+<span class="sd">            file path</span>
+<span class="sd">        rank: int | None</span>
+<span class="sd">            Rank number of cluster computer</span>
+<span class="sd">        size: int | None</span>
+<span class="sd">            Size of partition</span>
 <span class="sd">        </span>
-<span class="sd">        :Return:</span>
-<span class="sd">            result : numpy array</span>
-<span class="sd">                A numpy array of float64 values. The number of bins determines the</span>
-<span class="sd">                dimensionality of the output array.</span>
+<span class="sd">        **Return**\n</span>
+<span class="sd">        result: numpy array</span>
+<span class="sd">            A numpy array of float64 values. The number of bins determines the</span>
+<span class="sd">            dimensionality of the output array.</span>
 
-<span class="sd">        :Notes:</span>
-<span class="sd">            postProcess method must be used before computing the binned data if binning</span>
-<span class="sd">            is applied along pumpProbeDelay or polar k-space coordinates.</span>
+<span class="sd">        **Notes**\n</span>
+<span class="sd">        postProcess method must be used before computing the binned data if binning</span>
+<span class="sd">        is applied along pumpProbeDelay or polar k-space coordinates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">analyzePart</span><span class="p">(</span><span class="n">part</span><span class="p">):</span>
@@ -1529,15 +1545,15 @@
         <span class="sd">&quot;&quot;&quot; Save a binned numpy array to h5 file. The file includes the axes</span>
 <span class="sd">        (taken from the scheduled bins) and the delay stage histogram, if it exists.</span>
 
-<span class="sd">        :Parameters:</span>
-<span class="sd">            binnedData : numpy array</span>
-<span class="sd">                Binned multidimensional data.</span>
-<span class="sd">            file_name : str</span>
-<span class="sd">                Name of the saved file. The extension &#39;.h5&#39; is automatically added.</span>
-<span class="sd">            path : str | None</span>
-<span class="sd">                File path.</span>
-<span class="sd">            mode : str | &#39;w&#39;</span>
-<span class="sd">                Write mode of h5 file (&#39;w&#39; = write).</span>
+<span class="sd">        **Parameters**\n</span>
+<span class="sd">        binnedData: numpy array</span>
+<span class="sd">            Binned multidimensional data.</span>
+<span class="sd">        file_name: str</span>
+<span class="sd">            Name of the saved file. The extension &#39;.h5&#39; is automatically added.</span>
+<span class="sd">        path: str | None</span>
+<span class="sd">            File path.</span>
+<span class="sd">        mode: str | &#39;w&#39;</span>
+<span class="sd">            Write mode of h5 file (&#39;w&#39; = write).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_abort</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1614,25 +1630,24 @@
         <span class="sd">&quot;&quot;&quot; Load an HDF5 file saved with ``save_binned()`` method.</span>
 <span class="sd">        wrapper for function utils.load_binned_h5()</span>
 
-<span class="sd">        :Parameters:</span>
-<span class="sd">            file_name : str</span>
-<span class="sd">                name of the file to load, including full path</span>
+<span class="sd">        **Parameters**\n</span>
+<span class="sd">        file_name: str</span>
+<span class="sd">            name of the file to load, including full path</span>
+<span class="sd">        mode: str | &#39;r&#39;</span>
+<span class="sd">            Read mode of h5 file (&#39;r&#39; = read).</span>
+<span class="sd">        ret_type: str | &#39;list&#39;,&#39;dict&#39;</span>
+<span class="sd">            output format for axes and histograms:</span>
+<span class="sd">            &#39;list&#39; generates a list of arrays, ordered as</span>
+<span class="sd">            the corresponding dimensions in data. &#39;dict&#39;</span>
+<span class="sd">            generates a dictionary with the names of each axis.</span>
 
-<span class="sd">            mode : str | &#39;r&#39;</span>
-<span class="sd">                Read mode of h5 file (&#39;r&#39; = read).</span>
-<span class="sd">            ret_type: str | &#39;list&#39;,&#39;dict&#39;</span>
-<span class="sd">                output format for axes and histograms:</span>
-<span class="sd">                &#39;list&#39; generates a list of arrays, ordered as</span>
-<span class="sd">                the corresponding dimensions in data. &#39;dict&#39;</span>
-<span class="sd">                generates a dictionary with the names of each axis.</span>
-
-<span class="sd">        :Returns:</span>
-<span class="sd">            data : numpy array</span>
-<span class="sd">                Multidimensional data read from h5 file.</span>
-<span class="sd">            axes : numpy array</span>
-<span class="sd">                The axes values associated with the read data.</span>
-<span class="sd">            hist : numpy array</span>
-<span class="sd">                Histogram values associated with the read data.</span>
+<span class="sd">        **Returns**\n</span>
+<span class="sd">        data: numpy array</span>
+<span class="sd">            Multidimensional data read from h5 file.</span>
+<span class="sd">        axes: numpy array</span>
+<span class="sd">            The axes values associated with the read data.</span>
+<span class="sd">        hist: numpy array</span>
+<span class="sd">            Histogram values associated with the read data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">misc</span><span class="o">.</span><span class="n">load_binned_h5</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">ret_type</span><span class="o">=</span><span class="n">ret_type</span><span class="p">)</span></div>
 
@@ -1653,10 +1668,10 @@
         <span class="sd">&quot;&quot;&quot; **[DEPRECATED]** Load data from a dask Parquet dataframe.</span>
 <span class="sd">        Use readDataframesParquet instead.</span>
 
-<span class="sd">        :Parameter:</span>
-<span class="sd">            fileName : str | None</span>
-<span class="sd">                name (including path) of the folder containing</span>
-<span class="sd">                parquet files where the data was saved.</span>
+<span class="sd">        **Parameter**\n</span>
+<span class="sd">        fileName: str | None</span>
+<span class="sd">            name (including path) of the folder containing</span>
+<span class="sd">            parquet files where the data was saved.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO: remove this function once retro-compatibility is ensured</span>
 

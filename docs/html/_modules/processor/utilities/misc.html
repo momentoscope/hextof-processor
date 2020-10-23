@@ -207,9 +207,9 @@
 <div class="viewcode-block" id="PulseEnergy400"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.PulseEnergy400">[docs]</a><span class="k">def</span> <span class="nf">PulseEnergy400</span><span class="p">(</span><span class="n">Diode</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate the pulse energy of 400nm laser in uJ. The unit is um for beam diameter.</span>
 <span class="sd">    </span>
-<span class="sd">        :Parameter:</span>
-<span class="sd">            Diode : numeric</span>
-<span class="sd">                Measured value from photodiode (arb. units)</span>
+<span class="sd">    Parameter:</span>
+<span class="sd">        Diode: numeric</span>
+<span class="sd">            Measured value from photodiode (arb. units)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="mf">0.86</span> <span class="o">*</span> <span class="p">(</span><span class="n">Diode</span> <span class="o">*</span> <span class="mf">0.0008010439</span> <span class="o">+</span> <span class="mf">0.0352573</span><span class="p">)</span></div>
 
@@ -217,9 +217,9 @@
 <div class="viewcode-block" id="PulseEnergy800"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.PulseEnergy800">[docs]</a><span class="k">def</span> <span class="nf">PulseEnergy800</span><span class="p">(</span><span class="n">Diode</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate the pulse energy of 800nm laser in uJ. The unit is um for beam diameter.</span>
 <span class="sd">    </span>
-<span class="sd">        :Parameter:</span>
-<span class="sd">            Diode : numeric</span>
-<span class="sd">                Meausred value from photodiode (arb. units)</span>
+<span class="sd">    Parameter:</span>
+<span class="sd">        Diode: numeric</span>
+<span class="sd">            Meausred value from photodiode (arb. units)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="mf">0.86</span> <span class="o">*</span> <span class="p">(</span><span class="n">Diode</span> <span class="o">*</span> <span class="mf">0.0009484577</span> <span class="o">+</span> <span class="mf">0.1576</span><span class="p">)</span></div>
@@ -229,11 +229,11 @@
     <span class="sd">&quot;&quot;&quot;Calculate the pulse energy density of 400nm laser in uJ/cm^2.</span>
 <span class="sd">    The units are um for beam diameter, uJ/cm^2 for energy density.</span>
 <span class="sd">    </span>
-<span class="sd">    :Parameters:</span>
-<span class="sd">        Diode : numeric</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        Diode: numeric</span>
 <span class="sd">            Measured value from photodiode (arb. units)</span>
-<span class="sd">        Diameter : numeric</span>
-<span class="sd">            Beam diameter</span>
+<span class="sd">        Diameter: numeric | 600</span>
+<span class="sd">            Beam diameter.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">PulseEnergy400</span><span class="p">(</span><span class="n">Diode</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">((</span><span class="n">Diameter</span> <span class="o">*</span> <span class="mf">0.0001</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span></div>
@@ -243,11 +243,11 @@
     <span class="sd">&quot;&quot;&quot;Calculate the pulse energy density of 800nm laser in uJ/cm^2.</span>
 <span class="sd">    The units are um for beam diameter, uJ/cm^2 for energy density.</span>
 <span class="sd">    </span>
-<span class="sd">    :Parameters:</span>
-<span class="sd">        Diode : numeric</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        Diode: numeric</span>
 <span class="sd">            Measured value from photodiode (arb. units)</span>
-<span class="sd">        Diameter : numeric</span>
-<span class="sd">            Beam diameter</span>
+<span class="sd">        Diameter: numeric | 600</span>
+<span class="sd">            Beam diameter.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">PulseEnergy800</span><span class="p">(</span><span class="n">Diode</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">((</span><span class="n">Diameter</span> <span class="o">*</span> <span class="mf">0.0001</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span></div>
@@ -259,6 +259,7 @@
 
 <div class="viewcode-block" id="parse_category"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.parse_category">[docs]</a><span class="k">def</span> <span class="nf">parse_category</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">settings_file</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; parse setting file and return desired value</span>
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        category (str): title of the category</span>
 <span class="sd">        setting_file (str): path to setting file. If set to &#39;default&#39; it takes</span>
@@ -294,11 +295,15 @@
 
 <div class="viewcode-block" id="parse_setting"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.parse_setting">[docs]</a><span class="k">def</span> <span class="nf">parse_setting</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">settings_file</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; parse setting file and return desired value</span>
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        category (str): title of the category</span>
-<span class="sd">        name (str): name of the parameter</span>
-<span class="sd">        setting_file (str): path to setting file. If set to &#39;default&#39; it takes</span>
-<span class="sd">            a file called SETTINGS.ini in the main folder of the repo.</span>
+<span class="sd">        category: str</span>
+<span class="sd">            title of the category</span>
+<span class="sd">        name: str</span>
+<span class="sd">            name of the parameter</span>
+<span class="sd">        setting_file: str | &#39;default&#39;</span>
+<span class="sd">            path to setting file. If set to &#39;default&#39; it takes a file called SETTINGS.ini</span>
+<span class="sd">            in the main folder of the repo.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        value of the parameter, None if parameter cannot be found.</span>
 <span class="sd">    Notes:</span>
@@ -332,6 +337,7 @@
 
 <div class="viewcode-block" id="write_setting"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.write_setting">[docs]</a><span class="k">def</span> <span class="nf">write_setting</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">settings_file</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Write enrty in the settings file</span>
+<span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        category (str): title of the category</span>
 <span class="sd">        name (str): name of the parameter</span>
@@ -411,14 +417,14 @@
 
 
 <div class="viewcode-block" id="radius"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.radius">[docs]</a><span class="k">def</span> <span class="nf">radius</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
-    <span class="sd">&quot;&quot;&quot; Calculate the radius</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the radius.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">posX</span> <span class="o">-</span> <span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">posY</span> <span class="o">-</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span></div>
 
 
 <div class="viewcode-block" id="argnearest"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.argnearest">[docs]</a><span class="k">def</span> <span class="nf">argnearest</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">rettype</span><span class="o">=</span><span class="s1">&#39;vectorized&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Find the coordinates of the nD array element nearest to a specified value</span>
+    <span class="sd">&quot;&quot;&quot;Find the coordinates of the nD array element nearest to a specified value.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        array (np.array): Numeric data array</span>
@@ -445,14 +451,14 @@
 <div class="viewcode-block" id="save_H5_hyperstack"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.save_H5_hyperstack">[docs]</a><span class="k">def</span> <span class="nf">save_H5_hyperstack</span><span class="p">(</span><span class="n">data_array</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI</span>
 
-<span class="sd">    :Parameters:</span>
-<span class="sd">        data_array : numpy array</span>
-<span class="sd">            4D data array, order must be Kx,Ky,Energy,Time</span>
-<span class="sd">        filename : str</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        data_array: numpy array</span>
+<span class="sd">            4D data array, order must be Kx,Ky,Energy,Time.</span>
+<span class="sd">        filename: str</span>
 <span class="sd">            The name of the file to save</span>
-<span class="sd">        path : str</span>
-<span class="sd">            The path to where to save hdf5 file. If None, uses the &quot;results&quot; folder from SETTINGS.ini</span>
-<span class="sd">        overwrite : str</span>
+<span class="sd">        path: str</span>
+<span class="sd">            The path to where to save hdf5 file. If None, uses the &quot;results&quot; folder from SETTINGS.ini.</span>
+<span class="sd">        overwrite: str</span>
 <span class="sd">            If true, it overwrites existing file with the same</span>
 <span class="sd">            name. Otherwise raises and error.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -556,12 +562,12 @@
 <div class="viewcode-block" id="get_available_runs"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.get_available_runs">[docs]</a><span class="k">def</span> <span class="nf">get_available_runs</span><span class="p">(</span><span class="n">rootpath</span><span class="p">):</span>  <span class="c1"># TODO: store the resulting dictionary to improve performance.</span>
     <span class="sd">&quot;&quot;&quot; Collects the filepaths to the available experimental run data.</span>
 
-<span class="sd">    :Parameters:</span>
-<span class="sd">        rootpath : str</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        rootpath: str</span>
 <span class="sd">            path where to look for data (recursive in subdirectories)</span>
 
-<span class="sd">    :Return:</span>
-<span class="sd">        available_runs : dict</span>
+<span class="sd">    Return:</span>
+<span class="sd">        available_runs: dict</span>
 <span class="sd">            dict with run numbers as keys (e.g. &#39;run12345&#39;) and path where to load data from as str.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -584,15 +590,15 @@
 <div class="viewcode-block" id="get_path_to_run"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.get_path_to_run">[docs]</a><span class="k">def</span> <span class="nf">get_path_to_run</span><span class="p">(</span><span class="n">runNumber</span><span class="p">,</span> <span class="n">rootpath</span><span class="p">):</span> <span class="c1"># TODO: improve performance</span>
     <span class="sd">&quot;&quot;&quot; Returns the path to the data of a given run number</span>
 
-<span class="sd">    :Parameters:</span>
-<span class="sd">        runNumber : str or int</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        runNumber: str or int</span>
 <span class="sd">            run number as integer or string.</span>
-<span class="sd">        rootpath : str</span>
+<span class="sd">        rootpath: str</span>
 <span class="sd">            path where to look for data (recursive in subdirectories)</span>
 
 
-<span class="sd">    :Return:</span>
-<span class="sd">        path : str</span>
+<span class="sd">    Return:</span>
+<span class="sd">        path: str</span>
 <span class="sd">            path to where the raw data of the given run number is stored.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -758,7 +764,7 @@
 
 <div class="viewcode-block" id="create_dataframes"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.create_dataframes">[docs]</a><span class="k">def</span> <span class="nf">create_dataframes</span><span class="p">(</span><span class="n">runNumbers</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Creates a parquet dataframe for each run passed.</span>
-<span class="sd">    Returns</span>
+<span class="sd">    Returns:</span>
 <span class="sd">        fails: dictionary of runs and error which broke the dataframe generation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">runNumbers</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>

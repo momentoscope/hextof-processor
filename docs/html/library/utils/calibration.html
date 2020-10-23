@@ -183,7 +183,7 @@
             
   <div class="section" id="module-processor.utilities.calibration">
 <span id="calibration-processor-utilities-calibration"></span><h1><span class="section-number">1. </span>Calibration (processor.utilities.calibration)<a class="headerlink" href="#module-processor.utilities.calibration" title="Permalink to this headline">¶</a></h1>
-<p>&#64;author: Steinn Ymir Agustsson</p>
+<p>&#64;author: Steinn Ymir Agustsson, Davide Curcio, Maciej Dendzik</p>
 <dl class="py function">
 <dt id="processor.utilities.calibration.correctOpticalPath">
 <code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">correctOpticalPath</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">poly1</span><span class="o">=</span><span class="default_value">- 0.00020578</span></em>, <em class="sig-param"><span class="n">poly2</span><span class="o">=</span><span class="default_value">4.6813e-07</span></em>, <em class="sig-param"><span class="n">xCenter</span><span class="o">=</span><span class="default_value">1334</span></em>, <em class="sig-param"><span class="n">yCenter</span><span class="o">=</span><span class="default_value">1426</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#correctOpticalPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.correctOpticalPath" title="Permalink to this definition">¶</a></dt>
@@ -191,34 +191,31 @@
 <p>Each DLD time is subtracted with a polynomial poly1*r + poly2*r^2,
 where r=sqrt((posx-xCenter)^2+(posy-yCenter)^2)</p>
 <p>This function makes corrections to the time of flight which take into account
-the path difference between the center of the detector and the edges of the detector</p>
+the path difference between the center of the detector and the edges of the detector.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="processor.utilities.calibration.e2t">
 <code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">e2t</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">0.77</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#e2t"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.e2t" title="Permalink to this definition">¶</a></dt>
 <dd><p>Same as energy2tof, but different name for retrocompatibility</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>e<span class="classifier">float</span></dt><dd><p>The binding energy</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>e: float</dt><dd><p>The binding energy</p>
 </dd>
-<dt>toffset<span class="classifier">float</span></dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
+<dt>toffset: float</dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
 </dd>
-<dt>eoffset<span class="classifier">float</span></dt><dd><p>The energy offset given by W-hv-V</p>
+<dt>eoffset: float</dt><dd><p>The energy offset given by W-hv-V</p>
 </dd>
-<dt>l<span class="classifier">float</span></dt><dd><p>the effective length of the drift section</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>t<span class="classifier">float</span></dt><dd><p>The time of flight</p>
+<dt>l: float</dt><dd><p>the effective length of the drift section</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-odd">Authors</dt>
-<dd class="field-odd"><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
+<dt>Return:</dt><dd><dl class="simple">
+<dt>t: float</dt><dd><p>The time of flight</p>
+</dd>
+</dl>
+</dd>
+<dt>Authors:</dt><dd><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
 </dd>
 </dl>
 </dd></dl>
@@ -231,7 +228,8 @@ the path difference between the center of the detector and the edges of the dete
 and time of flight (ToF) in ns.</p>
 <p>The formula used is based on the ToF for an electron with a kinetic energy <span class="math notranslate nohighlight">\(E_k\)</span>. Then the
 binding energy <span class="math notranslate nohighlight">\(E_b\)</span> is given by</p>
-<p>-Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V</p>
+<div class="math notranslate nohighlight">
+\[-E_b = E_k + W - hv - V = \frac{1}{2} mv^2 + W - hv - V\]</div>
 <p>With W the work function, hv the photon energy, V the electrostatic potential applied to
 the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
 The velocity v in the drift tube can be calculated knowing the length (1m) and the flight
@@ -250,27 +248,24 @@ there are several strategies for calibrating this value,</p>
 <li><p>By getting the correct values for W, hv, and V</p></li>
 <li><p>It can be calibrated by imposing peak position</p></li>
 </ol>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>e<span class="classifier">float</span></dt><dd><p>The binding energy</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>e: float</dt><dd><p>The binding energy</p>
 </dd>
-<dt>toffset<span class="classifier">float</span></dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
+<dt>toffset: float</dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
 </dd>
-<dt>eoffset<span class="classifier">float</span></dt><dd><p>The energy offset given by W-hv-V</p>
+<dt>eoffset: float</dt><dd><p>The energy offset given by W-hv-V</p>
 </dd>
-<dt>l<span class="classifier">float</span></dt><dd><p>the effective length of the drift section</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>t<span class="classifier">float</span></dt><dd><p>The time of flight</p>
+<dt>l: float</dt><dd><p>the effective length of the drift section</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-odd">Authors</dt>
-<dd class="field-odd"><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
+<dt>Return:</dt><dd><dl class="simple">
+<dt>t: float</dt><dd><p>The time of flight</p>
+</dd>
+</dl>
+</dd>
+<dt>Authors:</dt><dd><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
 </dd>
 </dl>
 </dd></dl>
@@ -279,7 +274,7 @@ there are several strategies for calibrating this value,</p>
 <dt id="processor.utilities.calibration.filterCircleDLDPos">
 <code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">filterCircleDLDPos</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">xCenter</span><span class="o">=</span><span class="default_value">1334</span></em>, <em class="sig-param"><span class="n">yCenter</span><span class="o">=</span><span class="default_value">1426</span></em>, <em class="sig-param"><span class="n">radius</span><span class="o">=</span><span class="default_value">1250</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#filterCircleDLDPos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.filterCircleDLDPos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply corrections to the dataframe. (Maciej Dendzik)</p>
-<p>Filters events with dldPosX and dldPosY within the radius from (xCenter,yCenter)</p>
+<p>Filters events with dldPosX and dldPosY within the radius from (xCenter,yCenter).</p>
 </dd></dl>
 
 <dl class="py function">
@@ -288,41 +283,45 @@ there are several strategies for calibrating this value,</p>
 <dd><p>Apply corrections to the dataframe. (Maciej Dendzik)</p>
 <p>Each quadrant of DLD is shifted in DLD time by shiftQn.
 xCenter and yCenter are used to define the center of the division.</p>
-<blockquote>
-<div><p>Q2     |     Q4</p>
-</div></blockquote>
-<dl class="simple">
-<dt>------------<a href="#id1"><span class="problematic" id="id2">|</span></a>------------</dt><dd><p>Q1     |     Q3</p>
-</dd>
-</dl>
-<p>this picture is upside-down in plt.imshow because it starts from 0 in top right corner</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Q2</p></td>
+<td><p>Q4</p></td>
+</tr>
+<tr class="row-even"><td><p>Q1</p></td>
+<td><p>Q3</p></td>
+</tr>
+</tbody>
+</table>
+<p>This picture is upside-down in <code class="docutils literal notranslate"><span class="pre">plt.imshow</span></code> because it starts from 0 in top right corner.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="processor.utilities.calibration.t2e">
 <code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">t2e</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">0.77</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#t2e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.t2e" title="Permalink to this definition">¶</a></dt>
 <dd><p>Same as tof2energy, but different name for retrocompatibility</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>t<span class="classifier">float</span></dt><dd><p>The time of flight</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>t: float</dt><dd><p>The time of flight</p>
 </dd>
-<dt>toffset<span class="classifier">float</span></dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
+<dt>toffset: float</dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
 </dd>
-<dt>eoffset<span class="classifier">float</span></dt><dd><p>The energy offset given by W-hv-V</p>
+<dt>eoffset: float</dt><dd><p>The energy offset given by W-hv-V</p>
 </dd>
-<dt>l<span class="classifier">float</span></dt><dd><p>the effective length of the drift section</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>e<span class="classifier">float</span></dt><dd><p>The binding energy</p>
+<dt>l: float</dt><dd><p>the effective length of the drift section</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-odd">Authors</dt>
-<dd class="field-odd"><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
+<dt>Return:</dt><dd><dl class="simple">
+<dt>e: float</dt><dd><p>The binding energy</p>
+</dd>
+</dl>
+</dd>
+<dt>Authors:</dt><dd><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
 </dd>
 </dl>
 </dd></dl>
@@ -335,7 +334,8 @@ xCenter and yCenter are used to define the center of the division.</p>
 and time of flight (ToF) in ns.</p>
 <p>The formula used is based on the ToF for an electron with a kinetic energy <span class="math notranslate nohighlight">\(E_k\)</span>. Then the
 binding energy <span class="math notranslate nohighlight">\(E_b\)</span> is given by</p>
-<p>-Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V</p>
+<div class="math notranslate nohighlight">
+\[-E_b = E_k + W - hv - V = \frac{1}{2} mv^2 + W - hv - V\]</div>
 <p>With W the work function, hv the photon energy, V the electrostatic potential applied to
 the sample with respect to the drift section voltage, v the velocity of the electrons in the drift tube,
 m the mass of the electron.</p>
@@ -355,27 +355,24 @@ there are several strategies for calibrating this value,</p>
 <li><p>By getting the correct values for W, hv, and V</p></li>
 <li><p>It can be calibrated by imposing peak position</p></li>
 </ol>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>t<span class="classifier">float</span></dt><dd><p>The time of flight</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>t: float</dt><dd><p>The time of flight</p>
 </dd>
-<dt>toffset<span class="classifier">float</span></dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
+<dt>toffset: float</dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
 </dd>
-<dt>eoffset<span class="classifier">float</span></dt><dd><p>The energy offset given by W-hv-V</p>
+<dt>eoffset: float</dt><dd><p>The energy offset given by W-hv-V</p>
 </dd>
-<dt>l<span class="classifier">float</span></dt><dd><p>the effective length of the drift section</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>e<span class="classifier">float</span></dt><dd><p>The binding energy</p>
+<dt>l: float</dt><dd><p>the effective length of the drift section</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-odd">Authors</dt>
-<dd class="field-odd"><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
+<dt>Return:</dt><dd><dl class="simple">
+<dt>e: float</dt><dd><p>The binding energy</p>
+</dd>
+</dl>
+</dd>
+<dt>Authors:</dt><dd><p>Davide Curcio &lt;<a class="reference external" href="mailto:davide&#46;curcio&#37;&#52;&#48;phys&#46;au&#46;dk">davide<span>&#46;</span>curcio<span>&#64;</span>phys<span>&#46;</span>au<span>&#46;</span>dk</a>&gt;</p>
 </dd>
 </dl>
 </dd></dl>
