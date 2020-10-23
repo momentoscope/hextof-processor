@@ -496,20 +496,20 @@ class DldProcessor:
             l = float(self.settings['processor']['ET_CONV_L'])
 
         # self.dd['energy'] = self.dd['dldTime'] - self.dd['dldSectorId']
-        self.dd['energy'] = self.dd['dldTime']
+        self.dd['dldTime_corrected'] = self.dd['dldTime']
         if 'dldSectorId' in self.dd.columns:
-            self.dd['energy'] -= self.dd['dldSectorId']
+            self.dd['dldTime_corrected'] -= self.dd['dldSectorId']
         if useJitter:
-            self.dd['energy'] = self.dd.map_partitions(self.applyJitter, amp=jitterAmplitude, col='energy', type=jitterType)
+            self.dd['dldTime_corrected'] = self.dd.map_partitions(self.applyJitter, amp=jitterAmplitude, col='dldTime_corrected', type=jitterType)
 
-        self.dd['energy'] *= self.TOF_STEP_TO_NS
+        self.dd['dldTime_corrected'] *= self.TOF_STEP_TO_NS
         if useAvgSampleBias:
             eoffset -= self.dd['sampleBias'].mean()
         else:
             eoffset -= self.dd['sampleBias']
 
         k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
-        self.dd['energy'] = k * np.power(l / ((self.dd['energy']) - toffset), 2.) - eoffset
+        self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected']) - toffset), 2.) - eoffset
 
     def calibratePumpProbeTime(self, t0=0, bamSign=1, streakSign=1, invertTimeAxis=True):
         """  Add pumpProbeTime axis to dataframes.
