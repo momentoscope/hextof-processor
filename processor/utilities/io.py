@@ -13,12 +13,12 @@ import processor.utilities.misc as utils
 def res_to_xarray(res, binNames, binAxes, metadata=None):
     """ creates a BinnedArray (xarray subclass) out of the given np.array
 
-    :Parameters:
+    Parameters:
         res: np.array
             nd array of binned data
         binNames (list): list of names of the binned axes
         binAxes (list): list of np.arrays with the values of the axes
-    :Returns:
+    Returns:
         ba: BinnedArray (xarray)
             an xarray-like container with binned data, axis, and all available metadata
     """
@@ -50,12 +50,12 @@ def save_binned(data, file_name, format='h5', path=None, mode='w'):
     """ Save a binned numpy array to h5 file. The file includes the axes
     (taken from the scheduled bins) and the delay stage histogram, if it exists.
 
-    :Parameters:
-        file_name : str
+    Parameters:
+        file_name: str
             Name of the saved file. The extension '.h5' is automatically added.
-        path : str | None
+        path: str | None
             File path.
-        mode : str | 'w'
+        mode: str | 'w'
             Write mode of h5 file ('w' = write).
     """
     _abort = False
@@ -186,22 +186,24 @@ def array_to_tiff(array,filename):
 
 
 def xarray_to_tiff(data, filename, axis_dict=None):
-    """ Save data to tiff file
+    """ Save data to tiff file.
 
     Args:
-        data (xarray.DataArray): data to be saved. ImageJ likes tiff files with
+        data: xarray.DataArray
+            data to be saved. ImageJ likes tiff files with
             axis order as TZCYXS. Therefore, best axis order in input should be:
             Time, Energy, posY, posX. The channels 'C' and 'S' are automatically
             added and can be ignored.
-        filename (str): full path and name of file to save.
-        axis_dict (dict): name pairs for correct axis ordering. Keys should be
+        filename: str
+            full path and name of file to save.
+        axis_dict: dict
+            name pairs for correct axis ordering. Keys should be
             any of T,Z,C,Y,X,S. The Corresponding value will be searched among
             the dimensions of the xarray, and placed in the right order for
             imagej stacks metadata.
-        units (bool): Not implemented. Will be used to set units in the tif stack
+        units: bool
+            Not implemented. Will be used to set units in the tif stack
             TODO: expand imagej metadata to include physical units
-
-
     """
 
     assert isinstance(data, xr.DataArray), 'Data must be an xarray.DataArray'
@@ -254,7 +256,3 @@ def to_tiff(data,filename,axis_dict=None):
         array_to_tiff(data,filename)
     else:
         raise TypeError('Input data must be a numpy array or xarray DataArray')
-
-
-if __name__ == '__main__':
-    pass

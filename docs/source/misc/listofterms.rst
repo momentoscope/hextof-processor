@@ -1,35 +1,53 @@
 List of terms and abbreviations
 =================================
 
-**BAM** = beam arrival monitor, monitors the time when the FEL beam arrives.
+.. glossary::
+   :sorted:
 
-**BDA** = beam distribution area (behind the gas monitor detector)
+**BAM**
+    Beam arrival monitor, monitors the time when the FEL beam arrives.
 
-**bunch charge** -- the total charge of an electron microbunch
+**BDA**
+    Beam distribution area (behind the gas monitor detector).
 
-**CAMP chamber** -- CFEL ASG multipurpose chamber
+**bunch charge**
+    The total charge of an electron microbunch.
 
-**DLD** = delay line detector, measures the (x,y) positions of electrons by two pairs of timing difference measurements.
+**CAMP chamber**
+    CFEL ASG multipurpose chamber, with CFEL being the Center for Free-Electron Laser.
 
-**GMD** = gas monitor detector, measures the intensity of the FEL beam before and after the gas attenuator. It contains the parts before (**GMD_Tunnel**) and after (**GMD_BDA**) the FEL undulator tunnel. Technical details of the detector see `[Tiedke08]`.
+**DLD**
+    Delay line detector, measures the (x,y) positions of electrons by two pairs of timing difference measurements.
 
-**FEL** = free electron laser
+**GMD**
+    Gas monitor detector, measures the intensity of the FEL beam before and after the gas attenuator. It contains the parts before (**GMD_Tunnel**) and after (**GMD_BDA**) the FEL undulator tunnel. Technical details of the detector see `[Tiedke08]`.
 
-**HEXTOF analyzer** = high energy X-ray time of flight analyzer. A measurement device that records simultaneously the (kx, ky, E) coordinates of the photoelectrons emitted within the X-ray photoemission horizon. It is later rebranded and sold by SPECS GmbH under the name METIS.
+**FEL**
+    Free electron laser.
 
-**SASE** = self-amplified spontaneous emission
+**HEXTOF analyzer**
+    High energy X-ray time of flight analyzer. A measurement device that records simultaneously the (kx, ky, E) coordinates of the photoelectrons emitted within the X-ray photoemission horizon. It is later rebranded and sold by SPECS GmbH under the name METIS.
 
-**ToF** = time of flight
+**SASE**
+    Self-amplified spontaneous emission.
 
-**macrobunch** -- a macroscopic bunch of electrons which can possess substructures (i.e. microbunches). It is the operating unit of a high-gain FEL and also referred to colloquially as a pulse train. Each macrobunch of electrons is tagged by the macrobunch ID.
+**ToF**
+    Time of flight.
 
-**microbunch** -- a subunit of a high-gain FEL pulse train due to spatial redistribution and localization of electrons within a macrobunch -- a phenomenon called `micronbunching <http://photon-science.desy.de/facilities/flash/the_free_electron_laser/how_it_works/high_gain_fel/index_eng.html>`_. Each microbunch of electrons is tagged by a microbunch ID. A well-behaving FEL has a stable number of microbunches within a macrobunch, although the total microbunch number can vary between beam time slots due to change in the machine parameters.
+**macrobunch**
+    A macroscopic bunch of electrons which can possess substructures (i.e. microbunches). It is the operating unit of a high-gain FEL and also referred to colloquially as a pulse train. Each macrobunch of electrons is tagged by the macrobunch ID.
 
-**dd** = `dask dataframe <http://dask.pydata.org/en/latest/dataframe.html>`_ -- a parallelized version of the `pandas dataframe <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_
+**microbunch**
+    A subunit of a high-gain FEL pulse train due to spatial redistribution and localization of electrons within a macrobunch -- a phenomenon called `micronbunching <http://photon-science.desy.de/facilities/flash/the_free_electron_laser/how_it_works/high_gain_fel/index_eng.html>`_. Each microbunch of electrons is tagged by a microbunch ID. A well-behaving FEL has a stable number of microbunches within a macrobunch, although the total microbunch number can vary between beam time slots due to change in the machine parameters.
 
-**run number** -- integer label of an experimental run. Every scan shares a single run number.
+**dd**
+    `Dask dataframe <http://dask.pydata.org/en/latest/dataframe.html>`_ -- a parallelized version of the `pandas dataframe <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_.
 
-**file number** -- integer label of a file in an experimental run.
+**run number**
+    Integer label of an experimental run. Every scan shares a single run number.
+
+**file number**
+    Integer label of a file in an experimental run.
 
 $$~$$  
 

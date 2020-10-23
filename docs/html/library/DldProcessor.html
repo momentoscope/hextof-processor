@@ -222,22 +222,21 @@ tiff stack formats etc.</p>
 which to bin the data. Output array dimensions order will be the same
 as in this list. The attribute binRangeList will contain the ranges of
 the binning used for the corresponding dimension.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>name<span class="classifier">str</span></dt><dd><p>Name of the column to apply binning to. Possible column names are`:`
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>name: str</dt><dd><p>Name of the column to apply binning to. Possible column names are`:`
 posX, posY, dldTime, pumpProbeTime, dldDetector, etc.</p>
 </dd>
-<dt>start<span class="classifier">float</span></dt><dd><p>Position of first bin</p>
+<dt>start: float</dt><dd><p>Position of first bin</p>
 </dd>
-<dt>end<span class="classifier">float</span></dt><dd><p>Position of last bin (not included!)</p>
+<dt>end: float</dt><dd><p>Position of last bin (not included!)</p>
 </dd>
-<dt>steps<span class="classifier">float</span></dt><dd><p>The bin size, if useStepSize=True (default),
+<dt>steps: float</dt><dd><p>The bin size, if useStepSize=True (default),
 this is the step size, while if useStepSize=False, then this is the
 number of bins. In Legacy mode (force_legacy=True, or
 processor._LEGACY_MODE=True)</p>
 </dd>
-<dt>useStepSize<span class="classifier">bool | True</span></dt><dd><p>Tells Python how to interpret steps.</p>
+<dt>useStepSize: bool | True</dt><dd><p>Tells Python how to interpret steps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">True</dt>
 <dd class="field-odd"><p>interpret steps as a step size.</p>
@@ -247,15 +246,15 @@ processor._LEGACY_MODE=True)</p>
 </dd>
 </dl>
 </dd>
-<dt>forceEnds<span class="classifier">bool | False</span></dt><dd><p>Tells python to give priority to the end parameter
+<dt>forceEnds: bool | False</dt><dd><p>Tells python to give priority to the end parameter
 rather than the step parameter (see genBins for more info)</p>
 </dd>
-<dt>include_last<span class="classifier">bool | True</span></dt><dd><p>Closes the interval on the right when true. If
+<dt>include_last: bool | True</dt><dd><p>Closes the interval on the right when true. If
 using step size priority, will expand the interval to include
 the next value when true, will shrink the interval to contain all
 points within the bounds if false.</p>
 </dd>
-<dt>force_legacy<span class="classifier">bool | False</span></dt><dd><dl class="field-list simple">
+<dt>force_legacy: bool | False</dt><dd><dl class="field-list simple">
 <dt class="field-odd">True</dt>
 <dd class="field-odd"><p>use np.arange method to generate bins.</p>
 </dd>
@@ -265,18 +264,14 @@ points within the bounds if false.</p>
 </dl>
 </dd>
 </dl>
-</dd>
-<dt class="field-odd">Return</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>axes<span class="classifier">numpy array</span></dt><dd><p>axis of the binned dimesion. The points defined on this axis are the middle points of
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>axes: numpy array</dt><dd><p>axis of the binned dimesion. The points defined on this axis are the middle points of
 each bin.</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-even">Note</dt>
-<dd class="field-even"><p>If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.</p>
-</dd>
-</dl>
+<p><strong>Note</strong></p>
+<p>If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><code class="docutils literal notranslate"><span class="pre">computeBinnedData</span></code> Method to compute all bins created with this function.</p>
@@ -288,8 +283,8 @@ each bin.</p>
 <code class="sig-name descname">addFilter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">colname</span></em>, <em class="sig-param"><span class="n">lb</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ub</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.addFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.addFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filters the dataframes contained in the processor instance.</p>
 <p>Filters the columns of <code class="docutils literal notranslate"><span class="pre">dd</span></code> and <code class="docutils literal notranslate"><span class="pre">ddMicrobunches</span></code> dataframes in place.</p>
-<dl>
-<dt>Args:</dt><dd><p>colname (str): name of the column in the dask dataframes
+<p><strong>Parameters</strong></p>
+<p>colname (str): name of the column in the dask dataframes
 lb (:obj:<a href="#id1"><span class="problematic" id="id2">`</span></a>float',optional):  lower bound of the filter</p>
 <blockquote>
 <div><p>if :None: (default), ignores lower boundary</p>
@@ -298,10 +293,8 @@ lb (:obj:<a href="#id1"><span class="problematic" id="id2">`</span></a>float',op
 <dt>ub (:obj:<a href="#id3"><span class="problematic" id="id4">`</span></a>float',optional):  upper bound of the filter</dt><dd><p>if :None: (default), ignores upper boundary</p>
 </dd>
 </dl>
-</dd>
-<dt>Attention:</dt><dd><p>this is an irreversible process, since the dataframe gets overwritten.</p>
-</dd>
-</dl>
+<p><strong>Attention</strong></p>
+<p>This is an irreversible process, since the dataframe gets overwritten.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -405,60 +398,50 @@ sample bias was changed</p>
 <dt id="processor.DldProcessor.DldProcessor.computeBinnedData">
 <code class="sig-name descname">computeBinnedData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">saveAs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">return_xarray</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">force_64bit</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">skip_metadata</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">fast_metadata</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">usePbar</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use the bin list to bin the data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>saveAs<span class="classifier">str | None</span></dt><dd><p>full file name where to save the result (forces return_xarray
-to be true)</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>saveAs: str | None</dt><dd><p>full file name where to save the result (forces return_xarray
+to be true).</p>
 </dd>
-<dt>return_xarray<span class="classifier">bool</span></dt><dd><p>if true, returns and xarray with all available axis and metadata
-information attached, otherwise a numpy.array</p>
+<dt>return_xarray: bool</dt><dd><p>if true, returns and xarray with all available axis and metadata
+information attached, otherwise a numpy.array.</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>result<span class="classifier">numpy.array or xarray.DataArray</span></dt><dd><p>A numpy array of float64 values. Number of bins defined will define the
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>result: numpy.array or xarray.DataArray</dt><dd><p>A numpy array of float64 values. Number of bins defined will define the
 dimensions of such array.</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-odd">Notes</dt>
-<dd class="field-odd"><p>postProcess method must be used before computing the binned data if binning
+<p><strong>Notes</strong></p>
+<p>postProcess method must be used before computing the binned data if binning
 along pumpProbeDelay or polar k-space coordinates.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.computeBinnedDataMulti">
 <code class="sig-name descname">computeBinnedDataMulti</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">saveName</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">savePath</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rank</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">size</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.computeBinnedDataMulti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.computeBinnedDataMulti" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use the bin list to bin the data. Cluster-compatible version (Maciej Dendzik)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>saveName<span class="classifier">str | None</span></dt><dd><p>filename</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>saveName: str | None</dt><dd><p>filename</p>
 </dd>
-<dt>savePath<span class="classifier">str | None</span></dt><dd><p>file path</p>
+<dt>savePath: str | None</dt><dd><p>file path</p>
 </dd>
-<dt>rank<span class="classifier">int | None</span></dt><dd><p>Rank number of cluster computer</p>
+<dt>rank: int | None</dt><dd><p>Rank number of cluster computer</p>
 </dd>
-<dt>size<span class="classifier">int | None</span></dt><dd><p>Size of partition</p>
+<dt>size: int | None</dt><dd><p>Size of partition</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>result<span class="classifier">numpy array</span></dt><dd><p>A numpy array of float64 values. The number of bins determines the
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>result: numpy array</dt><dd><p>A numpy array of float64 values. The number of bins determines the
 dimensionality of the output array.</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-odd">Notes</dt>
-<dd class="field-odd"><p>postProcess method must be used before computing the binned data if binning
+<p><strong>Notes</strong></p>
+<p>postProcess method must be used before computing the binned data if binning
 is applied along pumpProbeDelay or polar k-space coordinates.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -555,33 +538,30 @@ be larger than expected. In case forceEnds = true, the stepSize is not
 enforced, and the interval is divided by the closest step that divides it
 cleanly. This of course only has meaning when choosing steps that do not
 cleanly divide the interval.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>start<span class="classifier">float</span></dt><dd><p>Position of first bin</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>start: float</dt><dd><p>Position of first bin</p>
 </dd>
-<dt>end<span class="classifier">float</span></dt><dd><p>Position of last bin (not included!)</p>
+<dt>end: float</dt><dd><p>Position of last bin (not included!)</p>
 </dd>
-<dt>steps<span class="classifier">float</span></dt><dd><p>Define the bin size. If useStepSize=True (default),
+<dt>steps: float</dt><dd><p>Define the bin size. If useStepSize=True (default),
 this is the step size, while if useStepSize=False, then this is the
 number of bins. In Legacy mode (force_legacy=True, or
 processor._LEGACY_MODE=True)</p>
 </dd>
-<dt>useStepSize<span class="classifier">bool | True</span></dt><dd><p>Tells python to interpret steps as a step size if
+<dt>useStepSize: bool | True</dt><dd><p>Tells python to interpret steps as a step size if
 True, or as the number of steps if False</p>
 </dd>
-<dt>forceEnds<span class="classifier">bool | False</span></dt><dd><p>Tells python to give priority to the end parameter
+<dt>forceEnds: bool | False</dt><dd><p>Tells python to give priority to the end parameter
 rather than the step parameter (see above for more info)</p>
 </dd>
-<dt>include_last<span class="classifier">bool | True</span></dt><dd><p>Closes the interval on the right when true. If
+<dt>include_last: bool | True</dt><dd><p>Closes the interval on the right when true. If
 using step size priority, will expand the interval to include
 the next value when true, will shrink the interval to contain all
 points within the bounds if false.</p>
 </dd>
-<dt>force_legacy<span class="classifier">bool | False</span></dt><dd><p>If true, imposes old method for generating bins,
+<dt>force_legacy: bool | False</dt><dd><p>If true, imposes old method for generating bins,
 based on np.arange instead of np.inspace.</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -590,13 +570,14 @@ based on np.arange instead of np.inspace.</p>
 <dt id="processor.DldProcessor.DldProcessor.get_metadata">
 <code class="sig-name descname">get_metadata</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fast_mode</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.get_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.get_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a dictionary with the most relevant metadata.</p>
+<p><strong>Args</strong></p>
 <dl class="simple">
-<dt>Args:</dt><dd><dl class="simple">
-<dt>fast_mode (bool): if False skips the heavy computation steps which</dt><dd><p>take a long time.</p>
+<dt>fast_mode: bool | False</dt><dd><p>if False skips the heavy computation steps which take a long time.</p>
 </dd>
 </dl>
-</dd>
-<dt>Returns:</dt><dd><p>metadata (dict): dictionary with metadata information</p>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>metadata: dict</dt><dd><p>dictionary with metadata information</p>
 </dd>
 </dl>
 <p># TODO: distribute metadata generation in the appropriate methods.</p>
@@ -608,19 +589,17 @@ based on np.arange instead of np.inspace.</p>
 <dd><p>Parse settings file and assign the variables.</p>
 <dl>
 <dt>Args:</dt><dd><dl>
-<dt>import_all (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>): import method selection.</dt><dd><dl class="field-list simple">
-<dt class="field-odd">True</dt>
-<dd class="field-odd"><p>imports all entries in SETTINGS.ini except those from</p>
-</dd>
-</dl>
-<p>sections [DAQ channels]. These are handled in the DldFlashProcessor subclass.
-Prints a warning when an entry is not found as class attribute
-:False: only imports those that match existing attribute names.</p>
+<dt>import_all: bool | False</dt><dd><p>Option to import method selection.</p>
+<p><code class="docutils literal notranslate"><span class="pre">True</span></code> imports all entries in SETTINGS.ini except those from sections [DAQ channels].
+These are handled in the DldFlashProcessor subclass. Prints a warning when an entry
+is not found as class attribute</p>
+<p><code class="docutils literal notranslate"><span class="pre">False</span></code> only imports those that match existing attribute names.</p>
 </dd>
 </dl>
 </dd>
 <dt>Warnings:</dt><dd><dl class="simple">
-<dt>UserWarning: when an entry is found in the SETTINGS.ini file, which</dt><dd><p>is not present as a pre-defined class attribute, it warns the
+<dt>UserWarning:</dt><dd><p>when an entry is found in the SETTINGS.ini file, which
+is not present as a pre-defined class attribute, it warns the
 user to add id to the code.</p>
 </dd>
 </dl>
@@ -635,12 +614,14 @@ user to add id to the code.</p>
 <p>To save settings simply copy paste the SETTINGS.ini file to the
 utilities/settings folder, and rename it. Use this name in this method
 to then load its content to the SETTINGS.ini file.</p>
-<dl>
+<dl class="simple">
 <dt>Args:</dt><dd><dl class="simple">
-<dt>settings_file_name (str): Name of the settings file to load.</dt><dd><p>This file must be in the folder &quot;hextof-processor/utilities/settings&quot;</p>
+<dt>settings_file_name: str</dt><dd><p>Name of the settings file to load.
+This file must be in the folder &quot;hextof-processor/utilities/settings&quot;.</p>
+</dd>
+<dt>preserve_path: bool | True</dt><dd><p>Disables overwriting local file saving paths. Defaults to True.</p>
 </dd>
 </dl>
-<p>preserve_path: Disables overwriting local file saving paths. Defaults to True</p>
 </dd>
 </dl>
 </dd></dl>
@@ -650,12 +631,11 @@ to then load its content to the SETTINGS.ini file.</p>
 <em class="property">static </em><code class="sig-name descname">load_binned</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'r'</span></em>, <em class="sig-param"><span class="n">ret_type</span><span class="o">=</span><span class="default_value">'list'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.load_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.load_binned" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load an HDF5 file saved with <code class="docutils literal notranslate"><span class="pre">save_binned()</span></code> method.
 wrapper for function utils.load_binned_h5()</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>file_name<span class="classifier">str</span></dt><dd><p>name of the file to load, including full path</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>file_name: str</dt><dd><p>name of the file to load, including full path</p>
 </dd>
-<dt>mode<span class="classifier">str | 'r'</span></dt><dd><p>Read mode of h5 file ('r' = read).</p>
+<dt>mode: str | 'r'</dt><dd><p>Read mode of h5 file ('r' = read).</p>
 </dd>
 <dt>ret_type: str | 'list','dict'</dt><dd><p>output format for axes and histograms:
 'list' generates a list of arrays, ordered as
@@ -663,16 +643,13 @@ the corresponding dimensions in data. 'dict'
 generates a dictionary with the names of each axis.</p>
 </dd>
 </dl>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>data: numpy array</dt><dd><p>Multidimensional data read from h5 file.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>data<span class="classifier">numpy array</span></dt><dd><p>Multidimensional data read from h5 file.</p>
+<dt>axes: numpy array</dt><dd><p>The axes values associated with the read data.</p>
 </dd>
-<dt>axes<span class="classifier">numpy array</span></dt><dd><p>The axes values associated with the read data.</p>
-</dd>
-<dt>hist<span class="classifier">numpy array</span></dt><dd><p>Histogram values associated with the read data.</p>
-</dd>
-</dl>
+<dt>hist: numpy array</dt><dd><p>Histogram values associated with the read data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -686,14 +663,19 @@ generates a dictionary with the names of each axis.</p>
 <dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.normalizeAxisMean">
 <code class="sig-name descname">normalizeAxisMean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_array</span></em>, <em class="sig-param"><span class="n">ax</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.normalizeAxisMean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.normalizeAxisMean" title="Permalink to this definition">¶</a></dt>
-<dd><p>Normalize to the mean of the given axis
-Args:</p>
-<blockquote>
-<div><p>data_array (np.ndarray): array to be normalized
-ax (int): axis along which to normalize</p>
-</div></blockquote>
+<dd><p>Normalize to the mean of the given axis.</p>
 <dl class="simple">
-<dt>Returns:</dt><dd><p>norm_array (np.ndarray): normalized array</p>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>data_array: np.ndarray</dt><dd><p>array to be normalized</p>
+</dd>
+<dt>ax: int</dt><dd><p>axis along which to normalize</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>norm_array: np.ndarray</dt><dd><p>normalized array</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -845,13 +827,10 @@ NOT the FLASH HDF5 files obtained from the DAQ system!)</p>
 <code class="sig-name descname">readDataframesParquet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fileName</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.readDataframesParquet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.readDataframesParquet" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>[DEPRECATED]</strong> Load data from a dask Parquet dataframe.
 Use readDataframesParquet instead.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameter</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>fileName<span class="classifier">str | None</span></dt><dd><p>name (including path) of the folder containing
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt>fileName: str | None</dt><dd><p>name (including path) of the folder containing
 parquet files where the data was saved.</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -884,21 +863,17 @@ parquet files where the data was saved.</p>
 <dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.res_to_xarray_old">
 <code class="sig-name descname">res_to_xarray_old</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">res</span></em>, <em class="sig-param"><span class="n">fast_mode</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.res_to_xarray_old"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.res_to_xarray_old" title="Permalink to this definition">¶</a></dt>
-<dd><p>creates a BinnedArray (xarray subclass) out of the given np.array</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dd><p>Creates a BinnedArray (xarray subclass) out of the given numpy.array.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
 <dt>res: np.array</dt><dd><p>nd array of binned data</p>
 </dd>
 <dt>fast_mode: bool default True</dt><dd><p>if True, it skips the creation of metadata element which require computation.</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>ba: BinnedArray (xarray)</dt><dd><p>an xarray-like container with binned data, axis, and all available metadata</p>
-</dd>
-</dl>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>ba: BinnedArray (xarray)</dt><dd><p>an xarray-like container with binned data, axis, and all available metadata.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -964,18 +939,15 @@ defined in SETTINGS.ini</p>
 <code class="sig-name descname">save_binned</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">binnedData</span></em>, <em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'w'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.save_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.save_binned" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save a binned numpy array to h5 file. The file includes the axes
 (taken from the scheduled bins) and the delay stage histogram, if it exists.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>binnedData<span class="classifier">numpy array</span></dt><dd><p>Binned multidimensional data.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>binnedData: numpy array</dt><dd><p>Binned multidimensional data.</p>
 </dd>
-<dt>file_name<span class="classifier">str</span></dt><dd><p>Name of the saved file. The extension '.h5' is automatically added.</p>
+<dt>file_name: str</dt><dd><p>Name of the saved file. The extension '.h5' is automatically added.</p>
 </dd>
-<dt>path<span class="classifier">str | None</span></dt><dd><p>File path.</p>
+<dt>path: str | None</dt><dd><p>File path.</p>
 </dd>
-<dt>mode<span class="classifier">str | 'w'</span></dt><dd><p>Write mode of h5 file ('w' = write).</p>
-</dd>
-</dl>
+<dt>mode: str | 'w'</dt><dd><p>Write mode of h5 file ('w' = write).</p>
 </dd>
 </dl>
 </dd></dl>

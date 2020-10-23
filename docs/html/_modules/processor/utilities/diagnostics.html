@@ -273,6 +273,7 @@
 <div class="viewcode-block" id="binned_array_size"><a class="viewcode-back" href="../../../library/utils/diagnostics.html#processor.utilities.diagnostics.binned_array_size">[docs]</a><span class="k">def</span> <span class="nf">binned_array_size</span><span class="p">(</span><span class="n">processor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Prints the expected size in memory of the binned array, computed with</span>
 <span class="sd">    the current binning parameters&quot;&quot;&quot;</span>
+
     <span class="n">voxels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">processor</span><span class="o">.</span><span class="n">binAxesList</span><span class="p">])</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">repr_byte_size</span><span class="p">(</span><span class="n">voxels</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">*</span> <span class="mf">64.</span><span class="p">))</span></div>
 
@@ -311,7 +312,9 @@
 
 
 <div class="viewcode-block" id="plot_GMD_vs_bunches"><a class="viewcode-back" href="../../../library/utils/diagnostics.html#processor.utilities.diagnostics.plot_GMD_vs_bunches">[docs]</a><span class="k">def</span> <span class="nf">plot_GMD_vs_bunches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; not sure what this was done for...&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; not sure what this was done for...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">resetBins</span><span class="p">()</span>
     <span class="n">ubId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addBinning</span><span class="p">(</span><span class="s1">&#39;dldMicrobunchId&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -355,14 +358,6 @@
     <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ax</span><span class="p">:</span>
         <span class="n">a</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
         <span class="n">a</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span></div>
-
-
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="k">pass</span>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
            </div>
