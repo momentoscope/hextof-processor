@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)  # avoid printing FutureWarnings from other packages
@@ -125,16 +126,16 @@ class DldProcessor:
     def initAttributes(self, import_all=False):
         """ Parse settings file and assign the variables.
 
-
-
         Args:
-            import_all (:obj:`bool`): import method selection.
-                :True: imports all entries in SETTINGS.ini except those from
-                sections [DAQ channels]. These are handled in the DldFlashProcessor subclass.
-                Prints a warning when an entry is not found as class attribute
-                :False: only imports those that match existing attribute names.
+            import_all: bool | False
+                Option to import method selection.\n
+                ``True`` imports all entries in SETTINGS.ini except those from sections [DAQ channels].
+                These are handled in the DldFlashProcessor subclass. Prints a warning when an entry
+                is not found as class attribute\n
+                ``False`` only imports those that match existing attribute names.
         Warnings:
-            UserWarning: when an entry is found in the SETTINGS.ini file, which
+            UserWarning:
+                when an entry is found in the SETTINGS.ini file, which
                 is not present as a pre-defined class attribute, it warns the
                 user to add id to the code.
         """
@@ -233,9 +234,11 @@ class DldProcessor:
         to then load its content to the SETTINGS.ini file.
 
         Args:
-            settings_file_name (str): Name of the settings file to load.
-                This file must be in the folder "hextof-processor/utilities/settings"
-            preserve_path: Disables overwriting local file saving paths. Defaults to True
+            settings_file_name: str
+                Name of the settings file to load.
+                This file must be in the folder "hextof-processor/utilities/settings".
+            preserve_path: bool | True
+                Disables overwriting local file saving paths. Defaults to True.
 
         """
 
@@ -692,12 +695,16 @@ class DldProcessor:
         return norm_array
 
     def normalizeAxisMean(self, data_array, ax):
-        """ Normalize to the mean of the given axis
+        """ Normalize to the mean of the given axis.
+        
         Args:
-            data_array (np.ndarray): array to be normalized
-            ax (int): axis along which to normalize
+            data_array: np.ndarray
+                array to be normalized
+            ax: int
+                axis along which to normalize
         Returns:
-            norm_array (np.ndarray): normalized array
+            norm_array: np.ndarray
+                normalized array
         """
         print("normalizing mean on axis {}".format(ax))
         try:
@@ -1104,11 +1111,12 @@ class DldProcessor:
         """  Creates a dictionary with the most relevant metadata.
 
         **Args**\n
-        fast_mode (bool): if False skips the heavy computation steps which
-            take a long time.
+        fast_mode: bool | False
+            if False skips the heavy computation steps which take a long time.
         
         **Returns**\n
-        metadata (dict): dictionary with metadata information
+        metadata: dict
+            dictionary with metadata information
         # TODO: distribute metadata generation in the appropriate methods.
         """
         print('Generating metadata...')

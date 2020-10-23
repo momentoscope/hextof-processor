@@ -184,14 +184,10 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">@author: Steinn Ymir Agustsson</span>
+<span class="sd">@author: Steinn Ymir Agustsson, Davide Curcio, Maciej Dendzik</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="k">pass</span>
 
 
 <span class="c1"># %% Energy calibration</span>
@@ -201,8 +197,10 @@
 
 <span class="sd">    The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the</span>
 <span class="sd">    binding energy Eb is given by</span>
+<span class="sd">    </span>
+<span class="sd">    .. math::</span>
 
-<span class="sd">    Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V</span>
+<span class="sd">        -E_b = E_k + W - hv - V = \\frac{1}{2} mv^2 + W - hv - V</span>
 
 <span class="sd">    With W the work function, hv the photon energy, V the electrostatic potential applied to</span>
 <span class="sd">    the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.</span>
@@ -238,7 +236,10 @@
 <span class="sd">    The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the</span>
 <span class="sd">    binding energy :math:`E_b` is given by</span>
 
-<span class="sd">    -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V</span>
+<span class="sd">    .. math::</span>
+
+<span class="sd">        -E_b = E_k + W - hv - V = \\frac{1}{2} mv^2 + W - hv - V</span>
+
 
 <span class="sd">    With W the work function, hv the photon energy, V the electrostatic potential applied to</span>
 <span class="sd">    the sample with respect to the drift section voltage, v the velocity of the electrons in the drift tube,</span>
@@ -261,21 +262,21 @@
 <span class="sd">    1.  By getting the correct values for W, hv, and V</span>
 <span class="sd">    2.  It can be calibrated by imposing peak position</span>
 
-<span class="sd">    :Parameters:</span>
-<span class="sd">        t : float</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        t: float</span>
 <span class="sd">            The time of flight</span>
-<span class="sd">        toffset : float</span>
+<span class="sd">        toffset: float</span>
 <span class="sd">            The time offset from thedld clock start to when the fastest photoelectrons reach the detector</span>
-<span class="sd">        eoffset : float</span>
+<span class="sd">        eoffset: float</span>
 <span class="sd">            The energy offset given by W-hv-V</span>
-<span class="sd">        l : float</span>
+<span class="sd">        l: float</span>
 <span class="sd">            the effective length of the drift section</span>
 
-<span class="sd">    :Return:</span>
-<span class="sd">        e : float</span>
+<span class="sd">    Return:</span>
+<span class="sd">        e: float</span>
 <span class="sd">            The binding energy</span>
 
-<span class="sd">    :Authors:</span>
+<span class="sd">    Authors:</span>
 <span class="sd">        Davide Curcio &lt;davide.curcio@phys.au.dk&gt;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -307,7 +308,10 @@
 <span class="sd">    The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the</span>
 <span class="sd">    binding energy :math:`E_b` is given by</span>
 
-<span class="sd">    -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V</span>
+<span class="sd">    .. math::</span>
+
+<span class="sd">        -E_b = E_k + W - hv - V = \\frac{1}{2} mv^2 + W - hv - V</span>
+
 
 <span class="sd">    With W the work function, hv the photon energy, V the electrostatic potential applied to</span>
 <span class="sd">    the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.</span>
@@ -328,21 +332,21 @@
 <span class="sd">    1.  By getting the correct values for W, hv, and V</span>
 <span class="sd">    2.  It can be calibrated by imposing peak position</span>
 
-<span class="sd">    :Parameters:</span>
-<span class="sd">        e : float</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        e: float</span>
 <span class="sd">            The binding energy</span>
-<span class="sd">        toffset : float</span>
+<span class="sd">        toffset: float</span>
 <span class="sd">            The time offset from thedld clock start to when the fastest photoelectrons reach the detector</span>
-<span class="sd">        eoffset : float</span>
+<span class="sd">        eoffset: float</span>
 <span class="sd">            The energy offset given by W-hv-V</span>
-<span class="sd">        l : float</span>
+<span class="sd">        l: float</span>
 <span class="sd">            the effective length of the drift section</span>
 
-<span class="sd">    :Return:</span>
-<span class="sd">        t : float</span>
+<span class="sd">    Return:</span>
+<span class="sd">        t: float</span>
 <span class="sd">            The time of flight</span>
 
-<span class="sd">    :Authors:</span>
+<span class="sd">    Authors:</span>
 <span class="sd">        Davide Curcio &lt;davide.curcio@phys.au.dk&gt;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -368,21 +372,21 @@
 <div class="viewcode-block" id="e2t"><a class="viewcode-back" href="../../../library/utils/calibration.html#processor.utilities.calibration.e2t">[docs]</a><span class="k">def</span> <span class="nf">e2t</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">toffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mf">0.77</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Same as energy2tof, but different name for retrocompatibility</span>
 
-<span class="sd">    :Parameters:</span>
-<span class="sd">        e : float</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        e: float</span>
 <span class="sd">            The binding energy</span>
-<span class="sd">        toffset : float</span>
+<span class="sd">        toffset: float</span>
 <span class="sd">            The time offset from thedld clock start to when the fastest photoelectrons reach the detector</span>
-<span class="sd">        eoffset : float</span>
+<span class="sd">        eoffset: float</span>
 <span class="sd">            The energy offset given by W-hv-V</span>
-<span class="sd">        l : float</span>
+<span class="sd">        l: float</span>
 <span class="sd">            the effective length of the drift section</span>
 
-<span class="sd">    :Return:</span>
-<span class="sd">        t : float</span>
+<span class="sd">    Return:</span>
+<span class="sd">        t: float</span>
 <span class="sd">            The time of flight</span>
 
-<span class="sd">    :Authors:</span>
+<span class="sd">    Authors:</span>
 <span class="sd">        Davide Curcio &lt;davide.curcio@phys.au.dk&gt;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -392,21 +396,21 @@
 <div class="viewcode-block" id="t2e"><a class="viewcode-back" href="../../../library/utils/calibration.html#processor.utilities.calibration.t2e">[docs]</a><span class="k">def</span> <span class="nf">t2e</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">toffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mf">0.77</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Same as tof2energy, but different name for retrocompatibility</span>
 
-<span class="sd">    :Parameters:</span>
-<span class="sd">        t : float</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        t: float</span>
 <span class="sd">            The time of flight</span>
-<span class="sd">        toffset : float</span>
+<span class="sd">        toffset: float</span>
 <span class="sd">            The time offset from thedld clock start to when the fastest photoelectrons reach the detector</span>
-<span class="sd">        eoffset : float</span>
+<span class="sd">        eoffset: float</span>
 <span class="sd">            The energy offset given by W-hv-V</span>
-<span class="sd">        l : float</span>
+<span class="sd">        l: float</span>
 <span class="sd">            the effective length of the drift section</span>
 
-<span class="sd">    :Return:</span>
-<span class="sd">        e : float</span>
+<span class="sd">    Return:</span>
+<span class="sd">        e: float</span>
 <span class="sd">            The binding energy</span>
 
-<span class="sd">    :Authors:</span>
+<span class="sd">    Authors:</span>
 <span class="sd">        Davide Curcio &lt;davide.curcio@phys.au.dk&gt;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -425,12 +429,14 @@
 
 <span class="sd">    Each quadrant of DLD is shifted in DLD time by shiftQn.</span>
 <span class="sd">    xCenter and yCenter are used to define the center of the division.</span>
+<span class="sd">    </span>
+<span class="sd">    +-----------+-----------+</span>
+<span class="sd">    |    Q2     |     Q4    |</span>
+<span class="sd">    +-----------+-----------+</span>
+<span class="sd">    |    Q1     |     Q3    |</span>
+<span class="sd">    +-----------+-----------+</span>
 
-<span class="sd">         Q2     |     Q4</span>
-<span class="sd">    ------------|------------</span>
-<span class="sd">         Q1     |     Q3</span>
-
-<span class="sd">    this picture is upside-down in plt.imshow because it starts from 0 in top right corner</span>
+<span class="sd">    This picture is upside-down in ``plt.imshow`` because it starts from 0 in top right corner.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Q1</span>
     <span class="c1"># daskdataframe.where(condition,value) keeps the data where condition is True</span>
@@ -448,7 +454,7 @@
 <div class="viewcode-block" id="filterCircleDLDPos"><a class="viewcode-back" href="../../../library/utils/calibration.html#processor.utilities.calibration.filterCircleDLDPos">[docs]</a><span class="k">def</span> <span class="nf">filterCircleDLDPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xCenter</span><span class="o">=</span><span class="mi">1334</span><span class="p">,</span> <span class="n">yCenter</span><span class="o">=</span><span class="mi">1426</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">1250</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Apply corrections to the dataframe. (Maciej Dendzik)</span>
 
-<span class="sd">    Filters events with dldPosX and dldPosY within the radius from (xCenter,yCenter)</span>
+<span class="sd">    Filters events with dldPosX and dldPosY within the radius from (xCenter,yCenter).</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -463,7 +469,7 @@
 <span class="sd">    where r=sqrt((posx-xCenter)^2+(posy-yCenter)^2)</span>
 
 <span class="sd">    This function makes corrections to the time of flight which take into account</span>
-<span class="sd">    the path difference between the center of the detector and the edges of the detector</span>
+<span class="sd">    the path difference between the center of the detector and the edges of the detector.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Q1</span>
@@ -474,10 +480,7 @@
                          <span class="p">(</span><span class="n">poly1</span> <span class="o">*</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldPosX&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">xCenter</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span>
                                  <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldPosY&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">yCenter</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span> <span class="o">+</span> \
                           <span class="n">poly2</span> <span class="o">*</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldPosX&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">xCenter</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldPosY&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">yCenter</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span></div>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">main</span><span class="p">()</span>
+    
 </pre></div>
 
            </div>

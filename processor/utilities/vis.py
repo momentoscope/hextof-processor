@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
+
 """
-
 @author: Steinn Ymir Agustsson
-
 """
 import matplotlib.pyplot as plt
 import numpy as np
