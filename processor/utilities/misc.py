@@ -46,7 +46,7 @@ def EnergyDensity400(Diode, Diameter=600):
     """Calculate the pulse energy density of 400nm laser in uJ/cm^2.
     The units are um for beam diameter, uJ/cm^2 for energy density.
     
-    :Parameters:
+    Parameters:
         Diode: numeric
             Measured value from photodiode (arb. units)
         Diameter: numeric | 600
@@ -234,14 +234,14 @@ def parse_logbook(log_text):
 
 
 def radius(df, center=(0, 0)):
-    """ Calculate the radius
+    """ Calculate the radius.
     """
 
     return np.sqrt(np.square(df.posX - center[0]) + np.square(df.posY - center[1]))
 
 
 def argnearest(array, val, rettype='vectorized'):
-    """Find the coordinates of the nD array element nearest to a specified value
+    """Find the coordinates of the nD array element nearest to a specified value.
 
     Args:
         array (np.array): Numeric data array
@@ -270,11 +270,11 @@ def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
 
     Parameters:
         data_array: numpy array
-            4D data array, order must be Kx,Ky,Energy,Time
+            4D data array, order must be Kx,Ky,Energy,Time.
         filename: str
             The name of the file to save
         path: str
-            The path to where to save hdf5 file. If None, uses the "results" folder from SETTINGS.ini
+            The path to where to save hdf5 file. If None, uses the "results" folder from SETTINGS.ini.
         overwrite: str
             If true, it overwrites existing file with the same
             name. Otherwise raises and error.
@@ -581,7 +581,7 @@ def read_and_binn(runNumber, *args, static_bunches=False, source='raw', save=Tru
 
 def create_dataframes(runNumbers, *args):
     """ Creates a parquet dataframe for each run passed.
-    Returns
+    Returns:
         fails: dictionary of runs and error which broke the dataframe generation
     """
     if isinstance(runNumbers, int):

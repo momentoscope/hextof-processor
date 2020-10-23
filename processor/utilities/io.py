@@ -13,12 +13,12 @@ import processor.utilities.misc as utils
 def res_to_xarray(res, binNames, binAxes, metadata=None):
     """ creates a BinnedArray (xarray subclass) out of the given np.array
 
-    :Parameters:
+    Parameters:
         res: np.array
             nd array of binned data
         binNames (list): list of names of the binned axes
         binAxes (list): list of np.arrays with the values of the axes
-    :Returns:
+    Returns:
         ba: BinnedArray (xarray)
             an xarray-like container with binned data, axis, and all available metadata
     """
@@ -50,12 +50,12 @@ def save_binned(data, file_name, format='h5', path=None, mode='w'):
     """ Save a binned numpy array to h5 file. The file includes the axes
     (taken from the scheduled bins) and the delay stage histogram, if it exists.
 
-    :Parameters:
-        file_name : str
+    Parameters:
+        file_name: str
             Name of the saved file. The extension '.h5' is automatically added.
-        path : str | None
+        path: str | None
             File path.
-        mode : str | 'w'
+        mode: str | 'w'
             Write mode of h5 file ('w' = write).
     """
     _abort = False
@@ -254,7 +254,3 @@ def to_tiff(data,filename,axis_dict=None):
         array_to_tiff(data,filename)
     else:
         raise TypeError('Input data must be a numpy array or xarray DataArray')
-
-
-if __name__ == '__main__':
-    pass
