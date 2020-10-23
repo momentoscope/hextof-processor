@@ -229,7 +229,7 @@
     <span class="sd">&quot;&quot;&quot;Calculate the pulse energy density of 400nm laser in uJ/cm^2.</span>
 <span class="sd">    The units are um for beam diameter, uJ/cm^2 for energy density.</span>
 <span class="sd">    </span>
-<span class="sd">    :Parameters:</span>
+<span class="sd">    Parameters:</span>
 <span class="sd">        Diode: numeric</span>
 <span class="sd">            Measured value from photodiode (arb. units)</span>
 <span class="sd">        Diameter: numeric | 600</span>
@@ -302,8 +302,8 @@
 <span class="sd">        name: str</span>
 <span class="sd">            name of the parameter</span>
 <span class="sd">        setting_file: str | &#39;default&#39;</span>
-<span class="sd">            path to setting file. If set to &#39;default&#39; it takes</span>
-<span class="sd">            a file called SETTINGS.ini in the main folder of the repo.</span>
+<span class="sd">            path to setting file. If set to &#39;default&#39; it takes a file called SETTINGS.ini</span>
+<span class="sd">            in the main folder of the repo.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        value of the parameter, None if parameter cannot be found.</span>
 <span class="sd">    Notes:</span>
@@ -417,14 +417,14 @@
 
 
 <div class="viewcode-block" id="radius"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.radius">[docs]</a><span class="k">def</span> <span class="nf">radius</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
-    <span class="sd">&quot;&quot;&quot; Calculate the radius</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the radius.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">posX</span> <span class="o">-</span> <span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">posY</span> <span class="o">-</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span></div>
 
 
 <div class="viewcode-block" id="argnearest"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.argnearest">[docs]</a><span class="k">def</span> <span class="nf">argnearest</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">rettype</span><span class="o">=</span><span class="s1">&#39;vectorized&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Find the coordinates of the nD array element nearest to a specified value</span>
+    <span class="sd">&quot;&quot;&quot;Find the coordinates of the nD array element nearest to a specified value.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        array (np.array): Numeric data array</span>
@@ -453,11 +453,11 @@
 
 <span class="sd">    Parameters:</span>
 <span class="sd">        data_array: numpy array</span>
-<span class="sd">            4D data array, order must be Kx,Ky,Energy,Time</span>
+<span class="sd">            4D data array, order must be Kx,Ky,Energy,Time.</span>
 <span class="sd">        filename: str</span>
 <span class="sd">            The name of the file to save</span>
 <span class="sd">        path: str</span>
-<span class="sd">            The path to where to save hdf5 file. If None, uses the &quot;results&quot; folder from SETTINGS.ini</span>
+<span class="sd">            The path to where to save hdf5 file. If None, uses the &quot;results&quot; folder from SETTINGS.ini.</span>
 <span class="sd">        overwrite: str</span>
 <span class="sd">            If true, it overwrites existing file with the same</span>
 <span class="sd">            name. Otherwise raises and error.</span>
@@ -764,7 +764,7 @@
 
 <div class="viewcode-block" id="create_dataframes"><a class="viewcode-back" href="../../../library/utils/misc.html#processor.utilities.misc.create_dataframes">[docs]</a><span class="k">def</span> <span class="nf">create_dataframes</span><span class="p">(</span><span class="n">runNumbers</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Creates a parquet dataframe for each run passed.</span>
-<span class="sd">    Returns</span>
+<span class="sd">    Returns:</span>
 <span class="sd">        fails: dictionary of runs and error which broke the dataframe generation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">runNumbers</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>

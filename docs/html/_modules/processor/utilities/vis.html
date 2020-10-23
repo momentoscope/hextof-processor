@@ -182,10 +182,9 @@
             
   <h1>Source code for processor.utilities.vis</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
-
 <span class="sd">@author: Steinn Ymir Agustsson</span>
-
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -201,9 +200,6 @@
          <span class="s1">&#39;tab10&#39;</span><span class="p">,</span> <span class="s1">&#39;tab20&#39;</span><span class="p">,</span> <span class="s1">&#39;tab20b&#39;</span><span class="p">,</span> <span class="s1">&#39;tab20c&#39;</span><span class="p">,</span> <span class="s1">&#39;flag&#39;</span><span class="p">,</span> <span class="s1">&#39;prism&#39;</span><span class="p">,</span> <span class="s1">&#39;ocean&#39;</span><span class="p">,</span> <span class="s1">&#39;gist_earth&#39;</span><span class="p">,</span> <span class="s1">&#39;terrain&#39;</span><span class="p">,</span> <span class="s1">&#39;gist_stern&#39;</span><span class="p">,</span>
          <span class="s1">&#39;gnuplot&#39;</span><span class="p">,</span> <span class="s1">&#39;gnuplot2&#39;</span><span class="p">,</span> <span class="s1">&#39;CMRmap&#39;</span><span class="p">,</span> <span class="s1">&#39;cubehelix&#39;</span><span class="p">,</span> <span class="s1">&#39;brg&#39;</span><span class="p">,</span> <span class="s1">&#39;hsv&#39;</span><span class="p">,</span>
          <span class="s1">&#39;gist_rainbow&#39;</span><span class="p">,</span> <span class="s1">&#39;rainbow&#39;</span><span class="p">,</span> <span class="s1">&#39;jet&#39;</span><span class="p">,</span> <span class="s1">&#39;nipy_spectral&#39;</span><span class="p">,</span> <span class="s1">&#39;gist_ncar&#39;</span><span class="p">]</span>
-         
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="k">pass</span>
     
 <span class="k">def</span> <span class="nf">isnotebook</span><span class="p">():</span>
     <span class="k">try</span><span class="p">:</span>
@@ -600,10 +596,6 @@
 
 <span class="k">def</span> <span class="nf">slice_to_ev</span><span class="p">(</span><span class="n">ToF</span><span class="p">,</span> <span class="n">ToF_to_ev</span><span class="p">,</span> <span class="n">t0</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">ToF</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="n">ToF_to_ev</span>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
            </div>
