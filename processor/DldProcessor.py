@@ -58,7 +58,7 @@ class DldProcessor:
         """
 
         if settings is not None:
-            self.load_settings(settings)
+            self.loadSettings(settings)
         else:
             self.initAttributes()  # in else because it is called already in load_settings
 
@@ -142,12 +142,14 @@ class DldProcessor:
         # Hard coded class attributes which can be overwritten by settings files.
         self.N_CORES = int(max(os.cpu_count() - 1, 1))
         self.UBID_OFFSET = int(0)
-        self.CHUNK_SIZE = int(1000000)
-        self.TOF_STEP_TO_NS = np.float64(0.020574)
+        self.CHUNK_SIZE = int(100000)
+        self.TOF_STEP_TO_NS = np.float64(0.020576131995767355)
         self.ET_CONV_E_OFFSET = np.float64(357.7)
         self.ET_CONV_T_OFFSET = np.float64(82.7)
         self.ET_CONV_L = np.float64(.75)
         self.TOF_IN_NS = bool(True)
+        self.RETURN_XARRAY = bool(True)
+        self.SINGLE_CORE_DATAFRAME_CREATION = bool(False)
 
         self.DATA_RAW_DIR = str('/gpfs/pg2/current/raw/hdf')
         self.DATA_H5_DIR = str('/home/pg2user/data/h5')
@@ -155,7 +157,6 @@ class DldProcessor:
         self.DATA_RESULTS_DIR = str('/home/pg2user/DATA/results/')
         self.LOG_DIR = str('/home/pg2user/DATA/logs/')
         self.PAH_MODULE_DIR = str('')
-        self.SINGLE_CORE_DATAFRAME_CREATION = bool(False)
 
         # parse the currently loaded settings file and store as class attributes
         # each entry which is not in DAQ channels. Those are handled in the
