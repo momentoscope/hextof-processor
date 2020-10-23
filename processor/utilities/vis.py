@@ -18,9 +18,6 @@ cmaps = ['viridis', 'plasma', 'inferno', 'magma', 'Greys', 'Purples', 'Blues', '
          'tab10', 'tab20', 'tab20b', 'tab20c', 'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern',
          'gnuplot', 'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'hsv',
          'gist_rainbow', 'rainbow', 'jet', 'nipy_spectral', 'gist_ncar']
-         
-def main():
-    pass
     
 def isnotebook():
     try:
@@ -417,7 +414,3 @@ def get_k_xyz(pt, k_center=(179, 737), reciprocal_lattice_vector=(218, 218), rec
 
 def slice_to_ev(ToF, ToF_to_ev, t0):
     return (ToF - t0) * ToF_to_ev
-
-
-if __name__ == '__main__':
-    main()
