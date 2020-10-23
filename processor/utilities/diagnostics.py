@@ -90,6 +90,7 @@ def channel_statistics(dd,columns=None):
 def binned_array_size(processor):
     """ Prints the expected size in memory of the binned array, computed with
     the current binning parameters"""
+
     voxels = np.prod([len(x) for x in processor.binAxesList])
     print(repr_byte_size(voxels.astype(np.float64) * 64.))
 
@@ -128,7 +129,9 @@ def plot_channels(processor):
 
 
 def plot_GMD_vs_bunches(self):
-    """ not sure what this was done for..."""
+    """ not sure what this was done for...
+    """
+
     f, ax = plt.subplots(1, 2)
     self.resetBins()
     ubId = self.addBinning('dldMicrobunchId', 1, 500, 1)
@@ -172,11 +175,3 @@ def plot_GMD_vs_bunches(self):
     for a in ax:
         a.legend()
         a.grid()
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()

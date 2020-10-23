@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 
-@author: Steinn Ymir Agustsson
+@author: Steinn Ymir Agustsson, Davide Curcio, Maciej Dendzik
 """
 import sys, os
 import numpy as np
-
-
-def main():
-    pass
 
 
 # %% Energy calibration
@@ -18,8 +14,10 @@ def main():
 
     The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
     binding energy Eb is given by
+    
+    .. math::
 
-    Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+        -E_b = E_k + W - hv - V = \\frac{1}{2} mv^2 + W - hv - V
 
     With W the work function, hv the photon energy, V the electrostatic potential applied to
     the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
@@ -55,7 +53,10 @@ def tof2energy(t, toffset=None, eoffset=None, l=None):
     The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the
     binding energy :math:`E_b` is given by
 
-    -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+    .. math::
+
+        -E_b = E_k + W - hv - V = \\frac{1}{2} mv^2 + W - hv - V
+
 
     With W the work function, hv the photon energy, V the electrostatic potential applied to
     the sample with respect to the drift section voltage, v the velocity of the electrons in the drift tube,
@@ -78,21 +79,21 @@ def tof2energy(t, toffset=None, eoffset=None, l=None):
     1.  By getting the correct values for W, hv, and V
     2.  It can be calibrated by imposing peak position
 
-    :Parameters:
-        t : float
+    Parameters:
+        t: float
             The time of flight
-        toffset : float
+        toffset: float
             The time offset from thedld clock start to when the fastest photoelectrons reach the detector
-        eoffset : float
+        eoffset: float
             The energy offset given by W-hv-V
-        l : float
+        l: float
             the effective length of the drift section
 
-    :Return:
-        e : float
+    Return:
+        e: float
             The binding energy
 
-    :Authors:
+    Authors:
         Davide Curcio <davide.curcio@phys.au.dk>
     """
 
@@ -124,7 +125,10 @@ def energy2tof(e, toffset=None, eoffset=None, l=None):
     The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the
     binding energy :math:`E_b` is given by
 
-    -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+    .. math::
+
+        -E_b = E_k + W - hv - V = \\frac{1}{2} mv^2 + W - hv - V
+
 
     With W the work function, hv the photon energy, V the electrostatic potential applied to
     the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
@@ -145,21 +149,21 @@ def energy2tof(e, toffset=None, eoffset=None, l=None):
     1.  By getting the correct values for W, hv, and V
     2.  It can be calibrated by imposing peak position
 
-    :Parameters:
-        e : float
+    Parameters:
+        e: float
             The binding energy
-        toffset : float
+        toffset: float
             The time offset from thedld clock start to when the fastest photoelectrons reach the detector
-        eoffset : float
+        eoffset: float
             The energy offset given by W-hv-V
-        l : float
+        l: float
             the effective length of the drift section
 
-    :Return:
-        t : float
+    Return:
+        t: float
             The time of flight
 
-    :Authors:
+    Authors:
         Davide Curcio <davide.curcio@phys.au.dk>
     """
 
@@ -185,21 +189,21 @@ def energy2tof(e, toffset=None, eoffset=None, l=None):
 def e2t(e, toffset=None, eoffset=None, l=0.77):
     """ Same as energy2tof, but different name for retrocompatibility
 
-    :Parameters:
-        e : float
+    Parameters:
+        e: float
             The binding energy
-        toffset : float
+        toffset: float
             The time offset from thedld clock start to when the fastest photoelectrons reach the detector
-        eoffset : float
+        eoffset: float
             The energy offset given by W-hv-V
-        l : float
+        l: float
             the effective length of the drift section
 
-    :Return:
-        t : float
+    Return:
+        t: float
             The time of flight
 
-    :Authors:
+    Authors:
         Davide Curcio <davide.curcio@phys.au.dk>
     """
 
@@ -209,21 +213,21 @@ def e2t(e, toffset=None, eoffset=None, l=0.77):
 def t2e(t, toffset=None, eoffset=None, l=0.77):
     """ Same as tof2energy, but different name for retrocompatibility
 
-    :Parameters:
-        t : float
+    Parameters:
+        t: float
             The time of flight
-        toffset : float
+        toffset: float
             The time offset from thedld clock start to when the fastest photoelectrons reach the detector
-        eoffset : float
+        eoffset: float
             The energy offset given by W-hv-V
-        l : float
+        l: float
             the effective length of the drift section
 
-    :Return:
-        e : float
+    Return:
+        e: float
             The binding energy
 
-    :Authors:
+    Authors:
         Davide Curcio <davide.curcio@phys.au.dk>
     """
 
@@ -242,12 +246,14 @@ def shiftQuadrants(self, shiftQ1=0.231725, shiftQ2=-0.221625, shiftQ3=0.096575, 
 
     Each quadrant of DLD is shifted in DLD time by shiftQn.
     xCenter and yCenter are used to define the center of the division.
+    
+    +-----------+-----------+
+    |    Q2     |     Q4    |
+    +-----------+-----------+
+    |    Q1     |     Q3    |
+    +-----------+-----------+
 
-         Q2     |     Q4
-    ------------|------------
-         Q1     |     Q3
-
-    this picture is upside-down in plt.imshow because it starts from 0 in top right corner
+    This picture is upside-down in ``plt.imshow`` because it starts from 0 in top right corner.
     """
     # Q1
     # daskdataframe.where(condition,value) keeps the data where condition is True
@@ -265,7 +271,7 @@ def shiftQuadrants(self, shiftQ1=0.231725, shiftQ2=-0.221625, shiftQ3=0.096575, 
 def filterCircleDLDPos(self, xCenter=1334, yCenter=1426, radius=1250):
     """ Apply corrections to the dataframe. (Maciej Dendzik)
 
-    Filters events with dldPosX and dldPosY within the radius from (xCenter,yCenter)
+    Filters events with dldPosX and dldPosY within the radius from (xCenter,yCenter).
 
     """
 
@@ -280,7 +286,7 @@ def correctOpticalPath(self, poly1=-0.00020578, poly2=4.6813e-7, xCenter=1334, y
     where r=sqrt((posx-xCenter)^2+(posy-yCenter)^2)
 
     This function makes corrections to the time of flight which take into account
-    the path difference between the center of the detector and the edges of the detector
+    the path difference between the center of the detector and the edges of the detector.
 
     """
     # Q1
@@ -291,7 +297,4 @@ def correctOpticalPath(self, poly1=-0.00020578, poly2=4.6813e-7, xCenter=1334, y
                          (poly1 * ((self.dd['dldPosX'] - xCenter) ** 2 + (
                                  self.dd['dldPosY'] - yCenter) ** 2) ** 0.5 + \
                           poly2 * ((self.dd['dldPosX'] - xCenter) ** 2 + (self.dd['dldPosY'] - yCenter) ** 2))
-
-
-if __name__ == '__main__':
-    main()
+    

@@ -196,12 +196,12 @@
 <div class="viewcode-block" id="res_to_xarray"><a class="viewcode-back" href="../../../library/utils/io.html#processor.utilities.io.res_to_xarray">[docs]</a><span class="k">def</span> <span class="nf">res_to_xarray</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">binNames</span><span class="p">,</span> <span class="n">binAxes</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; creates a BinnedArray (xarray subclass) out of the given np.array</span>
 
-<span class="sd">    :Parameters:</span>
+<span class="sd">    Parameters:</span>
 <span class="sd">        res: np.array</span>
 <span class="sd">            nd array of binned data</span>
 <span class="sd">        binNames (list): list of names of the binned axes</span>
 <span class="sd">        binAxes (list): list of np.arrays with the values of the axes</span>
-<span class="sd">    :Returns:</span>
+<span class="sd">    Returns:</span>
 <span class="sd">        ba: BinnedArray (xarray)</span>
 <span class="sd">            an xarray-like container with binned data, axis, and all available metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -233,12 +233,12 @@
     <span class="sd">&quot;&quot;&quot; Save a binned numpy array to h5 file. The file includes the axes</span>
 <span class="sd">    (taken from the scheduled bins) and the delay stage histogram, if it exists.</span>
 
-<span class="sd">    :Parameters:</span>
-<span class="sd">        file_name : str</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        file_name: str</span>
 <span class="sd">            Name of the saved file. The extension &#39;.h5&#39; is automatically added.</span>
-<span class="sd">        path : str | None</span>
+<span class="sd">        path: str | None</span>
 <span class="sd">            File path.</span>
-<span class="sd">        mode : str | &#39;w&#39;</span>
+<span class="sd">        mode: str | &#39;w&#39;</span>
 <span class="sd">            Write mode of h5 file (&#39;w&#39; = write).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_abort</span> <span class="o">=</span> <span class="kc">False</span>
@@ -369,22 +369,24 @@
 
 
 <div class="viewcode-block" id="xarray_to_tiff"><a class="viewcode-back" href="../../../library/utils/io.html#processor.utilities.io.xarray_to_tiff">[docs]</a><span class="k">def</span> <span class="nf">xarray_to_tiff</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">axis_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Save data to tiff file</span>
+    <span class="sd">&quot;&quot;&quot; Save data to tiff file.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        data (xarray.DataArray): data to be saved. ImageJ likes tiff files with</span>
+<span class="sd">        data: xarray.DataArray</span>
+<span class="sd">            data to be saved. ImageJ likes tiff files with</span>
 <span class="sd">            axis order as TZCYXS. Therefore, best axis order in input should be:</span>
 <span class="sd">            Time, Energy, posY, posX. The channels &#39;C&#39; and &#39;S&#39; are automatically</span>
 <span class="sd">            added and can be ignored.</span>
-<span class="sd">        filename (str): full path and name of file to save.</span>
-<span class="sd">        axis_dict (dict): name pairs for correct axis ordering. Keys should be</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            full path and name of file to save.</span>
+<span class="sd">        axis_dict: dict</span>
+<span class="sd">            name pairs for correct axis ordering. Keys should be</span>
 <span class="sd">            any of T,Z,C,Y,X,S. The Corresponding value will be searched among</span>
 <span class="sd">            the dimensions of the xarray, and placed in the right order for</span>
 <span class="sd">            imagej stacks metadata.</span>
-<span class="sd">        units (bool): Not implemented. Will be used to set units in the tif stack</span>
+<span class="sd">        units: bool</span>
+<span class="sd">            Not implemented. Will be used to set units in the tif stack</span>
 <span class="sd">            TODO: expand imagej metadata to include physical units</span>
-
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">),</span> <span class="s1">&#39;Data must be an xarray.DataArray&#39;</span>
@@ -392,12 +394,12 @@
     <span class="n">dims_order</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">if</span> <span class="n">axis_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">axis_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;delayStage&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="s1">&#39;dldTime&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;dldPosY&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="s1">&#39;dldPosX&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;S&#39;</span><span class="p">}</span>
+        <span class="n">axis_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;delayStage&#39;</span><span class="p">,</span><span class="s1">&#39;pumpProbeTime&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">,</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;dldPosY&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;dldPosX&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">]}</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">axis_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -406,8 +408,11 @@
     <span class="c1"># Sort the dimensions in the correct order, and fill with one-point dimensions</span>
     <span class="c1"># the missing axes.</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="n">axis_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
-            <span class="n">dims_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">axis_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="n">axis_name_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">axis_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axis_name_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Too many dimensions for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> axis.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">axis_name_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">dims_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">*</span><span class="n">axis_name_list</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dims_to_add</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">dims_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
@@ -434,10 +439,6 @@
         <span class="n">array_to_tiff</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Input data must be a numpy array or xarray DataArray&#39;</span><span class="p">)</span></div>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="k">pass</span>
 </pre></div>
 
            </div>

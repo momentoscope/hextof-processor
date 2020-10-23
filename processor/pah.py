@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 """
 @author: Steinn Ymir Agustsson
 """
@@ -35,15 +36,15 @@ class BeamtimeDaqAccess(_BeamtimeDaqAccess):
     def create(rootDirectoryOfH5Files):
         """ Creates a BeamtimeDaqAccess object for the given root directory - API
 
-        **Parameter**
-            rootDirectoryOfH5Files (str): The root directory of the HDF files. The root
-                    directory contains sub directories for different FLASH DAQ streams.
+        **Parameter**\n
+        rootDirectoryOfH5Files (str): The root directory of the HDF files. The root
+                directory contains sub directories for different FLASH DAQ streams.
 
-        **Return**
-            BeamtimeDaqAccess: The ready to use beamtime DAQ access object.
+        **Return**\n
+        BeamtimeDaqAccess: The ready to use beamtime DAQ access object.
 
-        **Raise**
-            AssertionError: If the given rootDirectoryOfH5Files does not exist.
+        **Raise**\n
+        AssertionError: If the given rootDirectoryOfH5Files does not exist.
         """
 
         fileAccess = H5FileDataAccess(H5FileManager(rootDirectoryOfH5Files))
@@ -65,8 +66,8 @@ class H5FileDataAccess(_H5FileDataAccess):
         timing channel was not considered a valid channel in the original
         PAH code.
 
-        Returns:
-            (bool): True: channel is valid, False: channel not valid.
+        **Return**\n
+        (bool): True: channel is valid, False: channel not valid.
         """
         return channelName in self.allChannelNames() \
                or channelName.startswith('/uncategorised/') \

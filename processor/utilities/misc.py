@@ -24,9 +24,9 @@ Units are uJ for energy, um for beam diameter, uJ/cm^2 for energy density (and a
 def PulseEnergy400(Diode):
     """Calculate the pulse energy of 400nm laser in uJ. The unit is um for beam diameter.
     
-        :Parameter:
-            Diode : numeric
-                Measured value from photodiode (arb. units)
+    Parameter:
+        Diode: numeric
+            Measured value from photodiode (arb. units)
     """
     return 0.86 * (Diode * 0.0008010439 + 0.0352573)
 
@@ -34,9 +34,9 @@ def PulseEnergy400(Diode):
 def PulseEnergy800(Diode):
     """Calculate the pulse energy of 800nm laser in uJ. The unit is um for beam diameter.
     
-        :Parameter:
-            Diode : numeric
-                Meausred value from photodiode (arb. units)
+    Parameter:
+        Diode: numeric
+            Meausred value from photodiode (arb. units)
     """
 
     return 0.86 * (Diode * 0.0009484577 + 0.1576)
@@ -46,11 +46,11 @@ def EnergyDensity400(Diode, Diameter=600):
     """Calculate the pulse energy density of 400nm laser in uJ/cm^2.
     The units are um for beam diameter, uJ/cm^2 for energy density.
     
-    :Parameters:
-        Diode : numeric
+    Parameters:
+        Diode: numeric
             Measured value from photodiode (arb. units)
-        Diameter : numeric
-            Beam diameter
+        Diameter: numeric | 600
+            Beam diameter.
     """
 
     return PulseEnergy400(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
@@ -60,11 +60,11 @@ def EnergyDensity800(Diode, Diameter=600):
     """Calculate the pulse energy density of 800nm laser in uJ/cm^2.
     The units are um for beam diameter, uJ/cm^2 for energy density.
     
-    :Parameters:
-        Diode : numeric
+    Parameters:
+        Diode: numeric
             Measured value from photodiode (arb. units)
-        Diameter : numeric
-            Beam diameter
+        Diameter: numeric | 600
+            Beam diameter.
     """
 
     return PulseEnergy800(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
@@ -76,6 +76,7 @@ def EnergyDensity800(Diode, Diameter=600):
 
 def parse_category(category, settings_file='default'):
     """ parse setting file and return desired value
+    
     Args:
         category (str): title of the category
         setting_file (str): path to setting file. If set to 'default' it takes
@@ -111,11 +112,15 @@ def parse_category(category, settings_file='default'):
 
 def parse_setting(category, name, settings_file='default'):
     """ parse setting file and return desired value
+    
     Args:
-        category (str): title of the category
-        name (str): name of the parameter
-        setting_file (str): path to setting file. If set to 'default' it takes
-            a file called SETTINGS.ini in the main folder of the repo.
+        category: str
+            title of the category
+        name: str
+            name of the parameter
+        setting_file: str | 'default'
+            path to setting file. If set to 'default' it takes a file called SETTINGS.ini
+            in the main folder of the repo.
     Returns:
         value of the parameter, None if parameter cannot be found.
     Notes:
@@ -149,6 +154,7 @@ def parse_setting(category, name, settings_file='default'):
 
 def write_setting(value, category, name, settings_file='default'):
     """ Write enrty in the settings file
+    
     Args:
         category (str): title of the category
         name (str): name of the parameter
@@ -228,14 +234,14 @@ def parse_logbook(log_text):
 
 
 def radius(df, center=(0, 0)):
-    """ Calculate the radius
+    """ Calculate the radius.
     """
 
     return np.sqrt(np.square(df.posX - center[0]) + np.square(df.posY - center[1]))
 
 
 def argnearest(array, val, rettype='vectorized'):
-    """Find the coordinates of the nD array element nearest to a specified value
+    """Find the coordinates of the nD array element nearest to a specified value.
 
     Args:
         array (np.array): Numeric data array
@@ -262,14 +268,14 @@ def argnearest(array, val, rettype='vectorized'):
 def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
     """ Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI
 
-    :Parameters:
-        data_array : numpy array
-            4D data array, order must be Kx,Ky,Energy,Time
-        filename : str
+    Parameters:
+        data_array: numpy array
+            4D data array, order must be Kx,Ky,Energy,Time.
+        filename: str
             The name of the file to save
-        path : str
-            The path to where to save hdf5 file. If None, uses the "results" folder from SETTINGS.ini
-        overwrite : str
+        path: str
+            The path to where to save hdf5 file. If None, uses the "results" folder from SETTINGS.ini.
+        overwrite: str
             If true, it overwrites existing file with the same
             name. Otherwise raises and error.
     """
@@ -373,12 +379,12 @@ def load_binned_h5(file_name, mode='r', ret_type='list'):
 def get_available_runs(rootpath):  # TODO: store the resulting dictionary to improve performance.
     """ Collects the filepaths to the available experimental run data.
 
-    :Parameters:
-        rootpath : str
+    Parameters:
+        rootpath: str
             path where to look for data (recursive in subdirectories)
 
-    :Return:
-        available_runs : dict
+    Return:
+        available_runs: dict
             dict with run numbers as keys (e.g. 'run12345') and path where to load data from as str.
     """
 
@@ -401,15 +407,15 @@ def get_available_runs(rootpath):  # TODO: store the resulting dictionary to imp
 def get_path_to_run(runNumber, rootpath): # TODO: improve performance
     """ Returns the path to the data of a given run number
 
-    :Parameters:
-        runNumber : str or int
+    Parameters:
+        runNumber: str or int
             run number as integer or string.
-        rootpath : str
+        rootpath: str
             path where to look for data (recursive in subdirectories)
 
 
-    :Return:
-        path : str
+    Return:
+        path: str
             path to where the raw data of the given run number is stored.
     """
 
@@ -575,7 +581,7 @@ def read_and_binn(runNumber, *args, static_bunches=False, source='raw', save=Tru
 
 def create_dataframes(runNumbers, *args):
     """ Creates a parquet dataframe for each run passed.
-    Returns
+    Returns:
         fails: dictionary of runs and error which broke the dataframe generation
     """
     if isinstance(runNumbers, int):
