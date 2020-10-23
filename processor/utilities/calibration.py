@@ -14,8 +14,10 @@ import numpy as np
 
     The formula used is based on the ToF for an electron with a kinetic energy Ek. Then the
     binding energy Eb is given by
+    
+    .. math::
 
-    Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+        -E_b = E_k + W - hv - V = \\frac{1}{2} mv^2 + W - hv - V
 
     With W the work function, hv the photon energy, V the electrostatic potential applied to
     the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
@@ -51,7 +53,10 @@ def tof2energy(t, toffset=None, eoffset=None, l=None):
     The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the
     binding energy :math:`E_b` is given by
 
-    -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+    .. math::
+
+        -E_b = E_k + W - hv - V = \\frac{1}{2} mv^2 + W - hv - V
+
 
     With W the work function, hv the photon energy, V the electrostatic potential applied to
     the sample with respect to the drift section voltage, v the velocity of the electrons in the drift tube,
@@ -120,7 +125,10 @@ def energy2tof(e, toffset=None, eoffset=None, l=None):
     The formula used is based on the ToF for an electron with a kinetic energy :math:`E_k`. Then the
     binding energy :math:`E_b` is given by
 
-    -Eb = Ek+W-hv-V = 1/2 m*v*v +W-hv-V
+    .. math::
+
+        -E_b = E_k + W - hv - V = \\frac{1}{2} mv^2 + W - hv - V
+
 
     With W the work function, hv the photon energy, V the electrostatic potential applied to
     the sample, v the velocity of the electrons in the drift tube, m the mass of the electron.
@@ -238,12 +246,14 @@ def shiftQuadrants(self, shiftQ1=0.231725, shiftQ2=-0.221625, shiftQ3=0.096575, 
 
     Each quadrant of DLD is shifted in DLD time by shiftQn.
     xCenter and yCenter are used to define the center of the division.
+    
+    +-----------+-----------+
+    |    Q2     |     Q4    |
+    +-----------+-----------+
+    |    Q1     |     Q3    |
+    +-----------+-----------+
 
-         Q2     |     Q4
-    ------------|------------
-         Q1     |     Q3
-
-    this picture is upside-down in plt.imshow because it starts from 0 in top right corner
+    This picture is upside-down in ``plt.imshow`` because it starts from 0 in top right corner.
     """
     # Q1
     # daskdataframe.where(condition,value) keeps the data where condition is True

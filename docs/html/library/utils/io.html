@@ -198,17 +198,15 @@ filename (str): full path and name of file to save.</p>
 <dt id="processor.utilities.io.res_to_xarray">
 <code class="sig-prename descclassname">processor.utilities.io.</code><code class="sig-name descname">res_to_xarray</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">res</span></em>, <em class="sig-param"><span class="n">binNames</span></em>, <em class="sig-param"><span class="n">binAxes</span></em>, <em class="sig-param"><span class="n">metadata</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/io.html#res_to_xarray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.io.res_to_xarray" title="Permalink to this definition">¶</a></dt>
 <dd><p>creates a BinnedArray (xarray subclass) out of the given np.array</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dl>
+<dt>Parameters:</dt><dd><dl class="simple">
 <dt>res: np.array</dt><dd><p>nd array of binned data</p>
 </dd>
 </dl>
 <p>binNames (list): list of names of the binned axes
 binAxes (list): list of np.arrays with the values of the axes</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
+<dt>Returns:</dt><dd><dl class="simple">
 <dt>ba: BinnedArray (xarray)</dt><dd><p>an xarray-like container with binned data, axis, and all available metadata</p>
 </dd>
 </dl>
@@ -221,14 +219,13 @@ binAxes (list): list of np.arrays with the values of the axes</p>
 <code class="sig-prename descclassname">processor.utilities.io.</code><code class="sig-name descname">save_binned</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'h5'</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'w'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/io.html#save_binned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.io.save_binned" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save a binned numpy array to h5 file. The file includes the axes
 (taken from the scheduled bins) and the delay stage histogram, if it exists.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>file_name<span class="classifier">str</span></dt><dd><p>Name of the saved file. The extension '.h5' is automatically added.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>file_name: str</dt><dd><p>Name of the saved file. The extension '.h5' is automatically added.</p>
 </dd>
-<dt>path<span class="classifier">str | None</span></dt><dd><p>File path.</p>
+<dt>path: str | None</dt><dd><p>File path.</p>
 </dd>
-<dt>mode<span class="classifier">str | 'w'</span></dt><dd><p>Write mode of h5 file ('w' = write).</p>
+<dt>mode: str | 'w'</dt><dd><p>Write mode of h5 file ('w' = write).</p>
 </dd>
 </dl>
 </dd>
@@ -257,23 +254,23 @@ mode (str): hdf5 read/write mode</p>
 <dl class="py function">
 <dt id="processor.utilities.io.xarray_to_tiff">
 <code class="sig-prename descclassname">processor.utilities.io.</code><code class="sig-name descname">xarray_to_tiff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">axis_dict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/io.html#xarray_to_tiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.io.xarray_to_tiff" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save data to tiff file</p>
-<dl>
+<dd><p>Save data to tiff file.</p>
+<dl class="simple">
 <dt>Args:</dt><dd><dl class="simple">
-<dt>data (xarray.DataArray): data to be saved. ImageJ likes tiff files with</dt><dd><p>axis order as TZCYXS. Therefore, best axis order in input should be:
+<dt>data: xarray.DataArray</dt><dd><p>data to be saved. ImageJ likes tiff files with
+axis order as TZCYXS. Therefore, best axis order in input should be:
 Time, Energy, posY, posX. The channels 'C' and 'S' are automatically
 added and can be ignored.</p>
 </dd>
-</dl>
-<p>filename (str): full path and name of file to save.
-axis_dict (dict): name pairs for correct axis ordering. Keys should be</p>
-<blockquote>
-<div><p>any of T,Z,C,Y,X,S. The Corresponding value will be searched among
+<dt>filename: str</dt><dd><p>full path and name of file to save.</p>
+</dd>
+<dt>axis_dict: dict</dt><dd><p>name pairs for correct axis ordering. Keys should be
+any of T,Z,C,Y,X,S. The Corresponding value will be searched among
 the dimensions of the xarray, and placed in the right order for
 imagej stacks metadata.</p>
-</div></blockquote>
-<dl class="simple">
-<dt>units (bool): Not implemented. Will be used to set units in the tif stack</dt><dd><p>TODO: expand imagej metadata to include physical units</p>
+</dd>
+<dt>units: bool</dt><dd><p>Not implemented. Will be used to set units in the tif stack
+TODO: expand imagej metadata to include physical units</p>
 </dd>
 </dl>
 </dd>

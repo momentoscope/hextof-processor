@@ -572,12 +572,15 @@ based on np.arange instead of np.inspace.</p>
 <dd><p>Creates a dictionary with the most relevant metadata.</p>
 <p><strong>Args</strong></p>
 <dl class="simple">
-<dt>fast_mode (bool): if False skips the heavy computation steps which</dt><dd><p>take a long time.</p>
+<dt>fast_mode: bool | False</dt><dd><p>if False skips the heavy computation steps which take a long time.</p>
 </dd>
 </dl>
 <p><strong>Returns</strong></p>
-<p>metadata (dict): dictionary with metadata information
-# TODO: distribute metadata generation in the appropriate methods.</p>
+<dl class="simple">
+<dt>metadata: dict</dt><dd><p>dictionary with metadata information</p>
+</dd>
+</dl>
+<p># TODO: distribute metadata generation in the appropriate methods.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -586,19 +589,17 @@ based on np.arange instead of np.inspace.</p>
 <dd><p>Parse settings file and assign the variables.</p>
 <dl>
 <dt>Args:</dt><dd><dl>
-<dt>import_all (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>): import method selection.</dt><dd><dl class="field-list simple">
-<dt class="field-odd">True</dt>
-<dd class="field-odd"><p>imports all entries in SETTINGS.ini except those from</p>
-</dd>
-</dl>
-<p>sections [DAQ channels]. These are handled in the DldFlashProcessor subclass.
-Prints a warning when an entry is not found as class attribute
-:False: only imports those that match existing attribute names.</p>
+<dt>import_all: bool | False</dt><dd><p>Option to import method selection.</p>
+<p><code class="docutils literal notranslate"><span class="pre">True</span></code> imports all entries in SETTINGS.ini except those from sections [DAQ channels].
+These are handled in the DldFlashProcessor subclass. Prints a warning when an entry
+is not found as class attribute</p>
+<p><code class="docutils literal notranslate"><span class="pre">False</span></code> only imports those that match existing attribute names.</p>
 </dd>
 </dl>
 </dd>
 <dt>Warnings:</dt><dd><dl class="simple">
-<dt>UserWarning: when an entry is found in the SETTINGS.ini file, which</dt><dd><p>is not present as a pre-defined class attribute, it warns the
+<dt>UserWarning:</dt><dd><p>when an entry is found in the SETTINGS.ini file, which
+is not present as a pre-defined class attribute, it warns the
 user to add id to the code.</p>
 </dd>
 </dl>
@@ -613,12 +614,14 @@ user to add id to the code.</p>
 <p>To save settings simply copy paste the SETTINGS.ini file to the
 utilities/settings folder, and rename it. Use this name in this method
 to then load its content to the SETTINGS.ini file.</p>
-<dl>
+<dl class="simple">
 <dt>Args:</dt><dd><dl class="simple">
-<dt>settings_file_name (str): Name of the settings file to load.</dt><dd><p>This file must be in the folder &quot;hextof-processor/utilities/settings&quot;</p>
+<dt>settings_file_name: str</dt><dd><p>Name of the settings file to load.
+This file must be in the folder &quot;hextof-processor/utilities/settings&quot;.</p>
+</dd>
+<dt>preserve_path: bool | True</dt><dd><p>Disables overwriting local file saving paths. Defaults to True.</p>
 </dd>
 </dl>
-<p>preserve_path: Disables overwriting local file saving paths. Defaults to True</p>
 </dd>
 </dl>
 </dd></dl>
@@ -660,14 +663,19 @@ generates a dictionary with the names of each axis.</p>
 <dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.normalizeAxisMean">
 <code class="sig-name descname">normalizeAxisMean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_array</span></em>, <em class="sig-param"><span class="n">ax</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.normalizeAxisMean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.normalizeAxisMean" title="Permalink to this definition">¶</a></dt>
-<dd><p>Normalize to the mean of the given axis
-Args:</p>
-<blockquote>
-<div><p>data_array (np.ndarray): array to be normalized
-ax (int): axis along which to normalize</p>
-</div></blockquote>
+<dd><p>Normalize to the mean of the given axis.</p>
 <dl class="simple">
-<dt>Returns:</dt><dd><p>norm_array (np.ndarray): normalized array</p>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>data_array: np.ndarray</dt><dd><p>array to be normalized</p>
+</dd>
+<dt>ax: int</dt><dd><p>axis along which to normalize</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>norm_array: np.ndarray</dt><dd><p>normalized array</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>

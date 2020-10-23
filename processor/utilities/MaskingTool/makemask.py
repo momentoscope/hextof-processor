@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
+
 '''
-file makemask.py
-Author: Markus Scholz, Mario Reiser
+@author: Markus Scholz, Mario Reiser\n
 Masking tool for image data
 '''
 

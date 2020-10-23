@@ -188,9 +188,8 @@
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">EnergyDensity400</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Diode</span></em>, <em class="sig-param"><span class="n">Diameter</span><span class="o">=</span><span class="default_value">600</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#EnergyDensity400"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.EnergyDensity400" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the pulse energy density of 400nm laser in uJ/cm^2.
 The units are um for beam diameter, uJ/cm^2 for energy density.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
 <dt>Diode: numeric</dt><dd><p>Measured value from photodiode (arb. units)</p>
 </dd>
 <dt>Diameter: numeric | 600</dt><dd><p>Beam diameter.</p>
@@ -245,7 +244,7 @@ The units are um for beam diameter, uJ/cm^2 for energy density.</p>
 <dl class="py function">
 <dt id="processor.utilities.misc.argnearest">
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">argnearest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em>, <em class="sig-param"><span class="n">val</span></em>, <em class="sig-param"><span class="n">rettype</span><span class="o">=</span><span class="default_value">'vectorized'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#argnearest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.argnearest" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find the coordinates of the nD array element nearest to a specified value</p>
+<dd><p>Find the coordinates of the nD array element nearest to a specified value.</p>
 <dl>
 <dt>Args:</dt><dd><p>array (np.array): Numeric data array
 val (int or float) : Look-up value
@@ -270,7 +269,7 @@ rettype (<a class="reference external" href="https://docs.python.org/3/library/s
 <dt id="processor.utilities.misc.create_dataframes">
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">create_dataframes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">runNumbers</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#create_dataframes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.create_dataframes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a parquet dataframe for each run passed.
-Returns</p>
+Returns:</p>
 <blockquote>
 <div><p>fails: dictionary of runs and error which broke the dataframe generation</p>
 </div></blockquote>
@@ -379,8 +378,8 @@ category.</p>
 </dd>
 <dt>name: str</dt><dd><p>name of the parameter</p>
 </dd>
-<dt>setting_file: str | 'default'</dt><dd><p>path to setting file. If set to 'default' it takes
-a file called SETTINGS.ini in the main folder of the repo.</p>
+<dt>setting_file: str | 'default'</dt><dd><p>path to setting file. If set to 'default' it takes a file called SETTINGS.ini
+in the main folder of the repo.</p>
 </dd>
 </dl>
 </dd>
@@ -400,7 +399,7 @@ a file called SETTINGS.ini in the main folder of the repo.</p>
 <dl class="py function">
 <dt id="processor.utilities.misc.radius">
 <code class="sig-prename descclassname">processor.utilities.misc.</code><code class="sig-name descname">radius</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">center</span><span class="o">=</span><span class="default_value">0, 0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/misc.html#radius"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.misc.radius" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the radius</p>
+<dd><p>Calculate the radius.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -417,11 +416,11 @@ Follows same notation as Windows does for files. See: <a class="reference extern
 <dd><p>Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI</p>
 <dl class="simple">
 <dt>Parameters:</dt><dd><dl class="simple">
-<dt>data_array: numpy array</dt><dd><p>4D data array, order must be Kx,Ky,Energy,Time</p>
+<dt>data_array: numpy array</dt><dd><p>4D data array, order must be Kx,Ky,Energy,Time.</p>
 </dd>
 <dt>filename: str</dt><dd><p>The name of the file to save</p>
 </dd>
-<dt>path: str</dt><dd><p>The path to where to save hdf5 file. If None, uses the &quot;results&quot; folder from SETTINGS.ini</p>
+<dt>path: str</dt><dd><p>The path to where to save hdf5 file. If None, uses the &quot;results&quot; folder from SETTINGS.ini.</p>
 </dd>
 <dt>overwrite: str</dt><dd><p>If true, it overwrites existing file with the same
 name. Otherwise raises and error.</p>
