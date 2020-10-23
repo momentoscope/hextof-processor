@@ -3,32 +3,25 @@
 @author: Steinn Ymir Agustsson
 """
 
-import sys, os
-import configparser
+import os
+import sys
 
-# settings = configparser.ConfigParser() # TODO: find a smarter way
-# if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-#     settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
-# else:
-#     settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+if not 'camp' in sys.modules:
+    import configparser
 
-# importing stuff from PAH modules
-# sys.path.append(settings['paths']['PAH_MODULE_DIR'])
-from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess as _BeamtimeDaqAccess, H5FileDataAccess as _H5FileDataAccess, H5FileManager as _H5FileManager
+    settings = configparser.ConfigParser()  # TODO: find a smarter way
+    if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+        settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+    else:
+        settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+    sys.path.append(settings['paths']['PAH_MODULE_DIR'])
 
-# Below are the redefined classes belonging to PAH that should correct the 
+from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess as _BeamtimeDaqAccess, H5FileDataAccess as _H5FileDataAccess, \
+    H5FileManager as _H5FileManager
+
+
+# Below are the redefined classes belonging to PAH that should correct the
 # problems induced by adding the macrobunchID information to the data.
-
-
-def main():
-    """ Configuring local settings.
-    """
-    settings = configparser.ConfigParser()
-    settings.read('SETTINGS.ini')
-    path = settings['paths']['DATA_RAW_DIR']
-    daqAccess = BeamtimeDaqAccess.create(path)
-    dldPosXName = "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset"
-    dldPosY, otherStuff = daqAccess.allValuesOfRun(dldPosXName, 19135)
 
 
 class BeamtimeDaqAccess(_BeamtimeDaqAccess):
@@ -52,7 +45,7 @@ class BeamtimeDaqAccess(_BeamtimeDaqAccess):
         **Raise**
             AssertionError: If the given rootDirectoryOfH5Files does not exist.
         """
-        
+
         fileAccess = H5FileDataAccess(H5FileManager(rootDirectoryOfH5Files))
         return BeamtimeDaqAccess(fileAccess)
 
@@ -91,7 +84,3 @@ class H5FileManager(_H5FileManager):
 
     def __init__(self, rootDirectoryOfH5Files):
         super(H5FileManager, self).__init__(rootDirectoryOfH5Files)
-
-
-if __name__ == '__main__':
-    main()
