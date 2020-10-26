@@ -17,7 +17,7 @@ import pandas as pd
 from tqdm import tqdm, tqdm_notebook
 from configparser import ConfigParser
 # import matplotlib.pyplot as plt
-from processor.utilities import misc
+from processor.utilities import misc, dfops
 from processor.utilities.io import res_to_xarray
 
 # warnings.resetwarnings()
@@ -147,6 +147,11 @@ class DldProcessor:
         self.ET_CONV_E_OFFSET = np.float64(357.7)
         self.ET_CONV_T_OFFSET = np.float64(82.7)
         self.ET_CONV_L = np.float64(.75)
+        self.K_CENTER_X = np.float64(668)
+        self.K_CENTER_Y = np.float64(658)
+        self.K_ROTATION_ANGLE = np.float64(0)
+        self.STEP_TO_K = np.float64(1.)
+
         self.TOF_IN_NS = bool(True)
         self.RETURN_XARRAY = bool(True)
         self.SINGLE_CORE_DATAFRAME_CREATION = bool(False)
@@ -442,35 +447,9 @@ class DldProcessor:
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStage'] - \
                                                self.ddMicrobunches['bam'] * sign
 
-    @staticmethod
-    def applyJitter(df, amp, col, type):
-        """ Add jittering to a dataframe column.
-
-        Adapted from MPES package: https://github.com/mpes-kit/mpes
-
-        :Parameters:
-            df : dataframe
-                Dataframe to add noise/jittering to.
-            amp : numeric
-                Amplitude scaling for the jittering noise.
-            col : str
-                Name of the column to add jittering to.
-
-        :Return:
-            Uniformly distributed noise vector with specified amplitude and size.
-        """
-        colsize = df[col].size
-
-        if (type == 'uniform'):
-            # Uniform Jitter distribution
-            return df[col] + amp * np.random.uniform(low=-1, high=1, size=colsize)
-        elif (type == 'normal'):
-            # Normal Jitter distribution works better for non-linear transformations and jitter sizes that don't match the original bin sizes
-            return df[col] + amp * np.random.standard_normal(size=colsize)
-
-    def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=False, useJitter=True,
+    def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=False, applyJitter=True,
                         jitterAmplitude=3, jitterType='normal'):
-        """ add calibrated energy axis to dataframe
+        """ Add calibrated energy axis to dataframe
 
         Uses the same equation as in tof2energy in calibrate.
         Args:
@@ -499,8 +478,9 @@ class DldProcessor:
         self.dd['dldTime_corrected'] = self.dd['dldTime']
         if 'dldSectorId' in self.dd.columns:
             self.dd['dldTime_corrected'] -= self.dd['dldSectorId']
-        if useJitter:
-            self.dd['dldTime_corrected'] = self.dd.map_partitions(self.applyJitter, amp=jitterAmplitude, col='dldTime_corrected', type=jitterType)
+        if applyJitter:
+            self.dd['dldTime_corrected'] = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmplitude,
+                                                                  col='dldTime_corrected', type=jitterType)
 
         self.dd['dldTime_corrected'] *= self.TOF_STEP_TO_NS
         if useAvgSampleBias:
@@ -533,7 +513,7 @@ class DldProcessor:
                 invert time direction on pump probe time
 
         """
-        for df in [self.dd,self.ddMicrobunches]:
+        for df in [self.dd, self.ddMicrobunches]:
             df['pumpProbeTime'] = df['delayStage'] - t0
 
             if 'bam' in df:
@@ -542,6 +522,69 @@ class DldProcessor:
                 df['pumpProbeTime'] += df['streakCamera'] * streakSign
             if invertTimeAxis:
                 df['pumpProbeTime'] = - df['pumpProbeTime']
+
+    def calibrateMomentum(self, kCenterX=None, kCenterY=None, rotationAngle=None, px_to_k=None, createPolarCoords=True,
+                          applyJitter=True, jitterAmp=0.5, jitterType='uniform'):
+        """ Add calibrated parallel momentum axes to dataframe.
+
+        Compute the calibration of parallel momentum kx and ky from the detector
+        position dldPosX and dldPosY. Optionally, add columns with thethe polar
+        coordinates kr and kt.
+
+        Uses the same equation as in tof2energy in calibrate.
+        Args:
+            kCenterX : float
+                dldPosX coordinate of the center of k-space
+            kCenterY : float
+                dldPosY coordinate of the center of k-space
+            rotationAngle : float
+                Rotates the momentum coordinates counterclockwise
+            px_to_k : float
+                Conversion between dldPosX/Y to momentum in inverse Angstroms
+            createPolarCoords: bool (True)
+                If True, also creates the polar momentum coordinates kr and kt
+            applyJitter: bool (True)
+                Apply jitter on the original axis to reduce artifacts when binning.
+                This is especially necessary when rotating the momentum coordinates.
+            jitterAmp: float
+                Amplitude of the random jitter applied. Best kept at half the
+                axis original spacing. In case of dldPosX and Y, this should be
+                kept at 0.5, since they are integer steps.
+            jitterType: 'uniform'
+                Choose between 'uniform' or 'normal' random distributions. With
+                 regularly spaced axes as here, uniform is preferred.
+        """
+        if kCenterX is None:
+            kCenterX = self.K_CENTER_X
+        if kCenterY is None:
+            kCenterY = self.K_CENTER_Y
+        if rotationAngle is None:
+            rotationAngle = self.K_ROTATION_ANGLE
+        if px_to_k is None:
+            px_to_k = self.STEP_TO_K
+
+        if applyJitter:
+            X = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmp, col='dldPosX', type=jitterType) - np.float(
+                kCenterX)
+            Y = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmp, col='dldPosY', type=jitterType) - np.float(
+                kCenterY)
+        else:
+            X = self.dd['dldPosX'] - np.float(kCenterX)
+            Y = self.dd['dldPosY'] - np.float(kCenterY)
+        sin, cos = np.sin(rotationAngle), np.cos(rotationAngle)
+
+        self.dd['kx'] = px_to_k * (X * cos + Y * sin)
+        self.dd['ky'] = px_to_k * (- X * sin + Y * cos)
+
+        if createPolarCoords:
+            def radius(df):
+                return np.sqrt(np.square(df['kx']) + np.square(df['ky']))
+
+            def angle(df):
+                return np.arctan2(df['ky'], df['kx'])
+
+            self.dd['kr'] = self.dd.map_partitions(radius)
+            self.dd['kt'] = self.dd.map_partitions(angle)
 
     def createPolarCoordinates(self, kCenter=(250, 250)):
         """ Calculate polar coordinates for k-space values.
