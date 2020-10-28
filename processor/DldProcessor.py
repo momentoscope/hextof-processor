@@ -149,6 +149,7 @@ class DldProcessor:
         self.ET_CONV_L = np.float64(.75)
         self.K_CENTER_X = np.float64(668)
         self.K_CENTER_Y = np.float64(658)
+        self.K_RADIUS = np.float64(230)
         self.K_ROTATION_ANGLE = np.float64(0)
         self.STEP_TO_K = np.float64(1.)
 
