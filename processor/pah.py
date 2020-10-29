@@ -7,7 +7,11 @@
 import os
 import sys
 
-if not 'camp' in sys.modules:
+try:
+    from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess as _BeamtimeDaqAccess, H5FileDataAccess as _H5FileDataAccess, \
+    H5FileManager as _H5FileManager
+
+except ModuleNotFoundError:
     import configparser
 
     settings = configparser.ConfigParser()  # TODO: find a smarter way
@@ -16,9 +20,6 @@ if not 'camp' in sys.modules:
     else:
         settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
     sys.path.append(settings['paths']['PAH_MODULE_DIR'])
-
-from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess as _BeamtimeDaqAccess, H5FileDataAccess as _H5FileDataAccess, \
-    H5FileManager as _H5FileManager
 
 
 # Below are the redefined classes belonging to PAH that should correct the
