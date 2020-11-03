@@ -347,6 +347,20 @@ class DldProcessor:
         newddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
         self.ddMicrobunches = dask.dataframe.concat([self.ddMicrobunches, newddMicrobunches], join='outer',
                                                     interleave_partitions=True)
+
+    def binnedArrayShape(self):
+        
+        s = []
+        for a in self.binAxesList:
+            s.append(len(a))
+        return tuple(s)
+
+    def binnedArraySize(self):
+        s = []
+        for a in self.binAxesList:
+            s.append(len(a))
+        return np.prod(s) * 64
+
     def printRunOverview(self):
         """ Print run information, used in readData and readDataParquet 
         """
