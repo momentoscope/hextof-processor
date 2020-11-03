@@ -448,16 +448,15 @@ class DldProcessor:
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStage'] - \
                                                self.ddMicrobunches['bam'] * sign
 
-    def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=False, applyJitter=True,
-                        jitterAmplitude=3, jitterType='normal'):
+    def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=False, k_shift_func=None,
+                        k_shift_parameters=None, applyJitter=True, jitterAmplitude=4, jitterType='uniform'):
         """ Add calibrated energy axis to dataframe
 
         Uses the same equation as in tof2energy in calibrate.
+
         Args:
-            t : float
-                The time of flight
             toffset : float
-                The time offset from thedld clock start to when the fastest photoelectrons reach the detector
+                The time offset from the dld clock start to when the fastest photoelectrons reach the detector
             eoffset : float
                 The energy offset given by W-hv-V
             l : float
@@ -466,7 +465,15 @@ class DldProcessor:
                 uses the average value for the sample bias across the dataset,
                 possibly reducing noise, but cannot be used on runs where the
                 sample bias was changed
-
+            k_shift_func : function
+                function fitting the shifts of energy across the detector.
+            k_shift_parameters :
+                parameters for the fit function to reproduce the energy shift.
+            applyJitter : bool (True)
+                if true, applies random noise of amplitude determined by jitterAmplitude
+                to the dldTime step values.
+            jitterType :
+                noise distribution, 'uniform' or 'normal'.
         """
         if toffset is None:
             toffset = float(self.settings['processor']['ET_CONV_T_OFFSET'])
@@ -475,22 +482,32 @@ class DldProcessor:
         if l is None:
             l = float(self.settings['processor']['ET_CONV_L'])
 
-        # self.dd['energy'] = self.dd['dldTime'] - self.dd['dldSectorId']
         self.dd['dldTime_corrected'] = self.dd['dldTime']
         if 'dldSectorId' in self.dd.columns:
             self.dd['dldTime_corrected'] -= self.dd['dldSectorId']
+
+        def correct_dldTime_shift(df, func, *args):
+            r = func((df['dldPosX'], df['dldPosY']), *args)
+            if self.TOF_IN_NS:
+                r /= 0.020576131995767355
+            return r
+
+        if k_shift_func is not None and k_shift_parameters is not None:
+            self.dd['dldTime_corrected'] += self.dd.map_partitions(correct_dldTime_shift, k_shift_func,
+                                                                 *k_shift_parameters)
+
         if applyJitter:
             self.dd['dldTime_corrected'] = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmplitude,
                                                                   col='dldTime_corrected', type=jitterType)
 
-        self.dd['dldTime_corrected'] *= self.TOF_STEP_TO_NS
         if useAvgSampleBias:
             eoffset -= self.dd['sampleBias'].mean()
         else:
             eoffset -= self.dd['sampleBias']
 
         k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
-        self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected']) - toffset), 2.) - eoffset
+        self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
+                                         2.) - eoffset
 
     def calibratePumpProbeTime(self, t0=0, bamSign=1, streakSign=1, invertTimeAxis=True):
         """  Add pumpProbeTime axis to dataframes.
