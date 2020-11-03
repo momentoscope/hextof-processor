@@ -427,6 +427,59 @@ def get_path_to_run(runNumber, rootpath): # TODO: improve performance
         raise KeyError('No run number {} under path {}'.format(runNumber, rootpath))
 
 
+def availableParquet(parquet_dir=None):
+    if parquet_dir is None:
+        import configparser
+
+        settings = configparser.ConfigParser()  # TODO: find a smarter way
+        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+            settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+        else:
+            settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+        parquet_dir = settings['paths']['DATA_PARQUET_DIR']
+
+    return [x[:-3] for x in os.listdir(parquet_dir) if '_el' in x]
+
+
+# %% mathematical functions
+# ================================================================================
+def gaussian2D(x,y, amplitude, xo, yo, sigma_x, sigma_y, theta, offset):
+#     x, y = M
+    xo = float(xo)
+    yo = float(yo)
+    a = (np.cos(theta)**2)/(2*sigma_x**2) + (np.sin(theta)**2)/(2*sigma_y**2)
+    b = -(np.sin(2*theta))/(4*sigma_x**2) + (np.sin(2*theta))/(4*sigma_y**2)
+    c = (np.sin(theta)**2)/(2*sigma_x**2) + (np.cos(theta)**2)/(2*sigma_y**2)
+    return offset + amplitude*np.exp( - (a*((x-xo)**2) + 2*b*(x-xo)*(y-yo)
+                        + c*((y-yo)**2)))
+
+def lorentzian2D(x,y, amp, mux, muy, g, c):
+    numerator = np.abs(amp * g)
+    denominator = ((x - mux) ** 2 + (y - muy) ** 2 + g ** 2) ** 1.5
+    return numerator / denominator + c
+
+def multi_lorentzian2D(M,*args):
+    x,y = M
+    arr = np.zeros(x.shape)
+    n=7
+    for i in range(len(args)//n):
+        arr += lorentzian2D(M, *args[i*n:i*n+n])
+    return arr
+
+def multi_gaussian2D(M, *args):
+    x,y = M
+    arr = None
+    n=7
+    for i in range(len(args)//n):
+        if arr is None:
+            arr = gaussian2D(x,y, *args[i*n:i*n+n])
+        else:
+            arr += gaussian2D(x,y, *args[i*n:i*n+n])
+    return arr
+
+
+
+
 # %% String operations
 # ================================================================================
 
