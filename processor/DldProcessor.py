@@ -348,13 +348,14 @@ class DldProcessor:
         self.ddMicrobunches = dask.dataframe.concat([self.ddMicrobunches, newddMicrobunches], join='outer',
                                                     interleave_partitions=True)
 
+    @property
     def binnedArrayShape(self):
-        
         s = []
         for a in self.binAxesList:
             s.append(len(a))
         return tuple(s)
 
+    @property
     def binnedArraySize(self):
         s = []
         for a in self.binAxesList:
