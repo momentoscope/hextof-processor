@@ -1,0 +1,298 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>&lt;no title&gt; &mdash; hextof-processor 0.9.5 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
+        <link rel="next" title="&lt;no title&gt;" href="nobinning.html"/>
+        <link rel="prev" title="2. Save dataset to dask parquet files" href="02_parquet.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/pah.html">3. Interfacing external pah library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/diagnostics.html">4. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/vis.html">6. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/misc.html">7. Miscellaneous (processor.utilities.misc)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_parquet.html">2. Save dataset to dask parquet files</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/howtomaintain.html">2. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>&lt;no title&gt;</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/example/binning.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <p>## Binning multidimensional data</p>
+<p>In order to get n-dimensional numpy array from the generated datasets, it is necessary to bin data along the desired axes. An example starting from loading parquet data is in the following,
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">processor</span> <span class="pre">=</span> <span class="pre">DldFlashProcessor()</span>
+<span class="pre">processor.runNumber</span> <span class="pre">=</span> <span class="pre">18843</span>
+<span class="pre">processor.readDataframes('path/to/file/name')</span>
+<span class="pre">`</span></code></p>
+<p>This can be also done from direct raw data read with <cite>readData</cite> To create the bin array structure, run
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">processor.addBinning('dldPosX',480,980,10)</span>
+<span class="pre">processor.addBinning('dldPosY',480,980,10)</span>
+<span class="pre">`</span></code></p>
+<p>This adds binning along the kx and ky directions, from point 480 to point 980 with bin size of 10. Bins can be created defining start and end points and either step size or number of steps. The resulting array can be obtained using
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">result</span> <span class="pre">=</span> <span class="pre">processor.ComputeBinnedData()</span>
+<span class="pre">`</span></code></p>
+<p>where the resulting numpy array with float64-typed values will have the axes in the same order as binning assignments. Other binning axes commonly used are,
+<code class="docutils literal notranslate"><span class="pre">`eval_rst</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">Proper</span> <span class="pre">name</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">Namestring</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span> <span class="pre">Typical</span> <span class="pre">values</span> <span class="pre">|</span>&#160; <span class="pre">Units</span> <span class="pre">|</span>
+<span class="pre">+=======================+=====================+================+========+</span>
+<span class="pre">|</span>&#160;&#160;&#160; <span class="pre">ToF</span> <span class="pre">delay</span> <span class="pre">(ns)</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">'dldTime'</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160; <span class="pre">620,670,10</span> <span class="pre">*</span>&#160; <span class="pre">|</span>&#160;&#160;&#160; <span class="pre">ns</span>&#160; <span class="pre">|</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">|</span> <span class="pre">Pump-probe</span> <span class="pre">time</span> <span class="pre">delay</span> <span class="pre">|</span>&#160; <span class="pre">'pumpProbeDelay'</span>&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160; <span class="pre">-10,10,1</span>&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160; <span class="pre">ps</span>&#160; <span class="pre">|</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">Separate</span> <span class="pre">DLDs</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160; <span class="pre">'dldDetectors'</span>&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">-1,2,1</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160; <span class="pre">ID</span>&#160; <span class="pre">|</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">|</span> <span class="pre">Microbunch</span> <span class="pre">(pulse)</span> <span class="pre">ID</span> <span class="pre">|</span>&#160;&#160; <span class="pre">'microbunchId'</span>&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160; <span class="pre">0,500,1</span> <span class="pre">**</span>&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160; <span class="pre">ID</span>&#160; <span class="pre">|</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">|</span>&#160;&#160; <span class="pre">Auxiliary</span> <span class="pre">channel</span>&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">'dldAux'</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">|</span> <span class="pre">Beam</span> <span class="pre">arrival</span> <span class="pre">monitor</span>&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'bam'</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160; <span class="pre">fs</span>&#160; <span class="pre">|</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">|</span>&#160;&#160; <span class="pre">FEL</span> <span class="pre">bunch</span> <span class="pre">charge</span>&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160; <span class="pre">'bunchCharge'</span>&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">Macrobunch</span> <span class="pre">ID</span>&#160;&#160;&#160;&#160; <span class="pre">|</span> <span class="pre">'macroBunchPulseId'</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160; <span class="pre">ID</span>&#160; <span class="pre">|</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">|</span>&#160; <span class="pre">Laser</span> <span class="pre">diode</span> <span class="pre">reading</span>&#160; <span class="pre">|</span>&#160;&#160; <span class="pre">'opticalDiode'</span>&#160;&#160;&#160; <span class="pre">|</span> <span class="pre">1000,2000,100</span>&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">?</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">'gmdTunnel'</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">?</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">'gmdBda'</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+-----------------------+---------------------+----------------+--------+</span>
+<span class="pre">`</span></code></p>
+<p>* ToF delay bin size needs to be multiplied by <cite>processor.TOF_STEP_TO_NS</cite> in order to avoid artifacts.</p>
+<p>** binning on microbunch works only when not binning on any other dimension</p>
+<p>Binning is created using np.linspace (formerly was done with <cite>np.arange</cite>). The implementation allows to choose between setting a step size (<cite>useStepSize=True, default</cite>) or using a number of bins (<cite>useStepSize=False</cite>).</p>
+<p>In general, it is not possible to satisfy all 3 parameters: start, end, steps. For this reason, you can choose to give priority to the step size or to the interval size. In the case of <cite>forceEnds=False</cite>, the steps parameter is given priority and the end parameter is redefined, so the interval can actually be larger than expected. In the case of <cite>forceEnds = true</cite>, the stepSize is not enforced, and the interval is divided by the closest step that divides it cleanly. This of course only has meaning when choosing steps that do not cleanly divide the interval.</p>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="nobinning.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="02_parquet.html" class="btn btn-neutral" title="2. Save dataset to dask parquet files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

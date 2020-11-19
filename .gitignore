@@ -17,7 +17,7 @@ lib/*.html
 
 # ignore local settings
 SETTINGS.ini
-utilities/settings/personalSettings
+settings/personalSettings
 \.DS_Store
 
 # ignore cython builds

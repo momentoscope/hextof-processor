@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>&lt;no title&gt; &mdash; hextof-processor 0.9.5 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.5 documentation" href="../index.html"/>
+        <link rel="next" title="&lt;no title&gt;" href="corrections.html"/>
+        <link rel="prev" title="&lt;no title&gt;" href="binning.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/pah.html">3. Interfacing external pah library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/diagnostics.html">4. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/vis.html">6. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/misc.html">7. Miscellaneous (processor.utilities.misc)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_parquet.html">2. Save dataset to dask parquet files</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/howtomaintain.html">2. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>&lt;no title&gt;</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/example/nobinning.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <p>## Processing data without binning</p>
+<p>Sometimes it is not necessary to bin the electrons to extract the data. It is actually possible to directly extract data from the appropriate dataframe. This is useful if, for example, you just want to plot some parameters, not involving the number of electrons that happen to have such a value (this would require
+binning).</p>
+<p>Because of the structure of the dataframe, which is divided in dd and ddMicrobunches, it is possible to get electron-resolved data (the electron number will be on the x axis), or microbunch-resolved data (the microbunch ID, or <cite>uBid</cite>, will be on the x axis).</p>
+<p>The data you can get from the dd dataframe (electron-resolved) includes:
+<code class="docutils literal notranslate"><span class="pre">`eval_rst</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Proper</span> <span class="pre">name</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160; <span class="pre">Namestring</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+================================+====================+</span>
+<span class="pre">|</span> <span class="pre">x</span> <span class="pre">position</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">electron</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160; <span class="pre">'dldPosX'</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|</span> <span class="pre">y</span> <span class="pre">position</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">electron</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160; <span class="pre">'dldPosY'</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">time</span> <span class="pre">of</span> <span class="pre">flight</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160; <span class="pre">'dldTime'</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|pump</span> <span class="pre">probe</span> <span class="pre">delay</span> <span class="pre">stage</span> <span class="pre">reading</span>&#160; <span class="pre">|</span>&#160; <span class="pre">'delayStageTime'</span>&#160; <span class="pre">|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160; <span class="pre">beam</span> <span class="pre">arrival</span> <span class="pre">monitor</span> <span class="pre">jitter</span>&#160;&#160; <span class="pre">|</span>&#160; <span class="pre">'bam'</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">microbunch</span> <span class="pre">ID</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160; <span class="pre">'microbunchId'</span>&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">which</span> <span class="pre">detector</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160; <span class="pre">'dldDetectorId'</span>&#160;&#160; <span class="pre">|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">electron</span> <span class="pre">bunch</span> <span class="pre">charge</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160; <span class="pre">'bunchCharge'</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|pump</span> <span class="pre">laser</span> <span class="pre">optical</span> <span class="pre">diode</span> <span class="pre">reading|</span>&#160; <span class="pre">'opticalDiode'</span>&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160; <span class="pre">gas</span> <span class="pre">monitor</span> <span class="pre">detector</span> <span class="pre">reading</span>&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">|</span>&#160; <span class="pre">before</span> <span class="pre">gas</span> <span class="pre">attenuator</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span> <span class="pre">'gmdTunnel'</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160; <span class="pre">gas</span> <span class="pre">monitor</span> <span class="pre">detector</span> <span class="pre">reading</span>&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">|</span>&#160; <span class="pre">after</span> <span class="pre">gas</span> <span class="pre">attenuator</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span> <span class="pre">'gmdBda'</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">macrobunch</span> <span class="pre">ID</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span> <span class="pre">'macroBunchPulseId'|</span>
+<span class="pre">+--------------------------------+--------------------+</span>
+<span class="pre">`</span></code></p>
+<p>The data you can get from the <cite>ddMicrobunches</cite> (uBID-resolved) dataframe includes:
+<code class="docutils literal notranslate"><span class="pre">`eval_rst</span>
+<span class="pre">+---------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Proper</span> <span class="pre">name</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">Namestring</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+=================================+====================+</span>
+<span class="pre">|</span> <span class="pre">pump</span> <span class="pre">probe</span> <span class="pre">delay</span> <span class="pre">stage</span> <span class="pre">reading</span>&#160; <span class="pre">|</span>&#160; <span class="pre">'delayStageTime'</span>&#160; <span class="pre">|</span>
+<span class="pre">+---------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160; <span class="pre">beam</span> <span class="pre">arrival</span> <span class="pre">monitor</span> <span class="pre">jitter</span>&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'bam'</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+---------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">auxillary</span> <span class="pre">channel</span> <span class="pre">0</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'aux0'</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+---------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160; <span class="pre">auxillary</span> <span class="pre">channel</span> <span class="pre">1</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'aux1'</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>
+<span class="pre">+---------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160;&#160; <span class="pre">electron</span> <span class="pre">bunch</span> <span class="pre">charge</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160; <span class="pre">'bunchCharge'</span>&#160;&#160; <span class="pre">|</span>
+<span class="pre">+---------------------------------+--------------------+</span>
+<span class="pre">|</span> <span class="pre">pump</span> <span class="pre">laser</span> <span class="pre">optical</span> <span class="pre">diode</span> <span class="pre">reading|</span>&#160;&#160; <span class="pre">'opticalDiode'</span>&#160;&#160; <span class="pre">|</span>
+<span class="pre">+---------------------------------+--------------------+</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">macrobunch</span> <span class="pre">ID</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span> <span class="pre">'macroBunchPulseId'|</span>
+<span class="pre">+---------------------------------+--------------------+</span>
+<span class="pre">`</span></code></p>
+<p>Some of the values overlap, and in these cases, you can get the values either uBid-resolved or electron-resolved.</p>
+<p>An example of how to retrieve values both from the <cite>dd</cite> and <cite>ddMicrobunches</cite> dataframes:
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">bam_dd=processor.dd['bam'].values.compute()</span>
+<span class="pre">bam_uBid=processor.ddMicrobunches['bam'].values.compute()</span>
+<span class="pre">`</span></code>
+Be careful when reading the data not to include IDs that contain NaNs (usually at the beginning), otherwise this method will return all NaNs.</p>
+<p>It is also possible to access the electron-resolved data on a <cite>uBid</cite> basis by using
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">uBid=processor.dd['microbunchId'].values.compute()</span>
+<span class="pre">value[int(uBid[j])]</span>
+<span class="pre">`</span></code>
+or to plot the values as a function of <cite>uBid</cite> by using
+<a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
+uBid=processor.dd['microbunchId'].values.compute()
+MBid=processor.dd['macroBunchPulseId'].values.compute()
+bam=processor.dd['bam'].values.compute()</p>
+<p>pl.plot(uBid+processor.bam.shape[1]*MBid,bam)
+<a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+<p>The following code, as an example, averages <cite>gmdTunnel</cite> values for electrons that have the same <cite>uBid</cite> (it effectively also bins the electrons in <cite>avgNorm</cite> as a side effect):
+<a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a>python
+uBid=processor.dd['microbunchId'].values.compute()
+pow=processor.dd['gmdBDA'].values.compute()</p>
+<p>avgPow=np.zeros(500)
+avgNorm=np.zeros(500)
+for j in range(0,len(uBid)):</p>
+<blockquote>
+<div><dl class="simple">
+<dt>if(uBid[j]&gt;0 and uBid[j]&lt;500 and pow[j]&gt;0):</dt><dd><p>avgNorm[int(uBid[j])]+=1
+avgPow1[int(uBid[j])]=(avgPow1[int(uBid[j])]*(avgNorm[int(uBid[j])])+pow[j])/(avgNorm[int(uBid[j])]+1.0)</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="corrections.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="binning.html" class="btn btn-neutral" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
