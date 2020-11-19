@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)  # avoid printing FutureWarnings from other packages
@@ -18,10 +19,6 @@ from configparser import ConfigParser
 # import matplotlib.pyplot as plt
 from utilities import misc
 from processor.BinnedArrays import res_to_xarray
-from utilities import calibration
-
-
-
 # warnings.resetwarnings()
 
 _VERBOSE = False
@@ -60,7 +57,7 @@ class DldProcessor:
         """
 
         if settings is not None:
-            self.load_settings(settings)
+            self.loadSettings(settings)
         else:
             self.initAttributes()  # in else because it is called already in load_settings
 
@@ -128,28 +125,36 @@ class DldProcessor:
     def initAttributes(self, import_all=False):
         """ Parse settings file and assign the variables.
 
-
-
         Args:
-            import_all (:obj:`bool`): import method selection.
-                :True: imports all entries in SETTINGS.ini except those from
-                sections [DAQ channels]. These are handled in the DldFlashProcessor subclass.
-                Prints a warning when an entry is not found as class attribute
-                :False: only imports those that match existing attribute names.
+            import_all: bool | False
+                Option to import method selection.\n
+                ``True`` imports all entries in SETTINGS.ini except those from sections [DAQ channels].
+                These are handled in the DldFlashProcessor subclass. Prints a warning when an entry
+                is not found as class attribute\n
+                ``False`` only imports those that match existing attribute names.
         Warnings:
-            UserWarning: when an entry is found in the SETTINGS.ini file, which
+            UserWarning:
+                when an entry is found in the SETTINGS.ini file, which
                 is not present as a pre-defined class attribute, it warns the
                 user to add id to the code.
         """
         # Hard coded class attributes which can be overwritten by settings files.
         self.N_CORES = int(max(os.cpu_count() - 1, 1))
         self.UBID_OFFSET = int(0)
-        self.CHUNK_SIZE = int(1000000)
-        self.TOF_STEP_TO_NS = np.float64(0.020574)
+        self.CHUNK_SIZE = int(100000)
+        self.TOF_STEP_TO_NS = np.float64(0.020576131995767355)
         self.ET_CONV_E_OFFSET = np.float64(357.7)
         self.ET_CONV_T_OFFSET = np.float64(82.7)
         self.ET_CONV_L = np.float64(.75)
+        self.K_CENTER_X = np.float64(668)
+        self.K_CENTER_Y = np.float64(658)
+        self.K_RADIUS = np.float64(230)
+        self.K_ROTATION_ANGLE = np.float64(0)
+        self.STEP_TO_K = np.float64(1.)
+
         self.TOF_IN_NS = bool(True)
+        self.RETURN_XARRAY = bool(True)
+        self.SINGLE_CORE_DATAFRAME_CREATION = bool(False)
 
         self.DATA_RAW_DIR = str('/gpfs/pg2/current/raw/hdf')
         self.DATA_H5_DIR = str('/home/pg2user/data/h5')
@@ -157,7 +162,6 @@ class DldProcessor:
         self.DATA_RESULTS_DIR = str('/home/pg2user/DATA/results/')
         self.LOG_DIR = str('/home/pg2user/DATA/logs/')
         self.PAH_MODULE_DIR = str('')
-        self.SINGLE_CORE_DATAFRAME_CREATION = bool(False)
 
         # parse the currently loaded settings file and store as class attributes
         # each entry which is not in DAQ channels. Those are handled in the
@@ -236,9 +240,11 @@ class DldProcessor:
         to then load its content to the SETTINGS.ini file.
 
         Args:
-            settings_file_name (str): Name of the settings file to load.
-                This file must be in the folder "hextof-processor/utilities/settings"
-            preserve_path: Disables overwriting local file saving paths. Defaults to True
+            settings_file_name: str
+                Name of the settings file to load.
+                This file must be in the folder "hextof-processor/utilities/settings".
+            preserve_path: bool | True
+                Disables overwriting local file saving paths. Defaults to True.
 
         """
 
@@ -249,11 +255,11 @@ class DldProcessor:
         new_settings = ConfigParser()
         if settings_file_name[-4:] != '.ini':
             settings_file_name += '.ini'
-        new_settings_file = os.path.join(root_folder, 'utilities', 'settings', settings_file_name)
+        new_settings_file = os.path.join(root_folder, 'settings', settings_file_name)
         new_settings.read(new_settings_file)
         if len(new_settings.sections()) == 0:
             print(f'No settings file {settings_file_name} found.')
-            available_settings = os.listdir(os.path.join(root_folder, 'utilities', 'settings'))
+            available_settings = os.listdir(os.path.join(root_folder, 'settings'))
             print('Available settings files are:', *available_settings, sep='\n\t')
         else:
             if preserve_path:
@@ -340,6 +346,21 @@ class DldProcessor:
         newddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
         self.ddMicrobunches = dask.dataframe.concat([self.ddMicrobunches, newddMicrobunches], join='outer',
                                                     interleave_partitions=True)
+
+    @property
+    def binnedArrayShape(self):
+        s = []
+        for a in self.binAxesList:
+            s.append(len(a))
+        return tuple(s)
+
+    @property
+    def binnedArraySize(self):
+        s = []
+        for a in self.binAxesList:
+            s.append(len(a))
+        return np.prod(s) * 64
+
     def printRunOverview(self):
         """ Print run information, used in readData and readDataParquet 
         """
@@ -449,7 +470,6 @@ class DldProcessor:
             source : str
                 channel to apply the BAM correction. Default is the 'delayStage' channel
         """
-
         self.dd['pumpProbeTime'] = self.dd[source] - \
                                    (self.dd['bam']-centered*self.dd['bam'].mean()) * sign
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches[source] - \
@@ -499,54 +519,163 @@ class DldProcessor:
                                    self.dd['delayStageDirection']*backSlash
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches[source]# - \
         #                                       self.ddMicrobunches['delayStageDirection']*backSlash      
-    
-    def energyConversion(self, toff=432.9,eoff=21.6, l=0.75):
-        """ convert 'dldTime' channel in to binding energy.
-        :Parameter:
-            toff : float 
-                time offset
-            eoff :float
-                energy offset
-            l : float
-                 TOF tube length 
-        """
-        def convert2Energy(df):
-            return calibration.t2e(df.dldTime*self.TOF_STEP_TO_NS,toffset=toff,eoffset=eoff, l=l)
-        self.dd['energy']=self.dd.map_partitions(convert2Energy)            
-                  
-    def rotate(self, angle, center=(0,0)):
-        """ rotate the detector image.
-        :Parameter:
-            angle : float 
-                angle to rotate the X Pos and Y Pos on the detector in degree
-            center : (float,float)
-                 position of the center of rotation. Defaut is (0,0) 
-        """
-        w=angle/180*np.pi
-        x0,y0=center
-                  
-        def rotY(df):
-            return(np.sin(w)*(df.dldPosX-x0)+np.cos(w)*(df.dldPosY-y0))+y0
-        def rotX(df):
-            return(np.cos(w)*(df.dldPosX-x0)-np.sin(w)*(df.dldPosY-y0))+x0
-                  
-        self.dd['rotPosX_{:.1f}'.format(angle)]= self.dd.map_partitions(rotX)
-        self.dd['rotPosY_{:.1f}'.format(angle)]= self.dd.map_partitions(rotY)
-    
-    def shiftChannel(self, channel, shiftoffset, newChannel=None):
-        """ Shift all values of one channel by a constant.
-        :Parameter:
-            channel : str 
-                channelname of the channel 
-            center : (float,float)
-                 position of the center of rotation. Defaut is (0,0)
-            newChannel : str
-                channelname of new channel. Default is None (old channel will be overwriten)
-        """
-        if newChannel==None:
-            newChannel=channel
-        self.dd[newChannel]=self.dd[channel]-shiftoffset
         
+    def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=False, k_shift_func=None,
+                        k_shift_parameters=None, applyJitter=True, jitterAmplitude=4, jitterType='uniform'):
+        """ Add calibrated energy axis to dataframe
+
+        Uses the same equation as in tof2energy in calibrate.
+
+        Args:
+            toffset : float
+                The time offset from the dld clock start to when the fastest photoelectrons reach the detector
+            eoffset : float
+                The energy offset given by W-hv-V
+            l : float
+                the effective length of the drift section
+            useAvgSampleBias: bool (False)
+                uses the average value for the sample bias across the dataset,
+                possibly reducing noise, but cannot be used on runs where the
+                sample bias was changed
+            k_shift_func : function
+                function fitting the shifts of energy across the detector.
+            k_shift_parameters :
+                parameters for the fit function to reproduce the energy shift.
+            applyJitter : bool (True)
+                if true, applies random noise of amplitude determined by jitterAmplitude
+                to the dldTime step values.
+            jitterType :
+                noise distribution, 'uniform' or 'normal'.
+        """
+        if toffset is None:
+            toffset = float(self.settings['processor']['ET_CONV_T_OFFSET'])
+        if eoffset is None:
+            eoffset = float(self.settings['processor']['ET_CONV_E_OFFSET'])
+        if l is None:
+            l = float(self.settings['processor']['ET_CONV_L'])
+
+        self.dd['dldTime_corrected'] = self.dd['dldTime']
+        if 'dldSectorId' in self.dd.columns:
+            self.dd['dldTime_corrected'] -= self.dd['dldSectorId']
+
+        def correct_dldTime_shift(df, func, *args):
+            r = func((df['dldPosX'], df['dldPosY']), *args)
+            if self.TOF_IN_NS:
+                r /= 0.020576131995767355
+            return r
+
+        if k_shift_func is not None and k_shift_parameters is not None:
+            self.dd['dldTime_corrected'] += self.dd.map_partitions(correct_dldTime_shift, k_shift_func,
+                                                                 *k_shift_parameters)
+
+        if applyJitter:
+            self.dd['dldTime_corrected'] = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmplitude,
+                                                                  col='dldTime_corrected', type=jitterType)
+
+        if useAvgSampleBias:
+            eoffset -= self.dd['sampleBias'].mean()
+        else:
+            eoffset -= self.dd['sampleBias']
+
+        k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
+        self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
+                                         2.) - eoffset
+
+    def calibratePumpProbeTime(self, t0=0, bamSign=1, streakSign=1, invertTimeAxis=True):
+        """  Add pumpProbeTime axis to dataframes.
+
+        Correct pump probe time by BAM and/or streak camera
+
+        Args:
+            t0: float
+                pump probe time overlap
+            bamSign: -1,+1
+                sign of the bam correction:
+                    +1 : pumpProbeTime =  delayStage + bam
+                    -1 : pumpProbeTime =  delayStage - bam
+                     0 : ignore bam correction
+            streakSign: -1,0,+1
+                sign of the bam correction:
+                    +1 : pumpProbeTime =  delayStage + streakCam
+                    -1 : pumpProbeTime =  delayStage - streakCam
+                     0 : ignore streakCamera correction
+            invertTimeAxis: bool (True)
+                invert time direction on pump probe time
+
+        """
+        for df in [self.dd, self.ddMicrobunches]:
+            df['pumpProbeTime'] = df['delayStage'] - t0
+
+            if 'bam' in df:
+                df['pumpProbeTime'] += df['bam'] * bamSign
+            if 'streakCamera' in df:
+                df['pumpProbeTime'] += df['streakCamera'] * streakSign
+            if invertTimeAxis:
+                df['pumpProbeTime'] = - df['pumpProbeTime']
+
+    def calibrateMomentum(self, kCenterX=None, kCenterY=None, rotationAngle=None, px_to_k=None, createPolarCoords=True,
+                          applyJitter=True, jitterAmp=0.5, jitterType='uniform'):
+        """ Add calibrated parallel momentum axes to dataframe.
+
+        Compute the calibration of parallel momentum kx and ky from the detector
+        position dldPosX and dldPosY. Optionally, add columns with thethe polar
+        coordinates kr and kt.
+
+        Uses the same equation as in tof2energy in calibrate.
+        Args:
+            kCenterX : float
+                dldPosX coordinate of the center of k-space
+            kCenterY : float
+                dldPosY coordinate of the center of k-space
+            rotationAngle : float
+                Rotates the momentum coordinates counterclockwise
+            px_to_k : float
+                Conversion between dldPosX/Y to momentum in inverse Angstroms
+            createPolarCoords: bool (True)
+                If True, also creates the polar momentum coordinates kr and kt
+            applyJitter: bool (True)
+                Apply jitter on the original axis to reduce artifacts when binning.
+                This is especially necessary when rotating the momentum coordinates.
+            jitterAmp: float
+                Amplitude of the random jitter applied. Best kept at half the
+                axis original spacing. In case of dldPosX and Y, this should be
+                kept at 0.5, since they are integer steps.
+            jitterType: 'uniform'
+                Choose between 'uniform' or 'normal' random distributions. With
+                 regularly spaced axes as here, uniform is preferred.
+        """
+        if kCenterX is None:
+            kCenterX = self.K_CENTER_X
+        if kCenterY is None:
+            kCenterY = self.K_CENTER_Y
+        if rotationAngle is None:
+            rotationAngle = self.K_ROTATION_ANGLE
+        if px_to_k is None:
+            px_to_k = self.STEP_TO_K
+
+        if applyJitter:
+            X = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmp, col='dldPosX', type=jitterType) - np.float(
+                kCenterX)
+            Y = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmp, col='dldPosY', type=jitterType) - np.float(
+                kCenterY)
+        else:
+            X = self.dd['dldPosX'] - np.float(kCenterX)
+            Y = self.dd['dldPosY'] - np.float(kCenterY)
+        sin, cos = np.sin(rotationAngle), np.cos(rotationAngle)
+
+        self.dd['kx'] = px_to_k * (X * cos + Y * sin)
+        self.dd['ky'] = px_to_k * (- X * sin + Y * cos)
+
+        if createPolarCoords:
+            def radius(df):
+                return np.sqrt(np.square(df['kx']) + np.square(df['ky']))
+
+            def angle(df):
+                return np.arctan2(df['ky'], df['kx'])
+
+            self.dd['kr'] = self.dd.map_partitions(radius)
+            self.dd['kt'] = self.dd.map_partitions(angle)
+
     def createPolarCoordinates(self, kCenter=(250, 250)):
         """ Calculate polar coordinates for k-space values.
 
@@ -606,13 +735,15 @@ class DldProcessor:
             raise ValueError(
                 'No pump probe time bin, could not normalize to delay stage histogram.')
 
-    def normalizeDelay(self, data_array, ax='pumpProbeTime', preserve_mean=True):
-        # TODO: work on better implementation and accessibility for this method
+    def normalizeDelay(self, data_array, ax=None, preserve_mean=True):
         """ Normalizes the data array to the number of counts per delay stage step.
 
         :Parameter:
             data_array : numpy array
                 data array containing binned data, as created by the ``computeBinnedData`` method.
+            ax : str
+                name of the axis to normalize to, default is None, which uses as
+                normalization axis "pumpProbeTime" if found, otherwise "delayStage"
             preserve_mean : bool | True
                 if True, divides the histogram by its mean, preserving the average value of the 
                 normalized array.   
@@ -623,17 +754,23 @@ class DldProcessor:
             data_array_normalized : numpy array
                 normalized version of the input array.
         """
-        if 'pumpProbeTime' in self.binNameList:
-            ax='pumpProbeTime'
-            nhist = self.pumpProbeHistogram.copy()
-        elif 'delayStage' in self.binNameList:
-            ax='delayStage'
-            nhist = self.delayStageHistogram.copy()
+
+        if ax is None:
+            if 'pumpProbeTime' in self.binNameList:
+                ax='pumpProbeTime'
+                nhist = self.pumpProbeTimeHistogram.copy()
+            elif 'delayStage' in self.binNameList:
+                ax='delayStage'
+                nhist = self.delayStageHistogram.copy()
+            else:
+                raise ValueError(f'No axis pump probe or delay stage histogram found, could not normalize.')
         else:
-            raise ValueError(
-                'No pump probe time bin, could not normalize to delay stage histogram.')
+            try:
+                nhist = getattr(self,f'{ax}Histogram')
+            except:
+                raise ValueError(f'No axis {ax} histogram found, could not normalize.')
         idx = self.binNameList.index(ax)
-        print('normalized pumpProbe data found along axis {}'.format(idx))
+        print(f'normalized {ax} data found along axis {idx}')
         data_array_normalized = np.swapaxes(data_array, 0, idx)
         
         for i in range(np.ndim(data_array_normalized) - 1):
@@ -692,12 +829,16 @@ class DldProcessor:
         return norm_array
 
     def normalizeAxisMean(self, data_array, ax):
-        """ Normalize to the mean of the given axis
+        """ Normalize to the mean of the given axis.
+        
         Args:
-            data_array (np.ndarray): array to be normalized
-            ax (int): axis along which to normalize
+            data_array: np.ndarray
+                array to be normalized
+            ax: int
+                axis along which to normalize
         Returns:
-            norm_array (np.ndarray): normalized array
+            norm_array: np.ndarray
+                normalized array
         """
         print("normalizing mean on axis {}".format(ax))
         try:
@@ -736,7 +877,7 @@ class DldProcessor:
             return out
 
     @property
-    def pumpProbeHistogram(self):
+    def pumpProbeTimeHistogram(self):
         """ Easy access to pump probe normalization array.
         Mostly for retrocompatibility"""
         try:
@@ -770,14 +911,15 @@ class DldProcessor:
 
         Filters the columns of ``dd`` and ``ddMicrobunches`` dataframes in place.
 
-        Args:
-            colname (str): name of the column in the dask dataframes
-            lb (:obj:`float',optional):  lower bound of the filter
-                if :None: (default), ignores lower boundary
-            ub (:obj:`float',optional):  upper bound of the filter
-                if :None: (default), ignores upper boundary
-        Attention:
-            this is an irreversible process, since the dataframe gets overwritten.
+        **Parameters**\n
+        colname (str): name of the column in the dask dataframes
+        lb (:obj:`float',optional):  lower bound of the filter
+            if :None: (default), ignores lower boundary
+        ub (:obj:`float',optional):  upper bound of the filter
+            if :None: (default), ignores upper boundary
+        
+        **Attention**\n
+        This is an irreversible process, since the dataframe gets overwritten.
         """
 
         if colname in self.dd.columns:
@@ -810,30 +952,30 @@ class DldProcessor:
         cleanly. This of course only has meaning when choosing steps that do not
         cleanly divide the interval.
 
-        :Parameters:
-            start : float
-                Position of first bin
-            end : float
-                Position of last bin (not included!)
-            steps : float
-                Define the bin size. If useStepSize=True (default),
-                this is the step size, while if useStepSize=False, then this is the
-                number of bins. In Legacy mode (force_legacy=True, or
-                processor._LEGACY_MODE=True)
-            useStepSize : bool | True
-                Tells python to interpret steps as a step size if
-                True, or as the number of steps if False
-            forceEnds : bool | False
-                Tells python to give priority to the end parameter
-                rather than the step parameter (see above for more info)
-            include_last : bool | True
-                Closes the interval on the right when true. If
-                using step size priority, will expand the interval to include
-                the next value when true, will shrink the interval to contain all
-                points within the bounds if false.
-            force_legacy : bool | False
-                If true, imposes old method for generating bins,
-                based on np.arange instead of np.inspace.
+        **Parameters**\n
+        start: float
+            Position of first bin
+        end: float
+            Position of last bin (not included!)
+        steps: float
+            Define the bin size. If useStepSize=True (default),
+            this is the step size, while if useStepSize=False, then this is the
+            number of bins. In Legacy mode (force_legacy=True, or
+            processor._LEGACY_MODE=True)
+        useStepSize: bool | True
+            Tells python to interpret steps as a step size if
+            True, or as the number of steps if False
+        forceEnds: bool | False
+            Tells python to give priority to the end parameter
+            rather than the step parameter (see above for more info)
+        include_last: bool | True
+            Closes the interval on the right when true. If
+            using step size priority, will expand the interval to include
+            the next value when true, will shrink the interval to contain all
+            points within the bounds if false.
+        force_legacy: bool | False
+            If true, imposes old method for generating bins,
+            based on np.arange instead of np.inspace.
         """
 
         from decimal import Decimal
@@ -880,43 +1022,43 @@ class DldProcessor:
         as in this list. The attribute binRangeList will contain the ranges of
         the binning used for the corresponding dimension.
 
-        :Parameters:
-            name : str
-                Name of the column to apply binning to. Possible column names are`:`
-                posX, posY, dldTime, pumpProbeTime, dldDetector, etc.
-            start : float
-                Position of first bin
-            end : float
-                Position of last bin (not included!)
-            steps : float
-                The bin size, if useStepSize=True (default),
-                this is the step size, while if useStepSize=False, then this is the
-                number of bins. In Legacy mode (force_legacy=True, or
-                processor._LEGACY_MODE=True)
-            useStepSize : bool | True
-                Tells Python how to interpret steps.
+        **Parameters**\n
+        name: str
+            Name of the column to apply binning to. Possible column names are`:`
+            posX, posY, dldTime, pumpProbeTime, dldDetector, etc.
+        start: float
+            Position of first bin
+        end: float
+            Position of last bin (not included!)
+        steps: float
+            The bin size, if useStepSize=True (default),
+            this is the step size, while if useStepSize=False, then this is the
+            number of bins. In Legacy mode (force_legacy=True, or
+            processor._LEGACY_MODE=True)
+        useStepSize: bool | True
+            Tells Python how to interpret steps.
+            
+            :True: interpret steps as a step size.
+            :False: interpret steps as the number of steps.
+        forceEnds: bool | False
+            Tells python to give priority to the end parameter
+            rather than the step parameter (see genBins for more info)
+        include_last: bool | True
+            Closes the interval on the right when true. If
+            using step size priority, will expand the interval to include
+            the next value when true, will shrink the interval to contain all
+            points within the bounds if false.
+        force_legacy: bool | False
+            :True: use np.arange method to generate bins.
+            :False: use np.linspace method to generate bins.
                 
-                :True: interpret steps as a step size.
-                :False: interpret steps as the number of steps.
-            forceEnds : bool | False
-                Tells python to give priority to the end parameter
-                rather than the step parameter (see genBins for more info)
-            include_last : bool | True
-                Closes the interval on the right when true. If
-                using step size priority, will expand the interval to include
-                the next value when true, will shrink the interval to contain all
-                points within the bounds if false.
-            force_legacy : bool | False
-                :True: use np.arange method to generate bins.
-                :False: use np.linspace method to generate bins.
+        **Return**\n
+        axes: numpy array
+            axis of the binned dimesion. The points defined on this axis are the middle points of
+            each bin.
                 
-        :Return:
-            axes : numpy array
-                axis of the binned dimesion. The points defined on this axis are the middle points of
-                each bin.
-                
-        :Note:
-            If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.
+        **Note**\n
+        If the name is 'pumpProbeTime': sets self.delaystageHistogram for normalization.
         
         .. seealso::
         
@@ -960,24 +1102,25 @@ class DldProcessor:
         self.binRangeList = []
         self.binAxesList = []
 
-    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False):
+    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False, usePbar=True):
         """ Use the bin list to bin the data.
         
-        :Parameters:
-            saveAs : str | None
-                full file name where to save the result (forces return_xarray
-                to be true)
-            return_xarray : bool
-                if true, returns and xarray with all available axis and metadata
-                information attached, otherwise a numpy.array
-        :Returns:
-            result : numpy.array or xarray.DataArray
-                A numpy array of float64 values. Number of bins defined will define the
-                dimensions of such array.
+        **Parameters**\n
+        saveAs: str | None
+            full file name where to save the result (forces return_xarray
+            to be true).
+        return_xarray: bool
+            if true, returns and xarray with all available axis and metadata
+            information attached, otherwise a numpy.array.
+        
+        **Returns**\n
+        result: numpy.array or xarray.DataArray
+            A numpy array of float64 values. Number of bins defined will define the
+            dimensions of such array.
 
-        :Notes:
-            postProcess method must be used before computing the binned data if binning
-            along pumpProbeDelay or polar k-space coordinates.
+        **Notes**\n
+        postProcess method must be used before computing the binned data if binning
+        along pumpProbeDelay or polar k-space coordinates.
         """
         if return_xarray is None:
             try:
@@ -1004,12 +1147,14 @@ class DldProcessor:
         # be faster!
         def analyzePartNumpy(part):
             """ Function called by each thread of the analysis.
-
-            This now should be faster.
-            Args:
-                part : partition to process
-            Returns:
-                res: binned array calculated from this partition
+            
+            **Parameter**\n
+            part: partition
+                partition to process.
+            
+            **Returns**\n
+            res: numpy array
+                binned array calculated from this partition.
             """
             # get the data as numpy:
             vals = part.values
@@ -1045,7 +1190,7 @@ class DldProcessor:
         with warnings.catch_warnings():
             warnings.simplefilter(warnString)
 
-            for i in tqdm_notebook(range(0, self.dd.npartitions, self.N_CORES)):
+            for i in tqdm_notebook(range(0, self.dd.npartitions, self.N_CORES),disable=not usePbar):
                 resultsToCalculate = []
                 # process the data in blocks of n partitions (given by the number
                 # of cores):
@@ -1099,11 +1244,13 @@ class DldProcessor:
     def get_metadata(self, fast_mode=False):
         """  Creates a dictionary with the most relevant metadata.
 
-        Args:
-            fast_mode (bool): if False skips the heavy computation steps which
-                take a long time.
-        Returns:
-            metadata (dict): dictionary with metadata information
+        **Args**\n
+        fast_mode: bool | False
+            if False skips the heavy computation steps which take a long time.
+        
+        **Returns**\n
+        metadata: dict
+            dictionary with metadata information
         # TODO: distribute metadata generation in the appropriate methods.
         """
         print('Generating metadata...')
@@ -1146,7 +1293,7 @@ class DldProcessor:
         if hasattr(self, 'delaystageHistogram'):
             metadata['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
         elif hasattr(self, 'pumpProbeHistogram'):
-            metadata['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeHistogram}
+            metadata['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeTimeHistogram}
 
         # if not fast_mode:
         #     try:
@@ -1166,16 +1313,17 @@ class DldProcessor:
         return metadata
 
     def res_to_xarray_old(self, res, fast_mode=False):
-        """ creates a BinnedArray (xarray subclass) out of the given np.array
+        """ Creates a BinnedArray (xarray subclass) out of the given numpy.array.
         
-        :Parameters:
-            res: np.array
-                nd array of binned data
-            fast_mode: bool default True
-                if True, it skips the creation of metadata element which require computation.
-        :Returns:
-            ba: BinnedArray (xarray)
-                an xarray-like container with binned data, axis, and all available metadata
+        **Parameters**\n
+        res: np.array
+            nd array of binned data
+        fast_mode: bool default True
+            if True, it skips the creation of metadata element which require computation.
+        
+        **Returns**\n
+        ba: BinnedArray (xarray)
+            an xarray-like container with binned data, axis, and all available metadata.
         """
         dims = self.binNameList
         coords = {}
@@ -1232,7 +1380,7 @@ class DldProcessor:
         if hasattr(self, 'delaystageHistogram'):
             ba.attrs['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
         elif hasattr(self, 'pumpProbeHistogram'):
-            ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeHistogram}
+            ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeTimeHistogram}
         if not fast_mode:
             try:
                 axis_values = []
@@ -1254,24 +1402,24 @@ class DldProcessor:
                                rank=None, size=None):
         """ Use the bin list to bin the data. Cluster-compatible version (Maciej Dendzik)
         
-        :Parameters:
-            saveName : str | None
-                filename
-            savePath : str | None
-                file path
-            rank : int | None
-                Rank number of cluster computer
-            size : int | None
-                Size of partition
+        **Parameters**\n
+        saveName: str | None
+            filename
+        savePath: str | None
+            file path
+        rank: int | None
+            Rank number of cluster computer
+        size: int | None
+            Size of partition
         
-        :Return:
-            result : numpy array
-                A numpy array of float64 values. The number of bins determines the
-                dimensionality of the output array.
+        **Return**\n
+        result: numpy array
+            A numpy array of float64 values. The number of bins determines the
+            dimensionality of the output array.
 
-        :Notes:
-            postProcess method must be used before computing the binned data if binning
-            is applied along pumpProbeDelay or polar k-space coordinates.
+        **Notes**\n
+        postProcess method must be used before computing the binned data if binning
+        is applied along pumpProbeDelay or polar k-space coordinates.
         """
 
         def analyzePart(part):
@@ -1348,15 +1496,15 @@ class DldProcessor:
         """ Save a binned numpy array to h5 file. The file includes the axes
         (taken from the scheduled bins) and the delay stage histogram, if it exists.
 
-        :Parameters:
-            binnedData : numpy array
-                Binned multidimensional data.
-            file_name : str
-                Name of the saved file. The extension '.h5' is automatically added.
-            path : str | None
-                File path.
-            mode : str | 'w'
-                Write mode of h5 file ('w' = write).
+        **Parameters**\n
+        binnedData: numpy array
+            Binned multidimensional data.
+        file_name: str
+            Name of the saved file. The extension '.h5' is automatically added.
+        path: str | None
+            File path.
+        mode: str | 'w'
+            Write mode of h5 file ('w' = write).
         """
         _abort = False
         if path is None:
@@ -1426,32 +1574,31 @@ class DldProcessor:
                 if hasattr(self, 'pumpProbeHistogram'):
                     hh.create_dataset(
                         'pumpProbeHistogram',
-                        data=self.pumpProbeHistogram)
+                        data=self.pumpProbeTimeHistogram)
 
     @staticmethod
     def load_binned(file_name, mode='r', ret_type='list'):
         """ Load an HDF5 file saved with ``save_binned()`` method.
         wrapper for function utils.load_binned_h5()
 
-        :Parameters:
-            file_name : str
-                name of the file to load, including full path
+        **Parameters**\n
+        file_name: str
+            name of the file to load, including full path
+        mode: str | 'r'
+            Read mode of h5 file ('r' = read).
+        ret_type: str | 'list','dict'
+            output format for axes and histograms:
+            'list' generates a list of arrays, ordered as
+            the corresponding dimensions in data. 'dict'
+            generates a dictionary with the names of each axis.
 
-            mode : str | 'r'
-                Read mode of h5 file ('r' = read).
-            ret_type: str | 'list','dict'
-                output format for axes and histograms:
-                'list' generates a list of arrays, ordered as
-                the corresponding dimensions in data. 'dict'
-                generates a dictionary with the names of each axis.
-
-        :Returns:
-            data : numpy array
-                Multidimensional data read from h5 file.
-            axes : numpy array
-                The axes values associated with the read data.
-            hist : numpy array
-                Histogram values associated with the read data.
+        **Returns**\n
+        data: numpy array
+            Multidimensional data read from h5 file.
+        axes: numpy array
+            The axes values associated with the read data.
+        hist: numpy array
+            Histogram values associated with the read data.
         """
         return misc.load_binned_h5(file_name, mode=mode, ret_type=ret_type)
 
@@ -1472,10 +1619,10 @@ class DldProcessor:
         """ **[DEPRECATED]** Load data from a dask Parquet dataframe.
         Use readDataframesParquet instead.
 
-        :Parameter:
-            fileName : str | None
-                name (including path) of the folder containing
-                parquet files where the data was saved.
+        **Parameter**\n
+        fileName: str | None
+            name (including path) of the folder containing
+            parquet files where the data was saved.
         """
         # TODO: remove this function once retro-compatibility is ensured
 

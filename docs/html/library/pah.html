@@ -1,0 +1,313 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>3. Interfacing external pah library &mdash; hextof-processor 0.9.7 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.7 documentation" href="../index.html"/>
+        <link rel="next" title="1. Calibration (processor.utilities.calibration)" href="utils/calibration.html"/>
+        <link rel="prev" title="2. DldProcessor class (DldProcessor)" href="DldProcessor.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. Interfacing external pah library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="utils/calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/06_fullexample.html">6. Complete code examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/howtomaintain.html">2. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li><span class="section-number">3. </span>Interfacing external pah library</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/library/pah.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-processor.pah">
+<span id="interfacing-external-pah-library"></span><h1><span class="section-number">3. </span>Interfacing external pah library<a class="headerlink" href="#module-processor.pah" title="Permalink to this headline">¶</a></h1>
+<p>&#64;author: Steinn Ymir Agustsson</p>
+<dl class="py function">
+<dt id="processor.pah.main">
+<code class="sig-prename descclassname">processor.pah.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/pah.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.pah.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configuring local settings.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="processor.pah.BeamtimeDaqAccess">
+<em class="property">class </em><code class="sig-prename descclassname">processor.pah.</code><code class="sig-name descname">BeamtimeDaqAccess</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/pah.html#BeamtimeDaqAccess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.pah.BeamtimeDaqAccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overwriting original class to apply local corrections to PAH code.</p>
+<dl class="py method">
+<dt id="processor.pah.BeamtimeDaqAccess.create">
+<em class="property">static </em><code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rootDirectoryOfH5Files</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/pah.html#BeamtimeDaqAccess.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.pah.BeamtimeDaqAccess.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a BeamtimeDaqAccess object for the given root directory - API</p>
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt>rootDirectoryOfH5Files (str): The root directory of the HDF files. The root</dt><dd><p>directory contains sub directories for different FLASH DAQ streams.</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<p>BeamtimeDaqAccess: The ready to use beamtime DAQ access object.</p>
+<p><strong>Raise</strong></p>
+<p>AssertionError: If the given rootDirectoryOfH5Files does not exist.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="processor.pah.H5FileDataAccess">
+<em class="property">class </em><code class="sig-prename descclassname">processor.pah.</code><code class="sig-name descname">H5FileDataAccess</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/pah.html#H5FileDataAccess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.pah.H5FileDataAccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper class for correcting PAH code for defining valid channels to read from.</p>
+<dl class="py method">
+<dt id="processor.pah.H5FileDataAccess.isValidChannel">
+<code class="sig-name descname">isValidChannel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channelName</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/pah.html#H5FileDataAccess.isValidChannel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.pah.H5FileDataAccess.isValidChannel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the valid channels in HDF5 data.</p>
+<p>Add the timing section of the hdf5 dataset as valid channel, as the
+timing channel was not considered a valid channel in the original
+PAH code.</p>
+<p><strong>Return</strong></p>
+<p>(bool): True: channel is valid, False: channel not valid.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="processor.pah.H5FileManager">
+<em class="property">class </em><code class="sig-prename descclassname">processor.pah.</code><code class="sig-name descname">H5FileManager</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/pah.html#H5FileManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.pah.H5FileManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for pointing to original class in  PAH module.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="utils/calibration.html" class="btn btn-neutral float-right" title="1. Calibration (processor.utilities.calibration)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="DldProcessor.html" class="btn btn-neutral" title="2. DldProcessor class (DldProcessor)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9.7',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
