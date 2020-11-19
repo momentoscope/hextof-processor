@@ -1,0 +1,304 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>2. Package maintenance &mdash; hextof-processor 0.9.7 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="hextof-processor 0.9.7 documentation" href="../index.html"/>
+        <link rel="prev" title="1. List of terms and abbreviations" href="listofterms.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> hextof-processor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9.7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Processor library API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../library/DldFlashDataframeCreator.html">1. Dataframe creator class (DldFlashDataframeCreator)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/DldProcessor.html">2. DldProcessor class (DldProcessor)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/pah.html">3. Interfacing external pah library</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities API (user contribution)</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/calibration.html">1. Calibration (processor.utilities.calibration)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/diagnostics.html">2. Diagnostics (processor.utilities.diagnostics)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/masking.html">3. Miscellaneous (processor.utilities.MaskingTool)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/vis.html">4. Miscellaneous (processor.utilities.vis)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/io.html">5. Input/Output (processor.utilities.io)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../library/utils/misc.html">6. Miscellaneous (processor.utilities.misc)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../example/01_readdaq.html">1. Read DAQ data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/02_parquet.html">2. Save dataset to dask parquet files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/03_binning.html">3. Binning multidimensional data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/04_nobinning.html">4. Processing data without binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/05_corrections.html">5. Corrections to FEL pulse timing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example/06_fullexample.html">6. Complete code examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="listofterms.html">1. List of terms and abbreviations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Package maintenance</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hextof-processor</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li><span class="section-number">2. </span>Package maintenance</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/misc/howtomaintain.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="package-maintenance">
+<h1><span class="section-number">2. </span>Package maintenance<a class="headerlink" href="#package-maintenance" title="Permalink to this headline">¶</a></h1>
+<p>The following guidelines are meant for future package updates by an extended user base. Please adhere to the original settings unless a significantly better version of things is available.</p>
+<p>2.1 Main dependencies</p>
+<p>For future updates on the <strong>hextof-processor</strong> package, the following main dependencies should be checked for compatibility,</p>
+<ul class="simple">
+<li><p><strong>pah</strong> -- the library from the FLASH beamline for parsing the raw hdf5 file generated in the experiment</p></li>
+<li><p><strong>dask</strong> -- contains the distributed version of numpy array and pandas dataframe</p></li>
+<li><p><strong>numpy</strong>, <strong>pandas</strong></p></li>
+</ul>
+<p>2.2 How to document</p>
+<p>Documentation of the package follows the <cite>readthedocs &lt;http://docs.readthedocs.io/en/latest/getting_started.html&gt;</cite> (a.k.a. rtd) style and uses the <a class="reference external" href="https://github.com/rtfd/sphinx_rtd_theme">sphinx rtd theme</a>. The generated htmls are self-hosted on the GitHub repository. This is partially due to the fact that the current version of the <strong>setup.py</strong> file in <strong>hextof-processor</strong> cannot be properly parsed by the readthedocs webhost to be installed and hosted there. Future improvements on the code packaging side may eliminate such problem. Nevertheless, self-hosting on GitHub has its own advantage such that one may include both <strong>rst</strong> (reStructuredText) and <strong>md</strong> (Markdown) formats. In the current version of the documentation, the description of the functions and classes were generated through the docstrings, the other files are generated directly from Markdown files.</p>
+<p>To update the documentation, follow the steps below,</p>
+<ol class="arabic simple">
+<li><p>Install the prerequisite packages, if not yet present on your local computer.</p></li>
+</ol>
+<ul class="simple">
+<li><p><strong>sphinx</strong> -- python rst parser package</p></li>
+<li><p><strong>sphinx_rtd_theme</strong> -- readthedocs theme package for sphinx</p></li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p>Have a local git-clone of the <strong>hextof-processor</strong> package.</p></li>
+<li><p>Update any of the documentation-related source files. These include,</p></li>
+</ol>
+<ul class="simple">
+<li><p>The code docstrings in the .py files under the <strong>processor</strong> folder.</p></li>
+<li><p>The rst files for formatting code docstrings, currently in the <strong>library</strong> subfolder of the <strong>source</strong> folder.</p></li>
+<li><p>The Markdown files of each section, currently in the <strong>example</strong> and <strong>misc</strong> subfolders of the <strong>source</strong> folder.</p></li>
+<li><p>The main index file <strong>index.rst</strong> under the <strong>source</strong> folder, which controls the formatting of the <strong>index.html</strong> page.</p></li>
+<li><p>The main configuration file <strong>conf.py</strong> under the <strong>source</strong> folder. This includes most of the basic settings in documentation such as html theme, parsers, code version, etc.</p></li>
+<li><p>Any other html styling files in .js or .css formats.</p></li>
+</ul>
+<ol class="arabic simple" start="4">
+<li><p>cd into the <strong>html</strong> folder on the terminal and run</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make html
+</pre></div>
+</div>
+<p>The original build contains the <strong>Makefiles</strong> for both Windows and Linux systems. This step initiates the build process locally on your computer. In the process, a series of messages will be generated in the terminal. Most of the times, the warnings on the formatting issues can be ignored, if they don't causing the build process to fail.</p>
+<ol class="arabic simple" start="5">
+<li><p>Check for the local build by viewing the <strong>index.html</strong> file in the <strong>html</strong> folder and browse through the newly added changes. On special occasions, one needs to start a clean build from (almost) nothing in order to implement all the changes. In this case, one can delete most of the content in the docs folder except <strong>source</strong> folder and <strong>index.html</strong> and redo step 4.</p></li>
+<li><p>Push the local changes to the <strong>hextof-processor</strong> repository. If necessary, use force at the end.</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git push origin master -f
+</pre></div>
+</div>
+<p>This can eliminate some of the unnecessary conflicts from the various javascript, CSS files generated in the rebuilding process.</p>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="listofterms.html" class="btn btn-neutral" title="1. List of terms and abbreviations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, momentoscope team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9.7',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

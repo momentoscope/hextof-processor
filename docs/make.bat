@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=source
 REM set BUILDDIR=build
-set BUILDDIR=..
+set BUILDDIR=.
 set SPHINXPROJ=hextof-processor
 
 if "%1" == "" goto help

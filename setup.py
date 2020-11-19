@@ -1,17 +1,30 @@
 # -*- coding: utf-8 -*-
-"""
 
-@author: Steinn Ymir Agustsson
-"""
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
 import numpy
-import os
+from os import path
+
+__version__ = '0.9.7'
+
+here = path.abspath(path.dirname(__file__))
+
+# Get the long description from the README file
+with open(path.join(here, 'README.md')) as f:
+    long_description = f.read()
+
+# Get the dependencies and installs
+with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+    all_reqs = f.read().split('\n')
+
+# Construct dependency links for registered packages
+install_requires = [x.strip() for x in all_reqs if 'git+' not in x]
+dependency_links = [x.strip().replace('git+', '') for x in all_reqs if x.startswith('git+')]
 
 build_doniachs = False # TODO: make if statement to build doniachs, and add this as option in SETTINGS.ini
 
 extensions = [
-    Extension("processor.cscripts.DldFlashProcessorCy", [os.path.join("processor", "cscripts", "DldFlashProcessorCy.pyx")],
+    Extension("processor.cscripts.DldFlashProcessorCy", [path.join("processor", "cscripts", "DldFlashProcessorCy.pyx")],
         include_dirs=[numpy.get_include()]),
 
 #    Extension('XPSdoniachs.XPSdoniachs_ext',
@@ -21,12 +34,23 @@ extensions = [
 ]
 
 setup(
-    name="HextofOfflineAnalyzer",
-    version='0.9.0',
+    name="hextof-processor",
+    version=__version__,
     description='Hextof Offline Analyzer',
-    author=['Yves Acremann','Steinn Ymir Agustsson','Davide Curcio','Patrick Xian'],
+    long_description_content_type='text/markdown',
+    long_description=long_description,
+    author='Yves Acremann, Steinn Ymir Agustsson, Davide Curcio, Rui Patrick Xian, Maciej Dendzik',
     url='https://github.com/momentoscope/hextof-processor',
+    download_url='https://github.com/momentoscope-kit/hextof-processor/tarball/' + __version__,
+    license='GNU-GPL',
+    classifiers=[
+      'Programming Language :: Python :: 3',
+    ],
+    keywords='',
     packages=['distutils', 'distutils.command'],
+    include_package_data=True,
+    install_requires=install_requires,
+    dependency_links=dependency_links,
     ext_modules=cythonize(extensions)
 )
 # print('Cythonized: DldFlashProcessorCy.pyx')
