@@ -167,7 +167,14 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             macroBunchPulseId_correction = pulseIdInterval[0]
 
         # necessary corrections for specific channels:
-        self.delayStage = self.delayStage[:, 1]
+        try:
+            self.delayStage = self.delayStage[:, 1]
+        except:
+            try:
+                self.delayStage = self.delayStage[:, 0]
+                print('1030nm Laser')
+            except:
+                print('no delay stage')
         self.macroBunchPulseId -= macroBunchPulseId_correction
         self.dldMicrobunchId -= self.UBID_OFFSET
 
