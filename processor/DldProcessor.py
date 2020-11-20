@@ -17,9 +17,8 @@ import pandas as pd
 from tqdm import tqdm, tqdm_notebook
 from configparser import ConfigParser
 # import matplotlib.pyplot as plt
-from processor.utilities import misc, dfops
-from processor.utilities.io import res_to_xarray
-
+from utilities import misc
+from processor.BinnedArrays import res_to_xarray
 # warnings.resetwarnings()
 
 _VERBOSE = False
@@ -393,7 +392,7 @@ class DldProcessor:
     # Dataframe column expansion
     # ==========================
 
-    def postProcess(self, bamCorrectionSign=0, kCenter=None):
+    def postProcess(self, bamCorrectionSign=0, kCenter=None, bamCentered=False):
         """ Apply corrections to the dataframe.
 
         Runs the methods to post-process the dataframe. Includes BAM sign
@@ -413,17 +412,19 @@ class DldProcessor:
             kCenter : (int, int) | None
                 position of the center of k-space in the DLD detector array.
                 If set to None, no polar coordinates are added.
-                See createPolarCoordinates for details.
-
+                See createPolarCoordinates for details.            
+            bamCentered : boolean | False
+                BAM correction will be centered to mean BAM value.
+                See ``correctBAM`` for details
         """
 
         if bamCorrectionSign is not None:
-            self.correctBAM(sign=bamCorrectionSign)
+            self.correctBAM(sign=bamCorrectionSign,centered=bamCentered)
 
         if kCenter is not None:
             self.createPolarCoordinates(kCenter)
 
-    def correctBAM(self, sign=1):
+    def correctBAM(self, sign=1, centered=False, source='delayStage'):
         """ Correct pump probe time by BAM (beam arrival monitor) data.
 
         Corrects the pulse to pulse jitter, and changes name from
@@ -456,13 +457,69 @@ class DldProcessor:
                  1       pumpProbeTime = delayStage - bam
                 -1       pumpProbeTime = delayStage + bam
                 =======  =====================================
+            centered : boolean
+                BAM correction is done either by the absulut value or the differens to 
+                the mean value.
+                
+                =======  =====================================
+                Value    Operation    
+                =======  =====================================
+                 True    pumpProbeTime = delayStage - (bam-bam.mean) 
+                 False   pumpProbeTime = delayStage - bam
+                =======  ===================================== 
+            source : str
+                channel to apply the BAM correction. Default is the 'delayStage' channel
         """
+        self.dd['pumpProbeTime'] = self.dd[source] - \
+                                   (self.dd['bam']-centered*self.dd['bam'].mean()) * sign
+        self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches[source] - \
+                                               (self.ddMicrobunches['bam']-centered*self.ddMicrobunches['bam'].mean()) * sign
+    def delayStageMovingDirection(self):
+        """ Calculate the direction of movement of the delay stage. 
+        Needed for backslash of the 1030nm Laser.
+        """
+        from scipy.interpolate import interp1d
+        if not'delayStageDirection' in self.dd.columns:
+            MId=self.dd['macroBunchPulseId'].compute()
+            delayStage=self.dd['delayStage'].compute()
 
-        self.dd['pumpProbeTime'] = self.dd['delayStage'] - \
-                                   self.dd['bam'] * sign
-        self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches['delayStage'] - \
-                                               self.ddMicrobunches['bam'] * sign
+            mask=np.isfinite(MId)
+            delayStage_c=delayStage[mask]
+            MId_c=MId[mask]
 
+            mask=np.isfinite(delayStage_c)
+            delayStage_c=delayStage_c[mask]
+            MId_c=MId_c[mask]
+
+            mask=np.gradient(delayStage_c)!=0
+            delayStage_0=delayStage_c[mask]
+            MId_0=MId_c[mask]
+
+            v=np.gradient(delayStage_0)
+            v[v<0]=v[v<0].mean()
+            v[v>0]=v[v>0].mean()
+            f=interp1d(MId_0,v,bounds_error=False, fill_value='extrapolate')
+            
+            def interpolateMovement(df):
+                return f(df.macroBunchPulseId)
+                
+            self.dd['delayStageDirection']=self.dd.macroBunchPulseId.map_partitions(f)
+            #self.ddMicrobunches['delayStageDirection']=self.ddMicrobunches.macroBunchPulseId.map_partitions(f) #solve fist: macroBunchPulseID is not identical in range for both dataframes
+                  
+    def correctBackSlash(self,backSlash, source='delayStage'):
+        """ Shift the delay time of the up and down moving in different directions 
+        to compensate backslash.
+        :Parameter:
+            backSlash : float 
+                Value to shift 
+            source : str
+                channel to apply the BAM correction. Default is the 'delayStage' channel
+        """
+        self.dd['pumpProbeTime'] = self.dd[source] - \
+                                   self.dd['delayStageDirection']*backSlash
+        self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches[source]# - \
+        #                                       self.ddMicrobunches['delayStageDirection']*backSlash      
+        
     def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=False, k_shift_func=None,
                         k_shift_parameters=None, applyJitter=True, jitterAmplitude=4, jitterType='uniform'):
         """ Add calibrated energy axis to dataframe
@@ -628,14 +685,14 @@ class DldProcessor:
         """
 
         def radius(df):
-            return np.sqrt(np.square(df.posX - kCenter[0]) +
-                           np.square(df.posY - kCenter[1]))
+            return np.sqrt(np.square(df.dldPosX - kCenter[0]) +
+                           np.square(df.dldPosY - kCenter[1]))
 
         def angle(df):
             return np.arctan2(df.posY - kCenter[1], df.posX - kCenter[0])
 
-        self.dd['posR'] = self.dd.map_partitions(radius)
-        self.dd['posT'] = self.dd.map_partitions(angle)
+        self.dd['dldPosR'] = self.dd.map_partitions(radius)
+        self.dd['dldPosT'] = self.dd.map_partitions(angle)
 
     # ========================
     # Normalization histograms
