@@ -8,17 +8,13 @@ import os
 from datetime import datetime
 import json
 import dask
-import dask.dataframe
-import dask.multiprocessing
 from dask.diagnostics import ProgressBar
 import h5py
 import numpy as np
 import pandas as pd
 from tqdm import tqdm, tqdm_notebook
 from configparser import ConfigParser
-# import matplotlib.pyplot as plt
-from utilities import misc
-from processor.BinnedArrays import res_to_xarray
+from processor.utilities import misc, io
 # warnings.resetwarnings()
 
 _VERBOSE = False
@@ -260,8 +256,6 @@ class DldProcessor:
                 new_settings.write(SETTINGS_file)
             print('Loaded settings from {}'.format(settings_file_name))
             # reload settings in the current processor instance
-            self.initAttributes()
-
     # ==================
     # Dataframe creation
     # ==================
@@ -566,6 +560,11 @@ class DldProcessor:
             eoffset -= self.dd['sampleBias'].mean()
         else:
             eoffset -= self.dd['sampleBias']
+
+        if useAvgMonochormatorEnergy:        # TODO: add monocrhomator position,
+            eoffset -= self.dd['monochromatorEnergy'].mean()
+        else:
+            eoffset -= self.dd['monochromatorEnergy']
 
         k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
         self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
@@ -1223,7 +1222,7 @@ class DldProcessor:
             except KeyError as err:
                 print(f'Failed creating metadata: {err}')
                 metadata = None
-            result = res_to_xarray(result, self.binNameList, self.binAxesList, metadata)
+            result = io.res_to_xarray(result, self.binNameList, self.binAxesList, metadata)
 
         if saveAs is not None:
             pass  # TODO: Make saving function
