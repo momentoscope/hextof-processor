@@ -19,7 +19,7 @@ The data obtained from the DAQ system is read through the **pah** package provid
 
 # Installation
 
-In this section we will walk you through all you need to get up and running with the hextof-processor!
+In this section we will walk you through all you need to get up and running with the hextof-processor.
 ### 1. Python
 If you don't have python on your local machine yet we suggest to start with `anaconda` or `miniconda`. 
 Details about how to install can be found [here](https://docs.anaconda.com/anaconda/install/).
@@ -138,10 +138,11 @@ Clone the repository in a folder of your choice
   $ clone https://stash.desy.de/scm/cs/pah.git
   $ cd PAH
 ```
-Access the `SETTINGS.ini` file in the main hextof-processor repository, and assign to **pah_module_dir** the path to the location you installed the pah directory. For example, if you installed PAH under `C:/code/`, it would look like this:
+Access the `SETTINGS.ini` file in the main hextof-processor repository, and assign to **pah_module_dir** the path to the location you installed the pah directory. 
+For example, if you installed PAH under `C:/code/`, it would look like this:
 ```ini
 [paths]
-pah_module_dir = "work/PAH"
+pah_module_dir = "C:/code/PAH/"
 ```
 ## 5. Test your installation
 In order to test your local installation, we have provided a series of tutorial Jupyter Notebooks. 
