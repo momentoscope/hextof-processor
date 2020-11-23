@@ -476,7 +476,7 @@ class DldProcessor:
                                                (self.ddMicrobunches['bam']-centered*self.ddMicrobunches['bam'].mean()) * sign
     def delayStageMovingDirection(self):
         """ Calculate the direction of movement of the delay stage. 
-        Needed for backslash of the 1030nm Laser.
+        Needed for backlash of the 1030nm Laser.
         """
         from scipy.interpolate import interp1d
         if not'delayStageDirection' in self.dd.columns:
@@ -506,19 +506,19 @@ class DldProcessor:
             self.dd['delayStageDirection']=self.dd.macroBunchPulseId.map_partitions(f)
             #self.ddMicrobunches['delayStageDirection']=self.ddMicrobunches.macroBunchPulseId.map_partitions(f) #solve fist: macroBunchPulseID is not identical in range for both dataframes
                   
-    def correctBackSlash(self,backSlash, source='delayStage'):
+    def correctBackLash(self, backLash, source='delayStage'):
         """ Shift the delay time of the up and down moving in different directions 
-        to compensate backslash.
+        to compensate backlash.
         :Parameter:
-            backSlash : float 
+            backLash : float 
                 Value to shift 
             source : str
                 channel to apply the BAM correction. Default is the 'delayStage' channel
         """
         self.dd['pumpProbeTime'] = self.dd[source] - \
-                                   self.dd['delayStageDirection']*backSlash
+                                   self.dd['delayStageDirection']*backLash
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches[source]# - \
-        #                                       self.ddMicrobunches['delayStageDirection']*backSlash      
+        #                                       self.ddMicrobunches['delayStageDirection']*backLash      
         
     def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=False, k_shift_func=None,
                         k_shift_parameters=None, applyJitter=True, jitterAmplitude=4, jitterType='uniform'):
