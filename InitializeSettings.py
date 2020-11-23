@@ -18,10 +18,18 @@ This was created to allow this code to be machine and OS agnostic.
 """
 
 
-def make_new_settings(rebuilding=False, clean=False, old_channel_names=False):
+def make_new_settings(rebuilding=False, clean=False, old_channel_names=False, load_default=True):
     config = ConfigParser()
+    if load_default:
+        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'settings/DEFAULT.ini')):
+            config.read(os.path.join(os.path.dirname(__file__), 'settings/DEFAULT.ini'))
+        else:
+            config.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'settings/DEFAULT.ini'))
+        # config.read(os.path.dirname(__file__), 'settings/DEFAULT.ini')
+        print(' -> New setting file generated from DEFAULT.ini')
 
-    settings_dict = {
+    else:
+        settings_dict = {
         'paths': {
             'DATA_RAW_DIR': os.getcwd()+'/Tutorial/raw/',
             'DATA_H5_DIR': os.getcwd()+'/Tutorial/h5/',
@@ -63,65 +71,66 @@ def make_new_settings(rebuilding=False, clean=False, old_channel_names=False):
     }
 
 
-        # for data aquired before August 2018, use the following DAQ addresses:
-    if old_channel_names:
-       settings_dict['DAQ address - used'] = {
-                'dld_pos_x': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset",
-                'dld_pos_y': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:1/dset",
-                'dld_time': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset",
-                'dld_detector_id': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset",
-                'dld_microbunch_id': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:2/dset",
-                'dld_aux_0': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset",
-                'dld_aux_1': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset",
-                'delay_stage': "/Experiment/Pump probe laser/delay line IK220.0/ENC",
-                'bam': '/Electron Diagnostic/BAM/4DBC3/electron bunch arrival time (low charge)',
-                'bunch_charge': '/Electron Diagnostic/Bunch charge/after undulator',
-                'macro_bunch_pulse_id': '/Timing/Bunch train info/index 1.sts',
-                'optical_diode': '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD',
-                'gmd_tunnel': '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel',
-                'gmd_bda': '/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA',
-                'pump_pol': '/uncategorised/FLASH1_USER2/FLASH.EXP/NF.ESP301/PG2/MOTOR3.POS/dset',
-            }
+            # for data aquired before August 2018, use the following DAQ addresses:
+        if old_channel_names:
+           settings_dict['DAQ address - used'] = {
+                    'dld_pos_x': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset",
+                    'dld_pos_y': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:1/dset",
+                    'dld_time': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset",
+                    'dld_detector_id': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:3/dset",
+                    'dld_microbunch_id': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:2/dset",
+                    'dld_aux_0': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset",
+                    'dld_aux_1': "/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:4/dset",
+                    'delay_stage': "/Experiment/Pump probe laser/delay line IK220.0/ENC",
+                    'bam': '/Electron Diagnostic/BAM/4DBC3/electron bunch arrival time (low charge)',
+                    'bunch_charge': '/Electron Diagnostic/Bunch charge/after undulator',
+                    'macro_bunch_pulse_id': '/Timing/Bunch train info/index 1.sts',
+                    'optical_diode': '/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD',
+                    'gmd_tunnel': '/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel',
+                    'gmd_bda': '/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA',
+                    'pump_pol': '/uncategorised/FLASH1_USER2/FLASH.EXP/NF.ESP301/PG2/MOTOR3.POS/dset',
+                }
 
-    # write dictionary to .ini structure
-    for section_name, section in settings_dict.items():
-        config.add_section(section_name)
-        for key, val in section.items():
-            config.set(section_name, key, str(val))
+        # write dictionary to .ini structure
+        for section_name, section in settings_dict.items():
+            config.add_section(section_name)
+            for key, val in section.items():
+                config.set(section_name, key, str(val))
 
-    # trying not to overwrite old settings every time
-    if not rebuilding:
-        current_settings = ConfigParser()
-        if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-            current_settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
-        else:
-            current_settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+        # trying not to overwrite old settings every time
+        if not rebuilding:
+            current_settings = ConfigParser()
+            if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
+                current_settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+            else:
+                current_settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
 
-        for section in current_settings:
-            for entry in current_settings[section]:
-                try:
-                    if config.has_option(section, entry):
-                        config.set(section, entry, current_settings[section][entry])
-                    else:
-                        print('WARNING: option {} not a standard setting.'.format(entry))
-                        if not clean:
+            for section in current_settings:
+                for entry in current_settings[section]:
+                    try:
+                        if config.has_option(section, entry):
                             config.set(section, entry, current_settings[section][entry])
-                except Exception as e:
-                    print('Invalid section in current config: {}'.format(e))
+                        else:
+                            print('WARNING: option {} not a standard setting.'.format(entry))
+                            if not clean:
+                                config.set(section, entry, current_settings[section][entry])
+                    except Exception as e:
+                        print('Invalid section in current config: {}'.format(e))
 
-    missing_folders = []
-    for dir_name in config['paths']:
-        if not os.path.isdir(config['paths'][dir_name]):
-            missing_folders.append((dir_name, config['paths'][dir_name]))
-    if len(missing_folders) > 0:
-        print('WARNING: the following folders do not exist:')
-        for i in missing_folders:
-            print('{0}: {1}'.format(i[0], i[1]))
+        missing_folders = []
+        for dir_name in config['paths']:
+            if not os.path.isdir(config['paths'][dir_name]):
+                missing_folders.append((dir_name, config['paths'][dir_name]))
+        if len(missing_folders) > 0:
+            print('WARNING: the following folders do not exist:')
+            for i in missing_folders:
+                print('{0}: {1}'.format(i[0], i[1]))
 
-    # write .ini structure to file.
+        # write .ini structure to file.
+        print(' -> New setting file generated.')
+
     with open('SETTINGS.ini', 'w') as configfile:  # save
         config.write(configfile)
-    print(' -> New setting file generated.')
 
 
 # -------------------------------------------------------------------
@@ -131,9 +140,12 @@ parser.add_argument('--overwrite', dest='overwrite', action='store_true',
                     help='forces the SETTINGS.ini file to be overwritten (default: update mode)')
 parser.add_argument('--clean', dest='clean', action='store_true',
                     help='removes options from current SETTINGS.ini that are not standard (default: keeps everything)')
+parser.add_argument('--oldmode', dest='oldmode', action='store_true',
+                    help='use the old method for defining the new settings file. This creates a file with hard coded values, when not used, settings from DEFAULT.ini will be loaded.')
 args = parser.parse_args()
 overwrite = args.overwrite
 clean = args.clean
+oldmode = args.oldmode
 
 if os.path.isfile('SETTINGS.ini'):
     promptMsg = ''
@@ -144,7 +156,7 @@ if os.path.isfile('SETTINGS.ini'):
     answer = input(promptMsg)
     if answer.lower() in ['y', 'yes', 'si', 'ja']:
         print(' -> Updating previous settings.')
-        make_new_settings(rebuilding=overwrite, clean=clean)
+        make_new_settings(rebuilding=overwrite, clean=clean,load_default=not oldmode)
     else:
         print('Settings file generation aborted by user.')
 else:

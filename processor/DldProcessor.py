@@ -114,7 +114,12 @@ class DldProcessor:
         settings = ConfigParser()
         root_folder = os.path.dirname(__file__)
         if 'SETTINGS.ini' not in os.listdir(root_folder):
-            root_folder = os.path.dirname(root_folder)
+            if 'setup.py' in os.listdir(root_folder):
+                raise SettingsInitializationError
+            else:
+                root_folder = os.path.dirname(root_folder)
+                if 'setup.py' in os.listdir(root_folder):
+                    raise SettingsInitializationError
         file = os.path.join(root_folder, 'SETTINGS.ini')
         settings.read(file)
         if len(settings.sections()) == 0:
@@ -166,71 +171,56 @@ class DldProcessor:
         # parse the currently loaded settings file and store as class attributes
         # each entry which is not in DAQ channels. Those are handled in the
         # DldFlashProcessor class.
-        for sec_name, section in self.settings.items():
-            if sec_name != 'DAQ channels':  # ignore the DAQ channels
-                for entry_name, entry_value in section.items():
-                    for type_ in [int, np.float64]:  # try assigning numeric values
-                        try:
-                            val = type_(entry_value)
-                            break
-                        except ValueError:
-                            val = None
-                    if val is None:
-                        val = entry_value
-                        if val.upper() == 'FALSE':
-                            val = False
-                        elif val.upper() == 'TRUE':
-                            val = True
-                        elif val.upper() in ['AUTO', 'NONE']:  # add option for ignoring value.
-                            val = None
-                    if val is not None:
-                        try:
-                            old_type = type(getattr(self, entry_name.upper()))
-                            new_type = type(val)
-                            if old_type != new_type:
-                                warnings.warn(
-                                    f'Setting {entry_name} found as {new_type} instead of the expected {old_type}')
-                            setattr(self, entry_name.upper(), val)
-                        except:
-                            if import_all:
+        try:
+            for sec_name, section in self.settings.items():
+                if sec_name != 'DAQ channels':  # ignore the DAQ channels
+                    for entry_name, entry_value in section.items():
+                        for type_ in [int, np.float64]:  # try assigning numeric values
+                            try:
+                                val = type_(entry_value)
+                                break
+                            except ValueError:
+                                val = None
+                        if val is None:
+                            val = entry_value
+                            if val.upper() == 'FALSE':
+                                val = False
+                            elif val.upper() == 'TRUE':
+                                val = True
+                            elif val.upper() in ['AUTO', 'NONE']:  # add option for ignoring value.
+                                val = None
+                        if val is not None:
+                            try:
+                                old_type = type(getattr(self, entry_name.upper()))
+                                new_type = type(val)
+                                if old_type != new_type:
+                                    warnings.warn(
+                                        f'Setting {entry_name} found as {new_type} instead of the expected {old_type}')
                                 setattr(self, entry_name.upper(), val)
-                            elif  _VERBOSE:
-                                warnings.warn(
-                                    f'Found new setting {entry_name}. Consider adding to hard coded defaults for correct'
-                                    f'type and error handling.')
-                            else:
-                                pass
-        # Old parsing method:
-        # for section in settings:
-        #     for entry in settings[section]:
-        #         if _VERBOSE:
-        #             print('trying: {} {}'.format(entry.upper(), settings[section][entry]))
-        #         try:
-        #             if settings[section][entry].upper() == 'FALSE':
-        #                 setattr(self, entry.upper(), False)
-        #             else:
-        #                 _type = type(getattr(self, entry.upper()))
-        #                 setattr(self, entry.upper(), _type(settings[section][entry]))
-        #             if _VERBOSE:
-        #                 print(entry.upper(), _type(settings[section][entry]))
-        #         except AttributeError as e:
-        #             if _VERBOSE:
-        #                 print('attribute error: {}'.format(e))
-        #             if import_all:  # old method
-        #                 try:  # assign the attribute to the best fitting type between float, int and string
-        #                     f = float(settings[section][entry])
-        #                     i = int(f)
-        #                     if f - i == 0.0:
-        #                         val = i  # assign Integer
-        #                     else:
-        #                         val = f  # assign Float
-        #                     setattr(self, entry.upper(), val)
-        #                 except ValueError:  # assign String
-        #                     setattr(
-        #                         self, entry.upper(), str(
-        #                             settings[section][entry]))
-        #             else:
-        #                 pass
+                            except:
+                                if import_all:
+                                    setattr(self, entry_name.upper(), val)
+                                elif  _VERBOSE:
+                                    warnings.warn(
+                                        f'Found new setting {entry_name}. Consider adding to hard coded defaults for correct'
+                                        f'type and error handling.')
+                                else:
+                                    pass
+        except SettingsInitializationError:
+            print('========================================================'
+                  'No Settings file found. Initializing to default settings'
+                  '========================================================')
+            root_folder = os.path.dirname(__file__)
+            if 'setup.py' not in os.listdir(root_folder):
+                root_folder = os.path.dirname(root_folder)
+            default_settings_file = os.path.join(root_folder, 'settings', 'DEFAULT')
+            default_settings = ConfigParser()
+            default_settings.read(default_settings_file)
+            settings_file = os.path.join(root_folder, 'SETTINGS.ini')
+
+            with open(settings_file, 'w') as SETTINGS_file:  # overwrite SETTINGS.ini with the new settings
+                default_settings.write(SETTINGS_file)
+            self.initAttributes()
 
     def loadSettings(self, settings_file_name, preserve_path=True):
         """ Load settings from an other saved setting file.
@@ -1815,3 +1805,6 @@ class DldProcessor:
                 axes[ax_name] = f['axes'][ax_label][...]
 
         return result, axes, histogram
+
+class SettingsInitializationError(Exception):
+    pass
