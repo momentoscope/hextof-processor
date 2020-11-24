@@ -4,14 +4,13 @@
 @author: Steinn Ymir Agustsson
 """
 
+from .misc import repr_byte_size
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 import dask
 from dask.diagnostics import ProgressBar
-
-from .misc import repr_byte_size
 
 
 def channel_report(dd):
