@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>processor.pah &mdash; hextof-processor 0.9.7 documentation</title>
+  <title>processor.pah &mdash; hextof-processor 1.0.1 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="hextof-processor 0.9.7 documentation" href="../../index.html"/>
+    <link rel="top" title="hextof-processor 1.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.9.7
+                1.0.1
               </div>
             
           
@@ -187,32 +187,29 @@
 <span class="sd">@author: Steinn Ymir Agustsson</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
-<span class="c1"># settings = configparser.ConfigParser() # TODO: find a smarter way</span>
-<span class="c1"># if os.path.isfile(os.path.join(os.path.dirname(__file__), &#39;SETTINGS.ini&#39;)):</span>
-<span class="c1">#     settings.read(os.path.join(os.path.dirname(__file__), &#39;SETTINGS.ini&#39;))</span>
-<span class="c1"># else:</span>
-<span class="c1">#     settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), &#39;SETTINGS.ini&#39;))</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">camp.pah.beamtimedaqaccess</span> <span class="kn">import</span> <span class="n">BeamtimeDaqAccess</span> <span class="k">as</span> <span class="n">_BeamtimeDaqAccess</span><span class="p">,</span> <span class="n">H5FileDataAccess</span> <span class="k">as</span> <span class="n">_H5FileDataAccess</span><span class="p">,</span> \
+    <span class="n">H5FileManager</span> <span class="k">as</span> <span class="n">_H5FileManager</span>
 
-<span class="c1"># importing stuff from PAH modules</span>
-<span class="c1"># sys.path.append(settings[&#39;paths&#39;][&#39;PAH_MODULE_DIR&#39;])</span>
-<span class="kn">from</span> <span class="nn">camp.pah.beamtimedaqaccess</span> <span class="kn">import</span> <span class="n">BeamtimeDaqAccess</span> <span class="k">as</span> <span class="n">_BeamtimeDaqAccess</span><span class="p">,</span> <span class="n">H5FileDataAccess</span> <span class="k">as</span> <span class="n">_H5FileDataAccess</span><span class="p">,</span> <span class="n">H5FileManager</span> <span class="k">as</span> <span class="n">_H5FileManager</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">configparser</span>
 
-<span class="c1"># Below are the redefined classes belonging to PAH that should correct the </span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>  <span class="c1"># TODO: find a smarter way</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)):</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">))</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;PAH_MODULE_DIR&#39;</span><span class="p">])</span>
+
+    <span class="kn">from</span> <span class="nn">camp.pah.beamtimedaqaccess</span> <span class="kn">import</span> <span class="n">BeamtimeDaqAccess</span> <span class="k">as</span> <span class="n">_BeamtimeDaqAccess</span><span class="p">,</span> <span class="n">H5FileDataAccess</span> <span class="k">as</span> <span class="n">_H5FileDataAccess</span><span class="p">,</span> \
+    <span class="n">H5FileManager</span> <span class="k">as</span> <span class="n">_H5FileManager</span>
+
+
+<span class="c1"># Below are the redefined classes belonging to PAH that should correct the</span>
 <span class="c1"># problems induced by adding the macrobunchID information to the data.</span>
-
-
-<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../library/pah.html#processor.pah.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; Configuring local settings.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">settings</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
-    <span class="n">settings</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;SETTINGS.ini&#39;</span><span class="p">)</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;DATA_RAW_DIR&#39;</span><span class="p">]</span>
-    <span class="n">daqAccess</span> <span class="o">=</span> <span class="n">BeamtimeDaqAccess</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="n">dldPosXName</span> <span class="o">=</span> <span class="s2">&quot;/uncategorised/FLASH1_USER2/FLASH.FEL/HEXTOF.DAQ/DLD1:0/dset&quot;</span>
-    <span class="n">dldPosY</span><span class="p">,</span> <span class="n">otherStuff</span> <span class="o">=</span> <span class="n">daqAccess</span><span class="o">.</span><span class="n">allValuesOfRun</span><span class="p">(</span><span class="n">dldPosXName</span><span class="p">,</span> <span class="mi">19135</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BeamtimeDaqAccess"><a class="viewcode-back" href="../../library/pah.html#processor.pah.BeamtimeDaqAccess">[docs]</a><span class="k">class</span> <span class="nc">BeamtimeDaqAccess</span><span class="p">(</span><span class="n">_BeamtimeDaqAccess</span><span class="p">):</span>
@@ -236,7 +233,7 @@
 <span class="sd">        **Raise**\n</span>
 <span class="sd">        AssertionError: If the given rootDirectoryOfH5Files does not exist.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="n">fileAccess</span> <span class="o">=</span> <span class="n">H5FileDataAccess</span><span class="p">(</span><span class="n">H5FileManager</span><span class="p">(</span><span class="n">rootDirectoryOfH5Files</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">BeamtimeDaqAccess</span><span class="p">(</span><span class="n">fileAccess</span><span class="p">)</span></div></div>
 
@@ -275,10 +272,6 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rootDirectoryOfH5Files</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">H5FileManager</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">rootDirectoryOfH5Files</span><span class="p">)</span></div>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
            </div>
@@ -315,7 +308,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.9.7',
+            VERSION:'1.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
