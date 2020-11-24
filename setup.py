@@ -39,7 +39,7 @@ setup(
     description='Hextof Offline Analyzer',
     long_description_content_type='text/markdown',
     long_description=long_description,
-    author='Yves Acremann, Steinn Ymir Agustsson, Davide Curcio, Rui Patrick Xian, Maciej Dendzik',
+    author='Yves Acremann, Steinn Ymir Agustsson, Davide Curcio, Rui Patrick Xian, Michael Heber, Maciej Dendzik',
     url='https://github.com/momentoscope/hextof-processor',
     download_url='https://github.com/momentoscope-kit/hextof-processor/tarball/' + __version__,
     license='GNU-GPL',
