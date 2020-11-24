@@ -110,12 +110,12 @@ class DldProcessor:
         settings = ConfigParser()
         root_folder = os.path.dirname(__file__)
         if 'SETTINGS.ini' not in os.listdir(root_folder):
-            if 'setup.py' in os.listdir(root_folder):
-                raise SettingsInitializationError
-            else:
-                root_folder = os.path.dirname(root_folder)
-                if 'setup.py' in os.listdir(root_folder):
-                    raise SettingsInitializationError
+            # if 'setup.py' in os.listdir(root_folder):
+            #     raise SettingsInitializationError
+            # else:
+            root_folder = os.path.dirname(root_folder)
+                # if 'setup.py' in os.listdir(root_folder):
+                #     raise SettingsInitializationError
         file = os.path.join(root_folder, 'SETTINGS.ini')
         settings.read(file)
         if len(settings.sections()) == 0:
@@ -204,19 +204,19 @@ class DldProcessor:
                                     pass
         except SettingsInitializationError:
             print('========================================================'
-                  'No Settings file found. Initializing to default settings'
+                  'No Settings file found. '
                   '========================================================')
-            root_folder = os.path.dirname(__file__)
-            if 'setup.py' not in os.listdir(root_folder):
-                root_folder = os.path.dirname(root_folder)
-            default_settings_file = os.path.join(root_folder, 'settings', 'DEFAULT')
-            default_settings = ConfigParser()
-            default_settings.read(default_settings_file)
-            settings_file = os.path.join(root_folder, 'SETTINGS.ini')
-
-            with open(settings_file, 'w') as SETTINGS_file:  # overwrite SETTINGS.ini with the new settings
-                default_settings.write(SETTINGS_file)
-            self.initAttributes()
+            # root_folder = os.path.dirname(__file__) # TODO: fix settings bug
+            # if 'setup.py' not in os.listdir(root_folder):
+            #     root_folder = os.path.dirname(root_folder)
+            # default_settings_file = os.path.join(root_folder, 'settings', 'DEFAULT')
+            # default_settings = ConfigParser()
+            # default_settings.read(default_settings_file)
+            # settings_file = os.path.join(root_folder, 'SETTINGS.ini')
+            #
+            # with open(settings_file, 'w') as SETTINGS_file:  # overwrite SETTINGS.ini with the new settings
+            #     default_settings.write(SETTINGS_file)
+            # self.initAttributes()
 
     def loadSettings(self, settings_file_name, preserve_path=True):
         """ Load settings from an other saved setting file.
