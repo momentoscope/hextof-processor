@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from . import misc
 import os
 
 import h5py
 import numpy as np
 import tifffile
 import xarray as xr
-
-import processor.utilities.misc as utils
 
 
 def res_to_xarray(res, binNames, binAxes, metadata=None):
@@ -61,7 +60,7 @@ def save_binned(data, file_name, format='h5', path=None, mode='w'):
     _abort = False
 
     if path is None:
-        path = utils.parse_setting('paths', 'DATA_H5_DIR')
+        path = misc.parse_setting('paths', 'DATA_H5_DIR')
     if not os.path.isdir(path):  # test if the path exists...
         answer = input("The folder {} doesn't exist,"
                        "do you want to create it? [y/n]".format(path))

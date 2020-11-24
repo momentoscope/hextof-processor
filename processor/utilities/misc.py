@@ -13,7 +13,7 @@ import os
 from configparser import ConfigParser
 from collections import OrderedDict
 
-from processor import DldFlashDataframeCreator as DldFlashProcessor
+# from processor import DldFlashDataframeCreator as DldFlashProcessor
 
 # ================================================================================
 """Functions for calculation of pulse energy and pulse energy density of optical laser.
@@ -585,6 +585,8 @@ def get_system_memory_status(print_=False):
 def read_and_binn(runNumber, *args, static_bunches=False, source='raw', save=True):
     print(datetime.now())
 
+    from processor import DldFlashDataframeCreator as DldFlashProcessor
+
     processor = DldFlashProcessor.DldFlashProcessor()
     processor.runNumber = runNumber
     if source == 'raw':
@@ -648,6 +650,7 @@ def create_dataframes(runNumbers, *args):
     fails = {}
     for run in runNumbers:
         try:
+            from processor import DldFlashDataframeCreator as DldFlashProcessor
             prc = DldFlashProcessor.DldFlashProcessor()
             prc.runNumber = run
             prc.readData()
