@@ -14,6 +14,7 @@ lib/*.html
 #ignore IDE settings folders
 \.idea/
 \.spyproject/
+\.vscode
 
 # ignore local settings
 SETTINGS.ini
