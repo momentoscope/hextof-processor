@@ -35,7 +35,7 @@ Create a clean new environment (We *strongly* suggest you to always do so!)
 
 If you are using conda:
 ```bash
-$ conda create --name hextof-env
+$ conda create --name hextof-env python=3.7 anaconda ipykernel
 ```
 now, to activate your new environment (windows):
 ```bash
@@ -48,10 +48,6 @@ $ source activate hextof-env
 #### 2.2 Virtual environment in Jupyter Notebooks
 
 To add the newly created environment to the **Jupyter Notebooks** kernel list,
-make sure you have ipykernel installed:
-```bash
-(hextof-env)$ conda install -c anaconda ipykernel
-```
 and install your new kernel:
 ```bash
 (hextof-env)$ python -m ipykernel install --user --name=hextof-env
@@ -67,7 +63,7 @@ To get cython running, the easiest is to install **[Visual Studio 2019 developer
 In Build tools, install C++ build tools and ensure the latest versions of **MSVCv142 - VS 2019 C++ x64/x86** build tools and **Windows 10 SDK** are checked. 
 Also, make sure the setuptools package is up to date.
 ```bash
-(hextof-env)$ conda update setuptools
+(hextof-env)$ conda install setuptools
 ```
 #### 3.2 Run setup.py
 You can now install all requirements by running `setup.py`. 
@@ -104,7 +100,18 @@ data_results_dir = /asap3/flash/gpfs/pg2/YYYY/data/xxxxxxxx/processed/*USER_NAME
 ```
 Where `YYYY` is the current year and `xxxxxxxx` is the beamtime number.
 
-### 4. The PAH package
+### 4. Further requirements
+Here is a list of packages which need to be installed in order to use all the features available in this package.
+
+### 4.1 ipywidgets
+for interactive control of parameters in jupyter notebooks:
+
+```bash
+$ conda install ipywidgets
+``` 
+
+
+##4.2 The PAH package
 In order to read the raw hdf5 files from the FLASH DAQ, hextof-processor makes use of the `beamtimedaqaccess` package.
 This can be installed through conda if you are located inside the DESY network (e.g. on the Maxwell cluster).
 For external use, it is requried to clone the [camp](https://stash.desy.de/projects/CS/repos/pah/browse) repository.
