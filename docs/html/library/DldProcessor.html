@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2. DldProcessor class (DldProcessor) &mdash; hextof-processor 0.9.7 documentation</title>
+  <title>2. DldProcessor class (DldProcessor) &mdash; hextof-processor 1.0.1 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="hextof-processor 0.9.7 documentation" href="../index.html"/>
+    <link rel="top" title="hextof-processor 1.0.1 documentation" href="../index.html"/>
         <link rel="next" title="3. Interfacing external pah library" href="pah.html"/>
         <link rel="prev" title="1. Dataframe creator class (DldFlashDataframeCreator)" href="DldFlashDataframeCreator.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.9.7
+                1.0.1
               </div>
             
           
@@ -315,38 +315,13 @@ parquet files to append the new data.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="processor.DldProcessor.DldProcessor.applyJitter">
-<em class="property">static </em><code class="sig-name descname">applyJitter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">amp</span></em>, <em class="sig-param"><span class="n">col</span></em>, <em class="sig-param"><span class="n">type</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.applyJitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.applyJitter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add jittering to a dataframe column.</p>
-<p>Adapted from MPES package: <a class="reference external" href="https://github.com/mpes-kit/mpes">https://github.com/mpes-kit/mpes</a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>df<span class="classifier">dataframe</span></dt><dd><p>Dataframe to add noise/jittering to.</p>
-</dd>
-<dt>amp<span class="classifier">numeric</span></dt><dd><p>Amplitude scaling for the jittering noise.</p>
-</dd>
-<dt>col<span class="classifier">str</span></dt><dd><p>Name of the column to add jittering to.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><p>Uniformly distributed noise vector with specified amplitude and size.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.calibrateEnergy">
-<code class="sig-name descname">calibrateEnergy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">useAvgSampleBias</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">useJitter</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">jitterAmplitude</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">jitterType</span><span class="o">=</span><span class="default_value">'normal'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.calibrateEnergy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.calibrateEnergy" title="Permalink to this definition">¶</a></dt>
-<dd><p>add calibrated energy axis to dataframe</p>
-<p>Uses the same equation as in tof2energy in calibrate.
-Args:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>t<span class="classifier">float</span></dt><dd><p>The time of flight</p>
-</dd>
-<dt>toffset<span class="classifier">float</span></dt><dd><p>The time offset from thedld clock start to when the fastest photoelectrons reach the detector</p>
+<code class="sig-name descname">calibrateEnergy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">useAvgSampleBias</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">k_shift_func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">k_shift_parameters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">applyJitter</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">jitterAmplitude</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">jitterType</span><span class="o">=</span><span class="default_value">'uniform'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.calibrateEnergy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.calibrateEnergy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add calibrated energy axis to dataframe</p>
+<p>Uses the same equation as in tof2energy in calibrate.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>toffset<span class="classifier">float</span></dt><dd><p>The time offset from the dld clock start to when the fastest photoelectrons reach the detector</p>
 </dd>
 <dt>eoffset<span class="classifier">float</span></dt><dd><p>The energy offset given by W-hv-V</p>
 </dd>
@@ -355,6 +330,53 @@ Args:</p>
 <dt>useAvgSampleBias: bool (False)</dt><dd><p>uses the average value for the sample bias across the dataset,
 possibly reducing noise, but cannot be used on runs where the
 sample bias was changed</p>
+</dd>
+<dt>k_shift_func<span class="classifier">function</span></dt><dd><p>function fitting the shifts of energy across the detector.</p>
+</dd>
+<dt>k_shift_parameters :</dt><dd><p>parameters for the fit function to reproduce the energy shift.</p>
+</dd>
+<dt>applyJitter<span class="classifier">bool (True)</span></dt><dd><p>if true, applies random noise of amplitude determined by jitterAmplitude
+to the dldTime step values.</p>
+</dd>
+<dt>jitterType :</dt><dd><p>noise distribution, 'uniform' or 'normal'.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.calibrateMomentum">
+<code class="sig-name descname">calibrateMomentum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kCenterX</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">kCenterY</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rotationAngle</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">px_to_k</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">createPolarCoords</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">applyJitter</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">jitterAmp</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">jitterType</span><span class="o">=</span><span class="default_value">'uniform'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.calibrateMomentum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.calibrateMomentum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add calibrated parallel momentum axes to dataframe.</p>
+<p>Compute the calibration of parallel momentum kx and ky from the detector
+position dldPosX and dldPosY. Optionally, add columns with thethe polar
+coordinates kr and kt.</p>
+<p>Uses the same equation as in tof2energy in calibrate.
+Args:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>kCenterX<span class="classifier">float</span></dt><dd><p>dldPosX coordinate of the center of k-space</p>
+</dd>
+<dt>kCenterY<span class="classifier">float</span></dt><dd><p>dldPosY coordinate of the center of k-space</p>
+</dd>
+<dt>rotationAngle<span class="classifier">float</span></dt><dd><p>Rotates the momentum coordinates counterclockwise</p>
+</dd>
+<dt>px_to_k<span class="classifier">float</span></dt><dd><p>Conversion between dldPosX/Y to momentum in inverse Angstroms</p>
+</dd>
+<dt>createPolarCoords: bool (True)</dt><dd><p>If True, also creates the polar momentum coordinates kr and kt</p>
+</dd>
+<dt>applyJitter: bool (True)</dt><dd><p>Apply jitter on the original axis to reduce artifacts when binning.
+This is especially necessary when rotating the momentum coordinates.</p>
+</dd>
+<dt>jitterAmp: float</dt><dd><p>Amplitude of the random jitter applied. Best kept at half the
+axis original spacing. In case of dldPosX and Y, this should be
+kept at 0.5, since they are integer steps.</p>
+</dd>
+<dt>jitterType: 'uniform'</dt><dd><dl class="simple">
+<dt>Choose between 'uniform' or 'normal' random distributions. With</dt><dd><p>regularly spaced axes as here, uniform is preferred.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </div></blockquote>
@@ -446,7 +468,7 @@ is applied along pumpProbeDelay or polar k-space coordinates.</p>
 
 <dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.correctBAM">
-<code class="sig-name descname">correctBAM</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sign</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.correctBAM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.correctBAM" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">correctBAM</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sign</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">centered</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">source</span><span class="o">=</span><span class="default_value">'delayStage'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.correctBAM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.correctBAM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Correct pump probe time by BAM (beam arrival monitor) data.</p>
 <p>Corrects the pulse to pulse jitter, and changes name from
 delayStageTime to pumpProbeTime. BAM correction shifts the time delay
@@ -490,9 +512,49 @@ measured, and should therefore be moved to more negative values.</p>
 </tbody>
 </table>
 </dd>
+<dt>centered<span class="classifier">boolean</span></dt><dd><p>BAM correction is done either by the absulut value or the differens to 
+the mean value.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 86%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Value</p></th>
+<th class="head"><p>Operation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>True</p></td>
+<td><p>pumpProbeTime = delayStage - (bam-bam.mean)</p></td>
+</tr>
+<tr class="row-odd"><td><p>False</p></td>
+<td><p>pumpProbeTime = delayStage - bam</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>source<span class="classifier">str</span></dt><dd><p>channel to apply the BAM correction. Default is the 'delayStage' channel</p>
+</dd>
 </dl>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.correctBackLash">
+<code class="sig-name descname">correctBackLash</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">backLash</span></em>, <em class="sig-param"><span class="n">source</span><span class="o">=</span><span class="default_value">'delayStage'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.correctBackLash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.correctBackLash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shift the delay time of the up and down moving in different directions 
+to compensate backlash.
+:Parameter:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>backLash<span class="classifier">float </span></dt><dd><p>Value to shift</p>
+</dd>
+<dt>source<span class="classifier">str</span></dt><dd><p>channel to apply the BAM correction. Default is the 'delayStage' channel</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -514,6 +576,13 @@ measured, and should therefore be moved to more negative values.</p>
 <em class="property">property </em><code class="sig-name descname">delayStageHistogram</code><a class="headerlink" href="#processor.DldProcessor.DldProcessor.delayStageHistogram" title="Permalink to this definition">¶</a></dt>
 <dd><p>Easy access to pump probe normalization array.
 Mostly for retrocompatibility</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="processor.DldProcessor.DldProcessor.delayStageMovingDirection">
+<code class="sig-name descname">delayStageMovingDirection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.delayStageMovingDirection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.delayStageMovingDirection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the direction of movement of the delay stage. 
+Needed for backlash of the 1030nm Laser.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -764,7 +833,7 @@ normalized array.</p>
 
 <dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.postProcess">
-<code class="sig-name descname">postProcess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bamCorrectionSign</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">kCenter</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.postProcess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.postProcess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">postProcess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bamCorrectionSign</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">kCenter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bamCentered</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.postProcess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.postProcess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply corrections to the dataframe.</p>
 <p>Runs the methods to post-process the dataframe. Includes BAM sign
 correction and polar coordinates axes generation.</p>
@@ -783,6 +852,9 @@ See <code class="docutils literal notranslate"><span class="pre">correctBAM</spa
 <dt>kCenter<span class="classifier">(int, int) | None</span></dt><dd><p>position of the center of k-space in the DLD detector array.
 If set to None, no polar coordinates are added.
 See createPolarCoordinates for details.</p>
+</dd>
+<dt>bamCentered<span class="classifier">boolean | False</span></dt><dd><p>BAM correction will be centered to mean BAM value.
+See <code class="docutils literal notranslate"><span class="pre">correctBAM</span></code> for details</p>
 </dd>
 </dl>
 </dd>
@@ -964,6 +1036,11 @@ defined in SETTINGS.ini</p>
 
 </dd></dl>
 
+<dl class="py exception">
+<dt id="processor.DldProcessor.SettingsInitializationError">
+<em class="property">exception </em><code class="sig-prename descclassname">processor.DldProcessor.</code><code class="sig-name descname">SettingsInitializationError</code><a class="reference internal" href="../_modules/processor/DldProcessor.html#SettingsInitializationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.SettingsInitializationError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 
 
@@ -1010,7 +1087,7 @@ defined in SETTINGS.ini</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.9.7',
+            VERSION:'1.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
