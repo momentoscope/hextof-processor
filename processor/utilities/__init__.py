@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from . import calibration, dfops, io, misc, diagnostics
+from . import calibration, dfops, io, misc
 
 try:
     from . import diagnostics
