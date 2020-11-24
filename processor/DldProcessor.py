@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm, tqdm_notebook
 from configparser import ConfigParser
-from processor.utilities import misc, io
+from processor.utilities import misc, io, dfops
 # warnings.resetwarnings()
 
 _VERBOSE = False
@@ -505,7 +505,8 @@ class DldProcessor:
         #                                       self.ddMicrobunches['delayStageDirection']*backLash      
         
     def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=False, k_shift_func=None,
-                        k_shift_parameters=None, applyJitter=True, jitterAmplitude=4, jitterType='uniform'):
+                        k_shift_parameters=None, applyJitter=True, jitterAmplitude=4, jitterType='uniform',
+                        useAvgMonochormatorEnergy=False):
         """ Add calibrated energy axis to dataframe
 
         Uses the same equation as in tof2energy in calibrate.
