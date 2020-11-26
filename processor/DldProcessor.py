@@ -458,6 +458,7 @@ class DldProcessor:
                                    (self.dd['bam']-centered*self.dd['bam'].mean()) * sign
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches[source] - \
                                                (self.ddMicrobunches['bam']-centered*self.ddMicrobunches['bam'].mean()) * sign
+
     def delayStageMovingDirection(self):
         """ Calculate the direction of movement of the delay stage. 
         Needed for backlash of the 1030nm Laser.
@@ -563,9 +564,9 @@ class DldProcessor:
             eoffset -= self.dd['sampleBias']
 
         if useAvgMonochormatorEnergy:        # TODO: add monocrhomator position,
-            eoffset -= self.dd['monochromatorEnergy'].mean()
+            eoffset -= self.dd['monochromatorPhotonEnergy'].mean()
         else:
-            eoffset -= self.dd['monochromatorEnergy']
+            eoffset -= self.dd['monochromatorPhotonEnergy']
 
         k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
         self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
