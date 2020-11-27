@@ -581,7 +581,9 @@ class DldProcessor:
             eoffset -= self.dd['monochromatorPhotonEnergy']
 
         if useAvgSampleBias or useAvgMonochormatorEnergy:
-            eoffset = dask.compute(eoffset)
+            print('computing energy offsets...')
+            with ProgressBar():
+                eoffset = dask.compute(eoffset)
         k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
         self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
                                          2.) - eoffset
