@@ -491,10 +491,10 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 Cut, reshape and average the ADC signal of the I0 monitor. 
                 Preliminary procedure: migth be optimized and tunend in to the DAQ 
                 """
-                i0Cutted=np.array(np.split(-self.i0Monitor[:,810:45090],410,axis=1))
-                i0BG=i0Cutted[:,:,:39].mean(2)
-                return np.nansum(i0Cutted[:,:,39:90]-i0BG[:,:,None],2).T
-            
+                i0Cutted=np.array(np.split(-self.i0Monitor[:,self.I0ID_OFFSET:self.I0ID_OFFSET+108*self.I0ID_N],self.I0ID_N,axis=1))
+                i0BG=i0Cutted[:,:,self.I0_MEAN_LOW:self.I0_MEAN_HIGH].mean(2)
+                return np.nansum(i0Cutted[:,:,self.I0_SUM_LOW:self.I0_SUM_HIGH]-i0BG[:,:,None],2).T
+                        
             i0Data=I0BunchTrain2Pulses()
             
             i0Array = assignToMircobunch(
@@ -668,7 +668,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 Cut, reshape and average the ADC signal of the I0 monitor. 
                 Preliminary procedure: migth be optimized and tunend in to the DAQ 
                 """
-                i0Cutted=np.array(np.split(-self.i0Monitor[:,810:45090],500,axis=1))
+                i0Cutted=np.array(np.split(-self.i0Monitor[:,967:54967],500,axis=1))
                 i0BG=i0Cutted[:,:,:39].mean(2)
                 return np.nansum(i0Cutted[:,:,39:90]-i0BG[:,:,None],2).T
                 
