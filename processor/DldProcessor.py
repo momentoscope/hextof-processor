@@ -164,6 +164,8 @@ class DldProcessor:
         self.TOF_IN_NS = bool(True)
         self.RETURN_XARRAY = bool(True)
         self.SINGLE_CORE_DATAFRAME_CREATION = bool(False)
+        self.USE_BAM = bool(True)
+        self.USE_STREAK = bool(False)
 
         self.DATA_RAW_DIR = str('/gpfs/pg2/current/raw/hdf')
         self.DATA_H5_DIR = str('/home/pg2user/data/h5')
@@ -466,6 +468,7 @@ class DldProcessor:
                                    (self.dd['bam']-centered*self.dd['bam'].mean()) * sign
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches[source] - \
                                                (self.ddMicrobunches['bam']-centered*self.ddMicrobunches['bam'].mean()) * sign
+
     def delayStageMovingDirection(self):
         """ Calculate the direction of movement of the delay stage. 
         Needed for backlash of the 1030nm Laser.
@@ -571,22 +574,26 @@ class DldProcessor:
             eoffset -= self.dd['sampleBias']
 
         if useAvgMonochormatorEnergy:        # TODO: add monocrhomator position,
-            eoffset -= self.dd['monochromatorEnergy'].mean()
+            eoffset -= self.dd['monochromatorPhotonEnergy'].mean()
         else:
-            eoffset -= self.dd['monochromatorEnergy']
+            eoffset -= self.dd['monochromatorPhotonEnergy']
 
         k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
         self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
                                          2.) - eoffset
 
-    def calibratePumpProbeTime(self, t0=0, bamSign=1, streakSign=1, invertTimeAxis=True):
+    def calibratePumpProbeTime(self, t0=0, useBam=None, useStreak=None, bamSign=1, streakSign=1, invertTimeAxis=True):
         """  Add pumpProbeTime axis to dataframes.
 
-        Correct pump probe time by BAM and/or streak camera
+        Correct pump probe time by BAM and/or streak camera.
 
         Args:
             t0: float
                 pump probe time overlap
+            useBam: bool
+                if true, corrects BAM jitter
+            useStreak: bool
+                if true, corrects StreakCamera jitter
             bamSign: -1,+1
                 sign of the bam correction:
                     +1 : pumpProbeTime =  delayStage + bam
@@ -601,12 +608,17 @@ class DldProcessor:
                 invert time direction on pump probe time
 
         """
+        if useBam is None:
+            useBam = self.USE_BAM
+        if useStreak is None:
+            useStreak = self.USE_STREAK
+
         for df in [self.dd, self.ddMicrobunches]:
             df['pumpProbeTime'] = df['delayStage'] - t0
 
-            if 'bam' in df:
+            if 'bam' in df and useBam:
                 df['pumpProbeTime'] += df['bam'] * bamSign
-            if 'streakCamera' in df:
+            if 'streakCamera' in df and useStreak:
                 df['pumpProbeTime'] += df['streakCamera'] * streakSign
             if invertTimeAxis:
                 df['pumpProbeTime'] = - df['pumpProbeTime']
