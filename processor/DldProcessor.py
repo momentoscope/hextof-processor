@@ -569,15 +569,19 @@ class DldProcessor:
                                                                   col='dldTime_corrected', type=jitterType)
 
         if useAvgSampleBias:
+            self._sampleBiasMean = self.dd['sampleBias'].mean().compute()
             eoffset -= self.dd['sampleBias'].mean()
         else:
             eoffset -= self.dd['sampleBias']
 
         if useAvgMonochormatorEnergy:        # TODO: add monocrhomator position,
+            self._monochromatorPhotonEnergyMean = self.dd['sampleBias'].mean().compute()
             eoffset -= self.dd['monochromatorPhotonEnergy'].mean()
         else:
             eoffset -= self.dd['monochromatorPhotonEnergy']
 
+        if useAvgSampleBias or useAvgMonochormatorEnergy:
+            eoffset = dask.compute(eoffset)
         k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
         self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
                                          2.) - eoffset
