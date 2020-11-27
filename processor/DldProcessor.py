@@ -569,13 +569,11 @@ class DldProcessor:
                                                                   col='dldTime_corrected', type=jitterType)
 
         if useAvgSampleBias:
-            self._sampleBiasMean = self.dd['sampleBias'].mean().compute()
             eoffset -= self.dd['sampleBias'].mean()
         else:
             eoffset -= self.dd['sampleBias']
 
         if useAvgMonochormatorEnergy:        # TODO: add monocrhomator position,
-            self._monochromatorPhotonEnergyMean = self.dd['sampleBias'].mean().compute()
             eoffset -= self.dd['monochromatorPhotonEnergy'].mean()
         else:
             eoffset -= self.dd['monochromatorPhotonEnergy']
