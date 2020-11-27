@@ -46,6 +46,7 @@ class DldProcessor:
         DATA_RESULTS_DIR : str
             Path to default saving location for results in np.array,
             tiff stack formats etc.
+        
     """
 
     def __init__(self, settings=None):
@@ -152,6 +153,13 @@ class DldProcessor:
         self.K_RADIUS = np.float64(230)
         self.K_ROTATION_ANGLE = np.float64(0)
         self.STEP_TO_K = np.float64(1.)
+        
+        self.I0ID_OFFSET = int(967)
+        self.I0ID_N = int(500)
+        self.I0_MEAN_LOW = int(20)
+        self.I0_MEAN_HIGH = int(40)
+        self.I0_SUM_LOW = int(44)
+        self.I0_SUM_HIGH = int(70)
 
         self.TOF_IN_NS = bool(True)
         self.RETURN_XARRAY = bool(True)
