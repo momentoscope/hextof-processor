@@ -488,7 +488,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         if 'monochromatorPhotonEnergy' in self.daqAddresses:
             monochromatorPhotonEnergyArray = assignToMircobunch(
                 self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
-                self.gmdBda[mbIndexStart:mbIndexEnd, :].astype(np.float64))
+                self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd, :].astype(np.float64))
             daMonochromatorPhotonEnergy = monochromatorPhotonEnergyArray.flatten()
             arrayCols.append(daMonochromatorPhotonEnergy)
             colNames.append('monochromatorPhotonEnergy')
