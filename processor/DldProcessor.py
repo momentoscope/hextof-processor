@@ -517,7 +517,7 @@ class DldProcessor:
         
     def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=True, k_shift_func=None,
                         k_shift_parameters=None, applyJitter=True, jitterAmplitude=4, jitterType='uniform',
-                        useAvgMonochormatorEnergy=True):
+                        useAvgMonochormatorEnergy=True, useAvgToFEnergy=True):
         """ Add calibrated energy axis to dataframe
 
         Uses the same equation as in tof2energy in calibrate.
@@ -578,7 +578,12 @@ class DldProcessor:
         else:
             eoffset -= self.dd['monochromatorPhotonEnergy']
 
-        if useAvgSampleBias or useAvgMonochormatorEnergy:
+        if useAvgToFEnergy:        # TODO: add monocrhomator position,
+            eoffset += self.dd['tofVoltage'].mean()
+        else:
+            eoffset += self.dd['tofVoltage']
+
+        if useAvgSampleBias or useAvgMonochormatorEnergy or useAvgToFEnergy:
             print('computing energy offsets...')
             with ProgressBar():
                 eoffset = dask.compute(eoffset)
