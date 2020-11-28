@@ -99,6 +99,8 @@ def tof2energy(t, toffset=None, eoffset=None, l=None):
 
     from configparser import ConfigParser
     settings = ConfigParser()
+    print(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+    print(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
     if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
         settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
     else:
