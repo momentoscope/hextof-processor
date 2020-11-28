@@ -515,9 +515,9 @@ class DldProcessor:
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches[source]# - \
         #                                       self.ddMicrobunches['delayStageDirection']*backLash      
         
-    def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=False, k_shift_func=None,
+    def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=True, k_shift_func=None,
                         k_shift_parameters=None, applyJitter=True, jitterAmplitude=4, jitterType='uniform',
-                        useAvgMonochormatorEnergy=False):
+                        useAvgMonochormatorEnergy=True):
         """ Add calibrated energy axis to dataframe
 
         Uses the same equation as in tof2energy in calibrate.
@@ -578,6 +578,10 @@ class DldProcessor:
         else:
             eoffset -= self.dd['monochromatorPhotonEnergy']
 
+        if useAvgSampleBias or useAvgMonochormatorEnergy:
+            print('computing energy offsets...')
+            with ProgressBar():
+                eoffset = dask.compute(eoffset)
         k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
         self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
                                          2.) - eoffset
