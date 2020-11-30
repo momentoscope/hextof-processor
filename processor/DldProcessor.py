@@ -12,7 +12,7 @@ from dask.diagnostics import ProgressBar
 import h5py
 import numpy as np
 import pandas as pd
-from tqdm import tqdm, tqdm_notebook
+from tqdm.auto import tqdm
 from configparser import ConfigParser
 from processor.utilities import misc, io, dfops
 # warnings.resetwarnings()
@@ -580,7 +580,6 @@ class DldProcessor:
 
         if useAvgToFEnergy:        # TODO: add monocrhomator position,
             eoffset += np.nanmean(self.dd['tofVoltage'].values)
-
         else:
             eoffset += self.dd['tofVoltage']
 
@@ -1210,7 +1209,7 @@ class DldProcessor:
         with warnings.catch_warnings():
             warnings.simplefilter(warnString)
 
-            for i in tqdm_notebook(range(0, self.dd.npartitions, self.N_CORES),disable=not usePbar):
+            for i in tqdm(range(0, self.dd.npartitions, self.N_CORES),disable=not usePbar):
                 resultsToCalculate = []
                 # process the data in blocks of n partitions (given by the number
                 # of cores):
