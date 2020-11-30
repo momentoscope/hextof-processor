@@ -301,6 +301,7 @@ class DldProcessor:
             else:
                 fileName = 'run{}'.format(self.runNumber)
         fullName = path + fileName  # TODO: test if naming is correct
+        print(f'Loading {format} data from {fileName}')
 
         if format == 'parquet':
             self.dd = dask.dataframe.read_parquet(fullName + "_el")
@@ -316,7 +317,7 @@ class DldProcessor:
             self.ddMicrobunches = dask.dataframe.read_hdf(
                 fullName, '/microbunches', mode='r', chunksize=self.CHUNK_SIZE)
         self.printRunOverview()
-        print(f'Loaded data form {format} file')
+        print(f'Loading complete.')
 
     def appendDataframeParquet(self, fileName, path=None):
         """ Append data to an existing dask Parquet dataframe.
