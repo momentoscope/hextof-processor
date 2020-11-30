@@ -568,18 +568,19 @@ class DldProcessor:
             self.dd['dldTime_corrected'] = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmplitude,
                                                                   col='dldTime_corrected', type=jitterType)
 
-        if useAvgSampleBias: #
-            eoffset -= self.dd['sampleBias'].mean()
+        if useAvgSampleBias:
+            eoffset -= np.nanmean(self.dd['sampleBias'].values)
         else:
             eoffset -= self.dd['sampleBias']
 
-        if useAvgMonochormatorEnergy:        # TODO: check what bugs this creates!
-            eoffset += self.dd['monochromatorPhotonEnergy'].mean()
+        if useAvgMonochormatorEnergy:        # TODO: add monocrhomator position,
+            eoffset += np.nanmean(self.dd['monochromatorPhotonEnergy'].values)
         else:
             eoffset += self.dd['monochromatorPhotonEnergy']
 
-        if useAvgToFEnergy:
-            eoffset += self.dd['tofVoltage'].mean()
+        if useAvgToFEnergy:        # TODO: add monocrhomator position,
+            eoffset += np.nanmean(self.dd['tofVoltage'].values)
+
         else:
             eoffset += self.dd['tofVoltage']
 
