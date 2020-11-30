@@ -580,6 +580,7 @@ class DldProcessor:
 
         if useAvgToFEnergy:        # TODO: add monocrhomator position,
             eoffset += np.nanmean(self.dd['tofVoltage'].values)
+
         else:
             eoffset += self.dd['tofVoltage']
 
