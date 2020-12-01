@@ -396,23 +396,38 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             colNames.append('dldTime')
 
         if 'dldAux0' in self.daqAddresses:
-            daSampleBias = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
-            daSampleBias[:, :] = (self.dldAux0[mbIndexStart:mbIndexEnd, 0])[:, None]
-            daSampleBias = daSampleBias.flatten()
-            arrayCols.append(daSampleBias)
-            colNames.append('sampleBias')
+            dldAuxChannels = {'sampleBias':0,
+                              'tofVoltage':1,
+                              'extractorVoltage':2,
+                              'extractorCurrent':3,
+                              'cryoTemperature':4,
+                              'sampleTemperaure':5,
+                              'dldTimeBinSize':15,
+                              }
 
-            daTofVoltage = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
-            daTofVoltage[:, :] = (self.dldAux0[mbIndexStart:mbIndexEnd, 1])[:, None]
-            daTofVoltage = daTofVoltage.flatten()
-            arrayCols.append(daTofVoltage)
-            colNames.append('tofVoltage')
-
-            daExtractorVoltage = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
-            daExtractorVoltage[:, :] = (self.dldAux0[mbIndexStart:mbIndexEnd, 2])[:, None]
-            daExtractorVoltage = daExtractorVoltage.flatten()
-            arrayCols.append(daExtractorVoltage)
-            colNames.append('extractorVoltage')
+            for name,chan in dldAuxChannels.items():
+                da = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+                da[:, :] = (self.dldAux0[mbIndexStart:mbIndexEnd, chan])[:, None]
+                da = da.flatten()
+                arrayCols.append(da)
+                colNames.append(name)
+            # daSampleBias = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+            # daSampleBias[:, :] = (self.dldAux0[mbIndexStart:mbIndexEnd, 0])[:, None]
+            # daSampleBias = daSampleBias.flatten()
+            # arrayCols.append(daSampleBias)
+            # colNames.append('sampleBias')
+            #
+            # daTofVoltage = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+            # daTofVoltage[:, :] = (self.dldAux0[mbIndexStart:mbIndexEnd, 1])[:, None]
+            # daTofVoltage = daTofVoltage.flatten()
+            # arrayCols.append(daTofVoltage)
+            # colNames.append('tofVoltage')
+            #
+            # daExtractorVoltage = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+            # daExtractorVoltage[:, :] = (self.dldAux0[mbIndexStart:mbIndexEnd, 2])[:, None]
+            # daExtractorVoltage = daExtractorVoltage.flatten()
+            # arrayCols.append(daExtractorVoltage)
+            # colNames.append('extractorVoltage')
 
         if 'delayStage' in self.daqAddresses:
             delayStageArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
