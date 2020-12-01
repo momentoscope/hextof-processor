@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="English" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
   
   
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="hextof-processor 1.0.1 documentation" href="../index.html"/>
-        <link rel="next" title="3. Interfacing external pah library" href="pah.html"/>
-        <link rel="prev" title="1. Dataframe creator class (DldFlashDataframeCreator)" href="DldFlashDataframeCreator.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3. Interfacing external pah library" href="pah.html" />
+    <link rel="prev" title="1. Dataframe creator class (DldFlashDataframeCreator)" href="DldFlashDataframeCreator.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../index.html" class="icon icon-home"> hextof-processor
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> hextof-processor
           
 
           
@@ -83,6 +79,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -123,13 +120,14 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">hextof-processor</a>
@@ -137,9 +135,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -160,7 +159,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li><span class="section-number">2. </span>DldProcessor class (DldProcessor)</li>
     
@@ -316,7 +315,7 @@ parquet files to append the new data.</p>
 
 <dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.calibrateEnergy">
-<code class="sig-name descname">calibrateEnergy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">useAvgSampleBias</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">k_shift_func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">k_shift_parameters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">applyJitter</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">jitterAmplitude</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">jitterType</span><span class="o">=</span><span class="default_value">'uniform'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.calibrateEnergy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.calibrateEnergy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">calibrateEnergy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">toffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eoffset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">l</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">useAvgSampleBias</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">k_shift_func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">k_shift_parameters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">applyJitter</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">jitterAmplitude</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">jitterType</span><span class="o">=</span><span class="default_value">'uniform'</span></em>, <em class="sig-param"><span class="n">useAvgMonochormatorEnergy</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">useAvgToFEnergy</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.calibrateEnergy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.calibrateEnergy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add calibrated energy axis to dataframe</p>
 <p>Uses the same equation as in tof2energy in calibrate.</p>
 <dl class="simple">
@@ -384,12 +383,16 @@ kept at 0.5, since they are integer steps.</p>
 
 <dl class="py method">
 <dt id="processor.DldProcessor.DldProcessor.calibratePumpProbeTime">
-<code class="sig-name descname">calibratePumpProbeTime</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t0</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">bamSign</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">streakSign</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">invertTimeAxis</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.calibratePumpProbeTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.calibratePumpProbeTime" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">calibratePumpProbeTime</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t0</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">useBam</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">useStreak</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bamSign</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">streakSign</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">invertTimeAxis</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/processor/DldProcessor.html#DldProcessor.calibratePumpProbeTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.DldProcessor.DldProcessor.calibratePumpProbeTime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add pumpProbeTime axis to dataframes.</p>
-<p>Correct pump probe time by BAM and/or streak camera</p>
+<p>Correct pump probe time by BAM and/or streak camera.</p>
 <dl>
 <dt>Args:</dt><dd><dl>
 <dt>t0: float</dt><dd><p>pump probe time overlap</p>
+</dd>
+<dt>useBam: bool</dt><dd><p>if true, corrects BAM jitter</p>
+</dd>
+<dt>useStreak: bool</dt><dd><p>if true, corrects StreakCamera jitter</p>
 </dd>
 <dt>bamSign: -1,+1</dt><dd><dl>
 <dt>sign of the bam correction:</dt><dd><p>+1 : pumpProbeTime =  delayStage + bam
@@ -1045,9 +1048,7 @@ defined in SETTINGS.ini</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -1056,7 +1057,7 @@ defined in SETTINGS.ini</p>
         <a href="pah.html" class="btn btn-neutral float-right" title="3. Interfacing external pah library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="DldFlashDataframeCreator.html" class="btn btn-neutral" title="1. Dataframe creator class (DldFlashDataframeCreator)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="DldFlashDataframeCreator.html" class="btn btn-neutral float-left" title="1. Dataframe creator class (DldFlashDataframeCreator)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1065,11 +1066,19 @@ defined in SETTINGS.ini</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018-2020, momentoscope team.
+        
+        &copy; Copyright 2018-2020, momentoscope team
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1081,39 +1090,15 @@ defined in SETTINGS.ini</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'1.0.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="../_static/language_data.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>
