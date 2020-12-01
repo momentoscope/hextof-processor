@@ -61,7 +61,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         dataframe containing chosen channel information from the given run.
     """
 
-    def __init__(self,runNumber=None, pulseIdInterval=None, settings=None):
+    def __init__(self, runNumber=None, pulseIdInterval=None, settings=None):
 
         super().__init__(settings)
 
@@ -99,7 +99,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         if (pulseIdInterval is None) and (runNumber is None):
             raise ValueError('Need either runNumber or pulseIdInterval to know what data to read.')
 
-
         if path is not None:
             try:
                 daqAccess = BeamtimeDaqAccess.create(path)
@@ -110,7 +109,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             path = self.DATA_RAW_DIR
             self.path_to_run = misc.get_path_to_run(runNumber, path)
             daqAccess = BeamtimeDaqAccess.create(self.path_to_run)
-        
+
         self.daqAddresses = []
         self.pulseIdInterval = self.getIds(runNumber, path)
         # Parse the settings file in the DAQ channels section for the list of
@@ -140,7 +139,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                     attrVal = getattr(self, address_name)
                     values, otherStuff = daqAccess.allValuesOfRun(attrVal, runNumber)
                 except AssertionError:
-                    print('Assertion error: {}'.format(address_name, attrVal, values, otherStuff ))
+                    print('Assertion error: {}'.format(address_name, attrVal, values, otherStuff))
 
                 setattr(self, address_name, values)
                 if address_name == 'macroBunchPulseId':  # catch the value of the first macrobunchID
@@ -149,7 +148,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                     macroBunchPulseId_correction = pulseIdInterval[0]
 
                 if address_name == 'timeStamp':  # catch the time stamps
-                    startEndTime = (values[0,0], values[-1,0])
+                    startEndTime = (values[0, 0], values[-1, 0])
                     self.startEndTime = startEndTime
 
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
@@ -189,19 +188,19 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         self.electronsPerMacrobunch = int(self.numOfElectrons / numOfMacrobunches)
 
         self.runInfo = {
-            'runNumber':self.runNumber,
-            'pulseIdInterval':self.pulseIdInterval,
+            'runNumber': self.runNumber,
+            'pulseIdInterval': self.pulseIdInterval,
             'numberOfMacrobunches': numOfMacrobunches,
-            'numberOfElectrons':self.numOfElectrons,
+            'numberOfElectrons': self.numOfElectrons,
             'electronsPerMacrobunch': self.electronsPerMacrobunch,
         }
         try:
             self.runInfo['timestampStart'] = self.startEndTime[0].astype(int)
             self.runInfo['timestampStop'] = self.startEndTime[1].astype(int)
-            self.runInfo['timestampDuration'] = self.startEndTime[1]-self.startEndTime[0].astype(int)
+            self.runInfo['timestampDuration'] = self.startEndTime[1] - self.startEndTime[0].astype(int)
             self.runInfo['timeStart'] = datetime.utcfromtimestamp(self.startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S')
             self.runInfo['timeStop'] = datetime.utcfromtimestamp(self.startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S')
-            self.runInfo['timeDuration'] = datetime.timedelta(self.startEndTime[1]-self.startEndTime[0])
+            self.runInfo['timeDuration'] = datetime.timedelta(self.startEndTime[1] - self.startEndTime[0])
         except:
             self.runInfo['timestampStart'] = None
             self.runInfo['timestampStop'] = None
@@ -302,7 +301,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                     attrVal = getattr(self, address_name)
                     values, otherStuff = daqAccess.allValuesOfRun(attrVal, runNumber)
                 except AssertionError:
-                    print('Assertion error: {}'.format(address_name, attrVal, values, otherStuff ))
+                    print('Assertion error: {}'.format(address_name, attrVal, values, otherStuff))
 
                 setattr(self, address_name, values)
                 if address_name == 'macroBunchPulseId':  # catch the value of the first macrobunchID
@@ -311,17 +310,17 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                     macroBunchPulseId_correction = pulseIdInterval[0]
 
                 if address_name == 'timeStamp':  # catch the time stamps
-                    startEndTime = (values[0,0], values[-1,0])
+                    startEndTime = (values[0, 0], values[-1, 0])
                     self.startEndTime = startEndTime
 
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
-            print('Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}'\
-                .format(runNumber, numOfMacrobunches, pulseIdInterval[0], pulseIdInterval[1]))
+            print('Run {0} contains {1:,} Macrobunches, from {2:,} to {3:,}' \
+                  .format(runNumber, numOfMacrobunches, pulseIdInterval[0], pulseIdInterval[1]))
             try:
                 print("start time: {}, end time: {}, total time: {}"
                       .format(datetime.utcfromtimestamp(startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S'),
                               datetime.utcfromtimestamp(startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S'),
-                              datetime.utcfromtimestamp(startEndTime[1]-startEndTime[0]).strftime('%H:%M:%S')))
+                              datetime.utcfromtimestamp(startEndTime[1] - startEndTime[0]).strftime('%H:%M:%S')))
             except:
                 pass
         else:
@@ -389,23 +388,22 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             arrayCols.append(daY)
             colNames.append('dldPosY')
 
-
         if 'dldTime' in self.daqAddresses:
             daTime = self.dldTime[mbIndexStart:mbIndexEnd, :].flatten()
             arrayCols.append(daTime)
             colNames.append('dldTime')
 
         if 'dldAux0' in self.daqAddresses:
-            dldAuxChannels = {'sampleBias':0,
-                              'tofVoltage':1,
-                              'extractorVoltage':2,
-                              'extractorCurrent':3,
-                              'cryoTemperature':4,
-                              'sampleTemperaure':5,
-                              'dldTimeBinSize':15,
+            dldAuxChannels = {'sampleBias': 0,
+                              'tofVoltage': 1,
+                              'extractorVoltage': 2,
+                              'extractorCurrent': 3,
+                              'cryoTemperature': 4,
+                              'sampleTemperaure': 5,
+                              'dldTimeBinSize': 15,
                               }
 
-            for name,chan in dldAuxChannels.items():
+            for name, chan in dldAuxChannels.items():
                 da = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
                 da[:, :] = (self.dldAux0[mbIndexStart:mbIndexEnd, chan])[:, None]
                 da = da.flatten()
@@ -501,13 +499,16 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             colNames.append('gmdBda')
 
         if 'monochromatorPhotonEnergy' in self.daqAddresses:
-            # monochromatorPhotonEnergyArray = assignToMircobunch(
-            #     self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
-            #     self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd, :].astype(np.float64))
-            # daMonochromatorPhotonEnergy = monochromatorPhotonEnergyArray.flatten()
-            monochromatorPhotonEnergyArray = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
-            monochromatorPhotonEnergyArray[:, :] = (self.monochromatorPhotonEnergyArray[mbIndexStart:mbIndexEnd])[:, None]
-            daMonochromatorPhotonEnergy = delayStageArray.flatten()
+            monochromatorPhotonEnergyArray = assignToMircobunch(
+                self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
+                self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd, :].astype(np.float64))
+            daMonochromatorPhotonEnergy = monochromatorPhotonEnergyArray.flatten()
+            # daMonochromatorPhotonEnergy = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+            # daMonochromatorPhotonEnergy[:, :] = (self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd])[:, None]
+            # daMonochromatorPhotonEnergy = daMonochromatorPhotonEnergy.flatten()
+            # handle nans # TODO: This channel should become a static value
+            daMonochromatorPhotonEnergy = np.nan_to_num(daMonochromatorPhotonEnergy,
+                                                        nan=np.nanmean(daMonochromatorPhotonEnergy))
             arrayCols.append(daMonochromatorPhotonEnergy)
             colNames.append('monochromatorPhotonEnergy')
 
@@ -517,19 +518,20 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 Cut, reshape and average the ADC signal of the I0 monitor. 
                 Preliminary procedure: migth be optimized and tunend in to the DAQ 
                 """
-                i0Cutted=np.array(np.split(-self.i0Monitor[:,self.I0ID_OFFSET:self.I0ID_OFFSET+108*self.I0ID_N],self.I0ID_N,axis=1))
-                i0BG=i0Cutted[:,:,self.I0_MEAN_LOW:self.I0_MEAN_HIGH].mean(2)
-                return np.nansum(i0Cutted[:,:,self.I0_SUM_LOW:self.I0_SUM_HIGH]-i0BG[:,:,None],2).T
-                        
-            i0Data=I0BunchTrain2Pulses()
-            
+                i0Cutted = np.array(
+                    np.split(-self.i0Monitor[:, self.I0ID_OFFSET:self.I0ID_OFFSET + 108 * self.I0ID_N], self.I0ID_N,
+                             axis=1))
+                i0BG = i0Cutted[:, :, self.I0_MEAN_LOW:self.I0_MEAN_HIGH].mean(2)
+                return np.nansum(i0Cutted[:, :, self.I0_SUM_LOW:self.I0_SUM_HIGH] - i0BG[:, :, None], 2).T
+
+            i0Data = I0BunchTrain2Pulses()
+
             i0Array = assignToMircobunch(
                 self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
                 i0Data[mbIndexStart:mbIndexEnd, :].astype(np.float64))
             daI0 = i0Array.flatten()
             arrayCols.append(daI0)
             colNames.append('i0Monitor')
-
 
         # convert the laser polarization motor position to the electron format
         if 'pumpPol' in self.daqAddresses:
@@ -554,8 +556,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             daTimeStamp = timeStampArray.flatten()
             arrayCols.append(daTimeStamp)
             colNames.append('timeStamp')
-
-
 
         # the Aux channel: aux0:
         # aux0Arr= assignToMircobunch(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64), self.dldAux[mbIndexStart:mbIndexEnd, 0].astype(np.float64))
@@ -582,11 +582,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         # self.dldTime=self.dldTime*self.dldTimeStep
         if _VERBOSE:
             print('creating electron dataframe...')
-            
+
         maxIndex = self.dldTime.shape[0]
 
-        if self.SINGLE_CORE_DATAFRAME_CREATION: 
-            n_cores = 1 # creating dataframes with multiple cores takes much longer...
+        if self.SINGLE_CORE_DATAFRAME_CREATION:
+            n_cores = 1  # creating dataframes with multiple cores takes much longer...
         else:
             n_cores = self.N_CORES
 
@@ -644,7 +644,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         if 'streakCam' in self.daqAddresses:
             streakCamArray = np.zeros_like(self.bam)
-            streakCamArray[:, :] = (self.streakCam[:,0])[:, None]
+            streakCamArray[:, :] = (self.streakCam[:, 0])[:, None]
             daStreakCamArray = dask.array.from_array(streakCamArray.flatten(), chunks=self.CHUNK_SIZE)
             arrayCols.append(daStreakCamArray)
             ddMicrobunchesColnames.append('streakCamera')
@@ -667,8 +667,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         #     daAux1 = dask.array.from_array(aux1.flatten(), chunks=(self.CHUNK_SIZE))
         #     arrayCols.append(daAux1)
         #     ddMicrobunchesColnames.append('delayStage')
-
-
 
         if 'bunchCharge' in self.daqAddresses:
             daBunchCharge = dask.array.from_array(self.bunchCharge[:, 0:numOfMicrobunches].flatten(),
@@ -694,19 +692,19 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 Cut, reshape and average the ADC signal of the I0 monitor. 
                 Preliminary procedure: migth be optimized and tunend in to the DAQ 
                 """
-                i0Cutted=np.array(np.split(-self.i0Monitor[:,967:54967],500,axis=1))
-                i0BG=i0Cutted[:,:,:39].mean(2)
-                return np.nansum(i0Cutted[:,:,39:90]-i0BG[:,:,None],2).T
-                
-            i0Data=I0BunchTrain2Pulses()
+                i0Cutted = np.array(np.split(-self.i0Monitor[:, 967:54967], 500, axis=1))
+                i0BG = i0Cutted[:, :, :39].mean(2)
+                return np.nansum(i0Cutted[:, :, 39:90] - i0BG[:, :, None], 2).T
+
+            i0Data = I0BunchTrain2Pulses()
             try:
                 paddedI0 = np.pad(i0Data, ((0, 0), (0, numOfMicrobunches - i0Data.shape[1])), 'constant',
-                                            constant_values=(0, 0))
+                                  constant_values=(0, 0))
                 daI0 = dask.array.from_array(paddedI0.flatten(), chunks=self.CHUNK_SIZE)
             except:
                 print('fix i0 Monitor DAQ: Length: ' + str(i0Data.shape[1]))
                 daI0 = dask.array.from_array(i0Data[:, 0:numOfMicrobunches].flatten(),
-                                                       chunks=self.CHUNK_SIZE)
+                                             chunks=self.CHUNK_SIZE)
             arrayCols.append(daI0)
             ddMicrobunchesColnames.append('i0Monitor')
 
@@ -756,7 +754,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         format = format.lower()
         assert format in ['parquet', 'h5', 'hdf5'], 'Invalid format for data input. Please select between parquet or h5'
-        
+
         # Update instance attributes based on input parameters
         if path is None:
             if format == 'parquet':
@@ -774,7 +772,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         fileName = path + fileName  # TODO: test if naming is correct
 
-
         if format == 'parquet':
             if os.path.isdir(fileName):
                 print(f'Appending data to existing parquet container {fileName}')
@@ -788,7 +785,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED", \
                                                append=append, ignore_divisions=True)
                 try:
-                    with open(os.path.join(fileName + '_el','run_metadata.txt'), 'w') as json_file:
+                    with open(os.path.join(fileName + '_el', 'run_metadata.txt'), 'w') as json_file:
                         json.dump(self.metadata_dict, json_file, indent=4)
                 except AttributeError:
                     print('failed saving metadata')
@@ -822,7 +819,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
 
         if path is None:
             path = self.DATA_RAW_DIR
-        
+
         if not hasattr(self, 'path_to_run'):
             self.path_to_run = misc.get_path_to_run(runNumber, path)
 
