@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="English" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,46 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
   
   
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="hextof-processor 1.0.1 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../../index.html" class="icon icon-home"> hextof-processor
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> hextof-processor
           
 
           
@@ -82,6 +77,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -122,13 +118,14 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">hextof-processor</a>
@@ -136,9 +133,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -159,7 +157,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -167,8 +165,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -668,16 +664,27 @@
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daGmdBda</span><span class="p">)</span>
             <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;gmdBda&#39;</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="s1">&#39;monochromatorPhotonEnergy&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
+            <span class="c1"># monochromatorPhotonEnergyArray = assignToMircobunch(</span>
+            <span class="c1">#     self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),</span>
+            <span class="c1">#     self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd, :].astype(np.float64))</span>
+            <span class="c1"># daMonochromatorPhotonEnergy = monochromatorPhotonEnergyArray.flatten()</span>
+            <span class="n">monochromatorPhotonEnergyArray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldMicrobunchId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">monochromatorPhotonEnergyArray</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monochromatorPhotonEnergyArray</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">daMonochromatorPhotonEnergy</span> <span class="o">=</span> <span class="n">delayStageArray</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daMonochromatorPhotonEnergy</span><span class="p">)</span>
+            <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;monochromatorPhotonEnergy&#39;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="s1">&#39;i0Monitor&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
             <span class="k">def</span> <span class="nf">I0BunchTrain2Pulses</span><span class="p">():</span>
                 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">                Cut, reshape and average the ADC signal of the I0 monitor. </span>
 <span class="sd">                Preliminary procedure: migth be optimized and tunend in to the DAQ </span>
 <span class="sd">                &quot;&quot;&quot;</span>
-                <span class="n">i0Cutted</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">i0Monitor</span><span class="p">[:,</span><span class="mi">810</span><span class="p">:</span><span class="mi">45090</span><span class="p">],</span><span class="mi">410</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-                <span class="n">i0BG</span><span class="o">=</span><span class="n">i0Cutted</span><span class="p">[:,:,:</span><span class="mi">39</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">i0Cutted</span><span class="p">[:,:,</span><span class="mi">39</span><span class="p">:</span><span class="mi">90</span><span class="p">]</span><span class="o">-</span><span class="n">i0BG</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-            
+                <span class="n">i0Cutted</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">i0Monitor</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">I0ID_OFFSET</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">I0ID_OFFSET</span><span class="o">+</span><span class="mi">108</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">I0ID_N</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">I0ID_N</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">i0BG</span><span class="o">=</span><span class="n">i0Cutted</span><span class="p">[:,:,</span><span class="bp">self</span><span class="o">.</span><span class="n">I0_MEAN_LOW</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">I0_MEAN_HIGH</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">i0Cutted</span><span class="p">[:,:,</span><span class="bp">self</span><span class="o">.</span><span class="n">I0_SUM_LOW</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">I0_SUM_HIGH</span><span class="p">]</span><span class="o">-</span><span class="n">i0BG</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+                        
             <span class="n">i0Data</span><span class="o">=</span><span class="n">I0BunchTrain2Pulses</span><span class="p">()</span>
             
             <span class="n">i0Array</span> <span class="o">=</span> <span class="n">assignToMircobunch</span><span class="p">(</span>
@@ -851,7 +858,7 @@
 <span class="sd">                Cut, reshape and average the ADC signal of the I0 monitor. </span>
 <span class="sd">                Preliminary procedure: migth be optimized and tunend in to the DAQ </span>
 <span class="sd">                &quot;&quot;&quot;</span>
-                <span class="n">i0Cutted</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">i0Monitor</span><span class="p">[:,</span><span class="mi">810</span><span class="p">:</span><span class="mi">45090</span><span class="p">],</span><span class="mi">410</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">i0Cutted</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">i0Monitor</span><span class="p">[:,</span><span class="mi">967</span><span class="p">:</span><span class="mi">54967</span><span class="p">],</span><span class="mi">500</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
                 <span class="n">i0BG</span><span class="o">=</span><span class="n">i0Cutted</span><span class="p">[:,:,:</span><span class="mi">39</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">i0Cutted</span><span class="p">[:,:,</span><span class="mi">39</span><span class="p">:</span><span class="mi">90</span><span class="p">]</span><span class="o">-</span><span class="n">i0BG</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
                 
@@ -1191,9 +1198,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -1202,11 +1207,19 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018-2020, momentoscope team.
+        
+        &copy; Copyright 2018-2020, momentoscope team
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1218,39 +1231,15 @@
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'1.0.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="../../_static/language_data.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>
