@@ -399,7 +399,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                               'extractorVoltage': 2,
                               'extractorCurrent': 3,
                               'cryoTemperature': 4,
-                              'sampleTemperaure': 5,
+                              'sampleTemperature': 5,
                               'dldTimeBinSize': 15,
                               }
 
