@@ -507,8 +507,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             # daMonochromatorPhotonEnergy[:, :] = (self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd])[:, None]
             # daMonochromatorPhotonEnergy = daMonochromatorPhotonEnergy.flatten()
             # handle nans # TODO: This channel should become a static value
-            daMonochromatorPhotonEnergy = np.nan_to_num(daMonochromatorPhotonEnergy,
-                                                        nan=np.nanmean(daMonochromatorPhotonEnergy))
+            nan = np.float64(np.nanmean(daMonochromatorPhotonEnergy))
+            daMonochromatorPhotonEnergy = np.nan_to_num(daMonochromatorPhotonEnergy,nan=nan)
             arrayCols.append(daMonochromatorPhotonEnergy)
             colNames.append('monochromatorPhotonEnergy')
 
