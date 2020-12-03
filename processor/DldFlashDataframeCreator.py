@@ -506,8 +506,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                               }
 
             alpha = 2 * self.monochromatorActEnergy[mbIndexStart:mbIndexEnd,monochromatorChannels['delta1']] + 90 -\
-                    self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd,monochromatorChannels['delta2']]
-            beta = -1 * self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd,monochromatorChannels['delta2']] - 86
+                    self.monochromatorActEnergy[mbIndexStart:mbIndexEnd,monochromatorChannels['delta2']]
+            beta = -1 * self.monochromatorActEnergy[mbIndexStart:mbIndexEnd,monochromatorChannels['delta2']] - 86
             GratingDensity = 200
             DiffrOrder = 1
 
