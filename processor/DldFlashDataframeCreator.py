@@ -505,8 +505,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                               'gratingAngle': 3,
                               }
 
-            alpha = 2 * self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd, 'delta1'] + 90 - self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd, 'delta2']
-            beta = -1 * self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd, 'delta2'] - 86
+            alpha = 2 * self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd]['delta1'] + 90 - self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd]['delta2']
+            beta = -1 * self.monochromatorPhotonEnergy[mbIndexStart:mbIndexEnd]['delta2'] - 86
             GratingDensity = 200
             DiffrOrder = 1
 
