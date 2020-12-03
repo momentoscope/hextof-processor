@@ -498,6 +498,29 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             arrayCols.append(daGmdBda)
             colNames.append('gmdBda')
 
+        if 'monochromatorActEnergy' in self.daqAddresses:
+            monochromatorChannels = {'delta1': 0,
+                              'delta2': 1,
+                              'mirrorAngle': 2,
+                              'gratingAngle': 3,
+                              }
+
+            alpha = 2 * self.monochromatorActEnergy[mbIndexStart:mbIndexEnd,monochromatorChannels['delta1']] + 90 -\
+                    self.monochromatorActEnergy[mbIndexStart:mbIndexEnd,monochromatorChannels['delta2']]
+            beta = -1 * self.monochromatorActEnergy[mbIndexStart:mbIndexEnd,monochromatorChannels['delta2']] - 86
+            GratingDensity = 200
+            DiffrOrder = 1
+
+            da = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
+            da[:, :] = np.array(1239.84/ ((np.sin(beta / 180 * np.pi)+np.sin(alpha / 180 * np.pi)) * 1e9 / (DiffrOrder * GratingDensity * 1000)))[:,None]
+            # for name, chan in monochromatorChannels.items():
+            da = da.flatten()
+
+            arrayCols.append(da)
+            colNames.append('monochromatorActEnergy')
+
+
+
         if 'monochromatorPhotonEnergy' in self.daqAddresses:
             monochromatorPhotonEnergyArray = assignToMircobunch(
                 self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :].astype(np.float64),
