@@ -512,7 +512,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             DiffrOrder = 1
 
             da = np.zeros_like(self.dldMicrobunchId[mbIndexStart:mbIndexEnd, :])
-            da[:, :] = 1239.84/ (np.sin(beta / 180 * np.pi)+np.sin(alpha / 180 * np.pi)) * 1e9 / (DiffrOrder * GratingDensity * 1000)
+            da[:, :] = 1239.84/ (np.sin(beta / 180 * np.pi)+np.sin(alpha / 180 * np.pi)) * 1e9 / (DiffrOrder * GratingDensity * 1000)[:,None]
             # for name, chan in monochromatorChannels.items():
             da = da.flatten()
 
