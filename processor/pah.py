@@ -80,6 +80,7 @@ class H5FileDataAccess(_H5FileDataAccess):
                or channelName.startswith('/Experiment/') \
                or channelName.startswith('/Photon Diagnostic/') \
                or channelName.startswith('/Electron Diagnostic/') \
+               or channelName.startswith('/Beamlines/') \
                or channelName.startswith('/Timing/')  # <--for datasets before 08-2018
 
 
