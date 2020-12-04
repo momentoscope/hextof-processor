@@ -518,7 +518,8 @@ class DldProcessor:
         
     def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=True, k_shift_func=None,
                         k_shift_parameters=None, applyJitter=True, jitterAmplitude=4, jitterType='uniform',
-                        useAvgMonochormatorEnergy=True, useAvgToFEnergy=True):
+                        useAvgMonochormatorEnergy=True, useAvgToFEnergy=True,
+                        sampleBias=None, monochromatorPhotonEnergy=None, tofVoltage=None):
         """ Add calibrated energy axis to dataframe
 
         Uses the same equation as in tof2energy in calibrate.
@@ -551,6 +552,13 @@ class DldProcessor:
         if l is None:
             l = float(self.settings['processor']['ET_CONV_L'])
 
+        if sampleBias is None:
+            sampleBias = np.nanmean(self.dd['sampleBias'].values)
+        if monochromatorPhotonEnergy is None:
+            monochromatorPhotonEnergy = np.nanmean(self.dd['monochromatorPhotonEnergy'].values)
+        if tofVoltage is None:
+            tofVoltage = np.nanmean(self.dd['tofVoltage'].values)
+
         self.dd['dldTime_corrected'] = self.dd['dldTime']
         if 'dldSectorId' in self.dd.columns:
             self.dd['dldTime_corrected'] -= self.dd['dldSectorId']
@@ -570,17 +578,17 @@ class DldProcessor:
                                                                   col='dldTime_corrected', type=jitterType)
 
         if useAvgSampleBias:
-            eoffset -= np.nanmean(self.dd['sampleBias'].values)
+            eoffset -= sampleBias
         else:
             eoffset -= self.dd['sampleBias']
 
-        if useAvgMonochormatorEnergy:        # TODO: add monocrhomator position,
-            eoffset += np.nanmean(self.dd['monochromatorPhotonEnergy'].values)
+        if useAvgMonochormatorEnergy:
+            eoffset += monochromatorPhotonEnergy
         else:
             eoffset += self.dd['monochromatorPhotonEnergy']
 
         if useAvgToFEnergy:        # TODO: add monocrhomator position,
-            eoffset += np.nanmean(self.dd['tofVoltage'].values)
+            eoffset += tofVoltage
         else:
             eoffset += self.dd['tofVoltage']
 
