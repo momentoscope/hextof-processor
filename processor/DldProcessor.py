@@ -304,13 +304,17 @@ class DldProcessor:
         print(f'Loading {format} data from {fileName}')
 
         if format == 'parquet':
-            self.dd = dask.dataframe.read_parquet(fullName + "_el")
-            self.ddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
             try:
-                with open(os.path.join(fullName + '_el', 'run_metadata.txt'), 'r') as json_file:
-                    self.metadata = json.load(json_file)
-            except Exception as err:
-                print(f'Failed loading metadata from parquet stored files!, {err}')
+                self.dd = dask.dataframe.read_parquet(fullName + "_el")
+                self.ddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
+
+                try:
+                    with open(os.path.join(fullName + '_el', 'run_metadata.txt'), 'r') as json_file:
+                        self.metadata = json.load(json_file)
+                except Exception as err:
+                    print(f'Failed loading metadata from parquet stored files!, {err}')
+            except FileNotFoundError:
+                raise FileNotFoundError(f'No parquet file {fileName} found under {path}')
         elif format in ['hdf5', 'h5']:
             self.dd = dask.dataframe.read_hdf(
                 fullName, '/electrons', mode='r', chunksize=self.CHUNK_SIZE)

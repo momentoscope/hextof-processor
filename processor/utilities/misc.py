@@ -425,7 +425,7 @@ def get_path_to_run(runNumber, rootpath): # TODO: improve performance
     try:
         return (available_runs['run{}'.format(runNumber)])
     except KeyError:
-        raise KeyError('No run number {} under path {}'.format(runNumber, rootpath))
+        raise FileNotFoundError('No run number {} under path {}'.format(runNumber, rootpath))
 
 
 def availableParquet(parquet_dir=None):
