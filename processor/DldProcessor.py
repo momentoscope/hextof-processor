@@ -1520,7 +1520,7 @@ class DldProcessor:
 
         return results
 
-    def save_binned(self, binnedData, file_name, path=None, mode='w'):
+    def save_binned(self, binnedData, file_name, saveFrames=True, path=None, mode='w'):
         """ Save a binned numpy array to h5 file. The file includes the axes
         (taken from the scheduled bins) and the delay stage histogram, if it exists.
 
@@ -1561,11 +1561,11 @@ class DldProcessor:
 
                 print('saving data to {}'.format(path + filename))
 
-                if 'pumpProbeTime' in self.binNameList:
+                if 'pumpProbeTime' in self.binNameList and saveFrames:
                     idx = self.binNameList.index('pumpProbeTime')
                     pp_data = np.swapaxes(binnedData, 0, idx)
 
-                elif 'delayStage' in self.binNameList:
+                elif 'delayStage' in self.binNameList and saveFrames:
                     idx = self.binNameList.index('delayStage')
                     pp_data = np.swapaxes(binnedData, 0, idx)
                 else:
@@ -1575,7 +1575,7 @@ class DldProcessor:
 
                 ff = h5File.create_group('frames')
 
-                if pp_data is None:  # in case there is no time axis, make a single dataset
+                if pp_data is None or not saveFrames:  # in case there is no time axis, make a single dataset
                     ff.create_dataset('f{:04d}'.format(0), data=binnedData)
                 else:
                     for i in range(pp_data.shape[0]):  # otherwise make a dataset for each time frame.
@@ -1586,7 +1586,7 @@ class DldProcessor:
                 # aa.create_dataset('axis_order', data=self.binNameList)
                 ax_n = 1
                 for i, binName in enumerate(self.binNameList):
-                    if binName in ['pumpProbeTime', 'delayStage']:
+                    if binName in ['pumpProbeTime', 'delayStage'] and saveFrames:
                         ds = aa.create_dataset('ax0 - {}'.format(binName), data=self.binAxesList[i])
                         ds.attrs['name'] = binName
                     else:
