@@ -15,6 +15,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 from configparser import ConfigParser
 from processor.utilities import misc, io, dfops
+import processor
 # warnings.resetwarnings()
 
 _VERBOSE = False
@@ -48,17 +49,32 @@ class DldProcessor:
             tiff stack formats etc.
         
     """
+    root_folder = os.path.dirname(os.path.dirname(processor.__file__))
 
     def __init__(self, settings=None):
         """ Create and manage a dask DataFrame from the data recorded at FLASH.
         """
+        self._settings = None
 
-        if settings is not None:
-            self.loadSettings(settings)
+        if settings is None:
+            self._settings_file = os.path.join(self.root_folder,'SETTINGS.ini')
+
+        elif os.path.isfile(settings):
+            self._settings_file = settings
         else:
-            self.initAttributes()  # in else because it is called already in load_settings
+            available_settings = os.listdir(os.path.join(self.root_folder, 'settings'))
+            settings = os.path.splitext(settings)[0]+'.ini'
+            if settings not in available_settings:
+                err_str = 'No Settings "{settings}" available.\n' \
+                          'Available settings files are:'
+                for s in available_settings:
+                    err_str += (f'\n\t{s}')
+                raise FileNotFoundError(err_str)
+            self._settings_file = os.path.join(self.root_folder,'settings',settings)
 
+        self.initAttributes()
         self.resetBins()
+
 
         # initialize attributes for metadata
         self.sample = {}  # this should contain 'name', 'sampleID', 'cleave number' etc...
@@ -108,21 +124,24 @@ class DldProcessor:
         Returns:
             dictionary with the settings file structure
         """
-        settings = ConfigParser()
-        root_folder = os.path.dirname(__file__)
-        if 'SETTINGS.ini' not in os.listdir(root_folder):
-            # if 'setup.py' in os.listdir(root_folder):
-            #     raise SettingsInitializationError
-            # else:
-            root_folder = os.path.dirname(root_folder)
-                # if 'setup.py' in os.listdir(root_folder):
-                #     raise SettingsInitializationError
-        file = os.path.join(root_folder, 'SETTINGS.ini')
-        settings.read(file)
-        if len(settings.sections()) == 0:
-            raise Exception('Failed loading main settings!')
-        else:
-            return settings
+        if self._settings is None:
+            settings = ConfigParser()
+            # root_folder = os.path.dirname(__file__)
+            # if self._settings_file not in os.listdir(root_folder):
+            #     # if 'setup.py' in os.listdir(root_folder):
+            #     #     raise SettingsInitializationError
+            #     # else:
+            #     root_folder = os.path.dirname(root_folder)
+            #         # if 'setup.py' in os.listdir(root_folder):
+            # #         #     raise SettingsInitializationError
+            # #
+            # file = os.path.join(root_folder, self._settings_file)
+            settings.read(self._settings_file)
+            if len(settings.sections()) == 0:
+                raise Exception('Failed loading main settings!')
+            else:
+                self._settings = settings
+        return self._settings
 
     def initAttributes(self, import_all=False):
         """ Parse settings file and assign the variables.
@@ -243,19 +262,38 @@ class DldProcessor:
                 Disables overwriting local file saving paths. Defaults to True.
 
         """
+        warnings.warn('DEPRECATED: Do not load settings, ')
+        self.setDefaultSettings( settings_file_name, preserve_path=preserve_path)
 
-        root_folder = os.path.dirname(__file__)
-        if 'SETTINGS.ini' not in os.listdir(root_folder):
-            root_folder = os.path.dirname(root_folder)
-        old_settings_file = os.path.join(root_folder, 'SETTINGS.ini')
+    def setDefaultSettings(self, settings_file_name, preserve_path=True):
+        """ Load settings from an other saved setting file.
+
+        To save settings simply copy paste the SETTINGS.ini file to the
+        utilities/settings folder, and rename it. Use this name in this method
+        to then load its content to the SETTINGS.ini file.
+
+        Args:
+            settings_file_name: str
+                Name of the settings file to load.
+                This file must be in the folder "hextof-processor/utilities/settings".
+            preserve_path: bool | True
+                Disables overwriting local file saving paths. Defaults to True.
+
+        """
+
+        # root_folder = os.path.dirname(__file__)
+        # if 'SETTINGS.ini' not in os.listdir(root_folder):
+        #     root_folder = os.path.dirname(root_folder)
+        old_settings_file = os.path.join(self.root_folder, 'SETTINGS.ini')
+
         new_settings = ConfigParser()
         if settings_file_name[-4:] != '.ini':
             settings_file_name += '.ini'
-        new_settings_file = os.path.join(root_folder, 'settings', settings_file_name)
+        new_settings_file = os.path.join(self.root_folder, 'settings', settings_file_name)
         new_settings.read(new_settings_file)
         if len(new_settings.sections()) == 0:
             print(f'No settings file {settings_file_name} found.')
-            available_settings = os.listdir(os.path.join(root_folder, 'settings'))
+            available_settings = os.listdir(os.path.join(self.root_folder, 'settings'))
             print('Available settings files are:', *available_settings, sep='\n\t')
         else:
             if preserve_path:
@@ -265,6 +303,7 @@ class DldProcessor:
             with open(old_settings_file, 'w') as SETTINGS_file:  # overwrite SETTINGS.ini with the new settings
                 new_settings.write(SETTINGS_file)
             print('Loaded settings from {}'.format(settings_file_name))
+        self._settings_file = 'SETTINGS.ini'
             # reload settings in the current processor instance
     # ==================
     # Dataframe creation
@@ -1273,7 +1312,7 @@ class DldProcessor:
 
         return result
 
-    def get_metadata(self, fast_mode=False):
+    def get_metadata(self, fast_mode=False): # TODO: make this great...!
         """  Creates a dictionary with the most relevant metadata.
 
         **Args**\n
@@ -1301,8 +1340,8 @@ class DldProcessor:
                               # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                               }
         metadata['sample'] = self.sample
-        metadata['settings'] = misc.parse_category('processor')
-        metadata['DAQ channels'] = misc.parse_category('DAQ channels')
+        metadata['settings'] = self.settings['processor']#misc.parse_category('processor')
+        metadata['DAQ channels'] = self.settings['DAQ channels']#misc.parse_category('DAQ channels')
         if self.pulseIdInterval is None and not fast_mode:
             pulseIdFrom = self.dd['macroBunchPulseId'].min().compute()
             pulseIdTo = self.dd['macroBunchPulseId'].max().compute()
@@ -1343,92 +1382,92 @@ class DldProcessor:
         #         print("Couldn't find GMD channel for making GMD normalization histograms\nError: {}".format(e))
         print('...done!')
         return metadata
-
-    def res_to_xarray_old(self, res, fast_mode=False):
-        """ Creates a BinnedArray (xarray subclass) out of the given numpy.array.
-        
-        **Parameters**\n
-        res: np.array
-            nd array of binned data
-        fast_mode: bool default True
-            if True, it skips the creation of metadata element which require computation.
-        
-        **Returns**\n
-        ba: BinnedArray (xarray)
-            an xarray-like container with binned data, axis, and all available metadata.
-        """
-        dims = self.binNameList
-        coords = {}
-        for name, vals in zip(self.binNameList, self.binAxesList):
-            coords[name] = vals
-
-        ba = BinnedArray(res, dims=dims, coords=coords)
-
-        units = {}
-        default_units = {'dldTime': 'step', 'delayStage': 'ps', 'pumpProbeDelay': 'ps'}
-        for name in self.binNameList:
-            try:
-                u = default_units[name]
-            except KeyError:
-                u = None
-            units[name] = u
-        ba.attrs['units'] = units
-
-        try:
-            start, stop = self.startEndTime[0], self.startEndTime[1]
-        except AttributeError:
-            if not fast_mode:
-                start, stop = self.dd['timeStamp'].min().compute(), self.dd['timeStamp'].max().compute()
-            else:
-                start, stop = 0, 1
-
-        ba.attrs['timing'] = {'acquisition start': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
-                              'acquisition stop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
-                              'acquisition duration': stop - start,
-                              'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                              }
-        ba.attrs['sample'] = self.sample
-        ba.attrs['settings'] = misc.parse_category('processor')
-        ba.attrs['DAQ channels'] = misc.parse_category('DAQ channels')
-        if self.pulseIdInterval is None:
-            pulseIdFrom = self.dd['macroBunchPulseId'].min().compute()
-            pulseIdTo = self.dd['macroBunchPulseId'].max().compute()
-        else:
-            pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
-
-        ba.attrs['run'] = {
-            'runNumber': self.runNumber,
-            'macroBunchPulseIdInterval': [pulseIdFrom, pulseIdTo],
-            'nMacrobunches': pulseIdTo - pulseIdFrom,
-        }
-        try:
-            ba.attrs['run']['nElectrons'] = self.numOfElectrons
-            ba.attrs['run']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
-        except:
-            pass  # TODO: find smarter solution
-
-        ba.attrs['histograms'] = {}
-
-        if hasattr(self, 'delaystageHistogram'):
-            ba.attrs['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
-        elif hasattr(self, 'pumpProbeHistogram'):
-            ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeTimeHistogram}
-        if not fast_mode:
-            try:
-                axis_values = []
-                ax_len = 0
-                for ax, val in coords.items():
-                    if len(val) > ax_len:
-                        ax_len = len(val)
-                        axis_name = ax
-                        axis_values = val
-
-                GMD_norm = self.make_GMD_histogram(axis_name, axis_values)
-                ba.attrs['histograms']['GMD'] = {'axis': axis_name, 'histogram': GMD_norm}
-            except Exception as e:
-                print("Couldn't find GMD channel for making GMD normalization histograms\nError: {}".format(e))
-
-        return ba
+    #
+    # def res_to_xarray_old(self, res, fast_mode=False):
+    #     """ Creates a BinnedArray (xarray subclass) out of the given numpy.array.
+    #
+    #     **Parameters**\n
+    #     res: np.array
+    #         nd array of binned data
+    #     fast_mode: bool default True
+    #         if True, it skips the creation of metadata element which require computation.
+    #
+    #     **Returns**\n
+    #     ba: BinnedArray (xarray)
+    #         an xarray-like container with binned data, axis, and all available metadata.
+    #     """
+    #     dims = self.binNameList
+    #     coords = {}
+    #     for name, vals in zip(self.binNameList, self.binAxesList):
+    #         coords[name] = vals
+    #
+    #     ba = BinnedArray(res, dims=dims, coords=coords)
+    #
+    #     units = {}
+    #     default_units = {'dldTime': 'step', 'delayStage': 'ps', 'pumpProbeDelay': 'ps'}
+    #     for name in self.binNameList:
+    #         try:
+    #             u = default_units[name]
+    #         except KeyError:
+    #             u = None
+    #         units[name] = u
+    #     ba.attrs['units'] = units
+    #
+    #     try:
+    #         start, stop = self.startEndTime[0], self.startEndTime[1]
+    #     except AttributeError:
+    #         if not fast_mode:
+    #             start, stop = self.dd['timeStamp'].min().compute(), self.dd['timeStamp'].max().compute()
+    #         else:
+    #             start, stop = 0, 1
+    #
+    #     ba.attrs['timing'] = {'acquisition start': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
+    #                           'acquisition stop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
+    #                           'acquisition duration': stop - start,
+    #                           'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+    #                           }
+    #     ba.attrs['sample'] = self.sample
+    #     ba.attrs['settings'] = misc.parse_category('processor')
+    #     ba.attrs['DAQ channels'] = misc.parse_category('DAQ channels')
+    #     if self.pulseIdInterval is None:
+    #         pulseIdFrom = self.dd['macroBunchPulseId'].min().compute()
+    #         pulseIdTo = self.dd['macroBunchPulseId'].max().compute()
+    #     else:
+    #         pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
+    #
+    #     ba.attrs['run'] = {
+    #         'runNumber': self.runNumber,
+    #         'macroBunchPulseIdInterval': [pulseIdFrom, pulseIdTo],
+    #         'nMacrobunches': pulseIdTo - pulseIdFrom,
+    #     }
+    #     try:
+    #         ba.attrs['run']['nElectrons'] = self.numOfElectrons
+    #         ba.attrs['run']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
+    #     except:
+    #         pass  # TODO: find smarter solution
+    #
+    #     ba.attrs['histograms'] = {}
+    #
+    #     if hasattr(self, 'delaystageHistogram'):
+    #         ba.attrs['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
+    #     elif hasattr(self, 'pumpProbeHistogram'):
+    #         ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeTimeHistogram}
+    #     if not fast_mode:
+    #         try:
+    #             axis_values = []
+    #             ax_len = 0
+    #             for ax, val in coords.items():
+    #                 if len(val) > ax_len:
+    #                     ax_len = len(val)
+    #                     axis_name = ax
+    #                     axis_values = val
+    #
+    #             GMD_norm = self.make_GMD_histogram(axis_name, axis_values)
+    #             ba.attrs['histograms']['GMD'] = {'axis': axis_name, 'histogram': GMD_norm}
+    #         except Exception as e:
+    #             print("Couldn't find GMD channel for making GMD normalization histograms\nError: {}".format(e))
+    #
+    #     return ba
 
     def computeBinnedDataMulti(self, saveName=None, savePath=None,
                                rank=None, size=None):
