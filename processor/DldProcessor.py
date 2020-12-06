@@ -61,6 +61,7 @@ class DldProcessor:
 
         elif os.path.isfile(settings):
             self._settings_file = settings
+            print(f'Using settings from {self._settings_file}')
         else:
             available_settings = os.listdir(os.path.join(self.root_folder, 'settings'))
             settings = os.path.splitext(settings)[0]+'.ini'
@@ -71,6 +72,8 @@ class DldProcessor:
                     err_str += (f'\n\t{s}')
                 raise FileNotFoundError(err_str)
             self._settings_file = os.path.join(self.root_folder,'settings',settings)
+            print(f'Using settings from {settings}')
+
 
         self.initAttributes()
         self.resetBins()
@@ -340,7 +343,7 @@ class DldProcessor:
             else:
                 fileName = 'run{}'.format(self.runNumber)
         fullName = path + fileName  # TODO: test if naming is correct
-        print(f'Loading {format} data from {fileName}')
+        print(f'Searching for {format} data from {fileName}...')
 
         if format == 'parquet':
             try:
