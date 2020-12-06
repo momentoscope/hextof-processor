@@ -304,13 +304,17 @@ class DldProcessor:
         print(f'Loading {format} data from {fileName}')
 
         if format == 'parquet':
-            self.dd = dask.dataframe.read_parquet(fullName + "_el")
-            self.ddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
             try:
-                with open(os.path.join(fullName + '_el', 'run_metadata.txt'), 'r') as json_file:
-                    self.metadata = json.load(json_file)
-            except Exception as err:
-                print(f'Failed loading metadata from parquet stored files!, {err}')
+                self.dd = dask.dataframe.read_parquet(fullName + "_el")
+                self.ddMicrobunches = dask.dataframe.read_parquet(fullName + "_mb")
+
+                try:
+                    with open(os.path.join(fullName + '_el', 'run_metadata.txt'), 'r') as json_file:
+                        self.metadata = json.load(json_file)
+                except Exception as err:
+                    print(f'Failed loading metadata from parquet stored files!, {err}')
+            except FileNotFoundError:
+                raise FileNotFoundError(f'No parquet file {fileName} found under {path}')
         elif format in ['hdf5', 'h5']:
             self.dd = dask.dataframe.read_hdf(
                 fullName, '/electrons', mode='r', chunksize=self.CHUNK_SIZE)
@@ -518,7 +522,8 @@ class DldProcessor:
         
     def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=True, k_shift_func=None,
                         k_shift_parameters=None, applyJitter=True, jitterAmplitude=4, jitterType='uniform',
-                        useAvgMonochormatorEnergy=True, useAvgToFEnergy=True):
+                        useAvgMonochormatorEnergy=True, useAvgToFEnergy=True,
+                        sampleBias=None, monochromatorPhotonEnergy=None, tofVoltage=None):
         """ Add calibrated energy axis to dataframe
 
         Uses the same equation as in tof2energy in calibrate.
@@ -551,6 +556,13 @@ class DldProcessor:
         if l is None:
             l = float(self.settings['processor']['ET_CONV_L'])
 
+        if sampleBias is None:
+            sampleBias = np.nanmean(self.dd['sampleBias'].values)
+        if monochromatorPhotonEnergy is None:
+            monochromatorPhotonEnergy = np.nanmean(self.dd['monochromatorPhotonEnergy'].values)
+        if tofVoltage is None:
+            tofVoltage = np.nanmean(self.dd['tofVoltage'].values)
+
         self.dd['dldTime_corrected'] = self.dd['dldTime']
         if 'dldSectorId' in self.dd.columns:
             self.dd['dldTime_corrected'] -= self.dd['dldSectorId']
@@ -570,17 +582,17 @@ class DldProcessor:
                                                                   col='dldTime_corrected', type=jitterType)
 
         if useAvgSampleBias:
-            eoffset -= np.nanmean(self.dd['sampleBias'].values)
+            eoffset -= sampleBias
         else:
             eoffset -= self.dd['sampleBias']
 
-        if useAvgMonochormatorEnergy:        # TODO: add monocrhomator position,
-            eoffset += np.nanmean(self.dd['monochromatorPhotonEnergy'].values)
+        if useAvgMonochormatorEnergy:
+            eoffset += monochromatorPhotonEnergy
         else:
             eoffset += self.dd['monochromatorPhotonEnergy']
 
         if useAvgToFEnergy:        # TODO: add monocrhomator position,
-            eoffset += np.nanmean(self.dd['tofVoltage'].values)
+            eoffset += tofVoltage
         else:
             eoffset += self.dd['tofVoltage']
 
@@ -1512,7 +1524,7 @@ class DldProcessor:
 
         return results
 
-    def save_binned(self, binnedData, file_name, path=None, mode='w'):
+    def save_binned(self, binnedData, file_name, saveFrames=True, path=None, mode='w'):
         """ Save a binned numpy array to h5 file. The file includes the axes
         (taken from the scheduled bins) and the delay stage histogram, if it exists.
 
@@ -1553,11 +1565,11 @@ class DldProcessor:
 
                 print('saving data to {}'.format(path + filename))
 
-                if 'pumpProbeTime' in self.binNameList:
+                if 'pumpProbeTime' in self.binNameList and saveFrames:
                     idx = self.binNameList.index('pumpProbeTime')
                     pp_data = np.swapaxes(binnedData, 0, idx)
 
-                elif 'delayStage' in self.binNameList:
+                elif 'delayStage' in self.binNameList and saveFrames:
                     idx = self.binNameList.index('delayStage')
                     pp_data = np.swapaxes(binnedData, 0, idx)
                 else:
@@ -1567,7 +1579,7 @@ class DldProcessor:
 
                 ff = h5File.create_group('frames')
 
-                if pp_data is None:  # in case there is no time axis, make a single dataset
+                if pp_data is None or not saveFrames:  # in case there is no time axis, make a single dataset
                     ff.create_dataset('f{:04d}'.format(0), data=binnedData)
                 else:
                     for i in range(pp_data.shape[0]):  # otherwise make a dataset for each time frame.
@@ -1578,7 +1590,7 @@ class DldProcessor:
                 # aa.create_dataset('axis_order', data=self.binNameList)
                 ax_n = 1
                 for i, binName in enumerate(self.binNameList):
-                    if binName in ['pumpProbeTime', 'delayStage']:
+                    if binName in ['pumpProbeTime', 'delayStage'] and saveFrames:
                         ds = aa.create_dataset('ax0 - {}'.format(binName), data=self.binAxesList[i])
                         ds.attrs['name'] = binName
                     else:
