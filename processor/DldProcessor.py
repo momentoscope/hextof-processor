@@ -612,7 +612,8 @@ class DldProcessor:
 
         self.dd['dldTime_corrected'] = self.dd['dldTime']
         if 'dldSectorId' in self.dd.columns:
-            self.dd['dldTime_corrected'] -= \ # Converts the SECTOR_CORRECTION list to a dask array so things can be lazy
+            # Converts the SECTOR_CORRECTION list to a dask array so things can be kept lazy
+            self.dd['dldTime_corrected'] -= \
                 da.from_array(self.SECTOR_CORRECTION)[self.dd['dldSectorId'].values.astype(int)]
 
         def correct_dldTime_shift(df, func, *args):
