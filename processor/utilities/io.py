@@ -60,7 +60,7 @@ def save_binned(data, file_name, format='h5', path=None, mode='w'):
     _abort = False
 
     if path is None:
-        path = misc.parse_setting('paths', 'DATA_H5_DIR')
+        path = misc.parse_setting('paths', 'DATA_H5_DIR') #TODO: generalise to get path from any settings, as in processor.
     if not os.path.isdir(path):  # test if the path exists...
         answer = input("The folder {} doesn't exist,"
                        "do you want to create it? [y/n]".format(path))
