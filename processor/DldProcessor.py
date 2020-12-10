@@ -189,7 +189,7 @@ class DldProcessor:
         self.USE_BAM = bool(True)
         self.USE_STREAK = bool(False)
 
-        self.SECTOR_CORRECTION = [int(i) for i in [0,0,0,0,0,0,0,0]]
+        self.SECTOR_CORRECTION = np.array([int(i) for i in [0,0,0,0,0,0,0,0]])
 
         self.DATA_RAW_DIR = str('/gpfs/pg2/current/raw/hdf')
         self.DATA_H5_DIR = str('/home/pg2user/data/h5')
@@ -208,7 +208,7 @@ class DldProcessor:
                         for type_ in [int, np.float64]:  # try assigning numeric values
                             try:
                                 if len(entry_value.split(",")) > 1:
-                                    val = [type_(i) for i in entry_value.split(",")]
+                                    val = np.array([type_(i) for i in entry_value.split(",")])
                                 else:
                                     val = type_(entry_value)
                                 break
