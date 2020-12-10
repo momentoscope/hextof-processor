@@ -166,5 +166,5 @@ Some example data is provided together with the examples. More compatible data i
 # Citation and and acknowledgments 
 
 If you use this software, please consider citing these two papers:
- * [D. Kutnyakhov *et al..* Review of Scientific Instruments 91, 013109 (2020);](https://aip.scitation.org/doi/full/10.1063/1.5118777)
+ * [D. Kutnyakhov *et al.* Review of Scientific Instruments 91, 013109 (2020);](https://aip.scitation.org/doi/full/10.1063/1.5118777)
  * [R. P. Xian *et al.* arXiv:1909.07714](https://arxiv.org/abs/1909.07714) 
