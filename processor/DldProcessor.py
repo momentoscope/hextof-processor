@@ -189,7 +189,7 @@ class DldProcessor:
         self.USE_BAM = bool(True)
         self.USE_STREAK = bool(False)
 
-        self.SECTOR_CORRECTION = int([0,0,0,0,0,0,0,0])
+        self.SECTOR_CORRECTION = [int(i) for i in [0,0,0,0,0,0,0,0]]
 
         self.DATA_RAW_DIR = str('/gpfs/pg2/current/raw/hdf')
         self.DATA_H5_DIR = str('/home/pg2user/data/h5')
