@@ -189,6 +189,8 @@ class DldProcessor:
         self.USE_BAM = bool(True)
         self.USE_STREAK = bool(False)
 
+        self.SECTOR_CORRECTION = [int(i) for i in [0,0,0,0,0,0,0,0]]
+
         self.DATA_RAW_DIR = str('/gpfs/pg2/current/raw/hdf')
         self.DATA_H5_DIR = str('/home/pg2user/data/h5')
         self.DATA_PARQUET_DIR = str('/home/pg2user/DATA/parquet/')
@@ -205,7 +207,10 @@ class DldProcessor:
                     for entry_name, entry_value in section.items():
                         for type_ in [int, np.float64]:  # try assigning numeric values
                             try:
-                                val = type_(entry_value)
+                                if len(entry_value.split(",")) > 1:
+                                    val = [type_(i) for i in entry_value.split(",")]
+                                else:
+                                    val = type_(entry_value)
                                 break
                             except ValueError:
                                 val = None
@@ -607,7 +612,9 @@ class DldProcessor:
 
         self.dd['dldTime_corrected'] = self.dd['dldTime']
         if 'dldSectorId' in self.dd.columns:
-            self.dd['dldTime_corrected'] -= self.dd['dldSectorId']
+            # Converts the SECTOR_CORRECTION list to a dask array so things can be kept lazy
+            self.dd['dldTime_corrected'] -= \
+                dask.array.from_array(self.SECTOR_CORRECTION)[self.dd['dldSectorId'].values.astype(int)]
 
         def correct_dldTime_shift(df, func, *args):
             r = func((df['dldPosX'], df['dldPosY']), *args)
