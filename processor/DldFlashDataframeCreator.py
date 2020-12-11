@@ -461,7 +461,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             colNames.append('dldDetectorId')
 
         if 'dldSectorId' in self.daqAddresses:
-            dldSectorId = (self.dldSectorId[mbIndexStart:mbIndexEnd, :].copy()).astype(int) % 8
+            dldSectorId = (self.dldSectorId[mbIndexStart:mbIndexEnd, :].copy()).astype(int) % np.power(2,self.DLD_ID_BITS)
             daSectorId = dldSectorId.flatten()
             arrayCols.append(daSectorId)
             colNames.append('dldSectorId')
