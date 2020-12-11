@@ -1153,7 +1153,7 @@ class DldProcessor:
         """
 
         # write the parameters to the bin list:
-        if name in ['dldTime'] and self.TOF_IN_NS:
+        if name in ['dldTime','dldTime_corrected'] and self.TOF_IN_NS:
             start = round(start/self.TOF_STEP_TO_NS)
             end = round(end/self.TOF_STEP_TO_NS)
             if useStepSize is True:
@@ -1167,7 +1167,7 @@ class DldProcessor:
         self.binRangeList.append(bins)
         axes = np.array([np.mean((x, y)) for x, y in zip(bins[:-1], bins[1:])])
 
-        if name in ['dldTime'] and self.TOF_IN_NS:
+        if name in ['dldTime','dldTime_corrected'] and self.TOF_IN_NS:
             axes *= self.TOF_STEP_TO_NS
 
         # TODO: could be improved for nonlinear scales
