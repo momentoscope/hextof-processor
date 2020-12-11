@@ -569,7 +569,7 @@ class DldProcessor:
         #                                       self.ddMicrobunches['delayStageDirection']*backLash      
         
     def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=True, k_shift_func=None,
-                        k_shift_parameters=None, applyJitter=True, jitterAmplitude=4, jitterType='uniform',
+                        k_shift_parameters=None, applyJitter=True, jitterAmplitude=None, jitterType='uniform',
                         useAvgMonochormatorEnergy=True, useAvgToFEnergy=True,
                         sampleBias=None, monochromatorPhotonEnergy=None, tofVoltage=None):
         """ Add calibrated energy axis to dataframe
@@ -610,6 +610,9 @@ class DldProcessor:
             monochromatorPhotonEnergy = np.nanmean(self.dd['monochromatorPhotonEnergy'].values)
         if tofVoltage is None:
             tofVoltage = np.nanmean(self.dd['tofVoltage'].values)
+
+        if jitterAmplitude is None:
+            jitterAmplitude = np.floor(np.power(2,self.DLD_ID_BITS-1))
 
         # sector dependent shift. this is necessary due to bit structure and due to photon peak shift among sectors
         self.dd['dldTime_corrected'] = self.dd['dldTime']
