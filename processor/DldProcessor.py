@@ -167,6 +167,7 @@ class DldProcessor:
         self.UBID_OFFSET = int(0)
         self.CHUNK_SIZE = int(100000)
         self.TOF_STEP_TO_NS = np.float64(0.020576131995767355)
+        self.DLD_ID_BITS = int(3)
         self.ET_CONV_E_OFFSET = np.float64(357.7)
         self.ET_CONV_T_OFFSET = np.float64(82.7)
         self.ET_CONV_L = np.float64(.75)
@@ -189,7 +190,7 @@ class DldProcessor:
         self.USE_BAM = bool(True)
         self.USE_STREAK = bool(False)
 
-        self.SECTOR_CORRECTION = [int(i) for i in [0,0,0,0,0,0,0,0]]
+        self.SECTOR_CORRECTION = [int(i) for i in [0,1,2,3,4,5,6,7]]
 
         self.DATA_RAW_DIR = str('/gpfs/pg2/current/raw/hdf')
         self.DATA_H5_DIR = str('/home/pg2user/data/h5')
@@ -610,6 +611,7 @@ class DldProcessor:
         if tofVoltage is None:
             tofVoltage = np.nanmean(self.dd['tofVoltage'].values)
 
+        # sector dependent shift. this is necessary due to bit structure and due to photon peak shift among sectors
         self.dd['dldTime_corrected'] = self.dd['dldTime']
         if 'dldSectorId' in self.dd.columns:
             # Converts the SECTOR_CORRECTION list to a dask array so things can be kept lazy
@@ -1154,8 +1156,8 @@ class DldProcessor:
             if useStepSize is True:
                 # division by 8 is necessary since the first 3 bits of the channel where these values are
                 # taken from is used for other purpouses. Therefore the real tof step is:
-                steps = round(steps/self.TOF_STEP_TO_NS/8)*8 
-                steps = max(steps,8)
+                steps = round(steps/self.TOF_STEP_TO_NS/np.power(2,self.DLD_ID_BITS))*np.power(2,self.DLD_ID_BITS)
+                steps = max(steps,np.power(2,self.DLD_ID_BITS))
 
         bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
         self.binNameList.append(name)
