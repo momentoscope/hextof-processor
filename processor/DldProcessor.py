@@ -90,33 +90,7 @@ class DldProcessor:
         try:
             md = self.metadata
         except AttributeError:
-            md = {}
-            try: 
-                md['run'] = self.runInfo
-            except AttributeError:
-                md['run'] = {
-                    'runNumber': self.runNumber,
-                    'pulseIdInterval': self.pulseIdInterval,
-                }
-            md['processor'] = {'n_cores': self.N_CORES,
-                           'chunk_size': self.CHUNK_SIZE,
-                               }
-            md['calibration'] = {'TOF_STEP_TO_NS': self.TOF_STEP_TO_NS,
-                                 'ET_CONV_E_OFFSET': self.ET_CONV_E_OFFSET,
-                                 'ET_CONV_T_OFFSET': self.ET_CONV_T_OFFSET,
-                                 'ET_CONV_L': self.ET_CONV_L,
-                                 'TOF_IN_NS': self.TOF_IN_NS,
-                                 }
-            md['paths'] = {
-                'DATA_RAW_DIR': self.DATA_RAW_DIR,
-                'DATA_H5_DIR': self.DATA_H5_DIR,
-                'DATA_PARQUET_DIR': self.DATA_PARQUET_DIR,
-                'DATA_RESULTS_DIR': self.DATA_RESULTS_DIR,
-                'LOG_DIR': self.LOG_DIR,
-                'PAH_MODULE_DIR': self.PAH_MODULE_DIR,
-                }
-            # md['DAQ channels'] =
-            md['sample'] = self.sample
+            md = self.get_metadata()
             self.metadata = md
         return md
 
@@ -417,23 +391,23 @@ class DldProcessor:
         except AttributeError:
             pass
         try:
-            i = self.metadata_dict
+            i = self.metadata_dict['runInfo']
         except:
             pass                
             
         if i is None:
             print('no run info available.')
         else:
-            print(f'Run {i['run']['runNumber']}')
+            print(f'Run {i['runNumber']}')
             try:
-                print(f"Started at {i['timing']['acquisition start']}, finished at {i['timing']['acquisition stop']}, "
-                      f"total duration {i['timing']['acquisition duration']:,} s")
+                print(f"Started at {i['timestampStart']}, finished at {i['timestampStop']}, "
+                      f"total duration {i['timestampDuration']:,} s")
             except:
                 pass
-            print(f"Macrobunches: {i['run']['numberOfMacrobunches']:,}  "
-                  f"from {i['run']['macroBunchPulseIdInterval'][0]:,} to {i['run']['macroBunchPulseIdInterval'][1]:,} ")
-            print(f"Total electrons: {i['run']['nElectrons']:,}, "
-                  f"electrons/Macrobunch {i['run']['electronsPerMacrobunch']:}")
+            print(f"Macrobunches: {i['numberOfMacrobunches']:,}  "
+                  f"from {i['pulseIdInterval'][0]:,} to {i['pulseIdInterval'][1]:,} ")
+            print(f"Total electrons: {i['numberOfElectrons']:,}, "
+                  f"electrons/Macrobunch {i['electronsPerMacrobunch']:}")
 
     # ==========================
     # Dataframe column expansion
@@ -1357,22 +1331,27 @@ class DldProcessor:
         metadata['sample'] = self.sample
         metadata['settings'] = dict(self.settings._sections['processor'])#misc.parse_category('processor')
         metadata['DAQ channels'] = dict(self.settings._sections['DAQ channels'])#misc.parse_category('DAQ channels')
-        if self.pulseIdInterval is None and not fast_mode:
-            pulseIdFrom = self.dd['macroBunchPulseId'].min().compute()
-            pulseIdTo = self.dd['macroBunchPulseId'].max().compute()
-        else:
-            pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
 
-        metadata['run'] = {
-            'runNumber': self.runNumber,
-            'macroBunchPulseIdInterval': [pulseIdFrom, pulseIdTo],
-            'nMacrobunches': pulseIdTo - pulseIdFrom,
-        }
+
         try:
-            metadata['run']['nElectrons'] = self.numOfElectrons
-            metadata['run']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
+            metadata['runInfo']=self.runInfo
         except:
-            pass  # TODO: find smarter solution
+            if self.pulseIdInterval is None and not fast_mode:
+                pulseIdFrom = self.dd['macroBunchPulseId'].min().compute()
+                pulseIdTo = self.dd['macroBunchPulseId'].max().compute()
+            else:
+                pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
+
+            metadata['runInfo'] = {
+                'runNumber': self.runNumber,
+                'pulseIdInterval': [pulseIdFrom, pulseIdTo],
+                'numberOfMacrobunches': pulseIdTo - pulseIdFrom,
+            }
+            try:
+                metadata['runInfo']['numberOfElectrons'] = self.numOfElectrons
+                metadata['runInfo']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
+            except:
+                pass  # TODO: find smarter solution
 
         metadata['histograms'] = {}
 
