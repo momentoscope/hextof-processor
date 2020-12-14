@@ -398,7 +398,7 @@ class DldProcessor:
         if i is None:
             print('no run info available.')
         else:
-            print(f'Run {i['runNumber']}')
+            print(f"Run {i['runNumber']}")
             try:
                 print(f"Started at {i['timestampStart']}, finished at {i['timestampStop']}, "
                       f"total duration {i['timestampDuration']:,} s")
