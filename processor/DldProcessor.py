@@ -1292,19 +1292,24 @@ class DldProcessor:
                     #                print("computing partitions " + str(i) + " to " + str(i + j) + " of " + str(
                     #                    self.dd.npartitions) + ". partitions calculated in parallel: " + str(
                     #                    len(resultsToCalculate)))
-                    results = dask.compute(*resultsToCalculate)
-                    total = np.zeros_like(results[0])
-                    for result in results:
-                        total = total + result
-                    calculatedResults.append(total)
-                    del total
+                    rs = dask.compute(*resultsToCalculate)
+                    try:
+                        result
+                        for r in rs:
+                            result = result + r
+                    except NameError:
+                        result = np.zeros_like(rs[0])
+                        for r in rs:
+                            result = result + r
+
+                    del rs
                 del resultsToCalculate
 
         # we now need to add them all up (single core):
-        result = np.zeros_like(calculatedResults[0])
-        for r in calculatedResults:
-            r = np.nan_to_num(r)
-            result = result + r
+        # result = np.zeros_like(calculatedResults[0])
+        # for r in calculatedResults:
+        #     r = np.nan_to_num(r)
+        #     result = result + r
 
         if force_64bit:
             result = result.astype(np.float64)
