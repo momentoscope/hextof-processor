@@ -809,7 +809,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                                                append=append, ignore_divisions=True)
                 try:
                     with open(os.path.join(fileName + '_el', 'run_metadata.txt'), 'w') as json_file:
-                        json.dump(self.metadata_dict, json_file, indent=4)
+                        json.dump(self.metadata, json_file, indent=4)
                 except AttributeError:
                     print('failed saving metadata')
 
