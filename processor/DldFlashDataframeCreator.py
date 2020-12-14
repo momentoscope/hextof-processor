@@ -224,7 +224,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         #
         # print("Number of electrons: {0:,}; {1:,} e/Mb ".format(self.numOfElectrons, self.electronsPerMacrobunch))
         if not bool(self.metadata):
-            self.metadata = self.get_metadata
+            self.metadata = self.get_metadata()
 
         print("Creating dataframes... Please wait...")
         with ProgressBar():
@@ -811,7 +811,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                                                append=append, ignore_divisions=True)
                 try:
                     if not bool(self.metadata):
-                        self.metadata = self.get_metadata
+                        self.metadata = self.get_metadata()
                     with open(os.path.join(fileName + '_el', 'run_metadata.txt'), 'w') as json_file:
                         json.dump(self.metadata, json_file, indent=4)
                 except AttributeError:
