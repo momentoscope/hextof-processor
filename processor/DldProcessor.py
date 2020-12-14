@@ -1293,6 +1293,7 @@ class DldProcessor:
                     #                    self.dd.npartitions) + ". partitions calculated in parallel: " + str(
                     #                    len(resultsToCalculate)))
                     rs = dask.compute(*resultsToCalculate)
+                    # we now need to add them all up (single core):
                     try:
                         result
                         for r in rs:
@@ -1304,12 +1305,6 @@ class DldProcessor:
 
                     del rs
                 del resultsToCalculate
-
-        # we now need to add them all up (single core):
-        # result = np.zeros_like(calculatedResults[0])
-        # for r in calculatedResults:
-        #     r = np.nan_to_num(r)
-        #     result = result + r
 
         if force_64bit:
             result = result.astype(np.float64)
@@ -1356,7 +1351,7 @@ class DldProcessor:
 
         metadata['timing'] = {'acquisition start': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
                               'acquisition stop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
-                              'acquisition duration': stop - start,
+                              'acquisition duration': np.int32(stop - start),
                               # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                               }
         metadata['sample'] = self.sample
