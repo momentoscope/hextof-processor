@@ -1351,12 +1351,12 @@ class DldProcessor:
 
         metadata['timing'] = {'acquisition start': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
                               'acquisition stop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
-                              'acquisition duration': np.int32(stop - start),
+                              'acquisition duration': int(stop - start),
                               # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                               }
         metadata['sample'] = self.sample
-        metadata['settings'] = self.settings['processor']#misc.parse_category('processor')
-        metadata['DAQ channels'] = self.settings['DAQ channels']#misc.parse_category('DAQ channels')
+        metadata['settings'] = dict(self.settings._sections['DAQ channels'])#misc.parse_category('processor')
+        metadata['DAQ channels'] = dict(self.settings._sections['DAQ channels'])#misc.parse_category('DAQ channels')
         if self.pulseIdInterval is None and not fast_mode:
             pulseIdFrom = self.dd['macroBunchPulseId'].min().compute()
             pulseIdTo = self.dd['macroBunchPulseId'].max().compute()
