@@ -223,6 +223,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         #     pass
         #
         # print("Number of electrons: {0:,}; {1:,} e/Mb ".format(self.numOfElectrons, self.electronsPerMacrobunch))
+        if self.metadata is None:
+            self.metadata = self.get_metadata
 
         print("Creating dataframes... Please wait...")
         with ProgressBar():
