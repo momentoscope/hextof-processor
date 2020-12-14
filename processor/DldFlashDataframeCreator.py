@@ -195,9 +195,9 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             'electronsPerMacrobunch': self.electronsPerMacrobunch,
         }
         try:
-            self.runInfo['timestampStart'] = self.startEndTime[0].astype(int)
-            self.runInfo['timestampStop'] = self.startEndTime[1].astype(int)
-            self.runInfo['timestampDuration'] = self.startEndTime[1] - self.startEndTime[0].astype(int)
+            self.runInfo['timestampStart'] = int(self.startEndTime[0])
+            self.runInfo['timestampStop'] = int(self.startEndTime[1])
+            self.runInfo['timestampDuration'] = int(self.startEndTime[1] - self.startEndTime[0])
             self.runInfo['timeStart'] = datetime.utcfromtimestamp(self.startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S')
             self.runInfo['timeStop'] = datetime.utcfromtimestamp(self.startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S')
             self.runInfo['timeDuration'] = str(timedelta(seconds=int(self.startEndTime[1] - self.startEndTime[0])))
