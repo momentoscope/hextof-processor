@@ -810,6 +810,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED", \
                                                append=append, ignore_divisions=True)
                 try:
+                    if self.metadata is None:
+                        self.metadata = self.get_metadata
                     with open(os.path.join(fileName + '_el', 'run_metadata.txt'), 'w') as json_file:
                         json.dump(self.metadata, json_file, indent=4)
                 except AttributeError:
