@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from datetime import datetime
+from datetime import datetime,timedelta
 from configparser import ConfigParser
 import dask
 import dask.dataframe
@@ -200,7 +200,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             self.runInfo['timestampDuration'] = self.startEndTime[1] - self.startEndTime[0].astype(int)
             self.runInfo['timeStart'] = datetime.utcfromtimestamp(self.startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S')
             self.runInfo['timeStop'] = datetime.utcfromtimestamp(self.startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S')
-            self.runInfo['timeDuration'] = datetime.timedelta(self.startEndTime[1] - self.startEndTime[0])
+            self.runInfo['timeDuration'] = timedelta(self.startEndTime[1] - self.startEndTime[0])
         except:
             self.runInfo['timestampStart'] = None
             self.runInfo['timestampStop'] = None
