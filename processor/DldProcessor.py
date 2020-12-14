@@ -417,23 +417,23 @@ class DldProcessor:
         except AttributeError:
             pass
         try:
-            i = self.metadata_dict['run']
+            i = self.metadata_dict
         except:
             pass                
             
         if i is None:
             print('no run info available.')
         else:
-            print(f'Run {i["runNumber"]}')
+            print(f'Run {i['run']['runNumber']}')
             try:
-                print(f"Started at {i['timeStart']}, finished at {i['timeStop']}, "
-                      f"total duration {i['timeDuration']:,} s")
+                print(f"Started at {i['timing']['acquisition start']}, finished at {i['timing']['acquisition stop']}, "
+                      f"total duration {i['timing']['acquisition duration']:,} s")
             except:
                 pass
-            print(f"Macrobunches: {i['numberOfMacrobunches']:,}  "
-                  f"from {i['pulseIdInterval'][0]:,} to {i['pulseIdInterval'][1]:,} ")
-            print(f"Total electrons: {i['numberOfElectrons']:,}, "
-                  f"electrons/Macrobunch {i['electronsPerMacrobunch']:}")
+            print(f"Macrobunches: {i['run']['numberOfMacrobunches']:,}  "
+                  f"from {i['run']['macroBunchPulseIdInterval'][0]:,} to {i['run']['macroBunchPulseIdInterval'][1]:,} ")
+            print(f"Total electrons: {i['run']['nElectrons']:,}, "
+                  f"electrons/Macrobunch {i['run']['electronsPerMacrobunch']:}")
 
     # ==========================
     # Dataframe column expansion
@@ -1355,7 +1355,7 @@ class DldProcessor:
                               # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                               }
         metadata['sample'] = self.sample
-        metadata['settings'] = dict(self.settings._sections['DAQ channels'])#misc.parse_category('processor')
+        metadata['settings'] = dict(self.settings._sections['processor'])#misc.parse_category('processor')
         metadata['DAQ channels'] = dict(self.settings._sections['DAQ channels'])#misc.parse_category('DAQ channels')
         if self.pulseIdInterval is None and not fast_mode:
             pulseIdFrom = self.dd['macroBunchPulseId'].min().compute()
