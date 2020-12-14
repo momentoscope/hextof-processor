@@ -87,11 +87,11 @@ class DldProcessor:
     @property
     def metadata_dict(self):
 
-        try:
-            md = self.metadata
-        except AttributeError:
+        if self.metadata is None:
             md = self.get_metadata()
             self.metadata = md
+        else:
+            md = self.metadata
         return md
 
     @property
@@ -391,7 +391,7 @@ class DldProcessor:
         except AttributeError:
             pass
         try:
-            i = self.metadata_dict['runInfo']
+            i = self.metadata['runInfo']
         except:
             pass                
             
