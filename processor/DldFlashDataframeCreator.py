@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from datetime import datetime
+from datetime import datetime,timedelta
 from configparser import ConfigParser
 import dask
 import dask.dataframe
@@ -195,12 +195,12 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             'electronsPerMacrobunch': self.electronsPerMacrobunch,
         }
         try:
-            self.runInfo['timestampStart'] = self.startEndTime[0].astype(int)
-            self.runInfo['timestampStop'] = self.startEndTime[1].astype(int)
-            self.runInfo['timestampDuration'] = self.startEndTime[1] - self.startEndTime[0].astype(int)
+            self.runInfo['timestampStart'] = int(self.startEndTime[0])
+            self.runInfo['timestampStop'] = int(self.startEndTime[1])
+            self.runInfo['timestampDuration'] = int(self.startEndTime[1] - self.startEndTime[0])
             self.runInfo['timeStart'] = datetime.utcfromtimestamp(self.startEndTime[0]).strftime('%Y-%m-%d %H:%M:%S')
             self.runInfo['timeStop'] = datetime.utcfromtimestamp(self.startEndTime[1]).strftime('%Y-%m-%d %H:%M:%S')
-            self.runInfo['timeDuration'] = datetime.timedelta(self.startEndTime[1] - self.startEndTime[0])
+            self.runInfo['timeDuration'] = str(timedelta(seconds=int(self.startEndTime[1] - self.startEndTime[0])))
         except:
             self.runInfo['timestampStart'] = None
             self.runInfo['timestampStop'] = None
@@ -223,6 +223,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         #     pass
         #
         # print("Number of electrons: {0:,}; {1:,} e/Mb ".format(self.numOfElectrons, self.electronsPerMacrobunch))
+        if not bool(self.metadata):
+            self.metadata = self.get_metadata()
 
         print("Creating dataframes... Please wait...")
         with ProgressBar():
@@ -808,8 +810,10 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED", \
                                                append=append, ignore_divisions=True)
                 try:
+                    if not bool(self.metadata):
+                        self.metadata = self.get_metadata()
                     with open(os.path.join(fileName + '_el', 'run_metadata.txt'), 'w') as json_file:
-                        json.dump(self.metadata_dict, json_file, indent=4)
+                        json.dump(self.metadata, json_file, indent=4)
                 except AttributeError:
                     print('failed saving metadata')
 
