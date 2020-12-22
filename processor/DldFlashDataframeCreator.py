@@ -165,6 +165,11 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
             macroBunchPulseId_correction = pulseIdInterval[0]
 
+            if address_name == 'timeStamp':  # catch the time stamps
+                startEndTime = (values[0, 0], values[-1, 0])
+                self.startEndTime = startEndTime
+
+
         # necessary corrections for specific channels:
         try:
             self.delayStage = self.delayStage[:, 1]
