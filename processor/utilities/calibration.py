@@ -7,6 +7,41 @@ import sys, os
 import numpy as np
 
 
+def gen_sector_correction(prc, energies, eref, tofVoltage=None, sampleBias=None, monoEnergy=None):
+    """
+    This function is helpful in generating the sector_correction list.
+    This takes into account the time shift caused by the bit stealing hack
+    plus is keeps track of the time shift due to detector misalignment by making sure
+    all values of energies are at eref.
+
+    :param prc:
+    :param energies:
+    :param eref:
+    :return:
+    """
+
+    if sampleBias is None:
+        sampleBias = np.nanmean(prc.dd['sampleBias'].values)
+    if monoEnergy is None:
+        monoEnergy = np.nanmean(prc.dd['monochromatorPhotonEnergy'].values)
+    if tofVoltage is None:
+        tofVoltage = np.nanmean(prc.dd['tofVoltage'].values)
+
+    n_sectors=prc.dd['dldSectorId'].values.compute().max().astype(int)+1
+    sector_correction = np.floor(np.array(range(n_sectors))*np.power(2,prc.DLD_ID_BITS)/n_sectors)
+
+    t_ref = energy2tof(eref, l=0.965, eoffset=-2.64-sampleBias+tofVoltage+monoEnergy)
+
+    times=[]
+    for ee in energies:
+        times.append((energy2tof(ee, l=0.965, eoffset=-2.64-47+30+monoEnergy)-t_ref)/prc.TOF_STEP_TO_NS)
+
+    sector_correction=sector_correction+np.array(times)
+
+    return sector_correction
+
+
+
 # %% Energy calibration
 
 """ The following functions convert between binding energy (Eb) in eV (negative convention)
