@@ -14,6 +14,9 @@ def gen_sector_correction(prc, energies, eref, tofVoltage=None, sampleBias=None,
     plus is keeps track of the time shift due to detector misalignment by making sure
     all values of energies are at eref.
 
+    Usage: use the function to create the sector_correction list and assign it to prc.SECTOR_CORRECTION
+    or paste it into the settings with no brackets
+
     :param prc:
     :param energies:
     :param eref:
@@ -27,8 +30,13 @@ def gen_sector_correction(prc, energies, eref, tofVoltage=None, sampleBias=None,
     if tofVoltage is None:
         tofVoltage = np.nanmean(prc.dd['tofVoltage'].values)
 
+    # Here, the most basic sector_correction list is generated, where the bit stealing hack gets corrected
     n_sectors=prc.dd['dldSectorId'].values.compute().max().astype(int)+1
     sector_correction = np.floor(np.array(range(n_sectors))*np.power(2,prc.DLD_ID_BITS)/n_sectors)
+    # e.g. for 3 stolen bits, 8 detector ids (new s8 data), this will look like [0,1,2,3,4,5,6,7]
+    # e.g. for 1 stolen bit, 8 detector ids (old modified s8 data), this will look like [0,0,0,0,1,1,1,1]
+    # e.g. for 1 stolen bit, 2 detector ids (old s8 data), this will look like [0,1]
+
 
     t_ref = energy2tof(eref, l=0.965, eoffset=-2.64-sampleBias+tofVoltage+monoEnergy)
 
@@ -37,6 +45,7 @@ def gen_sector_correction(prc, energies, eref, tofVoltage=None, sampleBias=None,
         times.append((energy2tof(ee, l=0.965, eoffset=-2.64-47+30+monoEnergy)-t_ref)/prc.TOF_STEP_TO_NS)
 
     sector_correction=sector_correction+np.array(times)
+    # here the sectors are shifter by the required time to align the energies
 
     return sector_correction
 
