@@ -100,6 +100,12 @@ data_results_dir = /asap3/flash/gpfs/pg2/YYYY/data/xxxxxxxx/processed/*USER_NAME
 ```
 Where `YYYY` is the current year and `xxxxxxxx` is the beamtime number.
 
+### 3.5 Calculating sector_correction list
+If you like, in the settings, you can add the sector_correction list, which will shift any misalignment of the sectors.
+At the very least, this should include the "bit stealing hack" correction, where the last bits of the dldTime
+are set so they encode dldSectorId. This can be achieved by using the calibration.gen_sector_correction function
+which will generate the list for you, given the energy shifts you want.
+
 ### 4. Further requirements
 Here is a list of packages which need to be installed in order to use all the features available in this package.
 
@@ -178,21 +184,21 @@ XPSdoniachs_ext.dsgn
 XPSdoniachs_ext.dsgnmEad2
 XPSdoniachs_ext.dsgnmBad2
 ```
-- The first one, dsgn, is a single DS function convoluted with a gaussian with a linear background. It has 7 parameters:
-w[0] is the bg offset
-w[1] is the bg slope
+The first one, dsgn, is a single DS function convoluted with a gaussian with a linear background. It has 7 parameters:
+- w[0] is the bg offset
+- w[1] is the bg slope
 
-w[2] L - first lineshape parameter, this is the Lorentzian FWHM
-w[3] A - second lineshape parameter, this is the asymmetry parameter
-w[4] G - third lineshape parameter, this is the Gaussian FWHM
+- w[2] L - first lineshape parameter, this is the Lorentzian FWHM
+- w[3] A - second lineshape parameter, this is the asymmetry parameter
+- w[4] G - third lineshape parameter, this is the Gaussian FWHM
 
-w[5] this is the intensity
-w[6] this is the binding energy, with asymmetry towards the left, fermi edge on the right
+- w[5] this is the intensity
+- w[6] this is the binding energy, with asymmetry towards the left, fermi edge on the right
 
-- The second one, dsgnmEad2, is a multiple DS function. It is the same as dsgn, but ou can include multiple peaks
+The second one, dsgnmEad2, is a multiple DS function. It is the same as dsgn, but ou can include multiple peaks
 by adding 5 additional parameters per peak after w[6]. The binding energy is relative to the first peak.
 
-- The third one, dsgnmBad2, is a multiple DS function. It is the same as dsgn, but ou can include multiple peaks
+The third one, dsgnmBad2, is a multiple DS function. It is the same as dsgn, but ou can include multiple peaks
 by adding 5 additional parameters per peak after w[6]. The binding energy is absolute.
 
 ### XPSdoniachs Usage
