@@ -178,7 +178,8 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 print('1030nm Laser')
             except:
                 print('no delay stage')
-        self.macroBunchPulseId -= macroBunchPulseId_correction
+        if self.CORRECT_MB_ID:
+            self.macroBunchPulseId -= macroBunchPulseId_correction
         self.dldMicrobunchId -= self.UBID_OFFSET
 
         if _VERBOSE:
