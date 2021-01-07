@@ -83,6 +83,19 @@ class H5FileDataAccess(_H5FileDataAccess):
                or channelName.startswith('/Beamlines/') \
                or channelName.startswith('/Timing/')  # <--for datasets before 08-2018
 
+    def filledInDesiredDataSets(self, sortedDesiredDataSets):
+        assert sortedDesiredDataSets, "Precond.: desiredDataSets not empty"
+        result= [sortedDesiredDataSets[0].desiredDatasetInitializedFromFile()]
+        preceedingDataset= result[0]
+        for currentDataset in sortedDesiredDataSets[1:]:
+            if currentDataset.pulseIdInterval[0] - preceedingDataset.pulseIdInterval[1] > 0:
+                nanDataSet= NaNDesiredDataSet((preceedingDataset.pulseIdInterval[1], currentDataset.pulseIdInterval[0]), preceedingDataset)
+                result.append(nanDataSet)
+            result.append(currentDataset.desiredDatasetInitializedFromFile())
+            preceedingDataset= currentDataset
+        assert self.hasNoGapsBetween(result), "Postcond.: No gaps between file chunks."
+        return result
+
 
 class H5FileManager(_H5FileManager):
     """ Wrapper for pointing to original class in  PAH module.
