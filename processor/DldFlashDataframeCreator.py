@@ -169,9 +169,6 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
             macroBunchPulseId_correction = pulseIdInterval[0]
 
-
-
-
         # necessary corrections for specific channels:
         try:
             self.delayStage = self.delayStage[:, 1]
