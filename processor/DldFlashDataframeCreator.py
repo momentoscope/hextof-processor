@@ -161,14 +161,13 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
             for address_name in self.daqAddresses:
                 if _VERBOSE:
                     print('reading address: {}'.format(address_name))
-                setattr(self, address_name, daqAccess.valuesOfInterval(getattr(self, address_name), pulseIdInterval))
+                values = daqAccess.valuesOfInterval(getattr(self, address_name), pulseIdInterval)
+                setattr(self, address_name, values)
+                if address_name == 'timeStamp':  # catch the time stamps
+                    startEndTime = (values[0, 0], values[-1, 0])
+                    self.startEndTime = startEndTime
             numOfMacrobunches = pulseIdInterval[1] - pulseIdInterval[0]
             macroBunchPulseId_correction = pulseIdInterval[0]
-
-            if address_name == 'timeStamp':  # catch the time stamps
-                startEndTime = (values[0, 0], values[-1, 0])
-                self.startEndTime = startEndTime
-
 
         # necessary corrections for specific channels:
         try:
