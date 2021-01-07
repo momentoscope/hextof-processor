@@ -94,6 +94,18 @@ class DldProcessor:
             md = self.metadata
         return md
 
+    def __repr__(self):
+        run = f'- Run Number: {self.runNumber}'
+        trainInterval = f'- MacrobunchIds: {self.pulseIdInterval}'
+        settings = f'- Settings loaded from {self._settings_file}'
+        bins = '- Bins:'
+        for i,name,rng in zip(range(len(self.binNameList)),self.binNameList,self.binRangeList):
+            bins += f'\n\t{i}. {name}: {len(rng)} points. From {min(rng):.2f} to {max(rng):.2f} in steps of {rng[1]-rng[0]:.2f}'
+        string = f'DldFlashProcessor.\n'
+        for s in [run,trainInterval,settings,bins]:
+            string += s + '\n'
+        return string
+        
     @property
     def settings(self):
         """ Easy access to settings.ini file
