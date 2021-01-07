@@ -139,6 +139,7 @@ class DldProcessor:
         # Hard coded class attributes which can be overwritten by settings files.
         self.N_CORES = int(max(os.cpu_count() - 1, 1))
         self.UBID_OFFSET = int(0)
+        self.CORRECT_MB_ID = bool(True)
         self.CHUNK_SIZE = int(100000)
         self.TOF_STEP_TO_NS = np.float64(0.020576131995767355)
         self.DLD_ID_BITS = int(3)
