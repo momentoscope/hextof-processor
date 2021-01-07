@@ -1315,13 +1315,12 @@ class DldProcessor:
         """
         print('Generating metadata...')
         metadata = {}
-        try:
+        if hasattr(self,'startEndTime'):
             start, stop = self.startEndTime[0], self.startEndTime[1]
-        except AttributeError:
-            if not fast_mode:
-                start, stop = self.dd['timeStamp'].min().compute(), self.dd['timeStamp'].max().compute()
-            else:
-                start, stop = 0, 1
+        elif hasattr(self, 'dd') and not fast_mode:
+            start, stop = self.dd['timeStamp'].min().compute(), self.dd['timeStamp'].max().compute()
+        else:
+            start, stop = 0, 1
 
         metadata['timing'] = {'acquisition start': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
                               'acquisition stop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
