@@ -6,6 +6,8 @@
 
 import os
 import sys
+import h5py
+
 
 try:
     from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess as _BeamtimeDaqAccess, H5FileDataAccess as _H5FileDataAccess, \
@@ -85,13 +87,29 @@ class H5FileDataAccess(_H5FileDataAccess):
 
     def filledInDesiredDataSets(self, sortedDesiredDataSets):
         assert sortedDesiredDataSets, "Precond.: desiredDataSets not empty"
-        result= [sortedDesiredDataSets[0].desiredDatasetInitializedFromFile()]
+
+        # finding largest datumsShape
+        largestShape = 0
+        for currentDataset in sortedDesiredDataSets:
+            with h5py.File(currentDataset.fileMeta.fileName(), 'r') as h5file:
+                if h5file[currentDataset.channelName].shape[1] > largestShape:
+                    largestDataset = currentDataset
+                    largestShape = h5file[currentDataset.channelName].shape[1]
+        largestDataset.desiredDatasetInitializedFromFile()
+        # largestDataset = sortedDesiredDataSets[10]
+        # largestDataset.desiredDatasetInitializedFromFile()
+
+        with h5py.File(largestDataset.fileMeta.fileName(), 'r') as h5file:
+            print(h5file[largestDataset.channelName].shape)
+
+        result= [sortedDesiredDataSets[0].desiredDatasetInitializedFromSample(largestDataset)]
         preceedingDataset= result[0]
+
         for currentDataset in sortedDesiredDataSets[1:]:
             if currentDataset.pulseIdInterval[0] - preceedingDataset.pulseIdInterval[1] > 0:
-                nanDataSet= NaNDesiredDataSet((preceedingDataset.pulseIdInterval[1], currentDataset.pulseIdInterval[0]), preceedingDataset)
+                nanDataSet= _H5FileDataAccess.NaNDesiredDataSet((preceedingDataset.pulseIdInterval[1], currentDataset.pulseIdInterval[0]), preceedingDataset)
                 result.append(nanDataSet)
-            result.append(currentDataset.desiredDatasetInitializedFromFile())
+            result.append(currentDataset.desiredDatasetInitializedFromSample(preceedingDataset))
             preceedingDataset= currentDataset
         assert self.hasNoGapsBetween(result), "Postcond.: No gaps between file chunks."
         return result
