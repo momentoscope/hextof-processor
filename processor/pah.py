@@ -96,12 +96,8 @@ class H5FileDataAccess(_H5FileDataAccess):
                     largestDataset = currentDataset
                     largestShape = h5file[currentDataset.channelName].shape[1]
         largestDataset.desiredDatasetInitializedFromFile()
-        # largestDataset = sortedDesiredDataSets[10]
-        # largestDataset.desiredDatasetInitializedFromFile()
 
-        with h5py.File(largestDataset.fileMeta.fileName(), 'r') as h5file:
-            print(h5file[largestDataset.channelName].shape)
-
+        # all the result parts need to be the same shape. Therefore, they need to be the largest possible
         result= [sortedDesiredDataSets[0].desiredDatasetInitializedFromSample(largestDataset)]
         preceedingDataset= result[0]
 
