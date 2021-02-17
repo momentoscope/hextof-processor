@@ -27,6 +27,9 @@ settings/personalSettings
 *.pyd
 *.c
 
+# ignore h5 data files
+*.h5
+
 # ignore old docs build
 # docs/build/
 
