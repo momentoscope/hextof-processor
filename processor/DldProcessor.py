@@ -6,6 +6,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)  # avoid printing
 import os
 
 from datetime import datetime
+from collections import OrderedDict
 import json
 import dask
 from dask.diagnostics import ProgressBar
@@ -83,6 +84,106 @@ class DldProcessor:
         self.sample = {}  # this should contain 'name', 'sampleID', 'cleave number' etc...
         self.histograms = {}
         self.metadata = {}
+
+    @property
+    def workflow_parameters(self):
+        """ Safe access to the workflow parameter dictionary"""
+        return self._workflow_parameters
+
+    @workflow_parameters.setter
+    def workflow_parameters(self, d):
+        """ Safe setter to the workflow parameter dictionary.
+
+        Args:
+            d: dict
+                Dictionary describing the method and arguments to reproduce a workflow step.
+                The dictionary should contain 3 keys:
+                - 'method': name of the method do call to perform perform the workflow step
+                - 'args': list of arguments to pass to the method
+                - 'kwargs': dictionary of keyword arguments to pass to the method
+        Rises NotImplementedError if the method described in the workflow parameter dictionary is not defined in the Processor class."""
+        assert isinstance(d, dict), f'Workflow parameters need to be a dictionary, not {type(d)}.'
+        self._workflow_parameters = OrderedDict()
+
+        for k, v in d.items():
+            try:
+                mtd = v['method']
+            except KeyError:
+                raise KeyError('Workflow parameter dictionary requires a "method" key.')
+            if hasattr(self, mtd):
+                self._workflow_parameters[k] = v
+            else:
+                raise NotImplementedError(f'Workflow step {mtd} is not implemented.')
+
+    def add_workflow_step(self, workflow_step, name=None, overwrite=False, *args, **kwargs):
+        """ Adds one or more steps to the workflow.
+
+        Args:
+            workflow_step: dict | str
+                This is the main descriptor of the workflow step.
+                If a dictionary is passed, it expects a workflow-parameter like dictionary: {'method':method,'args':[],kwargs:{}}
+                Otherwise, if a string is passed, it should be the name of the method of the workflow step.
+            name: str
+                name to describe the workflow step (key in the workflow_parameters dictionary)
+            overwrite: bool
+                optional setting to overwrite previous entrys with the same name.
+            args:
+                arguments to pass to the method
+            kwargs: keyword arguments passed to the method.
+        """
+        if isinstance(workflow_step, dict):
+            parDict = workflow_step
+        else:
+            if name is None:
+                name = method
+            parDict = {name: {'method': workflow_step,
+                              'args': args,
+                              'kwargs': kwargs
+                              }}
+        for k, v in parDict.items():
+            mtd = v['method']
+            if not hasattr(self, mtd):
+                raise AttributeError(f'No processing method {mtd} found.')
+            else:
+                if k in self._workflow_parameters and not overwrite:
+                    n = 2  # the first "duplicate" should be labelled as {k}_2
+                    while '{}_{}'.format(k, n) in self._workflow_parameters:
+                        n += 1
+                    k = '{}_{}'.format(k, n)
+
+                self._workflow_parameters[k] = v
+
+    def remove_workflow_step(name):
+        """ Removes a step from the workflow.
+
+        Args:
+            name: str | iterable of str
+                the key(s) which identify the workflow step(s) to remove.
+        """
+        if not isinstance(name, (list, tuple)):
+            name = [name]
+        for n in name:
+            del self._workflow_parameters[n]
+
+    def workflow(func):
+        """ decorator function to automatically save workflow paramters.
+
+        When a method is decorated with this decorator, the parameters passed when calling it are automatically added to the workflow_parameter dictionary.
+        **Warning**:
+            only explicitly passed arguments get saved. Default values will not be recorded.
+        """
+        def wrapper(self, *args, **kwargs):
+            print('decorated')
+            method = func.__name__
+            parDict = {method: {'method': method,
+                                'args': args,
+                                'kwargs': kwargs,
+                                }}
+
+            self.add_workflow_step(parDict)
+            func(self, *args, **kwargs)
+
+        return wrapper
 
     @property
     def metadata_dict(self):
