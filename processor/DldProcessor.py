@@ -1127,7 +1127,7 @@ class DldProcessor:
                 
         **Return**\n
         axes: numpy array
-            axis of the binned dimesion. The points defined on this axis are the middle points of
+            axis of the binned dimesion. The points defined on this axis are the weighted points of
             each bin.
                 
         **Note**\n
@@ -1153,6 +1153,18 @@ class DldProcessor:
         self.binNameList.append(name)
         self.binRangeList.append(bins)
         axes = np.array([np.mean((x, y)) for x, y in zip(bins[:-1], bins[1:])])
+        
+        # Compute optimal bins (fine) using Freedman-Diaconis rule
+        # Another method could be used to bin finely
+        fine_bins = np.histogram(values, bins = 'fd')
+        # Weighing of values to get an accurate representation of binAxes
+        binAxesList = []
+        for i in range(len(bins[0])):
+            val = np.average(fine_bins[1][(fine_bins[1] < bins[1][i+1]) & 
+                                        (fine_bins[1] > bins[1][i])], 
+                            weights = fine_bins[0][(fine_bins[1][1:] < bins[1][i+1]) & 
+                                        (fine_bins[1][1:] > bins[1][i])])
+            axes = np.append(axes, val)
 
         if name in ['dldTime','dldTime_corrected'] and self.TOF_IN_NS:
             axes *= self.TOF_STEP_TO_NS
