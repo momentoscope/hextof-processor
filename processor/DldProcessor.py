@@ -12,6 +12,7 @@ from dask.diagnostics import ProgressBar
 import h5py
 import numpy as np
 import pandas as pd
+import boost_histogram as bh
 from tqdm.auto import tqdm
 from configparser import ConfigParser
 from processor.utilities import misc, io, dfops
@@ -1149,16 +1150,13 @@ class DldProcessor:
                 steps = round(steps/self.TOF_STEP_TO_NS/np.power(2,self.DLD_ID_BITS))*np.power(2,self.DLD_ID_BITS)
                 steps = max(steps,np.power(2,self.DLD_ID_BITS))
 
-        bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
+        bins = self.genBins(start, end, steps*100, useStepSize, forceEnds, include_last, force_legacy)
         self.binNameList.append(name)
         self.binRangeList.append(bins)
-        axes = np.array([np.mean((x, y)) for x, y in zip(bins[:-1], bins[1:])])
         
-        # Compute optimal bins (fine) using Freedman-Diaconis rule
-        # Another method could be used to bin finely
-        fine_bins = np.histogram(values, bins = 'fd')
+        # Compute fine bins
+        fine_bins = self.computeBinnedData()
         # Weighing of values to get an accurate representation of binAxes
-        binAxesList = []
         for i in range(len(bins[0])):
             val = np.average(fine_bins[1][(fine_bins[1] < bins[1][i+1]) & 
                                         (fine_bins[1] > bins[1][i])], 
@@ -1171,6 +1169,12 @@ class DldProcessor:
 
         # TODO: could be improved for nonlinear scales
         self.binAxesList.append(axes)
+
+        self.binNameList = []
+        self.binRangeList = []
+        bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
+        self.binNameList.append(name)
+        self.binRangeList.append(bins)
 
         if name in ['pumpProbeTime', 'delayStage']:
             # add the normalization histogram to the histograms dictionary. computes them if requested, otherwise
@@ -1262,7 +1266,7 @@ class DldProcessor:
             #            # now we are ready for the analysis with numpy:
             #            res, edges = np.histogramdd(
             #                vals[:, colsToBin], bins=numBins, range=ranges)
-            res, edges = np.histogramdd(vals[:, colsToBin], bins=self.binRangeList)
+            res, edges = bh.numpy.histogramdd(vals[:, colsToBin], bins=self.binRangeList)
             return res
 
         # prepare the partitions for the calculation in parallel

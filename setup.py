@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from distutils.core import setup, Extension
+from setuptools import setup, find_packages, Extension
 from Cython.Build import cythonize
 import numpy
 from os import path
 
-__version__ = '1.0.3'
+__version__ = '0.0.1'
 
 here = path.abspath(path.dirname(__file__))
 
@@ -39,7 +39,7 @@ setup(
     description='Hextof Offline Analyzer',
     long_description_content_type='text/markdown',
     long_description=long_description,
-    author='Yves Acremann, Steinn Ymir Agustsson, Davide Curcio, Rui Patrick Xian, Michael Heber, Maciej Dendzik',
+    author='Yves Acremann, Steinn Ymir Agustsson, Davide Curcio, Rui Patrick Xian, Michael Heber, Maciej Dendzik, Muhammad Zain Sohail',
     url='https://github.com/momentoscope/hextof-processor',
     download_url='https://github.com/momentoscope-kit/hextof-processor/tarball/' + __version__,
     license='GNU-GPL',
@@ -47,7 +47,7 @@ setup(
       'Programming Language :: Python :: 3',
     ],
     keywords='',
-    packages=['distutils', 'distutils.command'],
+    packages=find_packages(exclude=['docs', 'tests*']),
     include_package_data=True,
     install_requires=install_requires,
     dependency_links=dependency_links,
