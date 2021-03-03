@@ -1128,7 +1128,7 @@ class DldProcessor:
                 
         **Return**\n
         axes: numpy array
-            axis of the binned dimesion. The points defined on this axis are the weighted points of
+            axis of the binned dimesion. The points defined on this axis are the middle points of
             each bin.
                 
         **Note**\n
@@ -1150,31 +1150,16 @@ class DldProcessor:
                 steps = round(steps/self.TOF_STEP_TO_NS/np.power(2,self.DLD_ID_BITS))*np.power(2,self.DLD_ID_BITS)
                 steps = max(steps,np.power(2,self.DLD_ID_BITS))
 
-        bins = self.genBins(start, end, steps*100, useStepSize, forceEnds, include_last, force_legacy)
+        bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
         self.binNameList.append(name)
         self.binRangeList.append(bins)
-        
-        # Compute fine bins
-        fine_bins = self.computeBinnedData()
-        # Weighing of values to get an accurate representation of binAxes
-        for i in range(len(bins[0])):
-            val = np.average(fine_bins[1][(fine_bins[1] < bins[1][i+1]) & 
-                                        (fine_bins[1] > bins[1][i])], 
-                            weights = fine_bins[0][(fine_bins[1][1:] < bins[1][i+1]) & 
-                                        (fine_bins[1][1:] > bins[1][i])])
-            axes = np.append(axes, val)
+        axes = np.array([np.mean((x, y)) for x, y in zip(bins[:-1], bins[1:])])
 
         if name in ['dldTime','dldTime_corrected'] and self.TOF_IN_NS:
             axes *= self.TOF_STEP_TO_NS
 
         # TODO: could be improved for nonlinear scales
         self.binAxesList.append(axes)
-
-        self.binNameList = []
-        self.binRangeList = []
-        bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
-        self.binNameList.append(name)
-        self.binRangeList.append(bins)
 
         if name in ['pumpProbeTime', 'delayStage']:
             # add the normalization histogram to the histograms dictionary. computes them if requested, otherwise
@@ -1191,7 +1176,7 @@ class DldProcessor:
         self.binRangeList = []
         self.binAxesList = []
 
-    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False, usePbar=True):
+    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False, usePbar=True, method='numpy'):
         """ Use the bin list to bin the data.
         
         **Parameters**\n
@@ -1266,7 +1251,11 @@ class DldProcessor:
             #            # now we are ready for the analysis with numpy:
             #            res, edges = np.histogramdd(
             #                vals[:, colsToBin], bins=numBins, range=ranges)
-            res, edges = bh.numpy.histogramdd(vals[:, colsToBin], bins=self.binRangeList)
+            if method == 'numpy':
+                histogram = np.histogramdd
+            elif method == 'boost':
+                histogram = bh.numpy.histogramdd
+            res, edges = histogram(vals[:, colsToBin], bins=self.binRangeList)
             return res
 
         # prepare the partitions for the calculation in parallel
