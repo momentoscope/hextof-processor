@@ -1088,7 +1088,7 @@ class DldProcessor:
         return bins
 
     def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False,
-                   include_last=True, force_legacy=False, compute_histograms=False):
+                   include_last=True, force_legacy=False, compute_histograms=False, method = 'numpy'):
         """ Add binning of one dimension, to be then computed with ``computeBinnedData`` method.
 
         Creates a list of bin names, (binNameList) to identify the axis on
@@ -1150,23 +1150,41 @@ class DldProcessor:
                 steps = round(steps/self.TOF_STEP_TO_NS/np.power(2,self.DLD_ID_BITS))*np.power(2,self.DLD_ID_BITS)
                 steps = max(steps,np.power(2,self.DLD_ID_BITS))
 
-        bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
-        self.binNameList.append(name)
-        self.binRangeList.append(bins)
-        axes = np.array([np.mean((x, y)) for x, y in zip(bins[:-1], bins[1:])])
+        bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)          
+        if method == 'numpy':
+            self.binNameList.append(name)
+            self.binRangeList.append(bins)
+            axes = np.array([np.mean((x, y)) for x, y in zip(bins[:-1], bins[1:])])
 
-        if name in ['dldTime','dldTime_corrected'] and self.TOF_IN_NS:
-            axes *= self.TOF_STEP_TO_NS
+            if name in ['dldTime','dldTime_corrected'] and self.TOF_IN_NS:
+                axes *= self.TOF_STEP_TO_NS
 
-        # TODO: could be improved for nonlinear scales
-        self.binAxesList.append(axes)
+            # TODO: could be improved for nonlinear scales
+            self.binAxesList.append(axes)
 
-        if name in ['pumpProbeTime', 'delayStage']:
-            # add the normalization histogram to the histograms dictionary. computes them if requested, otherwise
-            # only assigned the dask calculations for later computation.
-            self.histograms[name] = self.makeNormHistogram(name, compute=compute_histograms)
-            # These can be accessed in the old method through the class properties pumpProbeHistogram and delayStageHistogram
+            if name in ['pumpProbeTime', 'delayStage']:
+                # add the normalization histogram to the histograms dictionary. computes them if requested, otherwise
+                # only assigned the dask calculations for later computation.
+                self.histograms[name] = self.makeNormHistogram(name, compute=compute_histograms)
+                # These can be accessed in the old method through the class properties pumpProbeHistogram and delayStageHistogram
 
+        elif method == 'boost':
+            axis = bh.axis.Variable(bins)
+            self.binNameList.append(name)
+            self.binRangeList.append(axis.edges)
+            axes = axis.centers
+            
+            if name in ['dldTime','dldTime_corrected'] and self.TOF_IN_NS:
+                axes *= self.TOF_STEP_TO_NS
+                
+            self.binAxesList.append(axes)
+            self.binAxesListBH.append(axis)
+
+            if name in ['pumpProbeTime', 'delayStage']:
+                # add the normalization histogram to the histograms dictionary. computes them if requested, otherwise
+                # only assigned the dask calculations for later computation.
+                self.histograms[name] = self.makeNormHistogram(name, compute=compute_histograms)
+                # These can be accessed in the old method through the class properties pumpProbeHistogram and delayStageHistogram
         return axes
 
     def resetBins(self):
@@ -1175,6 +1193,7 @@ class DldProcessor:
         self.binNameList = []
         self.binRangeList = []
         self.binAxesList = []
+        self.binAxesListBH = []
 
     def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False, usePbar=True, method='numpy'):
         """ Use the bin list to bin the data.
@@ -1251,11 +1270,32 @@ class DldProcessor:
             #            # now we are ready for the analysis with numpy:
             #            res, edges = np.histogramdd(
             #                vals[:, colsToBin], bins=numBins, range=ranges)
-            if method == 'numpy':
-                histogram = np.histogramdd
-            elif method == 'boost':
-                histogram = bh.numpy.histogramdd
-            res, edges = histogram(vals[:, colsToBin], bins=self.binRangeList)
+
+            res, edges = np.histogramdd(vals[:, colsToBin], bins=self.binRangeList)
+            return res
+                  
+        def analyzePartBoost(part):
+            """ Function called by each thread of the analysis.
+            
+            **Parameter**\n
+            part: partition
+                partition to process.
+            
+            **Returns**\n
+            res: numpy array
+                binned array calculated from this partition.
+            """
+            # get the data as numpy:
+            vals = part.values
+            cols = part.columns.values
+            # create array of columns to be used for binning
+            colsToBin = []
+            for binName in self.binNameList:
+                idx = cols.tolist().index(binName)
+                colsToBin.append(idx)
+            res = bh.Histogram(*self.binAxesListBH)
+            valcolToBin = vals[:, colsToBin].T
+            res.fill(*valcolToBin)
             return res
 
         # prepare the partitions for the calculation in parallel
@@ -1276,7 +1316,10 @@ class DldProcessor:
                     if (i + j) >= self.dd.npartitions:
                         break
                     part = self.dd.get_partition(i + j)
-                    resultsToCalculate.append(dask.delayed(analyzePartNumpy)(part))
+                    if method == 'numpy':
+                        resultsToCalculate.append(dask.delayed(analyzePartNumpy)(part))
+                    elif method == 'boost':
+                        resultsToCalculate.append(dask.delayed(analyzePartBoost)(part))
 
                 # now do the calculation on each partition (using the dask
                 # framework):
