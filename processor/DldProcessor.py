@@ -657,7 +657,7 @@ class DldProcessor:
         #                                       self.ddMicrobunches['delayStageDirection']*backLash      
         
     def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=True, k_shift_func=None,
-                        k_shift_parameters=None, applyJitter=True, jitterAmplitude=None, jitterType='uniform',
+                        k_shift_parameters=None,k_shift_offset=None, applyJitter=True, jitterAmplitude=None, jitterType='uniform',
                         useAvgMonochormatorEnergy=True, useAvgToFEnergy=True,
                         sampleBias=None, monochromatorPhotonEnergy=None, tofVoltage=None):
         """ Add calibrated energy axis to dataframe
@@ -679,6 +679,8 @@ class DldProcessor:
                 function fitting the shifts of energy across the detector.
             k_shift_parameters :
                 parameters for the fit function to reproduce the energy shift.
+            k_shift_offset :
+                offset for k_shift function .
             applyJitter : bool (True)
                 if true, applies random noise of amplitude determined by jitterAmplitude
                 to the dldTime step values.
@@ -709,15 +711,17 @@ class DldProcessor:
             self.dd['dldTime_corrected'] -= \
                 dask.array.from_array(self.SECTOR_CORRECTION)[self.dd['dldSectorId'].values.astype(int)]
 
-        def correct_dldTime_shift(df, func, *args):
-            r = func((df['dldPosX'], df['dldPosY']), *args)
+        def correct_dldTime_shift(df, func, args, k_shift_offset=None):
+            r = func(df['dldPosX'], df['dldPosY'], **args)
+            if k_shift_offset is not None:
+                r -= k_shift_offset
             if self.TOF_IN_NS:
-                r /= 0.020576131995767355
+                r /= self.TOF_STEP_TO_NS
             return r
 
         if k_shift_func is not None and k_shift_parameters is not None:
-            self.dd['dldTime_corrected'] += self.dd.map_partitions(correct_dldTime_shift, k_shift_func,
-                                                                 *k_shift_parameters)
+            self.dd['dldTime_corrected'] -= self.dd.map_partitions(correct_dldTime_shift, k_shift_func, 
+                                                                 k_shift_parameters, k_shift_offset=k_shift_offset)
 
         if applyJitter:
             self.dd['dldTime_corrected'] = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmplitude,
@@ -1108,6 +1112,41 @@ class DldProcessor:
             if ub is not None:
                 self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[colname] < ub]
 
+    def addFilterElipse(self, xcolname='dldPosX',ycolname='dldPosY', angle=0.0, xscale=1, yscale=1, xcenter=0.0, ycenter=0.0,xsemiaxis=0.0, ysemiaxis=0.0, inside=True):
+        """ Eliptical filter of dataframes contained in the processor instance.
+
+        Filters the columns of ``dd`` and ``ddMicrobunches`` dataframes in place.
+
+        **Parameters**\n
+        xcolnamex (str): name of the column in the dask dataframes (x-axis of an elipse)
+        ycolnamey (str): name of the column in the dask dataframes (y-axis of an elipse)
+        angle: rotation angle from x-axis
+        xscale: scale factor for x-axis
+        yscale: scale factor for y-axis
+        xcenter and ycenter: center of an elipse
+        xsemiaxis and ysemiaxis: semiaxis of an elipse
+        inside (bool): filter inside (True) or outsie (False)
+        **Attention**\n
+        This is an irreversible process, since the dataframe gets overwritten.
+        """
+        
+        if xcolname and ycolname in self.dd.columns:
+            condition=((self.dd[xcolname]-xcenter)*np.cos(-angle)+(self.dd[ycolname]-ycenter)*np.sin(-angle))**2/(xscale*xsemiaxis)**2+((self.dd[xcolname]-xcenter)*np.sin(-angle)-(self.dd[ycolname]-ycenter)*np.cos(-angle))**2/(yscale*ysemiaxis)**2<=1
+            if inside:
+                self.dd = self.dd[condition == True]
+            else:
+                self.dd = self.dd[condition == False]
+        
+        if xcolname and ycolname in self.ddMicrobunches.columns:
+            condition=((self.ddMicrobunches[xcolname]-xcenter)*np.cos(-angle)+(self.ddMicrobunches[ycolname]-ycenter)*np.sin(-angle))**2/(xscale*xsemiaxis)**2+((self.ddMicrobunches[xcolname]-xcenter)*np.sin(-angle)-(self.ddMicrobunches[ycolname]-ycenter)*np.cos(-angle))**2/(yscale*ysemiaxis)**2<1
+            if inside:
+                self.dd = self.dd[condition == True]
+            else:
+                self.dd = self.dd[condition == False]
+            
+        
+        
+        
     def genBins(self, start, end, steps, useStepSize=True,
                 forceEnds=False, include_last=True, force_legacy=False):
         """ Creates bins for use by binning functions.
