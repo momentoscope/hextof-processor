@@ -1,18 +1,15 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="English" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="English" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="English" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>processor.DldFlashDataframeCreator &mdash; hextof-processor 1.0.3 documentation</title>
+  <title>processor.DldFlashDataframeCreator &mdash; hextof-processor 1.0.4 documentation</title>
   
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
 
   
   
@@ -20,9 +17,7 @@
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -35,6 +30,10 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -50,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> hextof-processor
+            <a href="../../index.html" class="icon icon-home"> hextof-processor
           
 
           
@@ -60,7 +59,7 @@
             
             
               <div class="version">
-                1.0.3
+                1.0.4
               </div>
             
           
@@ -77,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -118,7 +116,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -157,7 +154,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -180,7 +177,7 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span><span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">ConfigParser</span>
 <span class="kn">import</span> <span class="nn">dask</span>
 <span class="kn">import</span> <span class="nn">dask.dataframe</span>
@@ -340,7 +337,11 @@
             <span class="k">for</span> <span class="n">address_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">_VERBOSE</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;reading address: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">address_name</span><span class="p">))</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address_name</span><span class="p">,</span> <span class="n">daqAccess</span><span class="o">.</span><span class="n">valuesOfInterval</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address_name</span><span class="p">),</span> <span class="n">pulseIdInterval</span><span class="p">))</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">daqAccess</span><span class="o">.</span><span class="n">valuesOfInterval</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address_name</span><span class="p">),</span> <span class="n">pulseIdInterval</span><span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address_name</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">address_name</span> <span class="o">==</span> <span class="s1">&#39;timeStamp&#39;</span><span class="p">:</span>  <span class="c1"># catch the time stamps</span>
+                    <span class="n">startEndTime</span> <span class="o">=</span> <span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span> <span class="o">=</span> <span class="n">startEndTime</span>
             <span class="n">numOfMacrobunches</span> <span class="o">=</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">macroBunchPulseId_correction</span> <span class="o">=</span> <span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -353,7 +354,8 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;1030nm Laser&#39;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;no delay stage&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">macroBunchPulseId</span> <span class="o">-=</span> <span class="n">macroBunchPulseId_correction</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">CORRECT_MB_ID</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">macroBunchPulseId</span> <span class="o">-=</span> <span class="n">macroBunchPulseId_correction</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dldMicrobunchId</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UBID_OFFSET</span>
 
         <span class="k">if</span> <span class="n">_VERBOSE</span><span class="p">:</span>
@@ -374,12 +376,12 @@
             <span class="s1">&#39;electronsPerMacrobunch&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">electronsPerMacrobunch</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampStart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampStop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampDuration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampStart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampStop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampDuration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timeStart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timeStop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timeDuration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timeDuration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampStart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span><span class="p">[</span><span class="s1">&#39;timestampStop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -402,6 +404,8 @@
         <span class="c1">#     pass</span>
         <span class="c1">#</span>
         <span class="c1"># print(&quot;Number of electrons: {0:,}; {1:,} e/Mb &quot;.format(self.numOfElectrons, self.electronsPerMacrobunch))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating dataframes... Please wait...&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">ProgressBar</span><span class="p">():</span>
@@ -640,7 +644,7 @@
             <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;dldDetectorId&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;dldSectorId&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daqAddresses</span><span class="p">:</span>
-            <span class="n">dldSectorId</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldSectorId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span>
+            <span class="n">dldSectorId</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dldSectorId</span><span class="p">[</span><span class="n">mbIndexStart</span><span class="p">:</span><span class="n">mbIndexEnd</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">%</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">DLD_ID_BITS</span><span class="p">)</span>
             <span class="n">daSectorId</span> <span class="o">=</span> <span class="n">dldSectorId</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
             <span class="n">arrayCols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daSectorId</span><span class="p">)</span>
             <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;dldSectorId&#39;</span><span class="p">)</span>
@@ -987,8 +991,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">ddMicrobunches</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">fileName</span> <span class="o">+</span> <span class="s2">&quot;_mb&quot;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s2">&quot;UNCOMPRESSED&quot;</span><span class="p">,</span> \
                                                <span class="n">append</span><span class="o">=</span><span class="n">append</span><span class="p">,</span> <span class="n">ignore_divisions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
                     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fileName</span> <span class="o">+</span> <span class="s1">&#39;_el&#39;</span><span class="p">,</span> <span class="s1">&#39;run_metadata.txt&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
-                        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_dict</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+                        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;failed saving metadata&#39;</span><span class="p">)</span>
 
@@ -1242,19 +1248,11 @@
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2018-2020, momentoscope team
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1265,6 +1263,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

@@ -1,18 +1,15 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="English" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="English" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="English" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>processor.DldProcessor &mdash; hextof-processor 1.0.3 documentation</title>
+  <title>processor.DldProcessor &mdash; hextof-processor 1.0.4 documentation</title>
   
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
 
   
   
@@ -20,9 +17,7 @@
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -35,6 +30,10 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -50,7 +49,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> hextof-processor
+            <a href="../../index.html" class="icon icon-home"> hextof-processor
           
 
           
@@ -60,7 +59,7 @@
             
             
               <div class="version">
-                1.0.3
+                1.0.4
               </div>
             
           
@@ -77,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -118,7 +116,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -157,7 +154,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -266,39 +263,25 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">metadata_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">md</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="n">md</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">try</span><span class="p">:</span> 
-                <span class="n">md</span><span class="p">[</span><span class="s1">&#39;run&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span>
-            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-                <span class="n">md</span><span class="p">[</span><span class="s1">&#39;run&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s1">&#39;runNumber&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span><span class="p">,</span>
-                    <span class="s1">&#39;pulseIdInterval&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="n">md</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n_cores&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">N_CORES</span><span class="p">,</span>
-                           <span class="s1">&#39;chunk_size&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">,</span>
-                               <span class="p">}</span>
-            <span class="n">md</span><span class="p">[</span><span class="s1">&#39;calibration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;TOF_STEP_TO_NS&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">TOF_STEP_TO_NS</span><span class="p">,</span>
-                                 <span class="s1">&#39;ET_CONV_E_OFFSET&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ET_CONV_E_OFFSET</span><span class="p">,</span>
-                                 <span class="s1">&#39;ET_CONV_T_OFFSET&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ET_CONV_T_OFFSET</span><span class="p">,</span>
-                                 <span class="s1">&#39;ET_CONV_L&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ET_CONV_L</span><span class="p">,</span>
-                                 <span class="s1">&#39;TOF_IN_NS&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">TOF_IN_NS</span><span class="p">,</span>
-                                 <span class="p">}</span>
-            <span class="n">md</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;DATA_RAW_DIR&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_RAW_DIR</span><span class="p">,</span>
-                <span class="s1">&#39;DATA_H5_DIR&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_H5_DIR</span><span class="p">,</span>
-                <span class="s1">&#39;DATA_PARQUET_DIR&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_PARQUET_DIR</span><span class="p">,</span>
-                <span class="s1">&#39;DATA_RESULTS_DIR&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATA_RESULTS_DIR</span><span class="p">,</span>
-                <span class="s1">&#39;LOG_DIR&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">LOG_DIR</span><span class="p">,</span>
-                <span class="s1">&#39;PAH_MODULE_DIR&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PAH_MODULE_DIR</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="c1"># md[&#39;DAQ channels&#39;] =</span>
-            <span class="n">md</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">md</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">md</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">md</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span>
         <span class="k">return</span> <span class="n">md</span>
 
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">run</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;- Run Number: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">trainInterval</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;- MacrobunchIds: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">settings</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;- Settings loaded from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings_file</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="s1">&#39;- Bins:&#39;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">rng</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="p">)),</span><span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">binRangeList</span><span class="p">):</span>
+            <span class="n">bins</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\t</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">. </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span><span class="si">}</span><span class="s1"> points. From </span><span class="si">{</span><span class="nb">min</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> to </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> in steps of </span><span class="si">{</span><span class="n">rng</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">rng</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;DldFlashProcessor.</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="n">run</span><span class="p">,</span><span class="n">trainInterval</span><span class="p">,</span><span class="n">settings</span><span class="p">,</span><span class="n">bins</span><span class="p">]:</span>
+            <span class="n">string</span> <span class="o">+=</span> <span class="n">s</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">string</span>
+        
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Easy access to settings.ini file</span>
@@ -344,8 +327,10 @@
         <span class="c1"># Hard coded class attributes which can be overwritten by settings files.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">N_CORES</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">UBID_OFFSET</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">CORRECT_MB_ID</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">CHUNK_SIZE</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">TOF_STEP_TO_NS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">0.020576131995767355</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DLD_ID_BITS</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ET_CONV_E_OFFSET</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">357.7</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ET_CONV_T_OFFSET</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">82.7</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ET_CONV_L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="o">.</span><span class="mi">75</span><span class="p">)</span>
@@ -368,7 +353,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">USE_BAM</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">USE_STREAK</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">SECTOR_CORRECTION</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SECTOR_CORRECTION</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">]]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">DATA_RAW_DIR</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;/gpfs/pg2/current/raw/hdf&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">DATA_H5_DIR</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;/home/pg2user/data/h5&#39;</span><span class="p">)</span>
@@ -595,17 +580,17 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_dict</span><span class="p">[</span><span class="s1">&#39;run&#39;</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;runInfo&#39;</span><span class="p">]</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>                
             
         <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;no run info available.&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Run </span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;runNumber&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Run </span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;runNumber&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Started at </span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;timeStart&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, finished at </span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;timeStop&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, &quot;</span>
-                      <span class="sa">f</span><span class="s2">&quot;total duration </span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;timeDuration&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> s&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Started at </span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;timestampStart&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, finished at </span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;timestampStop&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, &quot;</span>
+                      <span class="sa">f</span><span class="s2">&quot;total duration </span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;timestampDuration&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> s&quot;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">pass</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Macrobunches: </span><span class="si">{</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;numberOfMacrobunches&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">  &quot;</span>
@@ -747,7 +732,7 @@
         <span class="c1">#                                       self.ddMicrobunches[&#39;delayStageDirection&#39;]*backLash      </span>
         
 <div class="viewcode-block" id="DldProcessor.calibrateEnergy"><a class="viewcode-back" href="../../library/DldProcessor.html#processor.DldProcessor.DldProcessor.calibrateEnergy">[docs]</a>    <span class="k">def</span> <span class="nf">calibrateEnergy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">toffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">useAvgSampleBias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">k_shift_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">k_shift_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">applyJitter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">jitterAmplitude</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">jitterType</span><span class="o">=</span><span class="s1">&#39;uniform&#39;</span><span class="p">,</span>
+                        <span class="n">k_shift_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">applyJitter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">jitterAmplitude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">jitterType</span><span class="o">=</span><span class="s1">&#39;uniform&#39;</span><span class="p">,</span>
                         <span class="n">useAvgMonochormatorEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">useAvgToFEnergy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">sampleBias</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">monochromatorPhotonEnergy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tofVoltage</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Add calibrated energy axis to dataframe</span>
@@ -789,6 +774,10 @@
         <span class="k">if</span> <span class="n">tofVoltage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tofVoltage</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;tofVoltage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">jitterAmplitude</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">jitterAmplitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">DLD_ID_BITS</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># sector dependent shift. this is necessary due to bit structure and due to photon peak shift among sectors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime_corrected&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="s1">&#39;dldSectorId&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="c1"># Converts the SECTOR_CORRECTION list to a dask array so things can be kept lazy</span>
@@ -1327,21 +1316,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># write the parameters to the bin list:</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">TOF_IN_NS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">,</span><span class="s1">&#39;dldTime_corrected&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">TOF_IN_NS</span><span class="p">:</span>
             <span class="n">start</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">start</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">TOF_STEP_TO_NS</span><span class="p">)</span>
             <span class="n">end</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">end</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">TOF_STEP_TO_NS</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">useStepSize</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="c1"># division by 8 is necessary since the first 3 bits of the channel where these values are</span>
                 <span class="c1"># taken from is used for other purpouses. Therefore the real tof step is:</span>
-                <span class="n">steps</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">steps</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">TOF_STEP_TO_NS</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="mi">8</span> 
-                <span class="n">steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+                <span class="n">steps</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">steps</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">TOF_STEP_TO_NS</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">DLD_ID_BITS</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">DLD_ID_BITS</span><span class="p">)</span>
+                <span class="n">steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">DLD_ID_BITS</span><span class="p">))</span>
 
         <span class="n">bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">genBins</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">useStepSize</span><span class="p">,</span> <span class="n">forceEnds</span><span class="p">,</span> <span class="n">include_last</span><span class="p">,</span> <span class="n">force_legacy</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">binNameList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">binRangeList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
         <span class="n">axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:])])</span>
 
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">TOF_IN_NS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dldTime&#39;</span><span class="p">,</span><span class="s1">&#39;dldTime_corrected&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">TOF_IN_NS</span><span class="p">:</span>
             <span class="n">axes</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TOF_STEP_TO_NS</span>
 
         <span class="c1"># TODO: could be improved for nonlinear scales</span>
@@ -1466,19 +1455,19 @@
                     <span class="c1">#                print(&quot;computing partitions &quot; + str(i) + &quot; to &quot; + str(i + j) + &quot; of &quot; + str(</span>
                     <span class="c1">#                    self.dd.npartitions) + &quot;. partitions calculated in parallel: &quot; + str(</span>
                     <span class="c1">#                    len(resultsToCalculate)))</span>
-                    <span class="n">results</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="o">*</span><span class="n">resultsToCalculate</span><span class="p">)</span>
-                    <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
-                        <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">+</span> <span class="n">result</span>
-                    <span class="n">calculatedResults</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
-                    <span class="k">del</span> <span class="n">total</span>
-                <span class="k">del</span> <span class="n">resultsToCalculate</span>
+                    <span class="n">rs</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="o">*</span><span class="n">resultsToCalculate</span><span class="p">)</span>
+                    <span class="c1"># we now need to add them all up (single core):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">result</span>
+                        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rs</span><span class="p">:</span>
+                            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">+</span> <span class="n">r</span>
+                    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">rs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rs</span><span class="p">:</span>
+                            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">+</span> <span class="n">r</span>
 
-        <span class="c1"># we now need to add them all up (single core):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">calculatedResults</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">calculatedResults</span><span class="p">:</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">+</span> <span class="n">r</span>
+                    <span class="k">del</span> <span class="n">rs</span>
+                <span class="k">del</span> <span class="n">resultsToCalculate</span>
 
         <span class="k">if</span> <span class="n">force_64bit</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
@@ -1515,38 +1504,42 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generating metadata...&#39;</span><span class="p">)</span>
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;startEndTime&#39;</span><span class="p">):</span>
             <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">startEndTime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">fast_mode</span><span class="p">:</span>
-                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;timeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;timeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;dd&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fast_mode</span><span class="p">:</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;timeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;timeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
 
         <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;acquisition start&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">),</span>
                               <span class="s1">&#39;acquisition stop&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">),</span>
-                              <span class="s1">&#39;acquisition duration&#39;</span><span class="p">:</span> <span class="n">stop</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span>
+                              <span class="s1">&#39;acquisition duration&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">stop</span> <span class="o">-</span> <span class="n">start</span><span class="p">),</span>
                               <span class="c1"># &#39;bin array creation&#39;: datetime.now().strftime(&#39;%Y-%m-%d %H:%M:%S&#39;),</span>
                               <span class="p">}</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">]</span><span class="c1">#misc.parse_category(&#39;processor&#39;)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">]</span><span class="c1">#misc.parse_category(&#39;DAQ channels&#39;)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fast_mode</span><span class="p">:</span>
-            <span class="n">pulseIdFrom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-            <span class="n">pulseIdTo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">pulseIdFrom</span><span class="p">,</span> <span class="n">pulseIdTo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s1">&#39;processor&#39;</span><span class="p">])</span><span class="c1">#misc.parse_category(&#39;processor&#39;)</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s1">&#39;DAQ channels&#39;</span><span class="p">])</span><span class="c1">#misc.parse_category(&#39;DAQ channels&#39;)</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;run&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;runNumber&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span><span class="p">,</span>
-            <span class="s1">&#39;macroBunchPulseIdInterval&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">pulseIdFrom</span><span class="p">,</span> <span class="n">pulseIdTo</span><span class="p">],</span>
-            <span class="s1">&#39;nMacrobunches&#39;</span><span class="p">:</span> <span class="n">pulseIdTo</span> <span class="o">-</span> <span class="n">pulseIdFrom</span><span class="p">,</span>
-        <span class="p">}</span>
+
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;run&#39;</span><span class="p">][</span><span class="s1">&#39;nElectrons&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numOfElectrons</span>
-            <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;run&#39;</span><span class="p">][</span><span class="s1">&#39;electronsPerMacrobunch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">electronsPerMacrobunch</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;runInfo&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">runInfo</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">pass</span>  <span class="c1"># TODO: find smarter solution</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fast_mode</span><span class="p">:</span>
+                <span class="n">pulseIdFrom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+                <span class="n">pulseIdTo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;macroBunchPulseId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pulseIdFrom</span><span class="p">,</span> <span class="n">pulseIdTo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseIdInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;runInfo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;runNumber&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runNumber</span><span class="p">,</span>
+                <span class="s1">&#39;pulseIdInterval&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">pulseIdFrom</span><span class="p">,</span> <span class="n">pulseIdTo</span><span class="p">],</span>
+                <span class="s1">&#39;numberOfMacrobunches&#39;</span><span class="p">:</span> <span class="n">pulseIdTo</span> <span class="o">-</span> <span class="n">pulseIdFrom</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;runInfo&#39;</span><span class="p">][</span><span class="s1">&#39;numberOfElectrons&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numOfElectrons</span>
+                <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;runInfo&#39;</span><span class="p">][</span><span class="s1">&#39;electronsPerMacrobunch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">electronsPerMacrobunch</span><span class="p">,</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>  <span class="c1"># TODO: find smarter solution</span>
 
         <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;histograms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -2090,19 +2083,11 @@
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2018-2020, momentoscope team
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -2113,6 +2098,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

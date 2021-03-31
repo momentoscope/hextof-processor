@@ -1,18 +1,15 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="English" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="English" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="English" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1. Calibration (processor.utilities.calibration) &mdash; hextof-processor 1.0.3 documentation</title>
+  <title>1. Calibration (processor.utilities.calibration) &mdash; hextof-processor 1.0.4 documentation</title>
   
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
 
   
   
@@ -20,9 +17,7 @@
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -35,6 +30,10 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="2. Diagnostics (processor.utilities.diagnostics)" href="diagnostics.html" />
@@ -52,7 +51,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> hextof-processor
+            <a href="../../index.html" class="icon icon-home"> hextof-processor
           
 
           
@@ -62,7 +61,7 @@
             
             
               <div class="version">
-                1.0.3
+                1.0.4
               </div>
             
           
@@ -79,7 +78,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -120,7 +118,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -159,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
         
       <li><span class="section-number">1. </span>Calibration (processor.utilities.calibration)</li>
     
@@ -274,6 +271,29 @@ there are several strategies for calibrating this value,</p>
 <code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">filterCircleDLDPos</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">xCenter</span><span class="o">=</span><span class="default_value">1334</span></em>, <em class="sig-param"><span class="n">yCenter</span><span class="o">=</span><span class="default_value">1426</span></em>, <em class="sig-param"><span class="n">radius</span><span class="o">=</span><span class="default_value">1250</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#filterCircleDLDPos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.filterCircleDLDPos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply corrections to the dataframe. (Maciej Dendzik)</p>
 <p>Filters events with dldPosX and dldPosY within the radius from (xCenter,yCenter).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="processor.utilities.calibration.gen_sector_correction">
+<code class="sig-prename descclassname">processor.utilities.calibration.</code><code class="sig-name descname">gen_sector_correction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">prc</span></em>, <em class="sig-param"><span class="n">energies</span></em>, <em class="sig-param"><span class="n">eref</span></em>, <em class="sig-param"><span class="n">tofVoltage</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampleBias</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">monoEnergy</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/processor/utilities/calibration.html#gen_sector_correction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processor.utilities.calibration.gen_sector_correction" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is helpful in generating the sector_correction list.
+This takes into account the time shift caused by the bit stealing hack
+plus is keeps track of the time shift due to detector misalignment by making sure
+all values of energies are at eref.</p>
+<p>Usage: use the function to create the sector_correction list and assign it to prc.SECTOR_CORRECTION
+or paste it into the settings with no brackets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prc</strong> -- </p></li>
+<li><p><strong>energies</strong> -- </p></li>
+<li><p><strong>eref</strong> -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -398,19 +418,11 @@ there are several strategies for calibrating this value,</p>
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2018-2020, momentoscope team
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -421,6 +433,7 @@ there are several strategies for calibrating this value,</p>
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

@@ -1,18 +1,15 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="English" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="English" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="English" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>processor.utilities.calibration &mdash; hextof-processor 1.0.3 documentation</title>
+  <title>processor.utilities.calibration &mdash; hextof-processor 1.0.4 documentation</title>
   
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
 
   
   
@@ -20,9 +17,7 @@
   
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -35,6 +30,10 @@
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
@@ -50,7 +49,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> hextof-processor
+            <a href="../../../index.html" class="icon icon-home"> hextof-processor
           
 
           
@@ -60,7 +59,7 @@
             
             
               <div class="version">
-                1.0.3
+                1.0.4
               </div>
             
           
@@ -77,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -118,7 +116,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -157,7 +154,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
@@ -184,6 +181,50 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="gen_sector_correction"><a class="viewcode-back" href="../../../library/utils/calibration.html#processor.utilities.calibration.gen_sector_correction">[docs]</a><span class="k">def</span> <span class="nf">gen_sector_correction</span><span class="p">(</span><span class="n">prc</span><span class="p">,</span> <span class="n">energies</span><span class="p">,</span> <span class="n">eref</span><span class="p">,</span> <span class="n">tofVoltage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sampleBias</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">monoEnergy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is helpful in generating the sector_correction list.</span>
+<span class="sd">    This takes into account the time shift caused by the bit stealing hack</span>
+<span class="sd">    plus is keeps track of the time shift due to detector misalignment by making sure</span>
+<span class="sd">    all values of energies are at eref.</span>
+
+<span class="sd">    Usage: use the function to create the sector_correction list and assign it to prc.SECTOR_CORRECTION</span>
+<span class="sd">    or paste it into the settings with no brackets</span>
+
+<span class="sd">    :param prc:</span>
+<span class="sd">    :param energies:</span>
+<span class="sd">    :param eref:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">sampleBias</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sampleBias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">prc</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;sampleBias&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">monoEnergy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">monoEnergy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">prc</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;monochromatorPhotonEnergy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tofVoltage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tofVoltage</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">prc</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;tofVoltage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="c1"># Here, the most basic sector_correction list is generated, where the bit stealing hack gets corrected</span>
+    <span class="n">n_sectors</span><span class="o">=</span><span class="n">prc</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="s1">&#39;dldSectorId&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+    <span class="n">sector_correction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_sectors</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">prc</span><span class="o">.</span><span class="n">DLD_ID_BITS</span><span class="p">)</span><span class="o">/</span><span class="n">n_sectors</span><span class="p">)</span>
+    <span class="c1"># e.g. for 3 stolen bits, 8 detector ids (new s8 data), this will look like [0,1,2,3,4,5,6,7]</span>
+    <span class="c1"># e.g. for 1 stolen bit, 8 detector ids (old modified s8 data), this will look like [0,0,0,0,1,1,1,1]</span>
+    <span class="c1"># e.g. for 1 stolen bit, 2 detector ids (old s8 data), this will look like [0,1]</span>
+
+
+    <span class="n">t_ref</span> <span class="o">=</span> <span class="n">energy2tof</span><span class="p">(</span><span class="n">eref</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mf">0.965</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=-</span><span class="mf">2.64</span><span class="o">-</span><span class="n">sampleBias</span><span class="o">+</span><span class="n">tofVoltage</span><span class="o">+</span><span class="n">monoEnergy</span><span class="p">)</span>
+
+    <span class="n">times</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ee</span> <span class="ow">in</span> <span class="n">energies</span><span class="p">:</span>
+        <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">energy2tof</span><span class="p">(</span><span class="n">ee</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mf">0.965</span><span class="p">,</span> <span class="n">eoffset</span><span class="o">=-</span><span class="mf">2.64</span><span class="o">-</span><span class="mi">47</span><span class="o">+</span><span class="mi">30</span><span class="o">+</span><span class="n">monoEnergy</span><span class="p">)</span><span class="o">-</span><span class="n">t_ref</span><span class="p">)</span><span class="o">/</span><span class="n">prc</span><span class="o">.</span><span class="n">TOF_STEP_TO_NS</span><span class="p">)</span>
+
+    <span class="n">sector_correction</span><span class="o">=</span><span class="n">sector_correction</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+    <span class="c1"># here the sectors are shifter by the required time to align the energies</span>
+
+    <span class="k">return</span> <span class="n">sector_correction</span></div>
+
 
 
 <span class="c1"># %% Energy calibration</span>
@@ -489,19 +530,11 @@
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2018-2020, momentoscope team
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -512,6 +545,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

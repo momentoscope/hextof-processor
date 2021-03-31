@@ -5,7 +5,7 @@ from Cython.Build import cythonize
 import numpy
 from os import path
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 
 here = path.abspath(path.dirname(__file__))
 
