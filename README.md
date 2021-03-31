@@ -1,4 +1,8 @@
 
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4651325.svg)](https://doi.org/10.5281/zenodo.4651325)
+
+
 # hextof-processor
 This code is used to analyze data measured at FLASH using the HEXTOF (high 
 energy X-ray time of flight) instrument. The HEXTOF uses a delay line detector 
