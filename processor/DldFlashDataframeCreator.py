@@ -833,7 +833,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                                     out = old
                                 
                                 last_part_number = max([int(s[5:]) for s in out.keys() if 'part_' in s])
-                                out[f"part_{last_part_number + 1:02d}"] = new
+                                out[f"part_{last_part_number + 1:03d}"] = new
 
                                 for key in new['runInfo'].keys():
 
