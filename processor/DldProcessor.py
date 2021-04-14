@@ -512,16 +512,26 @@ class DldProcessor:
         if i is None:
             print('no run info available.')
         else:
+            
             print(f"Run {i['runNumber']}")
             try:
-                print(f"Started at {i['timestampStart']}, finished at {i['timestampStop']}, "
-                      f"total duration {i['timestampDuration']:,} s")
+                print(f"Started at {i['timeStart']}, finished at {i['timeStop']}, "
+                    f"total duration {i['timeDuration']}")
             except:
-                pass
-            print(f"Macrobunches: {i['numberOfMacrobunches']:,}  "
-                  f"from {i['pulseIdInterval'][0]:,} to {i['pulseIdInterval'][1]:,} ")
+                print(f"Started at {i['timestampStart']}, finished at {i['timestampStop']}, "
+                    f"total duration {i['timestampDuration']:,} s")
+            n_macrobunches = i['numberOfMacrobunches']
+            pId_from = i['pulseIdInterval'][0]
+            pId_to  = i['pulseIdInterval'][-1]
+            if isinstance(pId_from,list):
+                pId_from = pId_from[0]
+                pId_to = pId_to[-1]
+            
+            print(f"Macrobunches: {n_macrobunches:,}  "
+                f"from {pId_from:,} to {pId_to:,} ")
             print(f"Total electrons: {i['numberOfElectrons']:,}, "
-                  f"electrons/Macrobunch {i['electronsPerMacrobunch']:}")
+                f"electrons/Macrobunch {i['electronsPerMacrobunch']:}")
+
 
     # ==========================
     # Dataframe column expansion
@@ -750,7 +760,7 @@ class DldProcessor:
         self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
                                          2.) - eoffset
 
-    def calibratePumpProbeTime(self, t0=0, useBam=None, useStreak=None, bamSign=1, streakSign=1, invertTimeAxis=True):
+    def calibratePumpProbeTime(self, t0=0, useBam=None, useStreak=None, bamSign=-1, streakSign=-1, invertTimeAxis=True,streakRolling=120,sigma=2,preserveT0=False):
         """  Add pumpProbeTime axis to dataframes.
 
         Correct pump probe time by BAM and/or streak camera.
@@ -762,18 +772,24 @@ class DldProcessor:
                 if true, corrects BAM jitter
             useStreak: bool
                 if true, corrects StreakCamera jitter
-            bamSign: -1,+1
+            bamSign: -1,+1 (-1)
                 sign of the bam correction:
                     +1 : pumpProbeTime =  delayStage + bam
                     -1 : pumpProbeTime =  delayStage - bam
                      0 : ignore bam correction
-            streakSign: -1,0,+1
+            streakSign: -1,0,+1 (-1)
                 sign of the bam correction:
                     +1 : pumpProbeTime =  delayStage + streakCam
                     -1 : pumpProbeTime =  delayStage - streakCam
                      0 : ignore streakCamera correction
             invertTimeAxis: bool (True)
                 invert time direction on pump probe time
+            streakRolling: int (120)
+                size in acquisition time seconds of the rolling average window to apply to the streak camera signal. 
+            sigma: float (2):
+                standard deviation of the gaussian window function. Higher values give smaller weighting variation in the window.
+            preserveT0: bool(false)
+                if true, removes the average of the bam ad streak camera signals to preserve the t0 value as it shows when looking at delayStage
 
         """
         if useBam is None:
@@ -781,15 +797,31 @@ class DldProcessor:
         if useStreak is None:
             useStreak = self.USE_STREAK
 
-        for df in [self.dd, self.ddMicrobunches]:
+
+
+        for df_name in ['dd', 'ddMicrobunches']:
+            df = getattr(self,df_name)
             df['pumpProbeTime'] = df['delayStage'] - t0
 
             if 'bam' in df and useBam:
                 df['pumpProbeTime'] += df['bam'] * bamSign
+                if preserveT0:
+                    df['pumpProbeTime']  -= df['bam'].mean() * bamSign
+
             if 'streakCamera' in df and useStreak:
-                df['pumpProbeTime'] += df['streakCamera'] * streakSign
+                if streakRolling:
+                    df = dfops.rolling_average_on_acquisition_time(df,'streakCamera',streakRolling,sigma)
+                    
+                    streakChannel = 'streakCamera_rolled'
+                else:
+                    streakChannel = 'streakCamera'
+                df['pumpProbeTime'] += df[streakChannel] * streakSign
+                if preserveT0:
+                    df['pumpProbeTime']  -= df[streakChannel].mean() * bamSign
+
             if invertTimeAxis:
                 df['pumpProbeTime'] = - df['pumpProbeTime']
+            setattr(self,df_name,df)
 
     def calibrateMomentum(self, kCenterX=None, kCenterY=None, rotationAngle=None, px_to_k=None, createPolarCoords=True,
                           applyJitter=True, jitterAmp=0.5, jitterType='uniform'):

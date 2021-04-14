@@ -8,6 +8,7 @@ import dask.dataframe
 import dask.multiprocessing
 from dask.diagnostics import ProgressBar
 import numpy as np
+from numpy.lib.function_base import iterable
 from processor import DldProcessor
 from processor.utilities import misc
 from processor.pah import BeamtimeDaqAccess
@@ -817,8 +818,58 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 try:
                     if not bool(self.metadata):
                         self.metadata = self.get_metadata()
+
+                    if append:
+                        with open(os.path.join(fileName + '_el', 'run_metadata.txt'),'r') as json_file:
+                            prev_metadata = json.load(json_file)
+
+                            def metadata_append_new_run(new,old):
+
+                                if True not in ['part_' in key for key in old.keys()]:
+                                    out={'runInfo':old['runInfo']}#{k:[v] for k,v in old['runInfo'].items() if k not in ['runNumber','pulseIdInterval','']}
+                                    oldRunNumber = old['runInfo']['runNumber']
+                                    out[f'part_000'] = old
+                                else:
+                                    out = old
+                                
+                                last_part_number = max([int(s[5:]) for s in out.keys() if 'part_' in s])
+                                out[f"part_{last_part_number + 1:02d}"] = new
+
+                                for key in new['runInfo'].keys():
+
+                                    if key == 'runNumber':
+                                        if not isinstance(out['runInfo'][key],list):
+                                            out['runInfo'][key] = [out['runInfo'][key],new['runInfo'][key]]
+                                        else:
+                                            out['runInfo'][key].append(new['runInfo'][key])
+
+                                    elif key == 'pulseIdInterval':
+                                        if not isinstance(out['runInfo'][key][0],list):
+                                            out['runInfo'][key] = [out['runInfo'][key],new['runInfo'][key]]
+                                        else:
+                                            out['runInfo'][key].append(new['runInfo'][key])
+                                
+                                    elif key == 'timeStart':
+                                            out['runInfo'][key] = min(datetime.strptime(old['runInfo'][key], '%Y-%m-%d %H:%M:%S'),datetime.strptime(new['runInfo'][key], '%Y-%m-%d %H:%M:%S')).__str__()
+                                   
+                                    elif key == 'timeStop':
+                                            out['runInfo'][key] = max(datetime.strptime(old['runInfo'][key], '%Y-%m-%d %H:%M:%S'),datetime.strptime(new['runInfo'][key], '%Y-%m-%d %H:%M:%S')).__str__()
+
+                                    elif key == 'timeDuration':
+                                        pass
+                                    else:
+                                        try:
+                                            out['runInfo'][key] += new['runInfo'][key]
+                                        except TypeError as E:
+                                            print(E, key)
+                                    out['runInfo']['timeDuration'] = str(timedelta(seconds=out['runInfo']['timestampDuration']))
+                                return out
+
+                            meta = metadata_append_new_run(self.metadata,prev_metadata)
+                    else:
+                        meta = self.metadata
                     with open(os.path.join(fileName + '_el', 'run_metadata.txt'), 'w') as json_file:
-                        json.dump(self.metadata, json_file, indent=4)
+                        json.dump(meta, json_file, indent=4)
                 except AttributeError:
                     print('failed saving metadata')
 
