@@ -230,7 +230,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         #
         # print("Number of electrons: {0:,}; {1:,} e/Mb ".format(self.numOfElectrons, self.electronsPerMacrobunch))
         if not bool(self.metadata):
-            self.metadata = self.get_metadata()
+            self.metadata = self.update_metadata()
 
         print("Creating dataframes... Please wait...")
         with ProgressBar():
@@ -769,7 +769,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         cols = ddMicrobunchesColnames
         self.ddMicrobunches = dask.dataframe.from_array(da.T, columns=cols)
 
-    def storeDataframes(self, fileName=None, path=None, format='parquet', append=False):
+    def storeDataframes(self, fileName=None, path=None, format='parquet', append=False,compression="UNCOMPRESSED"):
         """ Save imported dask dataframe as a parquet or hdf5 file.
 
         **Parameters**\n
@@ -804,74 +804,103 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
         fileName = path + fileName  # TODO: test if naming is correct
 
         if format == 'parquet':
-            if os.path.isdir(fileName):
+            if append:
                 print(f'Appending data to existing parquet container {fileName}')
             else:
                 print(f'Creating parquet container {fileName}')
 
             with ProgressBar():
-
-                self.dd.to_parquet(fileName + "_el", compression="UNCOMPRESSED", \
-                                   append=append, ignore_divisions=True)
-                self.ddMicrobunches.to_parquet(fileName + "_mb", compression="UNCOMPRESSED", \
-                                               append=append, ignore_divisions=True)
-                try:
-                    if not bool(self.metadata):
-                        self.metadata = self.get_metadata()
-
-                    if append:
-                        with open(os.path.join(fileName + '_el', 'run_metadata.txt'),'r') as json_file:
-                            prev_metadata = json.load(json_file)
-
-                            def metadata_append_new_run(new,old):
-
-                                if True not in ['part_' in key for key in old.keys()]:
-                                    out={'runInfo':old['runInfo']}#{k:[v] for k,v in old['runInfo'].items() if k not in ['runNumber','pulseIdInterval','']}
-                                    oldRunNumber = old['runInfo']['runNumber']
-                                    out[f'part_000'] = old
-                                else:
-                                    out = old
-                                
-                                last_part_number = max([int(s[5:]) for s in out.keys() if 'part_' in s])
-                                out[f"part_{last_part_number + 1:03d}"] = new
-
-                                for key in new['runInfo'].keys():
-
-                                    if key == 'runNumber':
-                                        if not isinstance(out['runInfo'][key],list):
-                                            out['runInfo'][key] = [out['runInfo'][key],new['runInfo'][key]]
-                                        else:
-                                            out['runInfo'][key].append(new['runInfo'][key])
-
-                                    elif key == 'pulseIdInterval':
-                                        if not isinstance(out['runInfo'][key][0],list):
-                                            out['runInfo'][key] = [out['runInfo'][key],new['runInfo'][key]]
-                                        else:
-                                            out['runInfo'][key].append(new['runInfo'][key])
-                                
-                                    elif key == 'timeStart':
-                                            out['runInfo'][key] = min(datetime.strptime(old['runInfo'][key], '%Y-%m-%d %H:%M:%S'),datetime.strptime(new['runInfo'][key], '%Y-%m-%d %H:%M:%S')).__str__()
-                                   
-                                    elif key == 'timeStop':
-                                            out['runInfo'][key] = max(datetime.strptime(old['runInfo'][key], '%Y-%m-%d %H:%M:%S'),datetime.strptime(new['runInfo'][key], '%Y-%m-%d %H:%M:%S')).__str__()
-
-                                    elif key == 'timeDuration':
-                                        pass
-                                    else:
-                                        try:
-                                            out['runInfo'][key] += new['runInfo'][key]
-                                        except TypeError as E:
-                                            print(E, key)
-                                    out['runInfo']['timeDuration'] = str(timedelta(seconds=out['runInfo']['timestampDuration']))
-                                return out
-
-                            meta = metadata_append_new_run(self.metadata,prev_metadata)
+                if 'runNumber' not in self.dd.columns: # add run number as column to the dataframe
+                    if self.runNumber:
+                        run = self.runNumber
                     else:
-                        meta = self.metadata
-                    with open(os.path.join(fileName + '_el', 'run_metadata.txt'), 'w') as json_file:
-                        json.dump(meta, json_file, indent=4)
-                except AttributeError:
-                    print('failed saving metadata')
+                        try:
+                            run = self.metadata['runInfo']['runNumber']
+                            if isinstance(run,list):
+                                run = None # in case this is already an agglomerate of runs... useless to add run number
+                        except KeyError:
+                            run = None
+                    if run is not None:
+                        self.dd['runNumber'] = run
+                        self.ddMicrobunches['runNumber'] = run
+                if 'pulseId' not in self.dd.columns: 
+                    # add the pulseId (macrobunchId) number as column to the dataframe
+                    # macroBunchPulseId is there already, but its reset to 0 at the firsto one...
+                    if self.pulseIdInterval:
+                        pulseId = self.pulseIdInterval[0]
+                    else:
+                        try:
+                            pulseId = self.metadata['runInfo']['pulseIdInterval'][0]
+                            if isinstance(pulseId,list):
+                                pulseId = None # in case this is already an agglomerate of runs... useless to add run number
+                        except KeyError:
+                            pulseId = None
+                    if pulseId is not None:
+                        self.dd['pulseId'] = self.dd['macroBunchPulseId'] + pulseId
+                        self.ddMicrobunches['pulseId'] = self.ddMicrobunches['macroBunchPulseId'] + pulseId
+
+                                                
+                self.dd.to_parquet(fileName + "_el", compression=compression, \
+                                   append=append, ignore_divisions=True)
+                self.ddMicrobunches.to_parquet(fileName + "_mb", compression=compression, \
+                                               append=append, ignore_divisions=True)
+            print('Saving metadata...')
+            try:
+                if not bool(self.metadata):
+                    self.metadata = self.update_metadata()
+
+                if not append:
+                    meta = self.metadata
+                else:
+                    with open(os.path.join(fileName + '_el', 'run_metadata.txt'),'r') as json_file:
+                        old = json.load(json_file)
+                    new = self.metadata
+
+                    if 'part_000' not in old.keys():
+                        meta={'runInfo':old['runInfo']}
+                        meta[f'part_000'] = old
+                    else:
+                        meta = old
+                    
+                    last_part_number = max([int(s[5:]) for s in meta.keys() if 'part_' in s])
+                    meta[f"part_{last_part_number + 1:03d}"] = new
+
+                    i = meta['runInfo']
+                    n = new['runInfo']
+                    for key in n.keys():
+                        if key == 'runNumber':
+                            if not isinstance(i[key],list):
+                                i[key] = [i[key],n[key]]
+                            else:
+                                i[key].append(n[key])
+
+                        elif key == 'pulseIdInterval':
+                            if not isinstance(i[key][0],list):
+                                i[key] = [i[key],n[key]]
+                            else:
+                                i[key].append(n[key])
+                    
+                        elif key == 'timeStart':
+                                i[key] = min(datetime.strptime(i[key], '%Y-%m-%d %H:%M:%S'),datetime.strptime(n[key], '%Y-%m-%d %H:%M:%S')).__str__()
+                        
+                        elif key == 'timeStop':
+                                i[key] = max(datetime.strptime(i[key], '%Y-%m-%d %H:%M:%S'),datetime.strptime(n[key], '%Y-%m-%d %H:%M:%S')).__str__()
+
+                        elif key in ['timeDuration', 'electronsPerMacrobunch']:
+                            pass # skip those which need recalculation based on the summed values
+                        else:
+                            try:
+                                i[key] += n[key]
+                            except TypeError as E:
+                                print(E, key)
+                        i['timeDuration'] = str(timedelta(seconds=i['timestampDuration']))
+                        i['electronsPerMacrobunch'] = i['numberOfElectrons']/i['numberOfMacrobunches']
+
+
+                with open(os.path.join(fileName + '_el', 'run_metadata.txt'), 'w') as json_file:
+                    json.dump(meta, json_file, indent=4)
+            except AttributeError as E:
+                print(f'failed saving metadata: {E}')
 
         elif format in ['hdf5', 'h5']:
             if os.path.isdir(fileName):
@@ -880,6 +909,7 @@ class DldFlashProcessor(DldProcessor.DldProcessor):
                 print(f'Creating h5 container {fileName}')
             dask.dataframe.to_hdf(self.dd, fileName, '/electrons')
             dask.dataframe.to_hdf(self.ddMicrobunches, fileName, '/microbunches')
+        print('saving complete!')
 
     def getIds(self, runNumber=None, path=None):
         """ Returns the first and the last macrobunch IDs of a given run number.

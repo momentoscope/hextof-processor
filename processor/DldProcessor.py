@@ -81,9 +81,17 @@ class DldProcessor:
 
 
         # initialize attributes for metadata
-        self.sample = {}  # this should contain 'name', 'sampleID', 'cleave number' etc...
+        self._sample = {}  # this should contain 'name', 'sampleID', 'cleave number' etc...
         self.histograms = {}
-        self.metadata = {}
+        self._metadata = None
+        self._workflow_parameters = OrderedDict()
+
+    @property
+    def sample(self):
+        return self._sample
+    @sample.setter
+    def sample(self,d):
+        self._sample = d
 
     @property
     def workflow_parameters(self):
@@ -103,7 +111,6 @@ class DldProcessor:
                 - 'kwargs': dictionary of keyword arguments to pass to the method
         Rises NotImplementedError if the method described in the workflow parameter dictionary is not defined in the Processor class."""
         assert isinstance(d, dict), f'Workflow parameters need to be a dictionary, not {type(d)}.'
-        self._workflow_parameters = OrderedDict()
 
         for k, v in d.items():
             try:
@@ -134,8 +141,18 @@ class DldProcessor:
         if isinstance(workflow_step, dict):
             parDict = workflow_step
         else:
+            for k,v in kwargs.items(): # functions are not json serializable, so we just save the function name
+                if callable(v):
+                    kwargs[k] = v.__name__               
+                else:
+                    try:
+                        for kk,vv in v.items():
+                            if callable(vv):
+                                kwargs[k][kk] = vv.__name__
+                    except:
+                        pass
             if name is None:
-                name = method
+                name = workflow_step
             parDict = {name: {'method': workflow_step,
                               'args': args,
                               'kwargs': kwargs
@@ -145,15 +162,15 @@ class DldProcessor:
             if not hasattr(self, mtd):
                 raise AttributeError(f'No processing method {mtd} found.')
             else:
-                if k in self._workflow_parameters and not overwrite:
+                if k in self.workflow_parameters and not overwrite:
                     n = 2  # the first "duplicate" should be labelled as {k}_2
-                    while '{}_{}'.format(k, n) in self._workflow_parameters:
+                    while '{}_{}'.format(k, n) in self.workflow_parameters:
                         n += 1
                     k = '{}_{}'.format(k, n)
 
-                self._workflow_parameters[k] = v
+                self.workflow_parameters[k] = v
 
-    def remove_workflow_step(name):
+    def remove_workflow_step(self, name):
         """ Removes a step from the workflow.
 
         Args:
@@ -173,11 +190,22 @@ class DldProcessor:
             only explicitly passed arguments get saved. Default values will not be recorded.
         """
         def wrapper(self, *args, **kwargs):
-            print('decorated')
+            # print('decorated')
             method = func.__name__
+            kwargs_ = kwargs.copy()
+            for k,v in kwargs.items(): # functions are not json serializable, so we just save the function name
+                if callable(v):
+                    kwargs_[k] = v.__name__               
+                else:
+                    try:
+                        for kk,vv in v.items():
+                            if callable(vv):
+                                kwargs_[k][kk] = vv.__name__
+                    except:
+                        pass
             parDict = {method: {'method': method,
                                 'args': args,
-                                'kwargs': kwargs,
+                                'kwargs': kwargs_,
                                 }}
 
             self.add_workflow_step(parDict)
@@ -186,27 +214,92 @@ class DldProcessor:
         return wrapper
 
     @property
-    def metadata_dict(self):
+    def metadata(self):
 
-        if self.metadata is None:
-            md = self.get_metadata()
-            self.metadata = md
+        if self._metadata is None:
+            md = self.update_metadata()
+            self._metadata = md
         else:
-            md = self.metadata
+            md = self._metadata
+        md['sample'] = self._sample
+        md['workflow_parameters'] = self.workflow_parameters
         return md
 
-    def __repr__(self):
-        run = f'- Run Number: {self.runNumber}'
-        trainInterval = f'- MacrobunchIds: {self.pulseIdInterval}'
-        settings = f'- Settings loaded from {self._settings_file}'
-        bins = '- Bins:'
-        for i,name,rng in zip(range(len(self.binNameList)),self.binNameList,self.binRangeList):
-            bins += f'\n\t{i}. {name}: {len(rng)} points. From {min(rng):.2f} to {max(rng):.2f} in steps of {rng[1]-rng[0]:.2f}'
-        string = f'DldFlashProcessor.\n'
-        for s in [run,trainInterval,settings,bins]:
-            string += s + '\n'
-        return string
+    def update_metadata(self, compute_histograms=True, fast_mode=False): # TODO: make this great...!
+        """  Creates a dictionary with the most relevant metadata.
+
+        **Args**\n
+        fast_mode: bool | False
+            if False skips the heavy computation steps which take a long time.
         
+        **Returns**\n
+        metadata: dict
+            dictionary with metadata information
+        # TODO: distribute metadata generation in the appropriate methods.
+            this can be done as with "sample" and "workflow parameters". 
+            They have their own dictionary independent from metadata, 
+            and metadata only collects these in one dict to be used or stored.
+        """
+        print('Generating metadata...')
+        metadata = {}
+        if hasattr(self,'startEndTime'):
+            start, stop = self.startEndTime[0], self.startEndTime[1]
+        elif hasattr(self, 'dd') and not fast_mode:
+            start, stop = dask.compute(self.dd['timeStamp'].min(), self.dd['timeStamp'].max())
+        else:
+            start, stop = 0, 1
+
+        metadata['timing'] = {'acquisition start': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
+                              'acquisition stop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
+                              'acquisition duration': int(stop - start),
+                              # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                              }
+        metadata['settings'] = dict(self.settings._sections['processor'])#misc.parse_category('processor')
+        metadata['DAQ channels'] = dict(self.settings._sections['DAQ channels'])#misc.parse_category('DAQ channels')
+        metadata['hextof-processor'] = {'version':processor.__version__}
+
+        try:
+            metadata['runInfo']=self.runInfo
+        except:
+            if self.pulseIdInterval is None and not fast_mode:
+                pulseIdFrom,pulseIdTo = dask.compute(self.dd['macroBunchPulseId'].min(),self.dd['macroBunchPulseId'].max())
+            else:
+                pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
+
+            metadata['runInfo'] = {
+                'runNumber': self.runNumber,
+                'pulseIdInterval': [pulseIdFrom, pulseIdTo],
+                'numberOfMacrobunches': pulseIdTo - pulseIdFrom,
+            }
+            try:
+                metadata['runInfo']['numberOfElectrons'] = self.numOfElectrons
+                metadata['runInfo']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
+            except:
+                pass  # TODO: find smarter solution
+        if compute_histograms:
+            metadata['histograms'] = {}
+            if hasattr(self, 'delaystageHistogram'):
+                metadata['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
+            elif hasattr(self, 'pumpProbeHistogram'):
+                metadata['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeTimeHistogram}
+
+        # if not fast_mode:
+        #     try:
+        #         axis_values = []
+        #         ax_len = 0
+        #         for ax, val in zip(self.binNameList, self.binAxesList):
+        #             if len(val) > ax_len:
+        #                 ax_len = len(val)
+        #                 axis_name = ax
+        #                 axis_values = val
+        #
+        #         GMD_norm = self.make_GMD_histogram(axis_name, axis_values)
+        #         metadata['histograms']['GMD'] = {'axis': axis_name, 'histogram': GMD_norm}
+        #     except Exception as e:
+        #         print("Couldn't find GMD channel for making GMD normalization histograms\nError: {}".format(e))
+        print('...done!')
+        return metadata
+
     @property
     def settings(self):
         """ Easy access to settings.ini file
@@ -446,7 +539,12 @@ class DldProcessor:
 
                 try:
                     with open(os.path.join(fullName + '_el', 'run_metadata.txt'), 'r') as json_file:
-                        self.metadata = json.load(json_file)
+                        d = json.load(json_file)
+                        try:
+                            self._workflow_parameters = d.pop('workflow_parameters')
+                        except KeyError:
+                            self._workflow_parameters = OrderedDict()
+                        self._metadata = d
                 except Exception as err:
                     print(f'Failed loading metadata from parquet stored files!, {err}')
             except FileNotFoundError:
@@ -483,12 +581,23 @@ class DldProcessor:
                                                     interleave_partitions=True)
 
     @property
+    def shape(self):
+        return self.binnedArraySize
+
+    @property
     def binnedArrayShape(self):
         s = []
         for a in self.binAxesList:
             s.append(len(a))
         return tuple(s)
 
+    @property
+    def size(self):
+        return self.binnedArraySize
+
+    @property
+    def size_mb(self):
+        return misc.repr_byte_size(self.binnedArraySize*64)
     @property
     def binnedArraySize(self):
         s = []
@@ -505,7 +614,7 @@ class DldProcessor:
         except AttributeError:
             pass
         try:
-            i = self.metadata['runInfo']
+            i = self._metadata['runInfo']
         except:
             pass                
             
@@ -532,11 +641,11 @@ class DldProcessor:
             print(f"Total electrons: {i['numberOfElectrons']:,}, "
                 f"electrons/Macrobunch {i['electronsPerMacrobunch']:}")
 
-
+     
     # ==========================
     # Dataframe column expansion
     # ==========================
-
+    @workflow
     def postProcess(self, bamCorrectionSign=0, kCenter=None, bamCentered=False):
         """ Apply corrections to the dataframe.
 
@@ -568,7 +677,8 @@ class DldProcessor:
 
         if kCenter is not None:
             self.createPolarCoordinates(kCenter)
-
+  
+    @workflow
     def correctBAM(self, sign=1, centered=False, source='delayStage'):
         """ Correct pump probe time by BAM (beam arrival monitor) data.
 
@@ -619,7 +729,8 @@ class DldProcessor:
                                    (self.dd['bam']-centered*self.dd['bam'].mean()) * sign
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches[source] - \
                                                (self.ddMicrobunches['bam']-centered*self.ddMicrobunches['bam'].mean()) * sign
-
+    
+    @workflow
     def delayStageMovingDirection(self):
         """ Calculate the direction of movement of the delay stage. 
         Needed for backlash of the 1030nm Laser.
@@ -651,7 +762,8 @@ class DldProcessor:
                 
             self.dd['delayStageDirection']=self.dd.macroBunchPulseId.map_partitions(f)
             #self.ddMicrobunches['delayStageDirection']=self.ddMicrobunches.macroBunchPulseId.map_partitions(f) #solve fist: macroBunchPulseID is not identical in range for both dataframes
-                  
+    
+    @workflow     
     def correctBackLash(self, backLash, source='delayStage'):
         """ Shift the delay time of the up and down moving in different directions 
         to compensate backlash.
@@ -665,7 +777,8 @@ class DldProcessor:
                                    self.dd['delayStageDirection']*backLash
         self.ddMicrobunches['pumpProbeTime'] = self.ddMicrobunches[source]# - \
         #                                       self.ddMicrobunches['delayStageDirection']*backLash      
-        
+
+    @workflow
     def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=True, k_shift_func=None,
                         k_shift_parameters=None,k_shift_offset=None, applyJitter=True, jitterAmplitude=None, jitterType='uniform',
                         useAvgMonochormatorEnergy=True, useAvgToFEnergy=True,
@@ -760,6 +873,7 @@ class DldProcessor:
         self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
                                          2.) - eoffset
 
+    @workflow
     def calibratePumpProbeTime(self, t0=0, useBam=None, useStreak=None, bamSign=-1, streakSign=-1, invertTimeAxis=True,streakRolling=120,sigma=2,preserveT0=False):
         """  Add pumpProbeTime axis to dataframes.
 
@@ -823,6 +937,7 @@ class DldProcessor:
                 df['pumpProbeTime'] = - df['pumpProbeTime']
             setattr(self,df_name,df)
 
+    @workflow
     def calibrateMomentum(self, kCenterX=None, kCenterY=None, rotationAngle=None, px_to_k=None, createPolarCoords=True,
                           applyJitter=True, jitterAmp=0.5, jitterType='uniform'):
         """ Add calibrated parallel momentum axes to dataframe.
@@ -886,6 +1001,7 @@ class DldProcessor:
             self.dd['kr'] = self.dd.map_partitions(radius)
             self.dd['kt'] = self.dd.map_partitions(angle)
 
+    @workflow
     def createPolarCoordinates(self, kCenter=(250, 250)):
         """ Calculate polar coordinates for k-space values.
 
@@ -1113,9 +1229,10 @@ class DldProcessor:
             return [None]
         
     # ==========================
-    # Binning
+    # Filtering
     # ==========================
 
+    @workflow
     def addFilter(self, colname, lb=None, ub=None):
         """ Filters the dataframes contained in the processor instance.
 
@@ -1144,6 +1261,7 @@ class DldProcessor:
             if ub is not None:
                 self.ddMicrobunches = self.ddMicrobunches[self.ddMicrobunches[colname] < ub]
 
+    @workflow
     def addFilterElipse(self, xcolname='dldPosX',ycolname='dldPosY', angle=0.0, xscale=1, yscale=1, xcenter=0.0, ycenter=0.0,xsemiaxis=0.0, ysemiaxis=0.0, inside=True):
         """ Eliptical filter of dataframes contained in the processor instance.
 
@@ -1175,10 +1293,11 @@ class DldProcessor:
                 self.dd = self.dd[condition == True]
             else:
                 self.dd = self.dd[condition == False]
-            
-        
-        
-        
+
+    # ==========================
+    # Binning
+    # ==========================        
+
     def genBins(self, start, end, steps, useStepSize=True,
                 forceEnds=False, include_last=True, force_legacy=False):
         """ Creates bins for use by binning functions.
@@ -1258,7 +1377,7 @@ class DldProcessor:
 
         return bins
 
-    def addBinning(self, name, start, end, steps, useStepSize=True, forceEnds=False,
+    def addBinning(self, name, start, end=None, steps=None, useStepSize=True, forceEnds=False,
                    include_last=True, force_legacy=False, compute_histograms=False):
         """ Add binning of one dimension, to be then computed with ``computeBinnedData`` method.
 
@@ -1310,18 +1429,33 @@ class DldProcessor:
           ``computeBinnedData`` Method to compute all bins created with this function.
 
         """
+        if name in self.binNameList:
+            raise NameError('There are already bins defined for axis '+ name)
+        try:
+            assert len(start)>1
+            bins = start
+        except AssertionError:
+            raise ValueError('lenght of binning array should have at least 2 elements')
+        except TypeError:
+            if end is None or steps is None:
+                raise ValueError('binning requires either an array or start,stop,step')
+            else:
+                
 
-        # write the parameters to the bin list:
-        if name in ['dldTime','dldTime_corrected'] and self.TOF_IN_NS:
-            start = round(start/self.TOF_STEP_TO_NS)
-            end = round(end/self.TOF_STEP_TO_NS)
-            if useStepSize is True:
-                # division by 8 is necessary since the first 3 bits of the channel where these values are
-                # taken from is used for other purpouses. Therefore the real tof step is:
-                steps = round(steps/self.TOF_STEP_TO_NS/np.power(2,self.DLD_ID_BITS))*np.power(2,self.DLD_ID_BITS)
-                steps = max(steps,np.power(2,self.DLD_ID_BITS))
 
-        bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
+                # write the parameters to the bin list:
+                if name in ['dldTime','dldTime_corrected'] and self.TOF_IN_NS:
+                    start = round(start/self.TOF_STEP_TO_NS)
+                    end = round(end/self.TOF_STEP_TO_NS)
+                    if useStepSize is True:
+                        # division by 8 is necessary since the first 3 bits of the channel where these values are
+                        # taken from is used for other purpouses. Therefore the real tof step is:
+                        steps = round(steps/self.TOF_STEP_TO_NS/np.power(2,self.DLD_ID_BITS))*np.power(2,self.DLD_ID_BITS)
+                        steps = max(steps,np.power(2,self.DLD_ID_BITS))
+
+                bins = self.genBins(start, end, steps, useStepSize, forceEnds, include_last, force_legacy)
+        
+        
         self.binNameList.append(name)
         self.binRangeList.append(bins)
         axes = np.array([np.mean((x, y)) for x, y in zip(bins[:-1], bins[1:])])
@@ -1347,7 +1481,11 @@ class DldProcessor:
         self.binRangeList = []
         self.binAxesList = []
 
-    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=True, fast_metadata=False, usePbar=True):
+    def compute(self,*args,**kwargs):
+        """ alias of computeBinnedData"""
+        return self.computeBinnedData(*args,**kwargs)
+
+    def computeBinnedData(self, saveAs=None, return_xarray=None, force_64bit=False, skip_metadata=False, compute_histograms=False, fast_metadata=False, usePbar=True):
         """ Use the bin list to bin the data.
         
         **Parameters**\n
@@ -1474,7 +1612,7 @@ class DldProcessor:
                 if skip_metadata: 
                     raise KeyError('forced to skip metadata creation')
                 else:
-                    metadata = self.get_metadata(fast_mode=fast_metadata)
+                    metadata = self.update_metadata(compute_histograms=compute_histograms,fast_mode=fast_metadata)
             except KeyError as err:
                 print(f'Failed creating metadata: {err}')
                 metadata = None
@@ -1486,166 +1624,7 @@ class DldProcessor:
 
         return result
 
-    def get_metadata(self, fast_mode=False): # TODO: make this great...!
-        """  Creates a dictionary with the most relevant metadata.
 
-        **Args**\n
-        fast_mode: bool | False
-            if False skips the heavy computation steps which take a long time.
-        
-        **Returns**\n
-        metadata: dict
-            dictionary with metadata information
-        # TODO: distribute metadata generation in the appropriate methods.
-        """
-        print('Generating metadata...')
-        metadata = {}
-        if hasattr(self,'startEndTime'):
-            start, stop = self.startEndTime[0], self.startEndTime[1]
-        elif hasattr(self, 'dd') and not fast_mode:
-            start, stop = self.dd['timeStamp'].min().compute(), self.dd['timeStamp'].max().compute()
-        else:
-            start, stop = 0, 1
-
-        metadata['timing'] = {'acquisition start': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
-                              'acquisition stop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
-                              'acquisition duration': int(stop - start),
-                              # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                              }
-        metadata['sample'] = self.sample
-        metadata['settings'] = dict(self.settings._sections['processor'])#misc.parse_category('processor')
-        metadata['DAQ channels'] = dict(self.settings._sections['DAQ channels'])#misc.parse_category('DAQ channels')
-
-
-        try:
-            metadata['runInfo']=self.runInfo
-        except:
-            if self.pulseIdInterval is None and not fast_mode:
-                pulseIdFrom = self.dd['macroBunchPulseId'].min().compute()
-                pulseIdTo = self.dd['macroBunchPulseId'].max().compute()
-            else:
-                pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
-
-            metadata['runInfo'] = {
-                'runNumber': self.runNumber,
-                'pulseIdInterval': [pulseIdFrom, pulseIdTo],
-                'numberOfMacrobunches': pulseIdTo - pulseIdFrom,
-            }
-            try:
-                metadata['runInfo']['numberOfElectrons'] = self.numOfElectrons
-                metadata['runInfo']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
-            except:
-                pass  # TODO: find smarter solution
-
-        metadata['histograms'] = {}
-
-        if hasattr(self, 'delaystageHistogram'):
-            metadata['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
-        elif hasattr(self, 'pumpProbeHistogram'):
-            metadata['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeTimeHistogram}
-
-        # if not fast_mode:
-        #     try:
-        #         axis_values = []
-        #         ax_len = 0
-        #         for ax, val in zip(self.binNameList, self.binAxesList):
-        #             if len(val) > ax_len:
-        #                 ax_len = len(val)
-        #                 axis_name = ax
-        #                 axis_values = val
-        #
-        #         GMD_norm = self.make_GMD_histogram(axis_name, axis_values)
-        #         metadata['histograms']['GMD'] = {'axis': axis_name, 'histogram': GMD_norm}
-        #     except Exception as e:
-        #         print("Couldn't find GMD channel for making GMD normalization histograms\nError: {}".format(e))
-        print('...done!')
-        return metadata
-    #
-    # def res_to_xarray_old(self, res, fast_mode=False):
-    #     """ Creates a BinnedArray (xarray subclass) out of the given numpy.array.
-    #
-    #     **Parameters**\n
-    #     res: np.array
-    #         nd array of binned data
-    #     fast_mode: bool default True
-    #         if True, it skips the creation of metadata element which require computation.
-    #
-    #     **Returns**\n
-    #     ba: BinnedArray (xarray)
-    #         an xarray-like container with binned data, axis, and all available metadata.
-    #     """
-    #     dims = self.binNameList
-    #     coords = {}
-    #     for name, vals in zip(self.binNameList, self.binAxesList):
-    #         coords[name] = vals
-    #
-    #     ba = BinnedArray(res, dims=dims, coords=coords)
-    #
-    #     units = {}
-    #     default_units = {'dldTime': 'step', 'delayStage': 'ps', 'pumpProbeDelay': 'ps'}
-    #     for name in self.binNameList:
-    #         try:
-    #             u = default_units[name]
-    #         except KeyError:
-    #             u = None
-    #         units[name] = u
-    #     ba.attrs['units'] = units
-    #
-    #     try:
-    #         start, stop = self.startEndTime[0], self.startEndTime[1]
-    #     except AttributeError:
-    #         if not fast_mode:
-    #             start, stop = self.dd['timeStamp'].min().compute(), self.dd['timeStamp'].max().compute()
-    #         else:
-    #             start, stop = 0, 1
-    #
-    #     ba.attrs['timing'] = {'acquisition start': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
-    #                           'acquisition stop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
-    #                           'acquisition duration': stop - start,
-    #                           'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-    #                           }
-    #     ba.attrs['sample'] = self.sample
-    #     ba.attrs['settings'] = misc.parse_category('processor')
-    #     ba.attrs['DAQ channels'] = misc.parse_category('DAQ channels')
-    #     if self.pulseIdInterval is None:
-    #         pulseIdFrom = self.dd['macroBunchPulseId'].min().compute()
-    #         pulseIdTo = self.dd['macroBunchPulseId'].max().compute()
-    #     else:
-    #         pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
-    #
-    #     ba.attrs['run'] = {
-    #         'runNumber': self.runNumber,
-    #         'macroBunchPulseIdInterval': [pulseIdFrom, pulseIdTo],
-    #         'nMacrobunches': pulseIdTo - pulseIdFrom,
-    #     }
-    #     try:
-    #         ba.attrs['run']['nElectrons'] = self.numOfElectrons
-    #         ba.attrs['run']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
-    #     except:
-    #         pass  # TODO: find smarter solution
-    #
-    #     ba.attrs['histograms'] = {}
-    #
-    #     if hasattr(self, 'delaystageHistogram'):
-    #         ba.attrs['histograms']['delay'] = {'axis': 'delayStage', 'histogram': self.delaystageHistogram}
-    #     elif hasattr(self, 'pumpProbeHistogram'):
-    #         ba.attrs['histograms']['delay'] = {'axis': 'pumpProbeDelay', 'histogram': self.pumpProbeTimeHistogram}
-    #     if not fast_mode:
-    #         try:
-    #             axis_values = []
-    #             ax_len = 0
-    #             for ax, val in coords.items():
-    #                 if len(val) > ax_len:
-    #                     ax_len = len(val)
-    #                     axis_name = ax
-    #                     axis_values = val
-    #
-    #             GMD_norm = self.make_GMD_histogram(axis_name, axis_values)
-    #             ba.attrs['histograms']['GMD'] = {'axis': axis_name, 'histogram': GMD_norm}
-    #         except Exception as e:
-    #             print("Couldn't find GMD channel for making GMD normalization histograms\nError: {}".format(e))
-    #
-    #     return ba
 
     def computeBinnedDataMulti(self, saveName=None, savePath=None,
                                rank=None, size=None):
@@ -1850,6 +1829,21 @@ class DldProcessor:
             Histogram values associated with the read data.
         """
         return misc.load_binned_h5(file_name, mode=mode, ret_type=ret_type)
+
+
+    def __repr__(self):
+        run = f'- Run Number: {self.runNumber}'
+        trainInterval = f'- MacrobunchIds: {self.pulseIdInterval}'
+        settings = f'- Settings loaded from {self._settings_file}'
+        bins = '- Bins:'
+        for i,name,rng in zip(range(len(self.binNameList)),self.binNameList,self.binRangeList):
+            bins += f'\n\t{i}. {name}: {len(rng)} points. From {min(rng):.2f} to {max(rng):.2f} in steps of {rng[1]-rng[0]:.2f}'
+        string = f'DldFlashProcessor.\n'
+        for s in [run,trainInterval,settings,bins]:
+            string += s + '\n'
+        return string
+        
+
 
     # % retro-compatibility functions and deprecated methods
 
