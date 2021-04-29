@@ -38,7 +38,7 @@ def rolling_average_on_acquisition_time(df,col,window,sigma=2):
         df : dataframe
             Dataframe to add noise/jittering to.
         col : str
-            Name of the column to add jittering to.
+            Name of the column on which to perform the rolling average
         window:
             Size of the rolling average window
         sigma:
@@ -53,6 +53,6 @@ def rolling_average_on_acquisition_time(df,col,window,sigma=2):
         df_['dt'] = pd.to_datetime(df_.index, unit='s')
         df_['ts'] = df_.index
     #     df['streakCamera'] = df['streakCamera']
-        df_[col+'_rolled'] = df_[col].interpolate(method='nearest').rolling(window,center=True,win_type='gaussian').mean(std=window/sigma).fillna(df_['streakCamera'])
+        df_[col+'_rolled'] = df_[col].interpolate(method='nearest').rolling(window,center=True,win_type='gaussian').mean(std=window/sigma).fillna(df_[col])
         df_ = df_.drop(col, axis=1)
     return df.merge(df_,left_on='timeStamp',right_on='ts').drop(['ts','dt'], axis=1)
