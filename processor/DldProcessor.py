@@ -1469,7 +1469,10 @@ class DldProcessor:
         if name in ['pumpProbeTime', 'delayStage']:
             # add the normalization histogram to the histograms dictionary. computes them if requested, otherwise
             # only assigned the dask calculations for later computation.
-            self.histograms[name] = self.makeNormHistogram(name, compute=compute_histograms)
+            try:
+                  self.histograms[name] = self.makeNormHistogram(name, compute=compute_histograms)
+            except KeyError as E:
+                print(f'Could not create {name} histogram: {E} ')
             # These can be accessed in the old method through the class properties pumpProbeHistogram and delayStageHistogram
 
         return axes
