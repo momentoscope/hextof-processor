@@ -900,39 +900,40 @@ class DldProcessor:
         """
         # sector dependent shift. this is necessary due to bit structure and due to photon peak shift among sectors
         if ('dldTime_corrected' not in self.dd.columns) or reset_dldTime_corrected:
-            self.dd['dldTime_corrected'] = self.dd['dldTime']
+            self.dd['dldTime_corrected'] = self.dd['dldTime'].astype(np.float32)
+            # if type(self.dd['dldTime_corrected'])
+        
+        if isinstance(sectorCorrection,(list,tuple)):
+            SECTOR_CORRECTION = sectorCorrection
+        elif sectorCorrection:
+            SECTOR_CORRECTION = self.SECTOR_CORRECTION
         else:
-            if isinstance(sectorCorrection,[list,tuple]):
-                SECTOR_CORRECTION = sectorCorrection
-            elif sectorCorrection:
-                self.SECTOR_CORRECTION
-            else:
-                SECTOR_CORRECTION = False
-            use_secCorr = sectorCorrection is True
-            if 'dldSectorId' in self.dd.columns and SECTOR_CORRECTION:
-                # Converts the SECTOR_CORRECTION list to a dask array so things can be kept lazy
-                self.dd['dldTime_corrected'] -= \
-                    dask.array.from_array(SECTOR_CORRECTION)[self.dd['dldSectorId'].values.astype(int)]
+            SECTOR_CORRECTION = False
+        use_secCorr = sectorCorrection is True
+        if 'dldSectorId' in self.dd.columns and SECTOR_CORRECTION:
+            # Converts the SECTOR_CORRECTION list to a dask array so things can be kept lazy
+            self.dd['dldTime_corrected'] -= \
+                dask.array.from_array(SECTOR_CORRECTION)[self.dd['dldSectorId'].values.astype(int)]
 
-            # Apply position dependent correction with parameters from a fitted function
-            def correct_dldTime_shift(df, func, args, k_shift_offset=None):
-                r = func(df['dldPosX'], df['dldPosY'], **args)
-                if k_shift_offset is not None:
-                    r -= k_shift_offset
-                if self.TOF_IN_NS:
-                    r /= self.TOF_STEP_TO_NS
-                return r
+        # Apply position dependent correction with parameters from a fitted function
+        def correct_dldTime_shift(df, func, args, k_shift_offset=None):
+            r = func(df['dldPosX'], df['dldPosY'], **args)
+            if k_shift_offset is not None:
+                r -= k_shift_offset
+            if self.TOF_IN_NS:
+                r /= self.TOF_STEP_TO_NS
+            return r
 
-            if k_shift_func is not None and k_shift_parameters is not None:
-                self.dd['dldTime_corrected'] -= self.dd.map_partitions(correct_dldTime_shift, k_shift_func, 
-                                                                    k_shift_parameters, k_shift_offset=k_shift_offset)
+        if k_shift_func is not None and k_shift_parameters is not None:
+            self.dd['dldTime_corrected'] -= self.dd.map_partitions(correct_dldTime_shift, k_shift_func, 
+                                                                k_shift_parameters, k_shift_offset=k_shift_offset)
 
-            # apply jitter 
-            if jitterAmplitude is None:
-                jitterAmplitude = np.floor(np.power(2,self.DLD_ID_BITS-1))
-            if applyJitter:
-                self.dd['dldTime_corrected'] = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmplitude,
-                                                                    col='dldTime_corrected', type=jitterType)
+        # apply jitter 
+        if jitterAmplitude is None:
+            jitterAmplitude = np.floor(np.power(2,self.DLD_ID_BITS-1))
+        if applyJitter:
+            self.dd['dldTime_corrected'] = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmplitude,
+                                                                col='dldTime_corrected', type=jitterType)
 
 
     @workflow

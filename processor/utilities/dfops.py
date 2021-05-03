@@ -57,4 +57,6 @@ def rolling_average_on_acquisition_time(df,cols,window,sigma=2):
         for c in cols:
             df_[c+'_rolled'] = df_[c].interpolate(method='nearest').rolling(window,center=True,win_type='gaussian').mean(std=window/sigma).fillna(df_[c])
             df_ = df_.drop(c, axis=1)
+            if c+'_rolled' in df.columns:
+                df = df.drop(c+'_rolled',axis=1)
     return df.merge(df_,left_on='timeStamp',right_on='ts').drop(['ts','dt'], axis=1)
