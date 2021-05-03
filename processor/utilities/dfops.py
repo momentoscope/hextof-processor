@@ -28,7 +28,7 @@ def applyJitter(df, amp, col, type):
         # Normal Jitter distribution works better for non-linear transformations and jitter sizes that don't match the original bin sizes
         return df[col] + amp * np.random.standard_normal(size=colsize)
 
-def rolling_average_on_acquisition_time(df,col,window,sigma=2):
+def rolling_average_on_acquisition_time(df,cols,window,sigma=2):
     """ Perform a rolling average with a gaussian weighted window.
 
         In order to preserve the number of points, the first and last "widnow" 
@@ -48,11 +48,13 @@ def rolling_average_on_acquisition_time(df,col,window,sigma=2):
     :Return:
         input dataframe with an additional '<col>_rolled' with the averaged data. """
     with ProgressBar():
-        print(f'rolling average over {col}...')
-        df_ = df.groupby('timeStamp').agg({col: 'mean'}).compute()
+        print(f'rolling average over {cols}...')
+        if isinstance(cols,str):
+            cols=[cols]
+        df_ = df.groupby('timeStamp').agg({c:'mean' for c in cols}).compute()
         df_['dt'] = pd.to_datetime(df_.index, unit='s')
         df_['ts'] = df_.index
-    #     df['streakCamera'] = df['streakCamera']
-        df_[col+'_rolled'] = df_[col].interpolate(method='nearest').rolling(window,center=True,win_type='gaussian').mean(std=window/sigma).fillna(df_[col])
-        df_ = df_.drop(col, axis=1)
+        for c in cols:
+            df_[c+'_rolled'] = df_[c].interpolate(method='nearest').rolling(window,center=True,win_type='gaussian').mean(std=window/sigma).fillna(df_[c])
+            df_ = df_.drop(c, axis=1)
     return df.merge(df_,left_on='timeStamp',right_on='ts').drop(['ts','dt'], axis=1)

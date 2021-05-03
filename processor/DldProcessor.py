@@ -779,10 +779,13 @@ class DldProcessor:
         #                                       self.ddMicrobunches['delayStageDirection']*backLash      
 
     @workflow
-    def calibrateEnergy(self, toffset=None, eoffset=None, l=None, useAvgSampleBias=True, k_shift_func=None,
-                        k_shift_parameters=None,k_shift_offset=None, applyJitter=True, jitterAmplitude=None, jitterType='uniform',
-                        useAvgMonochormatorEnergy=True, useAvgToFEnergy=True,
-                        sampleBias=None, monochromatorPhotonEnergy=None, tofVoltage=None):
+    def calibrateEnergy(self, toffset=None, eoffset=None, l=None, sectorCorrection=True,
+                    applyJitter=True, jitterAmplitude=None, jitterType='uniform',
+                    k_shift_func=None, k_shift_parameters=None, k_shift_offset=None, 
+                    useAvgSampleBias=True, useAvgMonochormatorEnergy=True, useAvgToFEnergy=True, 
+                    rollAverages=True, roll_window=120, roll_sigma=2,
+                    sampleBias=None, monochromatorPhotonEnergy=None, tofVoltage=None,
+                    reset_dldTime_corrected=True,compute=True):
         """ Add calibrated energy axis to dataframe
 
         Uses the same equation as in tof2energy in calibrate.
@@ -810,68 +813,127 @@ class DldProcessor:
             jitterType :
                 noise distribution, 'uniform' or 'normal'.
         """
+        if ('dldTime_corrected' not in self.dd.columns) or reset_dldTime_corrected:
+            self.correctDldTime(reset_dldTime_corrected=reset_dldTime_corrected, sectorCorrection=sectorCorrection,
+                    applyJitter=applyJitter, jitterAmplitude=jitterAmplitude, jitterType=jitterType,
+                    k_shift_func=k_shift_func, k_shift_parameters=k_shift_parameters, k_shift_offset=k_shift_offset)
+        
+                # Create energy axis from corrected dldTime
         if toffset is None:
             toffset = float(self.settings['processor']['ET_CONV_T_OFFSET'])
         if eoffset is None:
             eoffset = float(self.settings['processor']['ET_CONV_E_OFFSET'])
         if l is None:
             l = float(self.settings['processor']['ET_CONV_L'])
-
-        if sampleBias is None:
-            sampleBias = np.nanmean(self.dd['sampleBias'].values)
-        if monochromatorPhotonEnergy is None:
-            monochromatorPhotonEnergy = np.nanmean(self.dd['monochromatorPhotonEnergy'].values)
-        if tofVoltage is None:
-            tofVoltage = np.nanmean(self.dd['tofVoltage'].values)
-
-        if jitterAmplitude is None:
-            jitterAmplitude = np.floor(np.power(2,self.DLD_ID_BITS-1))
-
-        # sector dependent shift. this is necessary due to bit structure and due to photon peak shift among sectors
-        self.dd['dldTime_corrected'] = self.dd['dldTime']
-        if 'dldSectorId' in self.dd.columns:
-            # Converts the SECTOR_CORRECTION list to a dask array so things can be kept lazy
-            self.dd['dldTime_corrected'] -= \
-                dask.array.from_array(self.SECTOR_CORRECTION)[self.dd['dldSectorId'].values.astype(int)]
-
-        def correct_dldTime_shift(df, func, args, k_shift_offset=None):
-            r = func(df['dldPosX'], df['dldPosY'], **args)
-            if k_shift_offset is not None:
-                r -= k_shift_offset
-            if self.TOF_IN_NS:
-                r /= self.TOF_STEP_TO_NS
-            return r
-
-        if k_shift_func is not None and k_shift_parameters is not None:
-            self.dd['dldTime_corrected'] -= self.dd.map_partitions(correct_dldTime_shift, k_shift_func, 
-                                                                 k_shift_parameters, k_shift_offset=k_shift_offset)
-
-        if applyJitter:
-            self.dd['dldTime_corrected'] = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmplitude,
-                                                                  col='dldTime_corrected', type=jitterType)
-
-        if useAvgSampleBias:
+     
+        if rollAverages:
+            self.dd = dfops.rolling_average_on_acquisition_time(self.dd,['sampleBias','tofVoltage','monochromatorPhotonEnergy'],roll_window,roll_sigma)
+        
+        if sampleBias is not None:
             eoffset -= sampleBias
+        elif rollAverages:
+            eoffset -= self.dd['sampleBias_rolled']
+        elif useAvgSampleBias:
+            eoffset -= np.nanmean(self.dd['sampleBias'].values)
         else:
             eoffset -= self.dd['sampleBias']
 
-        if useAvgMonochormatorEnergy:
-            eoffset += monochromatorPhotonEnergy
-        else:
-            eoffset += self.dd['monochromatorPhotonEnergy']
-
-        if useAvgToFEnergy:        # TODO: add monocrhomator position,
+        if tofVoltage is not None:
             eoffset += tofVoltage
+        elif rollAverages:
+            eoffset += self.dd['tofVoltage_rolled']
+        elif useAvgToFEnergy:
+            eoffset += np.nanmean(self.dd['tofVoltage'].values)
         else:
             eoffset += self.dd['tofVoltage']
 
-        if useAvgSampleBias or useAvgMonochormatorEnergy or useAvgToFEnergy:
+        if monochromatorPhotonEnergy is not None:
+            eoffset += monochromatorPhotonEnergy
+        elif rollAverages:
+            eoffset += self.dd['monochromatorPhotonEnergy_rolled']
+        elif useAvgMonochormatorEnergy:
+            eoffset += np.nanmean(self.dd['monochromatorPhotonEnergy'].values)
+        else:
+            eoffset += self.dd['monochromatorPhotonEnergy']
+
+        if (useAvgSampleBias or useAvgMonochormatorEnergy or useAvgToFEnergy) and compute and not rollAverages:
             print('computing energy offsets...')
             with ProgressBar():
                 eoffset = dask.compute(eoffset)
-        k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
-        self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
+
+        def t2e(df,toffset,eoffset,l):
+            k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
+            return k * np.power(l / ((df['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
                                          2.) - eoffset
+
+        self.dd['energy'] = self.dd.map_partitions(t2e,toffset,eoffset,l)
+        # k = 0.5 * 1e18 * 9.10938e-31 / 1.602177e-19
+        # self.dd['energy'] = k * np.power(l / ((self.dd['dldTime_corrected'] * self.TOF_STEP_TO_NS) - toffset),
+        #                                  2.) - eoffset
+
+    @workflow
+    def correctDldTime(self, reset_dldTime_corrected=False, sectorCorrection=True,
+                    applyJitter=True, jitterAmplitude=None, jitterType='uniform',
+                    k_shift_func=None, k_shift_parameters=None, k_shift_offset=None):
+        """ Apply corrections to the dldTime axis.
+
+        Creates a new dldTime_corrected column in the dataframe, including all corrections applied.
+
+        Args:
+            reset_dldTime_corrected: bool
+                if true overwrites any previously applied corrections to dldTime
+            sectorCorrection: bool | iteable
+                if true, applies the sector correction using values from the settings file.
+                If a list is passed, these values are used to perform the correction.
+                Correction is not applied if False or None
+            k_shift_func : function
+                function fitting the shifts of energy across the detector.
+            k_shift_parameters :
+                parameters for the fit function to reproduce the energy shift.
+            k_shift_offset :
+                offset for k_shift function .
+            applyJitter : bool (True)
+                if true, applies random noise of amplitude determined by jitterAmplitude
+                to the dldTime step values.
+            jitterType :
+                noise distribution, 'uniform' or 'normal'.
+        """
+        # sector dependent shift. this is necessary due to bit structure and due to photon peak shift among sectors
+        if ('dldTime_corrected' not in self.dd.columns) or reset_dldTime_corrected:
+            self.dd['dldTime_corrected'] = self.dd['dldTime']
+        else:
+            if isinstance(sectorCorrection,[list,tuple]):
+                SECTOR_CORRECTION = sectorCorrection
+            elif sectorCorrection:
+                self.SECTOR_CORRECTION
+            else:
+                SECTOR_CORRECTION = False
+            use_secCorr = sectorCorrection is True
+            if 'dldSectorId' in self.dd.columns and SECTOR_CORRECTION:
+                # Converts the SECTOR_CORRECTION list to a dask array so things can be kept lazy
+                self.dd['dldTime_corrected'] -= \
+                    dask.array.from_array(SECTOR_CORRECTION)[self.dd['dldSectorId'].values.astype(int)]
+
+            # Apply position dependent correction with parameters from a fitted function
+            def correct_dldTime_shift(df, func, args, k_shift_offset=None):
+                r = func(df['dldPosX'], df['dldPosY'], **args)
+                if k_shift_offset is not None:
+                    r -= k_shift_offset
+                if self.TOF_IN_NS:
+                    r /= self.TOF_STEP_TO_NS
+                return r
+
+            if k_shift_func is not None and k_shift_parameters is not None:
+                self.dd['dldTime_corrected'] -= self.dd.map_partitions(correct_dldTime_shift, k_shift_func, 
+                                                                    k_shift_parameters, k_shift_offset=k_shift_offset)
+
+            # apply jitter 
+            if jitterAmplitude is None:
+                jitterAmplitude = np.floor(np.power(2,self.DLD_ID_BITS-1))
+            if applyJitter:
+                self.dd['dldTime_corrected'] = self.dd.map_partitions(dfops.applyJitter, amp=jitterAmplitude,
+                                                                    col='dldTime_corrected', type=jitterType)
+
 
     @workflow
     def calibratePumpProbeTime(self, t0=0, useBam=None, useStreak=None, bamSign=-1, streakSign=-1, invertTimeAxis=True,streakRolling=120,sigma=2,preserveT0=False):
