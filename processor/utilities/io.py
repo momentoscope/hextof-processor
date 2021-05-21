@@ -229,11 +229,11 @@ def xarray_to_tiff(data, filename, axis_dict=None):
     dims_order = []
 
     if axis_dict is None:
-        axis_dict = {'T': ['delayStage','pumpProbeTime'],
+        axis_dict = {'T': ['delayStage','pumpProbeTime','time'],
                      'Z': ['dldTime','energy'],
                      'C': ['C'],
-                     'Y': ['dldPosY'],
-                     'X': ['dldPosX'],
+                     'Y': ['dldPosY','ky'],
+                     'X': ['dldPosX','kx'],
                      'S': ['S']}
     else:
         for key in ['T', 'Z', 'C', 'Y', 'X', 'S']:
