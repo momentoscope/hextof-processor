@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import glob
 import json
 import h5py
@@ -22,14 +22,16 @@ class DldFlashProcessorNew:
     The class generates multiindexed multidimensional pandas dataframes 
     from the new FLASH dataformat resolved by both macro and microbunches.
     """
-    def __init__(self, data_raw_dir, run_number=None, train_id_interval=None):
+    def __init__(self, data_raw_dir, run_number=None, train_id_interval=None,channels=None):
 
         self.run_number = run_number
         self.train_id_interval = train_id_interval
         self.data_raw_dir = data_raw_dir
         self.channels = []
-        all_channel_list_dir = "channels.json"  # TODO: Generalize
-
+        if channels is None:
+            all_channel_list_dir = os.path.join(os.path.dirname(DldFlashProcessorNew.__file__),"channels.json")  # TODO: Generalize
+        else:
+            all_channel_list_dir = channels
         # Read all channel info from a json file
         with open(all_channel_list_dir, "r") as json_file:
             self.all_channels = json.load(json_file)
@@ -66,7 +68,7 @@ class DldFlashProcessorNew:
         # Create a pandas multiindex using the exploded dataset
         self.index_per_electron = MultiIndex.from_arrays(
             (microbunches.index, microbunches["dldMicrobunchId"].values),
-            names=["macroBunchPulseId", "microBunchPulseId"])
+            names=["trainId", "pulseId"])
 
     def createMultiIndexPerPulse(self, train_id):
         """Creates an index per pulse using a pulse resovled channel's 
@@ -76,7 +78,7 @@ class DldFlashProcessorNew:
         # pulse resolved dataframes
         self.index_per_pulse = MultiIndex.from_product(
             (train_id, np.arange(0, 499)),
-            names=["macroBunchPulseId", "microBunchPulseId"])
+            names=["trainId", "pulseId"])
 
     def createNumpyArrayPerChannel(self, h5_file, channel):
         """Returns a numpy Array for a given channel name for a given file"""
