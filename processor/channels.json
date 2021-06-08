@@ -78,17 +78,5 @@
         "group_name": "/FL1/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD/",
         "old_name": "/FL1/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD",
         "slice": ":"
-    },
-    "streakCam": {
-        "format": "per_pulse",
-        "group_name": "/FL1/Experiment/Pump probe laser/streak camera delay time/",
-        "old_name": "/FL1/Experiment/Pump probe laser/streak camera delay time",
-        "slice": ":"
-    },
-    "timeStamp": {
-        "format": "per_pulse",
-        "group_name": "/Timing/time stamp/fl1user2",
-        "old_name": "/Timing/time stamp/fl1user2",
-        "slice": ":"
     }
 }

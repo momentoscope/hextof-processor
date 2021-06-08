@@ -3,7 +3,7 @@ import glob
 import json
 import h5py
 import numpy as np
-from pandas import Series, DataFrame, concat, MultiIndex
+from pandas import Series, DataFrame, concat, MultiIndex, merge
 from pathlib import Path
 from functools import reduce
 
@@ -29,7 +29,7 @@ class DldFlashProcessorNew:
         self.data_raw_dir = data_raw_dir
         self.channels = []
         if channels is None:
-            all_channel_list_dir = os.path.join(os.path.dirname(DldFlashProcessorNew.__file__),"channels.json")  # TODO: Generalize
+            all_channel_list_dir = os.path.join(os.path.dirname(__file__),"channels.json")  # TODO: Generalize
         else:
             all_channel_list_dir = channels
         # Read all channel info from a json file
@@ -57,8 +57,7 @@ class DldFlashProcessorNew:
         [train_id, np_array] = self.createNumpyArrayPerChannel(h5_file, "dldMicrobunchId")
 
         # Create a series with the macrobunches as index and microbunches as values
-        self.macro_df = Series(
-            (np_array[i] for i in train_id.index),
+        self.macro_df = Series((np_array[i] for i in train_id.index),
             name="dldMicrobunchId",
             index=train_id).to_frame()
 
@@ -139,11 +138,26 @@ class DldFlashProcessorNew:
                 # Multiindex set and combined dataframe returned
                 return reduce(DataFrame.combine_first, data_frames).set_index(
                     self.index_per_pulse)
+            
+            elif channel == "delayStage":
+                return (Series((np_array[i] for i in train_id.index), name=channel)
+                    .repeat(499)
+                    .to_frame()
+                    .set_index(self.index_per_pulse))
+                
             else:
+                # Resize arrays which are not of dimension train_id x 499, 
+                # padding with NaNs
+                if np_array.shape[1]<499:
+                    empty = np.full((np_array.shape[0], 499), np.nan)
+                    empty.flat[:len(np_array)] = np_array[:, :499]
+                    np_array = empty
+                elif np_array.shape[1]>499:
+                    np_array = np_array[:, :499]
+                
                 # For all other pulse resolved channels, macrobunch resolved 
                 # data is exploded to a dataframe and the MultiIndex set
-                return (
-                    Series((np_array[i] for i in train_id.index), name=channel)
+                return (Series((np_array[i] for i in train_id.index), name=channel)
                     .explode()
                     .to_frame()
                     .set_index(self.index_per_pulse))
@@ -180,12 +194,11 @@ class DldFlashProcessorNew:
         """
         # Loads h5 file and creates two dataframes
         with h5py.File(file_path, "r") as h5_file:
+            self.resetMultiIndex()  # Reset MultiIndexes for next file
             data_frame_per_electron = self.splitDataframePerFormat(
                 h5_file, "per_electron")
             data_frame_per_pulse = self.splitDataframePerFormat(
                 h5_file, "per_pulse")
-
-            self.resetMultiIndex()  # Reset MultiIndexes for next file
 
             return data_frame_per_pulse, data_frame_per_electron
 
@@ -224,9 +237,22 @@ class DldFlashProcessorNew:
         # Deconvolves the dataframes list to seperate pulse resolved 
         # dataframes from electron resolved, returing the concatenated 
         # version of both
+#         return data_frames
         return concat(list(zip(*data_frames))[0]), concat(
             list(zip(*data_frames))[1]
         )
+    
+    def savetoParquet(self, parquet_dir, run_number=None, daq="fl1user2"):
+        """Saves the run data with the selected channels into a parquet file"""
+
+        # Merges the data, moves the indexes to columns, and 
+        # saves to parquet in given directory
+        # pd.merge is the same as df1.join(df2, 'outer')
+        merge(*self.createDataframePerRun(run_number, daq), left_index=True, 
+            right_index=True, how="outer").reset_index(level=['trainId', 'pulseId']
+            ).to_parquet(parquet_dir + str(self.run_number), compression = None, 
+            index = False)
+        
 
     # ==================
     # Might not work
