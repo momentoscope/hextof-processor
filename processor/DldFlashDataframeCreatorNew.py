@@ -139,7 +139,7 @@ class DldFlashProcessorNew:
                 return reduce(DataFrame.combine_first, data_frames).set_index(
                     self.index_per_pulse)
             
-            elif channel == "delayStage":
+            elif channel in ['monochromatorPhotonEnergy', 'delayStage']:
                 return (Series((np_array[i] for i in train_id.index), name=channel)
                     .repeat(499)
                     .to_frame()
@@ -162,7 +162,7 @@ class DldFlashProcessorNew:
                     .to_frame()
                     .set_index(self.index_per_pulse))
 
-    def splitDataframePerFormat(self, h5_file, format_):
+    def concatenateChannels(self, h5_file, format_=None):
         """Returns a concatenated pandas DataFrame for either all pulse
         resolved or all electron resolved channels."""
         valid_names = (each_name
@@ -171,9 +171,12 @@ class DldFlashProcessorNew:
         
         # Only channels with the defined format are selected and stored 
         # in an iterable list
-        channels_format = [each_name
-            for each_name in valid_names
-            if self.all_channels[each_name]["format"] == format_]
+        if format_ is not None:
+            channels_format = [each_name
+                for each_name in valid_names
+                if self.all_channels[each_name]["format"] == format_]
+        else:
+            channels_format = [each_name for each_name in valid_names]
 
         # if the defined format has channels, returns a concatenatd Dataframe.
         # Otherwise returns empty Dataframe.
@@ -192,16 +195,20 @@ class DldFlashProcessorNew:
         order opposite to specified by channel names. One DataFrame is 
         pulse resolved and the other electron resolved.
         """
-        # Loads h5 file and creates two dataframes
-        with h5py.File(file_path, "r") as h5_file:
+        # for the split version:
+        # # Loads h5 file and creates two dataframes
+        # with h5py.File(file_path, "r") as h5_file:
+        #     self.resetMultiIndex()  # Reset MultiIndexes for next file
+        #     data_frame_per_electron = self.concatenateChannels(
+        #         h5_file, "per_electron")
+        #     data_frame_per_pulse = self.concatenateChannels(
+        #         h5_file, "per_pulse")
+
+        #     return data_frame_per_pulse, data_frame_per_electron
+        with h5py.File(file_path, "r") as h5_file: # TODO: switch to daks here!
             self.resetMultiIndex()  # Reset MultiIndexes for next file
-            data_frame_per_electron = self.splitDataframePerFormat(
-                h5_file, "per_electron")
-            data_frame_per_pulse = self.splitDataframePerFormat(
-                h5_file, "per_pulse")
-
-            return data_frame_per_pulse, data_frame_per_electron
-
+            return self.concatenateChannels(h5_file)
+          
     def runFilesNames(self, run_number, daq):
         """Returns all filenames of given run located in directory for the given daq."""
         stream_name_prefixes = {"pbd": "GMD_DATA_gmd_data",
@@ -228,20 +235,21 @@ class DldFlashProcessorNew:
         
         # Creates a list of dataframes for all files in a run
         # genexpr not used due to the need to call this twice
-        data_frames = [
-            self.createDataframePerFile(each_file) for each_file in files]
+        # data_frames = [
+        #     self.createDataframePerFile(each_file) for each_file in files]
 
-        assert (data_frames
-        ), "Assertion: at least one file in files, but files was empty"
+        # assert (data_frames
+        # ), "Assertion: at least one file in files, but files was empty"
 
         # Deconvolves the dataframes list to seperate pulse resolved 
         # dataframes from electron resolved, returing the concatenated 
         # version of both
 #         return data_frames
-        return concat(list(zip(*data_frames))[0]), concat(
-            list(zip(*data_frames))[1]
-        )
-    
+        # for split dataframes
+        # return concat(list(zip(*data_frames))[0]), concat(list(zip(*data_frames))[1])
+        data_frames = (self.createDataframePerFile(each_file) for each_file in files)
+        return concat(data_frames)
+
     def savetoParquet(self, parquet_dir, run_number=None, daq="fl1user2"):
         """Saves the run data with the selected channels into a parquet file"""
 
@@ -253,6 +261,22 @@ class DldFlashProcessorNew:
             ).to_parquet(parquet_dir + str(self.run_number), compression = None, 
             index = False)
         
+# ################################################
+# prc = DldFlashDataframeCreator()
+# prc.runNumber = 12345
+# prc.readData()
+# prc.addBinning(dldPosX)
+# prc.addBinning(dldTime)
+# res = prc.computeBinnedData(ski
+# compare to : 
+# prc = DldFlashDataframeCreator()
+# prc.loadDataframes(prq)
+# prc.dd = YOURDATAFRAME
+# prc.addBinning(dldPosX)
+# prc.addBinning(dldTime)
+# res = prc.computeBinnedData(skip_metadata=True)
+##################################################
+
 
     # ==================
     # Might not work
