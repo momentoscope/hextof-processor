@@ -69,14 +69,14 @@ class DldFlashProcessorNew:
             (microbunches.index, microbunches["dldMicrobunchId"].values),
             names=["trainId", "pulseId"])
 
-    def createMultiIndexPerPulse(self, train_id):
+    def createMultiIndexPerPulse(self, train_id, np_array):
         """Creates an index per pulse using a pulse resovled channel's 
         macrobunch ID, for usage with the pulse resolved pandas dataframe"""
 
         # Create a pandas multiindex, useful to compare electron and 
         # pulse resolved dataframes
         self.index_per_pulse = MultiIndex.from_product(
-            (train_id, np.arange(0, 499)),
+            (train_id, np.arange(0, np_array.shape[1])),
             names=["trainId", "pulseId"])
 
     def createNumpyArrayPerChannel(self, h5_file, channel):
@@ -85,7 +85,7 @@ class DldFlashProcessorNew:
         group = h5_file[self.all_channels[channel]["group_name"]]
         channel_dict = self.all_channels[channel]  # channel parameters
 
-        train_id = Series(group["index"], name="Train ID")  # macrobunch
+        train_id = Series(group["index"], name="trainId")  # macrobunch
         np_array = group["value"][()]  # unpacks the values
 
         # Uses predefined axis and slice from the json file
@@ -109,17 +109,21 @@ class DldFlashProcessorNew:
             if self.index_per_electron is None:
                 self.createMultiIndexPerElectron(h5_file)
 
-            # The macrobunch resolved data is exploded and converted to dataframe, 
+            # The microbunch resolved data is exploded and converted to dataframe, 
             # afterwhich the MultiIndex is set 
-            return (Series((np_array[i] for i in train_id.index), name=channel)
+            # The NaN values are dropped, alongside the pulseId = 0 (meaningless)
+            df = (Series((np_array[i] for i in train_id.index), name=channel)
                 .explode()
                 .to_frame()
-                .set_index(self.index_per_electron))
+                .set_index(self.index_per_electron)
+                .dropna(axis=0)
+                .drop(index=0, level=1))
+            return df.set_index(df.index.set_levels
+                                ([df.index.levels[0], 
+                                  df.index.levels[1].astype(int)]))
 
         # Pulse resolved data is treated here
         elif channel_dict["format"] == "per_pulse":
-            # Creates the index_per_pulse for the given channel
-            self.createMultiIndexPerPulse(train_id)
 
             # Special case for auxillary channels which checks the channel dictionary 
             # for correct slices and creates a multicolumn pandas dataframe
@@ -131,32 +135,32 @@ class DldFlashProcessorNew:
                     Series((np_array[i, value] for i in train_id.index),
                     name=key,
                     index=train_id)
-                    .repeat(499)
                     .to_frame()
                     for key, value in channel_dict["dldAuxChannels"].items())
 
                 # Multiindex set and combined dataframe returned
-                return reduce(DataFrame.combine_first, data_frames).set_index(
-                    self.index_per_pulse)
+                return reduce(DataFrame.combine_first, data_frames)
             
             elif channel in ['monochromatorPhotonEnergy', 'delayStage']:
                 return (Series((np_array[i] for i in train_id.index), name=channel)
-                    .repeat(499)
                     .to_frame()
-                    .set_index(self.index_per_pulse))
+                    .set_index(train_id))
                 
             else:
                 # Resize arrays which are not of dimension train_id x 499, 
                 # padding with NaNs
-                if np_array.shape[1]<499:
-                    empty = np.full((np_array.shape[0], 499), np.nan)
-                    empty.flat[:len(np_array)] = np_array[:, :499]
-                    np_array = empty
-                elif np_array.shape[1]>499:
-                    np_array = np_array[:, :499]
+#                 if np_array.shape[1]<499:
+#                     empty = np.full((np_array.shape[0], 499), np.nan)
+#                     empty.flat[:len(np_array)] = np_array[:, :499]
+#                     np_array = empty
+#                 elif np_array.shape[1]>499:
+#                     np_array = np_array[:, :499]
                 
                 # For all other pulse resolved channels, macrobunch resolved 
                 # data is exploded to a dataframe and the MultiIndex set
+            
+                # Creates the index_per_pulse for the given channel
+                self.createMultiIndexPerPulse(train_id, np_array)
                 return (Series((np_array[i] for i in train_id.index), name=channel)
                     .explode()
                     .to_frame()
@@ -176,7 +180,7 @@ class DldFlashProcessorNew:
                 for each_name in valid_names
                 if self.all_channels[each_name]["format"] == format_]
         else:
-            channels_format = [each_name for each_name in valid_names]
+            channels = [each_name for each_name in valid_names]
 
         # if the defined format has channels, returns a concatenatd Dataframe.
         # Otherwise returns empty Dataframe.
@@ -184,9 +188,7 @@ class DldFlashProcessorNew:
             data_frames = (
                 self.createDataframePerChannel(h5_file, each)
                 for each in channels) 
-            return reduce(DataFrame.combine_first, data_frames)
-        else:
-            return DataFrame()
+            return reduce(lambda left, right: left.join(right, how='outer'), data_frames)
 
     def createDataframePerFile(self, file_path):
         """Returns two pandas DataFrames constructed for the given file.
@@ -194,14 +196,13 @@ class DldFlashProcessorNew:
         order opposite to specified by channel names. One DataFrame is 
         pulse resolved and the other electron resolved.
         """
-        # for the split version:
         # Loads h5 file and creates two dataframes
         with h5py.File(file_path, "r") as h5_file:
             self.resetMultiIndex()  # Reset MultiIndexes for next file
-            data_frame = (self.concatenateChannels(h5_file, format_) 
-                          for format_ in ["per_electron", "per_pulse"])
-
-            return concat(data_frame)
+            # for the split version:
+#             data_frames = [self.concatenateChannels(h5_file, format_) 
+#                   for format_ in ["per_electron", "per_pulse"]]
+            return self.concatenateChannels(h5_file) 
           
     def runFilesNames(self, run_number, daq):
         """Returns all filenames of given run located in directory for the given daq."""
@@ -242,14 +243,15 @@ class DldFlashProcessorNew:
         # for split dataframes
         # return concat(list(zip(*data_frames))[0]), concat(list(zip(*data_frames))[1])
         data_frames = (self.createDataframePerFile(each_file) for each_file in files)
-        return concat(data_frames)
+        self.df = concat(data_frames)
+        return self.df
 
     def savetoParquet(self, parquet_dir, run_number=None, daq="fl1user2"):
         """Saves the run data with the selected channels into a parquet file"""
 
         # Moves the indexes to columns, and saves to parquet in given directory
-        createDataframePerRun(run_number, daq).reset_index(level=['trainId', 'pulseId'])
-                            .to_parquet(parquet_dir + str(self.run_number)
+        self.df.reset_index(level=['trainId', 'pulseId']
+                     ).to_parquet(parquet_dir + str(self.run_number)
                                         , compression = None, index = False)
 
         
