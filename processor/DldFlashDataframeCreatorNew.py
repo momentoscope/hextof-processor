@@ -57,17 +57,31 @@ class DldFlashProcessorNew:
         [train_id, np_array] = self.createNumpyArrayPerChannel(h5_file, "dldMicrobunchId")
 
         # Create a series with the macrobunches as index and microbunches as values
-        self.macro_df = Series((np_array[i] for i in train_id.index),
+        macrobunches = Series((np_array[i] for i in train_id.index),
             name="dldMicrobunchId",
-            index=train_id).to_frame()
+            index=train_id)
 
-        # Explode dataframe to get all microbunch vales per macrobunch
-        microbunches = self.macro_df.explode("dldMicrobunchId")
+        # Explode dataframe to get all microbunch vales per macrobunch,
+        # remove NaN values and convert to type int
+        microbunches = macrobunches.explode().dropna().astype(int)
+        
+        # Create temporary index values 
+        index_temp = MultiIndex.from_arrays((microbunches.index, microbunches.values),
+                    names=["trainId", "pulseId"])
 
-        # Create a pandas multiindex using the exploded dataset
+
+        # Calculate the electron counts per dldMicrobunchId
+        # unique preserves the order of appearance
+        electron_counts = index_temp.value_counts()[index_temp.unique()].values
+
+        # Series object for indexing with electrons
+        electrons = Series([np.arange(electron_counts[i]) 
+                            for i in range(electron_counts.size)]).explode()
+
+        # Create a pandas multiindex using the exploded datasets
         self.index_per_electron = MultiIndex.from_arrays(
-            (microbunches.index, microbunches["dldMicrobunchId"].values),
-            names=["trainId", "pulseId"])
+            (microbunches.index, microbunches.values, electrons),
+            names=["trainId", "pulseId", 'electronId'])
 
     def createMultiIndexPerPulse(self, train_id, np_array):
         """Creates an index per pulse using a pulse resovled channel's 
@@ -112,16 +126,13 @@ class DldFlashProcessorNew:
             # The microbunch resolved data is exploded and converted to dataframe, 
             # afterwhich the MultiIndex is set 
             # The NaN values are dropped, alongside the pulseId = 0 (meaningless)
-            df = (Series((np_array[i] for i in train_id.index), name=channel)
+            return (Series((np_array[i] for i in train_id.index), name=channel)
                 .explode()
+                .dropna()
                 .to_frame()
                 .set_index(self.index_per_electron)
-                .dropna(axis=0)
                 .drop(index=0, level=1))
-            return df.set_index(df.index.set_levels
-                                ([df.index.levels[0], 
-                                  df.index.levels[1].astype(int)]))
-
+        
         # Pulse resolved data is treated here
         elif channel_dict["format"] == "per_pulse":
 
@@ -243,14 +254,13 @@ class DldFlashProcessorNew:
         # for split dataframes
         # return concat(list(zip(*data_frames))[0]), concat(list(zip(*data_frames))[1])
         data_frames = (self.createDataframePerFile(each_file) for each_file in files)
-        self.df = concat(data_frames)
-        return self.df
+        return concat(data_frames)
 
     def savetoParquet(self, parquet_dir, run_number=None, daq="fl1user2"):
         """Saves the run data with the selected channels into a parquet file"""
 
         # Moves the indexes to columns, and saves to parquet in given directory
-        self.df.reset_index(level=['trainId', 'pulseId']
+        createDataframePerRun(run_number, daq).reset_index(level=['trainId', 'pulseId']
                      ).to_parquet(parquet_dir + str(self.run_number)
                                         , compression = None, index = False)
 
@@ -270,7 +280,6 @@ class DldFlashProcessorNew:
 # prc.addBinning(dldTime)
 # res = prc.computeBinnedData(skip_metadata=True)
 ##################################################
-
 
     # ==================
     # Might not work
