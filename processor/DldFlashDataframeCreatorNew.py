@@ -35,7 +35,7 @@ class DldFlashProcessorNew:
         # Read all channel info from a json file
         with open(all_channel_list_dir, "r") as json_file:
             self.all_channels = json.load(json_file)
-
+        self.channels = self.availableChannels # Set all channels as default
         self.resetMultiIndex()  # initializes the indices
 
     @property
