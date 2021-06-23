@@ -27,7 +27,7 @@
             "dldTimeBinSize": 15
         }
     },
-    "dldMicrobunchId": {
+    "pulseId": {
         "axis": 1,
         "format": "per_electron",
         "group_name": "/FL1/Experiment/PG/Hextof/Detector/monitor/",

@@ -3,9 +3,10 @@ import glob
 import json
 import h5py
 import numpy as np
-from pandas import Series, DataFrame, concat, MultiIndex, merge
+from pandas import Series, DataFrame, concat, MultiIndex
 from pathlib import Path
 from functools import reduce
+from configparser import ConfigParser
 
 """
     author:: Muhammad Zain Sohail
@@ -20,29 +21,45 @@ assert sys.version_info >= (3,8), f"Requires at least Python version 3.8,\
 class DldFlashProcessorNew:
     """  
     The class generates multiindexed multidimensional pandas dataframes 
-    from the new FLASH dataformat resolved by both macro and microbunches.
+    from the new FLASH dataformat resolved by both macro and microbunches alongside electrons.
     """
-    def __init__(self, data_raw_dir, run_number=None, train_id_interval=None,channels=None):
+    def __init__(self, run_number = None, train_id_interval = None, channels = None, settings_dir = None):
 
         self.run_number = run_number
         self.train_id_interval = train_id_interval
-        self.data_raw_dir = data_raw_dir
-        self.channels = []
+        self.settings(settings_dir)
+        
         if channels is None:
-            all_channel_list_dir = os.path.join(os.path.dirname(__file__),"channels.json")  # TODO: Generalize
+            all_channel_list_dir = os.path.join(Path(__file__).parent.absolute(), "channels.json")
         else:
             all_channel_list_dir = channels
         # Read all channel info from a json file
         with open(all_channel_list_dir, "r") as json_file:
             self.all_channels = json.load(json_file)
-        self.channels = self.availableChannels # Set all channels as default
+        self.channels = self.availableChannels # Set all channels, exluding pulseId as default
+        
         self.resetMultiIndex()  # initializes the indices
+   
+    def settings(self, settings_dir):
+        """Loads the settings from settings file"""
+        self.settings_ = ConfigParser()
+        if settings_dir is None:
+            settings_file = os.path.join(Path(__file__).parent.absolute(), 'SETTINGS.ini')
+        else:
+            settings_file = settings_dir
+        self.settings_.read(settings_file)
+                
+        self.data_raw_dir = self.settings_['paths']['data_raw_dir']
+        self.data_parquet_dir = self.settings_['paths']['data_parquet_dir']    
+        self.ubid_offset = int(self.settings_['processor']['ubid_offset'])
 
     @property
     def availableChannels(self):
-        """Returns the channel names that are available for use,
-        defined by the json file"""
-        return list(self.all_channels.keys())
+        """Returns the channel names that are available for use, 
+        excluding pulseId, defined by the json file"""
+        available_channels = list(self.all_channels.keys())
+        available_channels.remove('pulseId')
+        return available_channels
 
     def resetMultiIndex(self):
         """Resets the index per pulse and electron"""
@@ -50,16 +67,16 @@ class DldFlashProcessorNew:
         self.index_per_pulse = None
 
     def createMultiIndexPerElectron(self, h5_file):
-        """Creates an index per electron using dldMicrobunchId 
+        """Creates an index per electron using pulseId 
         for usage with the electron resolved pandas dataframe"""
 
-        # Macrobunch IDs obtained from the dldMicrobunchId channel
-        [train_id, np_array] = self.createNumpyArrayPerChannel(h5_file, "dldMicrobunchId")
+        # Macrobunch IDs obtained from the pulseId channel
+        [train_id, np_array] = self.createNumpyArrayPerChannel(h5_file, "pulseId")
 
         # Create a series with the macrobunches as index and microbunches as values
         macrobunches = Series((np_array[i] for i in train_id.index),
-            name="dldMicrobunchId",
-            index=train_id)
+            name="pulseId",
+            index=train_id) - self.ubid_offset
 
         # Explode dataframe to get all microbunch vales per macrobunch,
         # remove NaN values and convert to type int
@@ -70,7 +87,7 @@ class DldFlashProcessorNew:
                     names=["trainId", "pulseId"])
 
 
-        # Calculate the electron counts per dldMicrobunchId
+        # Calculate the electron counts per pulseId
         # unique preserves the order of appearance
         electron_counts = index_temp.value_counts()[index_temp.unique()].values
 
@@ -131,7 +148,8 @@ class DldFlashProcessorNew:
                 .dropna()
                 .to_frame()
                 .set_index(self.index_per_electron)
-                .drop(index=0, level=1))
+                .drop(index = np.arange(-self.ubid_offset, 0), level = 1, errors = 'ignore'))
+        
         
         # Pulse resolved data is treated here
         elif channel_dict["format"] == "per_pulse":
@@ -180,10 +198,9 @@ class DldFlashProcessorNew:
     def concatenateChannels(self, h5_file, format_=None):
         """Returns a concatenated pandas DataFrame for either all pulse
         resolved or all electron resolved channels."""
-        valid_names = (each_name
+        valid_names = [each_name
             for each_name in self.channels
-            if each_name in self.all_channels)  # filters for valid channels
-        
+            if each_name in self.all_channels]  # filters for valid channels
         # Only channels with the defined format are selected and stored 
         # in an iterable list
         if format_ is not None:
@@ -256,12 +273,12 @@ class DldFlashProcessorNew:
         data_frames = (self.createDataframePerFile(each_file) for each_file in files)
         return concat(data_frames)
 
-    def savetoParquet(self, parquet_dir, run_number=None, daq="fl1user2"):
+    def savetoParquet(self, run_number=None, daq="fl1user2"):
         """Saves the run data with the selected channels into a parquet file"""
 
         # Moves the indexes to columns, and saves to parquet in given directory
         createDataframePerRun(run_number, daq).reset_index(level=['trainId', 'pulseId']
-                     ).to_parquet(parquet_dir + str(self.run_number)
+                     ).to_parquet(self.data_parquet_dir + str(self.run_number)
                                         , compression = None, index = False)
 
         
