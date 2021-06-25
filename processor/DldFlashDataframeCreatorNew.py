@@ -147,7 +147,7 @@ def readData(runs=None, ignore_missing_runs=False, settings=None, channels=None,
         raise ValueError('No data available. Probably failed reading all h5 files')
     else:
         print(f'Loading {len(prq_names)} dataframes. Failed reading {len(all_files)-len(prq_names)} files.')  
-        dfs = [dd.from_pandas(pd.read_parquet(fn),npartitions=1) for fn in prq_names]
+        dfs = [dd.from_pandas(pd.read_parquet(fn),npartitions=1) for fn in prq_names] # todo skip pandas, as dask only should work
         df = dd.concat(dfs)
         ffill_cols = ['bam', 'delayStage', 'cryoTemperature', 
               'extractorCurrent', 'extractorVoltage', 'sampleBias',
