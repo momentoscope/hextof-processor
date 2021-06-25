@@ -26,6 +26,8 @@ settings/personalSettings
 *.so
 *.pyd
 *.c
+# ignore other build files
+*.o
 
 # ignore h5 data files
 *.h5

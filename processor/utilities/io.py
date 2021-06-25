@@ -9,6 +9,26 @@ import tifffile
 import xarray as xr
 
 
+default_units = {
+    'dldPosX': 'step', 
+    'dldPosY': 'step', 
+    'dldTime': 'step', 
+    'tofVoltage':'V',
+    'extractorVoltage':'V',
+    'extractorCurrent':'V',
+    'cryoTemperature':'K',
+    'sampleTemperature':'K',
+    'dldTimeBinSize':'ns',
+    'delayStage':'ps',
+    'streakCamera':'ps',
+    'bam':'ps',
+    'monochromatorPhotonEnergy':'eV',
+    'timeStamp':'s',
+    'dldTime_corrected':'ns',
+    'energy':'eV',
+    'kx':'1/A',
+    'ky':'1/A'}
+
 def res_to_xarray(res, binNames, binAxes, metadata=None):
     """ creates a BinnedArray (xarray subclass) out of the given np.array
 
@@ -28,15 +48,14 @@ def res_to_xarray(res, binNames, binAxes, metadata=None):
 
     xres = xr.DataArray(res, dims=dims, coords=coords)
 
-    units = {}
-    default_units = {'dldTime': 'step', 'delayStage': 'ps', 'pumpProbeDelay': 'ps'}
     for name in binNames:
         try:
-            u = default_units[name]
+            xres[name].attrs['unit'] = default_units[name]
         except KeyError:
-            u = None
-        units[name] = u
-    xres.attrs['units'] = units
+            pass
+
+    xres.attrs['units'] = 'counts'
+    xres.attrs['long_name'] = 'photoelectron counts'
 
     if metadata is not None:
         for k, v in metadata.items():
