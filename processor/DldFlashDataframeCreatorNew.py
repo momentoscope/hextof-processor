@@ -90,11 +90,11 @@ def readData(runs=None, ignore_missing_runs=False, settings=None, channels=None,
     #
     try: 
         len(runs)
-        parquet_name = f'{temp_parquet_dir}/runs{runs[0]}to{runs[-1]}'
+        runs_str = f'runs{runs[0]}to{runs[-1]}'
     except TypeError:
-        parquet_name = f'{temp_parquet_dir}/run{runs}'
+        runs_str = f'run{runs}'
         runs = [runs]
-
+    parquet_name = f'{temp_parquet_dir}/{runs_str}'
     all_files = []
     for run in runs:
         files = runFilesNames(run,daq,raw_dir)
@@ -112,8 +112,11 @@ def readData(runs=None, ignore_missing_runs=False, settings=None, channels=None,
             missing_files.append(all_files[i])
             missing_prq_names.append(prq_names[i])
     
+    print(f'reading runs {runs_str}: {len(missing_files)} new files of {len(all_files)} total.')
+    failed_str = []
+    
     def readH5(fn):
-        dfc = DFCreator(settings=settings,channels=channels)
+        dfc = DldFlashProcessorNew(settings=settings,channels=channels)
         df = dfc.createDataframePerFile(fn)
         return df.reset_index(level=['trainId', 'pulseId','electronId'])
     
@@ -122,38 +125,43 @@ def readData(runs=None, ignore_missing_runs=False, settings=None, channels=None,
         
     def h5_to_parquet(h5,prq):
         try:
-            dfc = DFCreator(settings=settings,channels=channels)
+            dfc = DldFlashProcessorNew(settings=settings,channels=channels,silent=True)
             df = dfc.createDataframePerFile(h5).reset_index(level=['trainId', 'pulseId','electronId'])
             df.to_parquet(prq, compression = None, index = False)
         except ValueError as e:
-            print(f'failed {prq}: {e}')
+            failed_str.append(f'{prq}: {e}')
             prq_names.remove(prq)
         
     with ProgressBar():
 #         dfs =  [delayed(readH5)(each_file) for each_file in missing_files]
 #         writes = [delayed(saveParquet)(df,fn) for df,fn in zip(dfs,missing_prq_names)]
 #         dd.compute(*writes)
-
         ops = [delayed(h5_to_parquet)(h,p) for h,p in zip(missing_files,missing_prq_names)]
         dd.compute(*ops)
-        if len(prq_names)==0:
-            raise ValueError('No data available. Probably failed reading all h5 files')
-        else:
-
-            dfs = [dd.from_pandas(pd.read_parquet(fn),npartitions=1) for fn in prq_names]
-            df = dd.concat(dfs)
-            ffill_cols = ['bam', 'delayStage', 'cryoTemperature', 
-                  'extractorCurrent', 'extractorVoltage', 'sampleBias',
-                  'sampleTemperature', 'tofVoltage','gmdBda', 'gmdTunnel',
-                  'monochromatorPhotonEnergy', 'opticalDiode']
-            df[ffill_cols] = df[ffill_cols].ffill()
-            df_electron = df.dropna(subset=['dldPosX','dldPosY','dldTime'])
-            pulse_columns = ['trainId','pulseId','electronId','bam', 'delayStage','gmdBda', 'gmdTunnel','monochromatorPhotonEnergy', 'opticalDiode']
-            df_pulse = df[pulse_columns]
-            df_pulse = df_pulse[(df_pulse['electronId']==0)|(np.isnan(df_pulse['electronId']))]
-        prc.dd = df_electron
-        prc.ddMicrobunches = df_pulse
-        return prc
+                         
+    if len(failed_str)>0:
+        print(f'Failed reading {len(failed_str)} files of{len(all_files)}:')
+        for s in failed_str:
+            print(f'\t- {s})
+    if len(prq_names)==0:
+        raise ValueError('No data available. Probably failed reading all h5 files')
+    else:
+        print(f'Loading {len(prq_names)} dataframes. Failed reading {len(all_files)-len(prq_names)} files.')  
+        dfs = [dd.from_pandas(pd.read_parquet(fn),npartitions=1) for fn in prq_names]
+        df = dd.concat(dfs)
+        ffill_cols = ['bam', 'delayStage', 'cryoTemperature', 
+              'extractorCurrent', 'extractorVoltage', 'sampleBias',
+              'sampleTemperature', 'tofVoltage','gmdBda', 'gmdTunnel',
+              'monochromatorPhotonEnergy', 'opticalDiode']
+        df[ffill_cols] = df[ffill_cols].ffill()
+        df_electron = df.dropna(subset=['dldPosX','dldPosY','dldTime'])
+        pulse_columns = ['trainId','pulseId','electronId','bam', 'delayStage','gmdBda', 'gmdTunnel','monochromatorPhotonEnergy', 'opticalDiode']
+        df_pulse = df[pulse_columns]
+        df_pulse = df_pulse[(df_pulse['electronId']==0)|(np.isnan(df_pulse['electronId']))]
+    prc.dd = df_electron
+    prc.ddMicrobunches = df_pulse
+                                                                                             
+    return prc
 
 def runFilesNames(run_number, daq, raw_data_dir):
     """Returns all filenames of given run located in directory for the given daq."""
@@ -172,8 +180,8 @@ class DldFlashProcessorNew(DldProcessor):
     The class generates multiindexed multidimensional pandas dataframes 
     from the new FLASH dataformat resolved by both macro and microbunches alongside electrons.
     """
-    def __init__(self, runNumber = None, train_id_interval = None, channels = None, settings = None):
-        super().__init__(settings)
+    def __init__(self, runNumber = None, train_id_interval = None, channels = None, settings = None, silent=False):
+        super().__init__(settings=settings,silent=silent)
         self.runNumber = runNumber
         self.train_id_interval = train_id_interval
         # self.settings(settings) # DldProcessor handles it
