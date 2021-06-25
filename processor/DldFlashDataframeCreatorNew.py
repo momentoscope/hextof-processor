@@ -56,7 +56,7 @@ def readData(runs=None, ignore_missing_runs=False, settings=None, channels=None,
             
     """
     
-    prc = DldProcessor(settings=settings)
+    prc = DldFlashProcessorNew(settings=settings)
     prc.runNumber = runs
     
     if beamtime_dir is None:        
