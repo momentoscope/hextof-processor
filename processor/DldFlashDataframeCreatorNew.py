@@ -1,9 +1,14 @@
+from processor.DldProcessor import DldProcessor
 import sys, os
 import glob
 import json
 import h5py
 import numpy as np
+import pandas as pd
 from pandas import Series, DataFrame, concat, MultiIndex
+from dask import delayed, compute
+import dask.dataframe as dd
+from dask.diagnostics import ProgressBar
 from pathlib import Path
 from functools import reduce
 from configparser import ConfigParser
@@ -14,20 +19,164 @@ from configparser import ConfigParser
     https://gitlab.desy.de/christopher.passow/flash-daq-hdf/
 """
 
-assert sys.version_info >= (3,8), f"Requires at least Python version 3.8,\
-    but was {sys.version}"
+# assert sys.version_info >= (3,8), f"Requires at least Python version 3.8,\
+#     but was {sys.version}"
 
 
-class DldFlashProcessorNew:
+
+
+def readData(runs=None, ignore_missing_runs=False, settings=None, channels=None,
+             beamtime_dir=None, parquet_path=None, beamtime_id=None, year=None,
+            daq="fl1user2", ):
+    """ Read express data from DAQ, generating a parquet in between.
+    Args:
+        runs: int | list
+            run number or list of run numbers to load
+        ignore_missing_runs: bool
+            if False, rises FileNotFoundError in case files for a run are not available.
+        settings: str | path
+            pointer to the ini settings file, handeled by the dldProcessor class. It can
+            be the name of a default settings file found in the settings dir of the repo,
+            or the path to a specific settings file.
+        channels: list
+            list of channel names to include in the dataframe. if none defaults to all available channels
+        beamtime_dir: str | path
+            path to the raaw data. If none, its inferred from the settings file
+        parquet_path: str | path
+            path relative to beamtime_dir where to storethe parquet files. Defaults to "beamtime_dir/processed/parquet"
+        beamtime_id: int
+            the id of the beamtime. If none it is inferred from settings
+        year: int
+            the year of the beamtime. If none it is inferred from settings
+        daq: str
+            the daq containig the data. If none it is inferred from settings
+    returns:
+        prc: DldProcessor
+            returns an instance of the processor class, with electron and pulse dataframes loaded.
+            
+    """
+    
+    prc = DldProcessor(settings=settings)
+    prc.runNumber = runs
+    
+    if beamtime_dir is None:        
+        if beamtime_id is None:
+            beamtime_id = prc.settings['processor']['beamtime_id']
+        if year is None:
+            year = prc.settings['processor']['year']
+        if beamtime_id is None or year is None:
+            raise ValueError('Either the beamtime_dir or beamtime_id and year or a settings file containing such info is needed to find the data.')
+        beamtime_dir = Path(f'/asap3/flash/gpfs/pg2/{year}/data/{beamtime_id}/')
+            
+            
+    raw_dir = beamtime_dir.joinpath('raw/hdf/express')
+    
+    if parquet_path is None:
+        parquet_path = 'processed/parquet'
+    elif Path(parquet_path).exists():
+        parquet_dir = Path(parquet_path)
+    parquet_dir = beamtime_dir.joinpath(parquet_path)
+    if not parquet_dir.exists():
+        os.mkdir(parquet_dir)    
+        
+    temp_parquet_dir = parquet_dir.joinpath('per_file')
+    if not temp_parquet_dir.exists():
+        os.mkdir(temp_parquet_dir)
+
+    if runs is None:
+        raise ValueError('Must provide a run or list of runs!')
+
+    # prepare a list of names for the files to read and parquets to write
+    #
+    try: 
+        len(runs)
+        parquet_name = f'{temp_parquet_dir}/runs{runs[0]}to{runs[-1]}'
+    except TypeError:
+        parquet_name = f'{temp_parquet_dir}/run{runs}'
+        runs = [runs]
+
+    all_files = []
+    for run in runs:
+        files = runFilesNames(run,daq,raw_dir)
+        [all_files.append(f) for f in files]
+        if len(files) == 0 and not ignore_missing_runs:
+            raise FileNotFoundError(f'No file found for run {run}')
+    
+    prq_names = [parquet_name+f'_part{i:03}' for i in range(len(all_files))]
+    missing_files = []
+    missing_prq_names = []
+    
+    # only read and write files which were not read already 
+    for i in range(len(prq_names)): 
+        if not Path(prq_names[i]).exists():
+            missing_files.append(all_files[i])
+            missing_prq_names.append(prq_names[i])
+    
+    def readH5(fn):
+        dfc = DFCreator(settings=settings,channels=channels)
+        df = dfc.createDataframePerFile(fn)
+        return df.reset_index(level=['trainId', 'pulseId','electronId'])
+    
+    def saveParquet(df,fn):        
+        df.to_parquet(fn, compression = None, index = False)
+        
+    def h5_to_parquet(h5,prq):
+        try:
+            dfc = DFCreator(settings=settings,channels=channels)
+            df = dfc.createDataframePerFile(h5).reset_index(level=['trainId', 'pulseId','electronId'])
+            df.to_parquet(prq, compression = None, index = False)
+        except ValueError as e:
+            print(f'failed {prq}: {e}')
+            prq_names.remove(prq)
+        
+    with ProgressBar():
+#         dfs =  [delayed(readH5)(each_file) for each_file in missing_files]
+#         writes = [delayed(saveParquet)(df,fn) for df,fn in zip(dfs,missing_prq_names)]
+#         dd.compute(*writes)
+
+        ops = [delayed(h5_to_parquet)(h,p) for h,p in zip(missing_files,missing_prq_names)]
+        dd.compute(*ops)
+        if len(prq_names)==0:
+            raise ValueError('No data available. Probably failed reading all h5 files')
+        else:
+
+            dfs = [dd.from_pandas(pd.read_parquet(fn),npartitions=1) for fn in prq_names]
+            df = dd.concat(dfs)
+            ffill_cols = ['bam', 'delayStage', 'cryoTemperature', 
+                  'extractorCurrent', 'extractorVoltage', 'sampleBias',
+                  'sampleTemperature', 'tofVoltage','gmdBda', 'gmdTunnel',
+                  'monochromatorPhotonEnergy', 'opticalDiode']
+            df[ffill_cols] = df[ffill_cols].ffill()
+            df_electron = df.dropna(subset=['dldPosX','dldPosY','dldTime'])
+            pulse_columns = ['trainId','pulseId','electronId','bam', 'delayStage','gmdBda', 'gmdTunnel','monochromatorPhotonEnergy', 'opticalDiode']
+            df_pulse = df[pulse_columns]
+            df_pulse = df_pulse[(df_pulse['electronId']==0)|(np.isnan(df_pulse['electronId']))]
+        prc.dd = df_electron
+        prc.ddMicrobunches = df_pulse
+        return prc
+
+def runFilesNames(run_number, daq, raw_data_dir):
+    """Returns all filenames of given run located in directory for the given daq."""
+    stream_name_prefixes = {"pbd": "GMD_DATA_gmd_data",
+                            "pbd2": "FL2PhotDiag_pbd2_gmd_data",
+                            "fl1user1": "FLASH1_USER1_stream_2",
+                            "fl1user2": "FLASH1_USER2_stream_2",
+                            "fl1user3": "FLASH1_USER3_stream_2",
+                            "fl2user1": "FLASH2_USER1_stream_2",
+                            "fl2user2": "FLASH2_USER2_stream_2"}
+    date_time_section = lambda filename: str(filename).split("_")[-1]
+    return sorted(Path(raw_data_dir).glob(f"{stream_name_prefixes[daq]}_run{run_number}_*.h5"),key=date_time_section)
+
+class DldFlashProcessorNew(DldProcessor):
     """  
     The class generates multiindexed multidimensional pandas dataframes 
     from the new FLASH dataformat resolved by both macro and microbunches alongside electrons.
     """
-    def __init__(self, run_number = None, train_id_interval = None, channels = None, settings_dir = None):
-
-        self.run_number = run_number
+    def __init__(self, runNumber = None, train_id_interval = None, channels = None, settings = None):
+        super().__init__(settings)
+        self.runNumber = runNumber
         self.train_id_interval = train_id_interval
-        self.settings(settings_dir)
+        # self.settings(settings) # DldProcessor handles it
         
         if channels is None:
             all_channel_list_dir = os.path.join(Path(__file__).parent.absolute(), "channels.json")
@@ -40,18 +189,18 @@ class DldFlashProcessorNew:
         
         self.resetMultiIndex()  # initializes the indices
    
-    def settings(self, settings_dir):
-        """Loads the settings from settings file"""
-        self.settings_ = ConfigParser()
-        if settings_dir is None:
-            settings_file = os.path.join(Path(__file__).parent.absolute(), 'SETTINGS.ini')
-        else:
-            settings_file = settings_dir
-        self.settings_.read(settings_file)
+    # def loadSettings(self, settings_dir):
+    #     """Loads the settings from settings file"""
+    #     self.settings_ = ConfigParser()
+    #     if settings_dir is None:
+    #         settings_file = os.path.join(Path(__file__).parent.absolute(), 'SETTINGS.ini')
+    #     else:
+    #         settings_file = settings_dir
+    #     self.settings_.read(settings_file)
                 
-        self.data_raw_dir = self.settings_['paths']['data_raw_dir']
-        self.data_parquet_dir = self.settings_['paths']['data_parquet_dir']    
-        self.ubid_offset = int(self.settings_['processor']['ubid_offset'])
+    #     self.data_raw_dir = self.settings_['paths']['data_raw_dir']
+    #     self.data_parquet_dir = self.settings_['paths']['data_parquet_dir']    
+    #     self.ubid_offset = int(self.settings_['processor']['ubid_offset'])
 
     @property
     def availableChannels(self):
@@ -76,7 +225,7 @@ class DldFlashProcessorNew:
         # Create a series with the macrobunches as index and microbunches as values
         macrobunches = Series((np_array[i] for i in train_id.index),
             name="pulseId",
-            index=train_id) - self.ubid_offset
+            index=train_id) - self.UBID_OFFSET
 
         # Explode dataframe to get all microbunch vales per macrobunch,
         # remove NaN values and convert to type int
@@ -148,7 +297,7 @@ class DldFlashProcessorNew:
                 .dropna()
                 .to_frame()
                 .set_index(self.index_per_electron)
-                .drop(index = np.arange(-self.ubid_offset, 0), level = 1, errors = 'ignore'))
+                .drop(index = np.arange(-self.UBID_OFFSET, 0), level = 1, errors = 'ignore'))
         
         
         # Pulse resolved data is treated here
@@ -250,9 +399,9 @@ class DldFlashProcessorNew:
         """Returns concatenated DataFrame for multiple files from a run"""
 
         if run_number is None:
-            run_number = self.run_number
+            run_number = self.runNumber
         else:
-            self.run_number = run_number
+            self.runNumber = run_number
 
         files = self.runFilesNames(run_number, daq)
         
@@ -278,10 +427,12 @@ class DldFlashProcessorNew:
 
         # Moves the indexes to columns, and saves to parquet in given directory
         createDataframePerRun(run_number, daq).reset_index(level=['trainId', 'pulseId']
-                     ).to_parquet(self.data_parquet_dir + str(self.run_number)
+                     ).to_parquet(self.data_parquet_dir + str(self.runNumber)
                                         , compression = None, index = False)
 
-        
+
+
+
 # ################################################
 # prc = DldFlashDataframeCreator()
 # prc.runNumber = 12345
@@ -311,9 +462,9 @@ class DldFlashProcessorNew:
             self.train_id_interval = train_id_interval
 
         if run_number is None:
-            run_number = self.run_number
+            run_number = self.runNumber
         else:
-            self.run_number = run_number
+            self.runNumber = run_number
 
         # Get paths of all files in the run for a specific daq
         paths = self.runFilesNames(run_number, daq)

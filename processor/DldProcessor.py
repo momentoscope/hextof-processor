@@ -51,7 +51,7 @@ class DldProcessor:
     """
     root_folder = os.path.dirname(os.path.dirname(processor.__file__))
 
-    def __init__(self, settings=None):
+    def __init__(self, settings=None,silent=False):
         """ Create and manage a dask DataFrame from the data recorded at FLASH.
         """
         self._settings = None
@@ -61,7 +61,8 @@ class DldProcessor:
 
         elif os.path.isfile(settings):
             self._settings_file = settings
-            print(f'Using settings from {self._settings_file}')
+            if not silent:
+                print(f'Using settings from {self._settings_file}')
         else:
             available_settings = os.listdir(os.path.join(self.root_folder, 'settings'))
             settings = os.path.splitext(settings)[0]+'.ini'
@@ -72,8 +73,10 @@ class DldProcessor:
                     err_str += (f'\n\t{s}')
                 raise FileNotFoundError(err_str)
             self._settings_file = os.path.join(self.root_folder,'settings',settings)
-            print(f'Using settings from {settings}')
-
+            if not silent:
+                print(f'Using settings from {settings}')
+        self.runNumber = None
+        self.pulseIdInterval = [None,None]
 
         self.initAttributes()
         self.resetBins()
