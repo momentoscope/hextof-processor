@@ -1,0 +1,25 @@
+name: hextof-express
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8 
+  - numpy>=1.14.2
+  - matplotlib>=2.1.0
+  - pandas>=0.20.3
+  - h5py>=2.7.1
+  - dask>=0.17.3
+  - pytables
+  - jupyter
+  - nb_conda
+  - xarray>=0.9.6
+  - psutil>=5.4.5
+  - tqdm>=4.31.1
+  - sphinx
+  - sphinx_rtd_theme
+  - natsort>=6.0.0
+  - scipy>=1.2.1
+  - fastparquet>=0.2.1
+  - pyarrow>=0.12.1
+  - cloudpickle>=1.2.1
+  - toolz>=0.9.0
+  - tifffile

@@ -4,8 +4,7 @@ import glob
 import json
 import h5py
 import numpy as np
-import pandas as pd
-from pandas import Series, DataFrame, concat, MultiIndex
+from pandas import Series, DataFrame, concat, MultiIndex, read_parquet
 from dask import delayed, compute
 import dask.dataframe as dd
 from dask.diagnostics import ProgressBar
@@ -14,16 +13,13 @@ from functools import reduce
 from configparser import ConfigParser
 
 """
-    author:: Muhammad Zain Sohail
+    author:: Muhammad Zain Sohail, Steinn Ymir Agustsson
     Some functions taken or adapted from
     https://gitlab.desy.de/christopher.passow/flash-daq-hdf/
 """
 
 # assert sys.version_info >= (3,8), f"Requires at least Python version 3.8,\
 #     but was {sys.version}"
-
-
-
 
 def readData(runs=None, ignore_missing_runs=False, settings=None, channels=None,
              beamtime_dir=None, parquet_path=None, beamtime_id=None, year=None,
@@ -56,7 +52,7 @@ def readData(runs=None, ignore_missing_runs=False, settings=None, channels=None,
             
     """
     
-    prc = DldFlashProcessorNew(settings=settings)
+    prc = DldFlashProcessorExpress(settings=settings)
     prc.runNumber = runs
     
     if beamtime_dir is None:        
@@ -115,17 +111,9 @@ def readData(runs=None, ignore_missing_runs=False, settings=None, channels=None,
     print(f'reading runs {runs_str}: {len(missing_files)} new files of {len(all_files)} total.')
     failed_str = []
     
-    def readH5(fn):
-        dfc = DldFlashProcessorNew(settings=settings,channels=channels)
-        df = dfc.createDataframePerFile(fn)
-        return df.reset_index(level=['trainId', 'pulseId','electronId'])
-    
-    def saveParquet(df,fn):        
-        df.to_parquet(fn, compression = None, index = False)
-        
     def h5_to_parquet(h5,prq):
         try:
-            dfc = DldFlashProcessorNew(settings=settings,channels=channels,silent=True)
+            dfc = DldFlashProcessorExpress(settings=settings,channels=channels,silent=True)
             df = dfc.createDataframePerFile(h5).reset_index(level=['trainId', 'pulseId','electronId'])
             df.to_parquet(prq, compression = None, index = False)
         except ValueError as e:
@@ -133,21 +121,18 @@ def readData(runs=None, ignore_missing_runs=False, settings=None, channels=None,
             prq_names.remove(prq)
         
     with ProgressBar():
-#         dfs =  [delayed(readH5)(each_file) for each_file in missing_files]
-#         writes = [delayed(saveParquet)(df,fn) for df,fn in zip(dfs,missing_prq_names)]
-#         dd.compute(*writes)
         ops = [delayed(h5_to_parquet)(h,p) for h,p in zip(missing_files,missing_prq_names)]
         dd.compute(*ops)
                          
     if len(failed_str)>0:
         print(f'Failed reading {len(failed_str)} files of{len(all_files)}:')
         for s in failed_str:
-            print(f'\t- {s})
+            print(f'\t- {s}')
     if len(prq_names)==0:
         raise ValueError('No data available. Probably failed reading all h5 files')
     else:
         print(f'Loading {len(prq_names)} dataframes. Failed reading {len(all_files)-len(prq_names)} files.')  
-        dfs = [dd.from_pandas(pd.read_parquet(fn),npartitions=1) for fn in prq_names] # todo skip pandas, as dask only should work
+        dfs = [dd.from_pandas(read_parquet(fn),npartitions=1) for fn in prq_names] # todo skip pandas, as dask only should work
         df = dd.concat(dfs)
         ffill_cols = ['bam', 'delayStage', 'cryoTemperature', 
               'extractorCurrent', 'extractorVoltage', 'sampleBias',
@@ -175,7 +160,7 @@ def runFilesNames(run_number, daq, raw_data_dir):
     date_time_section = lambda filename: str(filename).split("_")[-1]
     return sorted(Path(raw_data_dir).glob(f"{stream_name_prefixes[daq]}_run{run_number}_*.h5"),key=date_time_section)
 
-class DldFlashProcessorNew(DldProcessor):
+class DldFlashProcessorExpress(DldProcessor):
     """  
     The class generates multiindexed multidimensional pandas dataframes 
     from the new FLASH dataformat resolved by both macro and microbunches alongside electrons.
@@ -184,7 +169,6 @@ class DldFlashProcessorNew(DldProcessor):
         super().__init__(settings=settings,silent=silent)
         self.runNumber = runNumber
         self.train_id_interval = train_id_interval
-        # self.settings(settings) # DldProcessor handles it
         
         if channels is None:
             all_channel_list_dir = os.path.join(Path(__file__).parent.absolute(), "channels.json")
@@ -196,19 +180,6 @@ class DldFlashProcessorNew(DldProcessor):
         self.channels = self.availableChannels # Set all channels, exluding pulseId as default
         
         self.resetMultiIndex()  # initializes the indices
-   
-    # def loadSettings(self, settings_dir):
-    #     """Loads the settings from settings file"""
-    #     self.settings_ = ConfigParser()
-    #     if settings_dir is None:
-    #         settings_file = os.path.join(Path(__file__).parent.absolute(), 'SETTINGS.ini')
-    #     else:
-    #         settings_file = settings_dir
-    #     self.settings_.read(settings_file)
-                
-    #     self.data_raw_dir = self.settings_['paths']['data_raw_dir']
-    #     self.data_parquet_dir = self.settings_['paths']['data_parquet_dir']    
-    #     self.ubid_offset = int(self.settings_['processor']['ubid_offset'])
 
     @property
     def availableChannels(self):
@@ -429,33 +400,6 @@ class DldFlashProcessorNew(DldProcessor):
         # return concat(list(zip(*data_frames))[0]), concat(list(zip(*data_frames))[1])
         data_frames = (self.createDataframePerFile(each_file) for each_file in files)
         return concat(data_frames)
-
-    def savetoParquet(self, run_number=None, daq="fl1user2"):
-        """Saves the run data with the selected channels into a parquet file"""
-
-        # Moves the indexes to columns, and saves to parquet in given directory
-        createDataframePerRun(run_number, daq).reset_index(level=['trainId', 'pulseId']
-                     ).to_parquet(self.data_parquet_dir + str(self.runNumber)
-                                        , compression = None, index = False)
-
-
-
-
-# ################################################
-# prc = DldFlashDataframeCreator()
-# prc.runNumber = 12345
-# prc.readData()
-# prc.addBinning(dldPosX)
-# prc.addBinning(dldTime)
-# res = prc.computeBinnedData(ski
-# compare to : 
-# prc = DldFlashDataframeCreator()
-# prc.loadDataframes(prq)
-# prc.dd = YOURDATAFRAME
-# prc.addBinning(dldPosX)
-# prc.addBinning(dldTime)
-# res = prc.computeBinnedData(skip_metadata=True)
-##################################################
 
     # ==================
     # Might not work
