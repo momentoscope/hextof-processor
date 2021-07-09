@@ -137,7 +137,13 @@ class DldFlashProcessorExpress(DldProcessor):
         [train_id, np_array] = self.createNumpyArrayPerChannel(
             h5_file, channel)  # numpy Array created
         channel_dict = self.all_channels[channel]  # channel parameters
-
+        
+        # If np_array is size zero, fill with NaNs
+        if np_array.size == 0:
+            np_array = np.full_like(train_id, np.nan, dtype = np.double)
+            return Series((np_array[i] for i in train_id.index), name = channel, 
+                          index = train_id)
+                    
         # Electron resolved data is treated here
         if channel_dict["format"] == "per_electron":
             # Creates the index_per_electron if it does not exist for a given file
