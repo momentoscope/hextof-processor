@@ -84,6 +84,26 @@ class DldFlashProcessorExpress(DldProcessor):
         available_channels = list(self.all_channels.keys())
         available_channels.remove('pulseId')
         return available_channels
+    
+    @property
+    def channelsPerPulse(self):
+        """Returns a list of channels with a per pulse format, 
+        including all auxillary channels"""
+        channels_per_pulse = []
+        for key in self.availableChannels:
+            if self.all_channels[key]['format'] == 'per_pulse':
+                if key == 'dldAux':
+                    for aux_key in self.all_channels[key]['dldAuxChannels'].keys():
+                        channels_per_pulse.append(aux_key)
+                else:    
+                    channels_per_pulse.append(key)
+        return channels_per_pulse
+    
+    @property
+    def channelsPerElectron(self):
+        """Returns a list of channels with a per electron channels"""
+        return [key for key in self.availableChannels 
+                if self.all_channels[key]['format'] == 'per_electron']
 
     def resetMultiIndex(self):
         """Resets the index per pulse and electron"""
@@ -366,16 +386,12 @@ class DldFlashProcessorExpress(DldProcessor):
             raise ValueError('No data available. Probably failed reading all h5 files')
         else:
             print(f'Loading {len(self.prq_names)} dataframes. Failed reading {len(all_files)-len(self.prq_names)} files.')  
-            dfs = [dd.from_pandas(read_parquet(fn),npartitions=1) for fn in self.prq_names] # todo skip pandas, as dask only should work
-            df = dd.concat(dfs)
-#             ffill_cols = ['bam', 'delayStage', 'cryoTemperature', 
-#                'extractorCurrent', 'extractorVoltage', 'sampleBias',
-#                'sampleTemperature', 'tofVoltage','gmdBda', 'gmdTunnel',
-#                'monochromatorPhotonEnergy', 'opticalDiode']
-#             df[ffill_cols] = df[ffill_cols].ffill()
-            df_electron = df.dropna(subset=['dldPosX','dldPosY','dldTime'])
-            pulse_columns = ['trainId','pulseId','electronId','bam', 'delayStage','gmdBda', 'gmdTunnel','monochromatorPhotonEnergy', 'opticalDiode']
+            dfs = [read_parquet(fn) for fn in self.prq_names] # todo skip pandas, as dask only should work
+            df = concat(dfs)
+            df[self.channelsPerPulse] = df[self.channelsPerPulse].fillna(method="ffill").fillna(method="bfill")
+            df_electron = df.dropna(subset=self.channelsPerElectron)
+            pulse_columns = ['trainId','pulseId','electronId'] + self.channelsPerPulse
             df_pulse = df[pulse_columns]
             df_pulse = df_pulse[(df_pulse['electronId']==0)|(np.isnan(df_pulse['electronId']))]
-        self.dd = df_electron
-        self.ddMicrobunches = df_pulse
+        self.dd = dd.from_pandas(df_electron, npartitions=len(self.prq_names))
+        self.ddMicrobunches = dd.from_pandas(df_pulse, npartitions=len(self.prq_names))
