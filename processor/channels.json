@@ -57,13 +57,13 @@
     },
     "gmdBda": {
         "format": "per_pulse",
-        "group_name": "/FL1/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA copy/",
+        "group_name": "/FL1/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA/",
         "old_name": "/FL1/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA copy",
         "slice": ":"
     },
     "gmdTunnel": {
         "format": "per_pulse",
-        "group_name": "/FL1/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel copy/",
+        "group_name": "/FL1/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel/",
         "old_name": "/FL1/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel copy",
         "slice": ":"
     },

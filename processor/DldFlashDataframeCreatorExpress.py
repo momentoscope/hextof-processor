@@ -42,6 +42,7 @@ class DldFlashProcessorExpress(DldProcessor):
             self.all_channels = json.load(json_file)
         self.channels = self.availableChannels # Set all channels, exluding pulseId as default
 
+
         if beamtime_dir is None:        
             if beamtime_id is None:
                 beamtime_id = self.settings['processor']['beamtime_id']
@@ -51,9 +52,24 @@ class DldFlashProcessorExpress(DldProcessor):
                 raise ValueError('Either the beamtime_dir or beamtime_id and year or a settings file containing such info is needed to find the data.')
             self.beamtime_dir = Path(f'/asap3/flash/gpfs/pg2/{year}/data/{beamtime_id}/')
         else:
-            self.beamtime_dir = beamtime_dir
+            self.beamtime_dir = Path(beamtime_dir)
                 
         self.raw_dir = self.beamtime_dir.joinpath('raw/hdf/express')
+
+        if parquet_path is None:
+            self.parquet_path = 'processed/parquet'
+        elif Path(self.parquet_path).exists():
+            self.parquet_dir = Path(self.parquet_path)
+        self.parquet_dir = self.beamtime_dir.joinpath(self.parquet_path)
+        if not self.parquet_dir.exists():
+            os.mkdir(self.parquet_dir)    
+            
+        self.temp_parquet_dir = self.parquet_dir.joinpath('per_file')
+        if not self.temp_parquet_dir.exists():
+            os.mkdir(self.temp_parquet_dir)
+
+        if self.runNumber is None:
+            raise ValueError('Must provide a run or list of runs!')
         
         self.resetMultiIndex()  # initializes the indices
 
@@ -282,7 +298,7 @@ class DldFlashProcessorExpress(DldProcessor):
                 list of channel names to include in the dataframe. if none defaults to all available channels
             beamtime_dir: str | path
                 path to the raaw data. If none, its inferred from the settings file
-            parquet_path: str | path
+            self.parquet_path: str | path
                 path relative to beamtime_dir where to storethe parquet files. Defaults to "beamtime_dir/processed/parquet"
             beamtime_id: int
                 the id of the beamtime. If none it is inferred from settings
@@ -294,23 +310,9 @@ class DldFlashProcessorExpress(DldProcessor):
             prc: DldProcessor
                 returns an instance of the processor class, with electron and pulse dataframes loaded.
         """
+                        
         if not runs:
             runs = self.runNumber 
-        
-        if parquet_path is None:
-            parquet_path = 'processed/parquet'
-        elif Path(parquet_path).exists():
-            parquet_dir = Path(parquet_path)
-        parquet_dir = self.beamtime_dir.joinpath(parquet_path)
-        if not parquet_dir.exists():
-            os.mkdir(parquet_dir)    
-            
-        temp_parquet_dir = parquet_dir.joinpath('per_file')
-        if not temp_parquet_dir.exists():
-            os.mkdir(temp_parquet_dir)
-
-        if self.runNumber is None:
-            raise ValueError('Must provide a run or list of runs!')
 
         # prepare a list of names for the files to read and parquets to write
         try: 
@@ -319,7 +321,7 @@ class DldFlashProcessorExpress(DldProcessor):
         except TypeError:
             runs_str = f'run{runs}'
             runs = [runs]
-        parquet_name = f'{temp_parquet_dir}/{runs_str}'
+        parquet_name = f'{self.temp_parquet_dir}/{runs_str}'
         all_files = []
         for run in runs:
             files = self.runFilesNames(run, daq, self.raw_dir)
@@ -371,52 +373,3 @@ class DldFlashProcessorExpress(DldProcessor):
             df_pulse = df_pulse[(df_pulse['electronId']==0)|(np.isnan(df_pulse['electronId']))]
         self.dd = df_electron
         self.ddMicrobunches = df_pulse
-                                                                                                
-
-    # # ==================
-    # # Might not work
-    # # ==================
-    # def createDataframePerRunIdInterval(
-    #     self, train_id_interval=None, run_number=None, daq="fl1user2"
-    # ):
-    #     """Returns a concatenated DataFrame from a run including values only between train_id_interval"""
-    #     if train_id_interval is None:
-    #         train_id_interval = self.train_id_interval
-    #     else:
-    #         self.train_id_interval = train_id_interval
-
-    #     if run_number is None:
-    #         run_number = self.runNumber
-    #     else:
-    #         self.runNumber = run_number
-
-    #     # Get paths of all files in the run for a specific daq
-    #     paths = self.runFilesNames(run_number, daq)
-
-    #     # Compute TrainIds for the whole Run using an arbritary channel, which is combined into
-    #     # a pandas Series with indices being TrainIds, and the values being the file numbers
-    #     channel = self.all_channels[self.channels[0]]["group_name"]
-    #     train_ids_per_file = (
-    #         Series(
-    #             np.tile(i, h5py.File(each, "r")[channel]["index"].size),
-    #             index=h5py.File(each, "r")[channel]["index"])
-    #             for i, each in enumerate(paths))
-
-    #     # Reduce all Run TrainIds into one Series
-    #     train_ids_per_run = reduce(Series.append, train_ids_per_file)
-
-    #     # Locate only files with the requested train_id_interval
-    #     unique = np.unique(
-    #         train_ids_per_run.loc[
-    #             self.train_id_interval[0] : self.train_id_interval[1]])
-
-    #     # Create Dataframe for all requested channels for each file and combine them,
-    #     # only returning with values between train_id_interval
-    #     data_frames = [
-    #         self.createDataframePerFile(each_file)
-    #         for each_file in paths[unique[0] : unique[-1]]]
-    #     assert (
-    #         data_frames
-    #     ), "Assertion: at least one file in files, but files was empty"
-    #     return reduce(DataFrame.combine_first, data_frames).loc[
-    #         self.train_id_interval[0] : self.train_id_interval[1]]
