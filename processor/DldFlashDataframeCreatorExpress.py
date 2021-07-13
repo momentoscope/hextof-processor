@@ -28,7 +28,7 @@ class DldFlashProcessorExpress(DldProcessor):
     from the new FLASH dataformat resolved by both macro and microbunches alongside electrons.
     """
     def __init__(self, runNumber = None, train_id_interval = None, channels = None, settings = None, beamtime_dir=None, 
-                parquet_path=None, beamtime_id=None, year=None, daq="fl1user2", silent=False):
+                parquet_path=None, parquet_dir=None, beamtime_id=None, year=None, daq="fl1user2", silent=False):
         super().__init__(settings=settings,silent=silent)
         self.runNumber = runNumber
         self.train_id_interval = train_id_interval
@@ -55,13 +55,16 @@ class DldFlashProcessorExpress(DldProcessor):
             self.beamtime_dir = Path(beamtime_dir)
                 
         self.raw_dir = self.beamtime_dir.joinpath('raw/hdf/express')
-
-        if parquet_path is None:
-            self.parquet_path = 'processed/parquet'
-        elif Path(self.parquet_path).exists():
-            self.parquet_dir = Path(self.parquet_path)
-        #self.parquet_dir = self.beamtime_dir.joinpath(self.parquet_path)
-        self.parquet_dir = Path('/home/pg2user/Commissioning_July2021_HEXTOF/Parquet/')
+        
+        if parquet_dir is None:
+            if parquet_path is None:
+                self.parquet_path = 'processed/parquet'
+            elif Path(self.parquet_path).exists():
+                self.parquet_dir = Path(self.parquet_path)
+            self.parquet_dir = self.beamtime_dir.joinpath(self.parquet_path)
+        else:
+            self.parquet_dir = Path(parquet_dir)
+            
         if not self.parquet_dir.exists():
             os.mkdir(self.parquet_dir)    
             
@@ -199,7 +202,7 @@ class DldFlashProcessorExpress(DldProcessor):
                 # Multiindex set and combined dataframe returned
                 return reduce(DataFrame.combine_first, data_frames)
             
-            elif channel in ['monochromatorPhotonEnergy', 'delayStage']:
+            elif channel in ['monochromatorPhotonEnergy', 'delayStage', 'timeStamp']:
                 return (Series((np_array[i] for i in train_id.index), name=channel)
                     .to_frame()
                     .set_index(train_id))
@@ -365,11 +368,11 @@ class DldFlashProcessorExpress(DldProcessor):
             print(f'Loading {len(self.prq_names)} dataframes. Failed reading {len(all_files)-len(self.prq_names)} files.')  
             dfs = [dd.from_pandas(read_parquet(fn),npartitions=1) for fn in self.prq_names] # todo skip pandas, as dask only should work
             df = dd.concat(dfs)
-            #ffill_cols = ['bam', 'delayStage', 'cryoTemperature', 
-             #   'extractorCurrent', 'extractorVoltage', 'sampleBias',
-             #   'sampleTemperature', 'tofVoltage','gmdBda', 'gmdTunnel',
-             #   'monochromatorPhotonEnergy', 'opticalDiode']
-            #df[ffill_cols] = df[ffill_cols].ffill()
+#             ffill_cols = ['bam', 'delayStage', 'cryoTemperature', 
+#                'extractorCurrent', 'extractorVoltage', 'sampleBias',
+#                'sampleTemperature', 'tofVoltage','gmdBda', 'gmdTunnel',
+#                'monochromatorPhotonEnergy', 'opticalDiode']
+#             df[ffill_cols] = df[ffill_cols].ffill()
             df_electron = df.dropna(subset=['dldPosX','dldPosY','dldTime'])
             pulse_columns = ['trainId','pulseId','electronId','bam', 'delayStage','gmdBda', 'gmdTunnel','monochromatorPhotonEnergy', 'opticalDiode']
             df_pulse = df[pulse_columns]

@@ -80,7 +80,6 @@
         "group_name": "/FL1/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD/",
         "old_name": "/FL1/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD",
         "slice": ":"
-    
     },
     "timeStamp": {
         "format": "per_pulse",
