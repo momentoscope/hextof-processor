@@ -60,7 +60,8 @@ class DldFlashProcessorExpress(DldProcessor):
             self.parquet_path = 'processed/parquet'
         elif Path(self.parquet_path).exists():
             self.parquet_dir = Path(self.parquet_path)
-        self.parquet_dir = self.beamtime_dir.joinpath(self.parquet_path)
+        #self.parquet_dir = self.beamtime_dir.joinpath(self.parquet_path)
+        self.parquet_dir = Path('/home/pg2user/Commissioning_July2021_HEXTOF/Parquet/')
         if not self.parquet_dir.exists():
             os.mkdir(self.parquet_dir)    
             
@@ -138,6 +139,8 @@ class DldFlashProcessorExpress(DldProcessor):
 
         train_id = Series(group["index"], name="trainId")  # macrobunch
         np_array = group["value"][()]  # unpacks the values
+        if channel == "timeStamp":
+            np_array = group["time"][()]
 
         # Uses predefined axis and slice from the json file
         # to choose correct dimension for necessary channel
@@ -362,11 +365,11 @@ class DldFlashProcessorExpress(DldProcessor):
             print(f'Loading {len(self.prq_names)} dataframes. Failed reading {len(all_files)-len(self.prq_names)} files.')  
             dfs = [dd.from_pandas(read_parquet(fn),npartitions=1) for fn in self.prq_names] # todo skip pandas, as dask only should work
             df = dd.concat(dfs)
-            ffill_cols = ['bam', 'delayStage', 'cryoTemperature', 
-                'extractorCurrent', 'extractorVoltage', 'sampleBias',
-                'sampleTemperature', 'tofVoltage','gmdBda', 'gmdTunnel',
-                'monochromatorPhotonEnergy', 'opticalDiode']
-            df[ffill_cols] = df[ffill_cols].ffill()
+            #ffill_cols = ['bam', 'delayStage', 'cryoTemperature', 
+             #   'extractorCurrent', 'extractorVoltage', 'sampleBias',
+             #   'sampleTemperature', 'tofVoltage','gmdBda', 'gmdTunnel',
+             #   'monochromatorPhotonEnergy', 'opticalDiode']
+            #df[ffill_cols] = df[ffill_cols].ffill()
             df_electron = df.dropna(subset=['dldPosX','dldPosY','dldTime'])
             pulse_columns = ['trainId','pulseId','electronId','bam', 'delayStage','gmdBda', 'gmdTunnel','monochromatorPhotonEnergy', 'opticalDiode']
             df_pulse = df[pulse_columns]
