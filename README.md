@@ -21,6 +21,7 @@ The `DldFlashDataframeCreatorExpress` class subclasses `DldProcessor` and is use
 # Installation
 
 In this section we will walk you through all you need to get up and running with the hextof-processor.
+
 For using this package with the old FLASH data structure, please refer to [README_DEPR.md](https://github.com/momentoscope/hextof-processor/blob/master/README_DEPR.md).
 
 ### 1. Python
@@ -90,6 +91,8 @@ At the very least, this should include the "bit stealing hack" correction, where
 are set so they encode dldSectorId. This can be achieved by using the calibration.gen_sector_correction function
 which will generate the list for you, given the energy shifts you want.
 
+### 3.4 Installing Doniach-Sunjic gaussian broadened
+Please refer to [XPSdoniachs/README.md](https://github.com/momentoscope/hextof-processor/blob/master/XPSdoniachs/README.md) for compilation instructions.
 
 ### 4. Test your installation
 In order to test your local installation, we have provided a series of tutorial Jupyter Notebooks. 
