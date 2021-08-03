@@ -85,19 +85,19 @@ data_results_dir = /asap3/flash/gpfs/pg2/YYYY/data/xxxxxxxx/processed/*USER_NAME
 ```
 Where `YYYY` is the current year and `xxxxxxxx` is the beamtime number.
 
-### 3.3 Calculating sector_correction list
+#### 3.3 Calculating sector_correction list
 If you like, in the settings, you can add the sector_correction list, which will shift any misalignment of the sectors.
 At the very least, this should include the "bit stealing hack" correction, where the last bits of the dldTime
 are set so they encode dldSectorId. This can be achieved by using the calibration.gen_sector_correction function
 which will generate the list for you, given the energy shifts you want.
 
-### 3.4 Installing Doniach-Sunjic gaussian broadened
+#### 3.4 Installing Doniach-Sunjic gaussian broadened
 Please refer to [XPSdoniachs/README.md](https://github.com/momentoscope/hextof-processor/blob/master/XPSdoniachs/README.md) for compilation instructions.
 
 ### 4. Test your installation
 In order to test your local installation, we have provided a series of tutorial Jupyter Notebooks. 
 You can find all the relevant material in the [tutorial folder](https://github.com/momentoscope/hextof-processor/tree/master/tutorial) in the main repository.
-We suggest setting testing [Tutorial_01 - Binning calibration and saving data.ipynb](https://github.com/momentoscope/hextof-processor/blob/master/tutorial/Tutorial_01%20-%20Binning%20calibrating%20and%20saving%20data.ipynb).
+We suggest setting testing [Express data readout.ipynb](https://github.com/momentoscope/hextof-processor/blob/master/tutorial/Express%20data%20readout.ipynb).
 
 
 # Documentation
