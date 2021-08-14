@@ -388,7 +388,7 @@ class DldFlashProcessorExpress(DldProcessor):
             print(f'Loading {len(self.prq_names)} dataframes. Failed reading {len(all_files)-len(self.prq_names)} files.')  
             dfs = [read_parquet(fn) for fn in self.prq_names] # todo skip pandas, as dask only should work
             df = concat(dfs)
-            df[self.channelsPerPulse] = df[self.channelsPerPulse].fillna(method="ffill").fillna(method="bfill")
+            df[self.channelsPerPulse] = df[self.channelsPerPulse].fillna(method="ffill")
             df_electron = df.dropna(subset=self.channelsPerElectron)
             pulse_columns = ['trainId','pulseId','electronId'] + self.channelsPerPulse
             df_pulse = df[pulse_columns]
