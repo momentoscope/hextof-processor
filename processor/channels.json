@@ -75,12 +75,6 @@
         "old_name": "/FL1/Beamlines/PG/Monochromator/monochromator photon energy",
         "slice": ":"
     },
-    "opticalDiode": {
-        "format": "per_pulse",
-        "group_name": "/FL1/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD/",
-        "old_name": "/FL1/Experiment/PG/SIS8300 100MHz ADC/CH9/pulse energy/TD",
-        "slice": ":"
-    },
     "timeStamp": {
         "format": "per_pulse",
         "group_name": "/FL1/Timing/Bunch pattern/train index 1/",
