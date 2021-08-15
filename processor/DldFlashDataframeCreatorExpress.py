@@ -340,22 +340,21 @@ class DldFlashProcessorExpress(DldProcessor):
         if not runs:
             runs = self.runNumber 
 
-        # prepare a list of names for the files to read and parquets to write
+        # Prepare a list of names for the files to read and parquets to write
         try: 
-            len(runs)
-            runs_str = f'runs{runs[0]}to{runs[-1]}'
+            runs_str = f'Runs {runs[0]} to {runs[-1]}'
         except TypeError:
-            runs_str = f'run{runs}'
+            runs_str = f'Run {runs}'
             runs = [runs]
-        parquet_name = f'{self.temp_parquet_dir}/{runs_str}'
+        parquet_name = f'{self.temp_parquet_dir}/'
         all_files = []
         for run in runs:
             files = self.runFilesNames(run, daq, self.raw_dir)
             [all_files.append(f) for f in files]
             if len(files) == 0 and not ignore_missing_runs:
                 raise FileNotFoundError(f'No file found for run {run}')
-        
-        self.prq_names = [parquet_name+f'_part{i:03}' for i in range(len(all_files))]
+
+        self.prq_names = [parquet_name + all_files[i].stem for i in range(len(all_files))]
         missing_files = []
         missing_prq_names = []
         
@@ -365,7 +364,7 @@ class DldFlashProcessorExpress(DldProcessor):
                 missing_files.append(all_files[i])
                 missing_prq_names.append(self.prq_names[i])
         
-        print(f'reading runs_ {runs_str}: {len(missing_files)} new files of {len(all_files)} total.')
+        print(f'Reading {runs_str}: {len(missing_files)} new files of {len(all_files)} total.')
         self.failed_str = []
         
         # Set cores for multiprocessing
