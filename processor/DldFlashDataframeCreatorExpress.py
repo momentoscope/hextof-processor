@@ -27,12 +27,12 @@ class DldFlashProcessorExpress(DldProcessor):
     The class generates multiindexed multidimensional pandas dataframes 
     from the new FLASH dataformat resolved by both macro and microbunches alongside electrons.
     """
-    def __init__(self, runNumber = None, train_id_interval = None, channels = None, settings = None, beamtime_dir=None, 
+    def __init__(self, runNumber = None, channels = None, settings = None, beamtime_dir=None, 
                 parquet_path=None, parquet_dir=None, beamtime_id=None, year=None, daq="fl1user2", silent=False):
         super().__init__(settings=settings,silent=silent)
         self.runNumber = runNumber
-        self.train_id_interval = train_id_interval
         
+        # Parses and stores the channel names that are defined by the json file
         if channels is None:
             all_channel_list_dir = os.path.join(Path(__file__).parent.absolute(), "channels.json")
         else:
@@ -41,42 +41,44 @@ class DldFlashProcessorExpress(DldProcessor):
         with open(all_channel_list_dir, "r") as json_file:
             self.all_channels = json.load(json_file)
         self.channels = self.availableChannels # Set all channels, exluding pulseId as default
-
-
-        if beamtime_dir is None:        
-            if beamtime_id is None:
-                beamtime_id = self.settings['processor']['beamtime_id']
-            if year is None:
-                year = self.settings['processor']['year']
-            if beamtime_id is None or year is None:
-                raise ValueError('Either the beamtime_dir or beamtime_id and year or a settings file containing such info is needed to find the data.')
-            self.beamtime_dir = Path(f'/asap3/flash/gpfs/pg2/{year}/data/{beamtime_id}/')
-        else:
-            self.beamtime_dir = Path(beamtime_dir)
-                
-        self.raw_dir = self.beamtime_dir.joinpath('raw/hdf/express')
         
-        if parquet_dir is None:
-            if parquet_path is None:
-                self.parquet_path = 'processed/parquet'
-            elif Path(self.parquet_path).exists():
-                self.parquet_dir = Path(self.parquet_path)
-            self.parquet_dir = self.beamtime_dir.joinpath(self.parquet_path)
-        else:
-            self.parquet_dir = Path(parquet_dir)
-            
-        if not self.parquet_dir.exists():
-            os.mkdir(self.parquet_dir)    
-            
-        self.temp_parquet_dir = self.parquet_dir.joinpath('per_file')
-        if not self.temp_parquet_dir.exists():
-            os.mkdir(self.temp_parquet_dir)
+        # Prases to locate the raw beamtime directory from settings file 
+        if 'paths' in self.settings.keys():
+            self.DATA_RAW_DIR = Path(self.settings['paths']['data_raw_dir'])
+        else:    
+            if beamtime_dir is None:
+                if beamtime_id is None:
+                    beamtime_id = self.settings['processor']['beamtime_id']
+                if year is None:
+                    year = self.settings['processor']['year']
+                if beamtime_id is None or year is None:
+                    raise ValueError('Either the beamtime_dir or beamtime_id and year or a settings file\
+                    containing such info is needed to find the data.')
+                self.beamtime_dir = Path(f'/asap3/flash/gpfs/pg2/{year}/data/{beamtime_id}/')
 
-        if self.runNumber is None:
-            raise ValueError('Must provide a run or list of runs!')
+            else:
+                self.beamtime_dir = Path(beamtime_dir)
+
+            # Folder naming convention till end of October
+            self.DATA_RAW_DIR = self.beamtime_dir.joinpath('raw/hdf/express')
+            # Use new convention if express doesn't exist
+            if not self.DATA_RAW_DIR.exists(): 
+                self.DATA_RAW_DIR = self.beamtime_dir.joinpath(f'raw/hdf/{upper(daq)}')
         
-        self.resetMultiIndex()  # initializes the indices
+        # Parses and creates directory to store parquet files
+        if 'paths' in self.settings.keys():
+            self.DATA_PARQUET_DIR = Path(self.settings['paths']['data_parquet_dir'])
+        else:
+            if parquet_dir is None:
+                if parquet_path is None:
+                    self.parquet_path = 'processed/parquet'
+                self.DATA_PARQUET_DIR = self.beamtime_dir.joinpath(self.parquet_path)
+            else:
+                self.DATA_PARQUET_DIR = Path(parquet_dir)
 
+            if not self.DATA_PARQUET_DIR.exists():
+                os.mkdir(self.DATA_PARQUET_DIR)    
+            
     @property
     def availableChannels(self):
         """Returns the channel names that are available for use, 
@@ -285,18 +287,6 @@ class DldFlashProcessorExpress(DldProcessor):
         return sorted(Path(raw_data_dir)
             .glob(f"{stream_name_prefixes[daq]}_run{run_number}_*.h5"),
             key=date_time_section)
-
-    def createDataframePerRun(self, run_number=None, daq="fl1user2"):
-        """Returns concatenated DataFrame for multiple files from a run"""
-
-        if run_number is None:
-            run_number = self.runNumber
-        else:
-            self.runNumber = run_number
-        files = self.runFilesNames(run_number, daq, self.raw_dir)
-
-        data_frames = (self.createDataframePerFile(each_file) for each_file in files)
-        return concat(data_frames)
     
     def h5_to_parquet(self, h5, prq):
         try:
@@ -324,7 +314,7 @@ class DldFlashProcessorExpress(DldProcessor):
                 list of channel names to include in the dataframe. if none defaults to all available channels
             beamtime_dir: str | path
                 path to the raaw data. If none, its inferred from the settings file
-            self.parquet_path: str | path
+            parquet_path: str | path
                 path relative to beamtime_dir where to storethe parquet files. Defaults to "beamtime_dir/processed/parquet"
             beamtime_id: int
                 the id of the beamtime. If none it is inferred from settings
@@ -336,13 +326,19 @@ class DldFlashProcessorExpress(DldProcessor):
             prc: DldProcessor
                 returns an instance of the processor class, with electron and pulse dataframes loaded.
         """
+        if (self.runNumber or runs) is None:
+            raise ValueError('Must provide a run or list of runs!')
                         
         if not runs:
             runs = self.runNumber 
-
+        
+        # create a per_file directory
+        self.temp_parquet_dir = self.DATA_PARQUET_DIR.joinpath('per_file')
+        if not self.temp_parquet_dir.exists():
+            os.mkdir(self.temp_parquet_dir)
+        
         # prepare a list of names for the files to read and parquets to write
         try: 
-            len(runs)
             runs_str = f'runs{runs[0]}to{runs[-1]}'
         except TypeError:
             runs_str = f'run{runs}'
@@ -350,7 +346,7 @@ class DldFlashProcessorExpress(DldProcessor):
         parquet_name = f'{self.temp_parquet_dir}/{runs_str}'
         all_files = []
         for run in runs:
-            files = self.runFilesNames(run, daq, self.raw_dir)
+            files = self.runFilesNames(run, daq, self.DATA_RAW_DIR)
             [all_files.append(f) for f in files]
             if len(files) == 0 and not ignore_missing_runs:
                 raise FileNotFoundError(f'No file found for run {run}')
@@ -368,11 +364,13 @@ class DldFlashProcessorExpress(DldProcessor):
         print(f'reading runs_ {runs_str}: {len(missing_files)} new files of {len(all_files)} total.')
         self.failed_str = []
         
+        self.resetMultiIndex()  # initializes the indices for h5_to_parquet
+        
         # Set cores for multiprocessing
         N_CORES = len(missing_files)
         if N_CORES > cpu_count() - 1:
             N_CORES = cpu_count() - 1
-
+        
         # Read missing files using multiple cores
         if len(missing_files) > 0:
             with Pool(processes=N_CORES) as pool:    
@@ -386,7 +384,7 @@ class DldFlashProcessorExpress(DldProcessor):
             raise ValueError('No data available. Probably failed reading all h5 files')
         else:
             print(f'Loading {len(self.prq_names)} dataframes. Failed reading {len(all_files)-len(self.prq_names)} files.')  
-            dfs = [read_parquet(fn) for fn in self.prq_names] # todo skip pandas, as dask only should work
+            dfs = [read_parquet(fn) for fn in self.prq_names]
             df = concat(dfs)
             df[self.channelsPerPulse] = df[self.channelsPerPulse].fillna(method="ffill")
             df_electron = df.dropna(subset=self.channelsPerElectron)
