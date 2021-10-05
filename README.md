@@ -54,7 +54,7 @@ $ source activate hextof-express
 To add the newly created environment to the **Jupyter Notebooks** kernel list,
 and install your new kernel:
 ```bash
-(hextof-env)$ python -m ipykernel install --user --name=hextof-express
+(hextof-express)$ python -m ipykernel install --user --name=hextof-express
 ```
 ### 3. Local Setup
 #### 3.1 Initialize settings
