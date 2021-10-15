@@ -355,7 +355,7 @@ class DldFlashProcessorExpress(DldProcessor):
                         
         if not runs:
             runs = self.runNumber 
-
+            
         # create a per_file directory
         self.temp_parquet_dir = self.DATA_PARQUET_DIR.joinpath('per_file')
         if not self.temp_parquet_dir.exists():
@@ -384,7 +384,7 @@ class DldFlashProcessorExpress(DldProcessor):
             if not Path(self.prq_names[i]).exists():
                 missing_files.append(all_files[i])
                 missing_prq_names.append(self.prq_names[i])
-
+        
         print(f'Reading {runs_str}: {len(missing_files)} new files of {len(all_files)} total.')
         self.failed_str = []
         
@@ -401,14 +401,14 @@ class DldFlashProcessorExpress(DldProcessor):
                 pool.starmap(self.h5_to_parquet, tuple(zip(missing_files, missing_prq_names)))
                             
         if len(self.failed_str)>0:
-            print(f'Failed reading {len(self.failed_str)} files of{len(all_files)}:') ## FIX THIS NAMING!
+            print(f'Failed reading {len(self.failed_str)} files of{len(all_files)}:')
             for s in self.failed_str:
                 print(f'\t- {s}')
         if len(self.prq_names)==0:
             raise ValueError('No data available. Probably failed reading all h5 files')
         else:
             print(f'Loading {len(self.prq_names)} dataframes. Failed reading {len(all_files)-len(self.prq_names)} files.')  
-            self.dfs = [dd.read_parquet(fn) for fn in self.prq_names] # todo skip pandas, as dask only should work
+            self.dfs = [dd.read_parquet(fn) for fn in self.prq_names]
             self.fill_na()
             df = dd.concat(self.dfs)
             df_electron = df.dropna(subset=self.channelsPerElectron)
