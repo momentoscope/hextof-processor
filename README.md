@@ -1,6 +1,7 @@
 
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4651325.svg)](https://doi.org/10.5281/zenodo.4651325)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4651325.svg)](https://doi.org/10.5281/zenodo.4651325) [![Documentation Status](https://readthedocs.org/projects/hextof-processor/badge/?version=latest)](https://hextof-processor.readthedocs.io/en/latest/?badge=latest)
+
 
 
 # hextof-processor
