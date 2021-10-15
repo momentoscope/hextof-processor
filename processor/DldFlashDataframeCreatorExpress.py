@@ -335,6 +335,7 @@ class DldFlashProcessorExpress(DldProcessor):
              beamtime_dir=None, parquet_path=None, beamtime_id=None, year=None,
             daq="fl1user2"):
         """ Read express data from DAQ, generating a parquet in between.
+
         Args:
             runs: int | list
                 run number or list of run numbers to load
@@ -356,6 +357,7 @@ class DldFlashProcessorExpress(DldProcessor):
                 the year of the beamtime. If none it is inferred from settings
             daq: str
                 the daq containig the data. If none it is inferred from settings
+                
         returns:
             prc: DldProcessor
                 returns an instance of the processor class, with electron and pulse dataframes loaded.

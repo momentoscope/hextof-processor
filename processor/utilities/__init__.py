@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+"""The utilities module"""
 from . import calibration, dfops, io, misc
 
 try:
