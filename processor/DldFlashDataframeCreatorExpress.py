@@ -4,7 +4,7 @@ import glob
 import json
 import h5py
 import numpy as np
-from pandas import Series, DataFrame, concat, MultiIndex, read_parquet
+from pandas import Series, DataFrame, concat, MultiIndex
 from dask import delayed, compute
 import dask.dataframe as dd
 from dask.diagnostics import ProgressBar
@@ -12,6 +12,7 @@ from pathlib import Path
 from functools import reduce
 from configparser import ConfigParser
 from multiprocessing import Pool, cpu_count
+from itertools import compress
 
 """
     author:: Muhammad Zain Sohail, Steinn Ymir Agustsson
@@ -296,6 +297,29 @@ class DldFlashProcessorExpress(DldProcessor):
         except ValueError as e:
             self.failed_str.append(f'{prq}: {e}')
             self.prq_names.remove(prq)
+            
+    def fill_na(self):
+        """Routine to fill the NaN values with intrafile forward filling. """
+        # First use forward filling method to fill each file's pulse resolved channels.
+        for i in range(len(self.dfs)):
+            self.dfs[i][self.channelsPerPulse] = self.dfs[i][self.channelsPerPulse].fillna(method="ffill")
+        
+        # This loop forward fills between the consective files. 
+        # The first run file will have NaNs, unless another run before it has been defined.
+        for i in range(1, len(self.dfs)):
+            subset = self.dfs[i][self.channelsPerPulse] # Take only pulse channels
+            is_null = subset.loc[0].isnull().values.compute() # Find which column(s) contain NaNs.
+            # Statement executed if there is more than one NaN value in the first row from all columns
+            if is_null.sum() > 0: 
+                # Select channel names with only NaNs
+                channels_to_overwrite = list(compress(self.channelsPerPulse, is_null[0]))
+                # Get the values for those channels from previous file
+                values = self.dfs[i-1][self.channelsPerPulse].tail(1).values[0]
+                # Fill all NaNs by those values
+                subset[channels_to_overwrite] = subset[channels_to_overwrite].fillna(
+                                                                dict(zip(channels_to_overwrite, values)))
+                # Overwrite the dataframes with filled dataframes
+                self.dfs[i][self.channelsPerPulse] = subset
 
     def readData(self, runs=None, ignore_missing_runs=False, settings=None, channels=None,
              beamtime_dir=None, parquet_path=None, beamtime_id=None, year=None,
@@ -331,27 +355,27 @@ class DldFlashProcessorExpress(DldProcessor):
                         
         if not runs:
             runs = self.runNumber 
-        
+
         # create a per_file directory
         self.temp_parquet_dir = self.DATA_PARQUET_DIR.joinpath('per_file')
         if not self.temp_parquet_dir.exists():
             os.mkdir(self.temp_parquet_dir)
-        
-        # prepare a list of names for the files to read and parquets to write
+
+        # Prepare a list of names for the files to read and parquets to write
         try: 
-            runs_str = f'runs{runs[0]}to{runs[-1]}'
+            runs_str = f'Runs {runs[0]} to {runs[-1]}'
         except TypeError:
-            runs_str = f'run{runs}'
+            runs_str = f'Run {runs}'
             runs = [runs]
-        parquet_name = f'{self.temp_parquet_dir}/{runs_str}'
+        parquet_name = f'{self.temp_parquet_dir}/'
         all_files = []
         for run in runs:
             files = self.runFilesNames(run, daq, self.DATA_RAW_DIR)
             [all_files.append(f) for f in files]
             if len(files) == 0 and not ignore_missing_runs:
                 raise FileNotFoundError(f'No file found for run {run}')
-        
-        self.prq_names = [parquet_name+f'_part{i:03}' for i in range(len(all_files))]
+
+        self.prq_names = [parquet_name + all_files[i].stem for i in range(len(all_files))]
         missing_files = []
         missing_prq_names = []
         
@@ -360,8 +384,8 @@ class DldFlashProcessorExpress(DldProcessor):
             if not Path(self.prq_names[i]).exists():
                 missing_files.append(all_files[i])
                 missing_prq_names.append(self.prq_names[i])
-        
-        print(f'reading runs_ {runs_str}: {len(missing_files)} new files of {len(all_files)} total.')
+
+        print(f'Reading {runs_str}: {len(missing_files)} new files of {len(all_files)} total.')
         self.failed_str = []
         
         self.resetMultiIndex()  # initializes the indices for h5_to_parquet
@@ -377,19 +401,20 @@ class DldFlashProcessorExpress(DldProcessor):
                 pool.starmap(self.h5_to_parquet, tuple(zip(missing_files, missing_prq_names)))
                             
         if len(self.failed_str)>0:
-            print(f'Failed reading {len(self.failed_str)} files of{len(all_files)}:')
+            print(f'Failed reading {len(self.failed_str)} files of{len(all_files)}:') ## FIX THIS NAMING!
             for s in self.failed_str:
                 print(f'\t- {s}')
         if len(self.prq_names)==0:
             raise ValueError('No data available. Probably failed reading all h5 files')
         else:
             print(f'Loading {len(self.prq_names)} dataframes. Failed reading {len(all_files)-len(self.prq_names)} files.')  
-            dfs = [read_parquet(fn) for fn in self.prq_names]
-            df = concat(dfs)
-            df[self.channelsPerPulse] = df[self.channelsPerPulse].fillna(method="ffill")
+            self.dfs = [dd.read_parquet(fn) for fn in self.prq_names] # todo skip pandas, as dask only should work
+            self.fill_na()
+            df = dd.concat(self.dfs)
             df_electron = df.dropna(subset=self.channelsPerElectron)
             pulse_columns = ['trainId','pulseId','electronId'] + self.channelsPerPulse
             df_pulse = df[pulse_columns]
             df_pulse = df_pulse[(df_pulse['electronId']==0)|(np.isnan(df_pulse['electronId']))]
-        self.dd = dd.from_pandas(df_electron, npartitions=len(self.prq_names))
-        self.ddMicrobunches = dd.from_pandas(df_pulse, npartitions=len(self.prq_names))
+
+        self.dd  = df_electron.repartition(npartitions=len(self.prq_names))
+        self.ddMicrobunches = df_pulse.repartition(npartitions=len(self.prq_names))
