@@ -8,7 +8,6 @@ The following guidelines are meant for future package updates by an extended use
 
 For future updates on the **hextof-processor** package, the following main dependencies should be checked for compatibility,
 
-* **pah** -- the library from the FLASH beamline for parsing the raw hdf5 file generated in the experiment
 * **dask** -- contains the distributed version of numpy array and pandas dataframe
 * **numpy**, **pandas**
 
