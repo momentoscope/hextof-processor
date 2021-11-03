@@ -6,7 +6,7 @@
         "slice": ":"
     },
     "delayStage": {
-        "format": "per_pulse",
+        "format": "per_train",
         "group_name": "/uncategorised/FLASH.SYNC/LASER.LOCK.EXP/FLASH1.MOD1.PG.OSC/FMC0.MD22.1.POSITION.RD/",
         "old_name": "/uncategorised/FLASH1_USER2/FLASH.SYNC/LASER.LOCK.EXP/FLASH1.MOD1.PG.OSC/FMC0.MD22.1.POSITION.RD/dset",
         "slice": ":"
@@ -70,13 +70,13 @@
         "slice": 0
     },
     "monochromatorPhotonEnergy": {
-        "format": "per_pulse",
+        "format": "per_train",
         "group_name": "/FL1/Beamlines/PG/Monochromator/monochromator photon energy/",
         "old_name": "/FL1/Beamlines/PG/Monochromator/monochromator photon energy",
         "slice": ":"
     },
     "timeStamp": {
-        "format": "per_pulse",
+        "format": "per_train",
         "group_name": "/FL1/Timing/Bunch pattern/train index 1/",
         "old_name": "/Timing/time stamp/fl1user2",
         "slice": ":"

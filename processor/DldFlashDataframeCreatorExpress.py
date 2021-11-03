@@ -90,7 +90,7 @@ class DldFlashProcessorExpress(DldProcessor):
     
     @property
     def channelsPerPulse(self):
-        """Returns a list of channels with a per pulse format, 
+        """Returns a list of channels with per_pulse format, 
         including all auxillary channels"""
         channels_per_pulse = []
         for key in self.availableChannels:
@@ -104,9 +104,15 @@ class DldFlashProcessorExpress(DldProcessor):
     
     @property
     def channelsPerElectron(self):
-        """Returns a list of channels with a per electron channels"""
+        """Returns a list of channels with per_electron format"""
         return [key for key in self.availableChannels 
                 if self.all_channels[key]['format'] == 'per_electron']
+    
+    @property
+    def channelsPerTrain(self):
+        """Returns a list of channels with per_train format"""
+        return [key for key in self.availableChannels 
+                if self.all_channels[key]['format'] == 'per_train']
 
     def resetMultiIndex(self):
         """Resets the index per pulse and electron"""
@@ -132,7 +138,6 @@ class DldFlashProcessorExpress(DldProcessor):
         # Create temporary index values 
         index_temp = MultiIndex.from_arrays((microbunches.index, microbunches.values),
                     names=["trainId", "pulseId"])
-
 
         # Calculate the electron counts per pulseId
         # unique preserves the order of appearance
@@ -164,9 +169,11 @@ class DldFlashProcessorExpress(DldProcessor):
         channel_dict = self.all_channels[channel]  # channel parameters
 
         train_id = Series(group["index"], name="trainId")  # macrobunch
-        np_array = group["value"][()]  # unpacks the values
+        # unpacks the timeStamp or value
         if channel == "timeStamp":
             np_array = group["time"][()]
+        else:
+            np_array = group["value"][()]
 
         # Uses predefined axis and slice from the json file
         # to choose correct dimension for necessary channel
@@ -208,7 +215,6 @@ class DldFlashProcessorExpress(DldProcessor):
         
         # Pulse resolved data is treated here
         elif channel_dict["format"] == "per_pulse":
-
             # Special case for auxillary channels which checks the channel dictionary 
             # for correct slices and creates a multicolumn pandas dataframe
             if channel == "dldAux":
@@ -225,11 +231,6 @@ class DldFlashProcessorExpress(DldProcessor):
                 # Multiindex set and combined dataframe returned
                 return reduce(DataFrame.combine_first, data_frames)
             
-            elif channel in ['monochromatorPhotonEnergy', 'delayStage', 'timeStamp']:
-                return (Series((np_array[i] for i in train_id.index), name=channel)
-                    .to_frame()
-                    .set_index(train_id))
-                
             else:
                 # For all other pulse resolved channels, macrobunch resolved 
                 # data is exploded to a dataframe and the MultiIndex set
@@ -240,6 +241,15 @@ class DldFlashProcessorExpress(DldProcessor):
                     .explode()
                     .to_frame()
                     .set_index(self.index_per_pulse))
+
+        elif channel_dict["format"] == "per_train":
+                return (Series((np_array[i] for i in train_id.index), name=channel)
+                    .to_frame()
+                    .set_index(train_id))
+        
+        else:
+            raise ValueError(channel + "has an undefined format. Available formats are \
+                per_pulse, per_electron and per_train")
 
     def concatenateChannels(self, h5_file, format_=None):
         """Returns a concatenated pandas DataFrame for either all pulse
