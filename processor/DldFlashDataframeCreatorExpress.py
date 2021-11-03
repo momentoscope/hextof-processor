@@ -64,7 +64,7 @@ class DldFlashProcessorExpress(DldProcessor):
             self.DATA_RAW_DIR = self.beamtime_dir.joinpath('raw/hdf/express')
             # Use new convention if express doesn't exist
             if not self.DATA_RAW_DIR.exists(): 
-                self.DATA_RAW_DIR = self.beamtime_dir.joinpath(f'raw/hdf/{upper(daq)}')
+                self.DATA_RAW_DIR = self.beamtime_dir.joinpath(f'raw/hdf/{daq.upper()}')
         
         # Parses and creates directory to store parquet files
         if 'paths' in self.settings.keys():
