@@ -1,16 +1,19 @@
-.. hextof-processor documentation master file
+.. hextof-processor documentation master file, created by
+   sphinx-quickstart on Tue Oct 12 03:55:45 2021.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
 ``hextof-processor`` documentation
-=================================================
+============================================
 
 .. toctree::
    :maxdepth: 3
    :numbered:
    :caption: Processor library API
-
-   library/DldFlashDataframeCreator
+   
    library/DldProcessor
-   library/pah
+   library/DldFlashDataframeCreatorExpress
+   library/LabDataframeCreator
 
 .. toctree::
    :maxdepth: 3
@@ -23,7 +26,8 @@
    library/utils/vis
    library/utils/io
    library/utils/misc
-   
+   library/utils/xpsdoniachs
+
 .. toctree::
    :maxdepth: 2
    :numbered:
@@ -35,7 +39,7 @@
    example/04_nobinning
    example/05_corrections
    example/06_fullexample
-   
+
 .. toctree::
    :maxdepth: 2
    :numbered:
@@ -43,3 +47,10 @@
    
    misc/listofterms
    misc/howtomaintain
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

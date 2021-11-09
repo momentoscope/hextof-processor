@@ -136,7 +136,7 @@ class LabDataframeCreator(DldProcessor):
                 pool.starmap(self.h5_to_parquet, tuple(zip(missing_files, missing_prq_names)))
                             
         if len(self.failed_str)>0:
-            print(f'Failed reading {len(self.failed_str)} files of{len(all_files)}:')
+            print(f'Failed reading {len(self.failed_str)} files of{len(self.filenames)}:')
             for s in self.failed_str:
                 print(f'\t- {s}')
         if len(self.prq_names)==0:
