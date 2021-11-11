@@ -1,3 +1,2 @@
 include README.md
-include requirements.txt
-global-include *.json
+include src/processor/*.json
