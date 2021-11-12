@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+"""This is the processing module for the acquired FLASH data.
+"""
 
 import warnings
 
