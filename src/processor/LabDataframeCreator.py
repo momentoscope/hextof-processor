@@ -12,6 +12,7 @@ from pathlib import Path
 from functools import reduce
 from configparser import ConfigParser
 from multiprocessing import Pool, cpu_count
+from itertools import compress
 
 """
     author:: Muhammad Zain Sohail, Steinn Ymir Agustsson
@@ -86,7 +87,30 @@ class LabDataframeCreator(DldProcessor):
         except ValueError as e:
             self.failed_str.append(f'{prq}: {e}')
             self.prq_names.remove(prq)
-    
+ 
+    def fillNA(self):
+        """Routine to fill the NaN values with intrafile forward filling. """
+        # First use forward filling method to fill each file's pulse resolved channels.
+        for i in range(len(self.dfs)):
+            self.dfs[i] = self.dfs[i].fillna(method="ffill")
+
+        # This loop forward fills between the consective files. 
+        # The first run file will have NaNs, unless another run before it has been defined.
+        for i in range(1, len(self.dfs)):
+            subset = self.dfs[i]
+            is_null = subset.loc[0].isnull().values.compute() # Find which column(s) contain NaNs.
+            # Statement executed if there is more than one NaN value in the first row from all columns
+            if is_null.sum() > 0: 
+                # Select channel names with only NaNs
+                channels_to_overwrite = list(is_null[0])
+                # Get the values for those channels from previous file
+                values = self.dfs[i-1].tail(1).values[0]
+                # Fill all NaNs by those values
+                subset[channels_to_overwrite] = subset[channels_to_overwrite].fillna(
+                                                                dict(zip(channels_to_overwrite, values)))
+                # Overwrite the dataframes with filled dataframes
+                self.dfs[i] = subset
+
     def readData(self, path=None, filenames = None):
         
         if (self.filenames or filenames) is None:
@@ -144,7 +168,6 @@ class LabDataframeCreator(DldProcessor):
         else:
             print(f'Loading {len(self.prq_names)} dataframes. Failed reading {len(self.filenames)-len(self.prq_names)} files.')  
             self.dfs = [dd.read_parquet(fn) for fn in self.prq_names] # todo skip pandas, as dask only should work
-            for i in range(len(self.dfs)):
-                self.dfs[i] = self.dfs[i].fillna(method="ffill")
+            self.fillNA()
 
         self.dd  = dd.concat(self.dfs).repartition(npartitions=len(self.prq_names))
