@@ -4,13 +4,16 @@
 @author: Steinn Ymir Agustsson
 """
 
-from .misc import repr_byte_size
+from .misc import repr_byte_size, ravelledGaussian2D, gaussian2D, fit_2d_gaussian,\
+    effective_gaussian_area, pulse_energy, fluence, absorbed_energy_density, fwhm_to_sigma, sigma_to_fwhm
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 import dask
 from dask.diagnostics import ProgressBar
+
 
 
 def channel_report(dd):
@@ -174,3 +177,127 @@ def plot_GMD_vs_bunches(self):
     for a in ax:
         a.legend()
         a.grid()
+
+def fit_spot_size(data,guess=None,l_bound=None,u_bound=None,
+                  px_to_um=None,optical_diode_mean=None,
+                  photoemission_order=None,optical_transmission=1,od_2_uj=4.0926e-06,
+                  reflectivity=None,penetration_depth=None,
+                  figsize=(8,8),
+                 sigma_is_fwhm=False):
+    """ Fit a 2D gaussian to the spatial view of the pump laser
+    
+    params:
+        guess: guess parameters for the fit.
+            the order of the parameters is: 
+            ['amplitude',    'xo',    'yo',  'sigma_x',  'sigma_y', 'theta', 'offset']
+        l_bound: lower bounds for the fit, same order as guess
+        u_bound: upper bounds for the fit, same order as guess
+        optical_diode_mean: mean value of the optical diode, used for fluence evaluation.
+            any value can be passed, and the fluence evaluation will use that.
+            if None, it tries to evaluate the mean optical diode value from data, if 
+            data was binned along optical diode also.
+        photoemission_order: the order of the photoemission process: see Dendzik et al supplementary
+        optical_transmission:transmission factor of the microscope
+            to account for losses from the laser power measurement 
+            point to the sample position, typically 0.7
+        od_2_uj: conversion from optical diode values to microjoule, obtained with calibration tables
+        figsize: size of the output figure
+        sigma_is_fwhm: if true, it interpretates the parameter sigma of the gaussian as FWHM
+    returns:
+        popt: fit parameters of the 2D gaussian    
+    """
+    try:
+        res = data.sum('opticalDiode')
+    except:
+        res = data
+    #calibration:
+
+    #px_to_um = 0.6 # pixel size in micrometers. if =1 will report in pixels.
+#     px_to_um = 1.0673331251301068#450/len(res.dldPosX) # FoV in micrometers over number of pixels in X or Y direction. if =1 will report in pixels.
+    if px_to_um is None:
+        px_to_um = 1
+        unit = 'px'
+    else:
+        unit= 'μm'
+    # fit parameters
+    labels =  ['amplitude',    'xo',    'yo',  'sigma_x',  'sigma_y', 'theta', 'offset'] # name of parameter
+    if guess is None:
+        guess =   [        30.,    275.,    215.,        30.,        70.,     3.,        0] # starting guess
+    if l_bound is None:
+        l_bound = [         0.,    170.,    150.,        5.,         5.,      0.,  -np.inf] # lower bounds (can use np.inf)
+    if u_bound is None:
+        u_bound = [     np.inf,    330.,    250.,        170.,       200.,     5.,   np.inf] # upper bounds
+    if sigma_is_fwhm:
+        guess[3] = fwhm_to_sigma(guess[3])
+        guess[4] = fwhm_to_sigma(guess[4])
+        l_bound[3] = fwhm_to_sigma(l_bound[3])
+        l_bound[4] = fwhm_to_sigma(l_bound[4])        
+        u_bound[3] = fwhm_to_sigma(u_bound[3])
+        u_bound[4] = fwhm_to_sigma(u_bound[4])
+    # ---- nothing to change below ----
+    x = np.linspace(0, res.shape[0] - 1, res.shape[0])
+    y = np.linspace(0, res.shape[1] - 1, res.shape[1])
+    meshgrid = np.meshgrid(x, y)
+    bounds = [l_bound,u_bound]
+    popt,perr  = fit_2d_gaussian(res,guess=guess,bounds=bounds)
+    data_fitted = gaussian2D(meshgrid, *popt).reshape(res.shape)
+    print(*popt)
+    # -- nothing to change below --
+    fig = plt.figure(figsize=figsize)
+    #[left, bottom, width, height]
+    img_ax = fig.add_axes([.1,.3,.5,.5],xticklabels=[], yticklabels=[])
+    xproj_ax = fig.add_axes([.1,.1,.5,.2], yticklabels=[])
+    yproj_ax = fig.add_axes([.6,.3,.2,.5], xticklabels=[])
+    img_ax.set_title('Spot size evaluation on run {}'.format(runNumber))
+    yproj_ax.yaxis.set_label_position("right")
+    yproj_ax.yaxis.set_ticks_position("right")
+    xproj_ax.set_xticklabels(np.arange(0,max(x)*px_to_um,5))
+    yproj_ax.set_yticklabels(np.arange(0,max(y)*px_to_um,5))
+
+    xproj_ax.set_xlabel('X')
+    yproj_ax.set_ylabel('Y')
+    for ax in [img_ax, yproj_ax, xproj_ax]:
+        ax.tick_params(axis="both",direction="in",bottom=True, top=True, left=True, right=True,which='both')
+
+    img_ax.imshow(res,cmap='terrain')#gray_r
+    img_ax.contour(data_fitted,cmap='inferno')#,colors='nipy_spectral')
+    xproj_ax.plot(x,res.sum(axis=0))
+    xproj_ax.plot(x,data_fitted.sum(0))
+    xproj_ax.set_xlim(min(x),max(x))
+    yproj_ax.plot(-res.sum(axis=1),y)
+    yproj_ax.plot(-data_fitted.sum(1),y)
+    yproj_ax.set_ylim(min(y),max(y))
+
+    FWHM_x = sigma_to_fwhm(px_to_um * popt[3])
+    FWHM_y = sigma_to_fwhm(px_to_um * popt[4])
+    eff_area = effective_gaussian_area(popt[3],popt[4],photoemission_order=photoemission_order,sigma_is_fwhm=False)
+    
+    report_label = "Parameters:\n"
+    report_label += f'Gaussian FWHM\nx={FWHM_x:.2f} {unit} | y={FWHM_y:.2f} {unit}\n'
+    report_label += f'Area: {eff_area:.2f} {unit}$^2$\n'
+
+    if optical_diode_mean is not None:
+        optical_diode_value = optical_diode_mean
+    else:
+        try:
+            optical_diode_mean = res.opticalDiode.mean().value
+        except:
+            optical_diode_value = None
+            
+    if optical_diode_value is not None:
+
+        report_label += f'OD mean: {optical_diode_value:.2f}\n'
+
+        pe  = pulse_energy(optical_diode_value,od_2_uj=od_2_uj,T=optical_transmission)
+        report_label += f'Pulse energy: {1000*pe:.3f} nJ\n'
+        fl  = fluence(pe,eff_area)
+        report_label += f'Fluence: {fl:.3f} mJ/cm²\n'
+
+    t = img_ax.text(res.shape[0]*1.02,res.shape[1]*1.02,report_label,color='Black',va='top',)#fontsize='small',)
+
+    if False: # set True to save figure
+        fig.savefig('spotsize evaluation run {}.pdf'.format(runNumber), dpi=None, facecolor='w', edgecolor='w',
+            orientation='portrait', papertype=None, format=None,
+            transparent=False, bbox_inches=None, pad_inches=0.1,
+            frameon=None, metadata=None)
+    return popt
