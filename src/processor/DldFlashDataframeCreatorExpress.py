@@ -78,8 +78,30 @@ class DldFlashProcessorExpress(DldProcessor):
                 self.DATA_PARQUET_DIR = Path(parquet_dir)
 
             if not self.DATA_PARQUET_DIR.exists():
-                os.mkdir(self.DATA_PARQUET_DIR)    
-            
+                os.mkdir(self.DATA_PARQUET_DIR)   
+         
+    @property
+    def removeChannels(self, channel_names):
+        """Removes the unnecessary channels from the available channels
+        using list of channels to remove"""
+        for channels in channel_names:
+            self.all_channels.pop(channels, None)
+        self.channels = self.availableChannels # Set all channels, exluding pulseId as default
+        return self.channels
+
+    @property
+    def addChannels(self, channel_dict):
+        """Add new channels using a dict format defined by:
+        "channel_name": {
+            "format": "per_pulse" | "per_train" | "per_electron",
+            "group_name": "channel_group_path",
+            "slice": ":"
+        }
+        """
+        self.all_channels.update(channel_dict)
+        self.channels = self.availableChannels # Set all channels, exluding pulseId as default
+        return self.channels
+
     @property
     def availableChannels(self):
         """Returns the channel names that are available for use, 
@@ -308,7 +330,7 @@ class DldFlashProcessorExpress(DldProcessor):
             self.failed_str.append(f'{prq}: {e}')
             self.prq_names.remove(prq)
             
-    def fill_na(self):
+    def fillNA(self):
         """Routine to fill the NaN values with intrafile forward filling. """
         # First use forward filling method to fill each file's pulse resolved channels.
         for i in range(len(self.dfs)):
@@ -421,7 +443,7 @@ class DldFlashProcessorExpress(DldProcessor):
         else:
             print(f'Loading {len(self.prq_names)} dataframes. Failed reading {len(all_files)-len(self.prq_names)} files.')  
             self.dfs = [dd.read_parquet(fn) for fn in self.prq_names]
-            self.fill_na()
+            self.fillNA()
             df = dd.concat(self.dfs)
             df_electron = df.dropna(subset=self.channelsPerElectron)
             pulse_columns = ['trainId','pulseId','electronId'] + self.channelsPerPulse
