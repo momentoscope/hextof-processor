@@ -265,9 +265,9 @@ class DldFlashProcessorExpress(DldProcessor):
                     .set_index(self.index_per_pulse))
 
         elif channel_dict["format"] == "per_train":
-                return (Series((np_array[i] for i in train_id.index), name=channel)
-                    .to_frame()
-                    .set_index(train_id))
+            return (Series((np_array[i] for i in train_id.index), name=channel)
+                .to_frame()
+                .set_index(train_id))
         
         else:
             raise ValueError(channel + "has an undefined format. Available formats are \
@@ -332,26 +332,27 @@ class DldFlashProcessorExpress(DldProcessor):
             
     def fillNA(self):
         """Routine to fill the NaN values with intrafile forward filling. """
-        # First use forward filling method to fill each file's pulse resolved channels.
+        # First use forward filling method to fill each file's pulse and train resolved channels.
+        channels = self.channelsPerPulse + self.channelsPerTrain
         for i in range(len(self.dfs)):
-            self.dfs[i][self.channelsPerPulse] = self.dfs[i][self.channelsPerPulse].fillna(method="ffill")
+            self.dfs[i][channels] = self.dfs[i][channels].fillna(method="ffill")
         
         # This loop forward fills between the consective files. 
         # The first run file will have NaNs, unless another run before it has been defined.
         for i in range(1, len(self.dfs)):
-            subset = self.dfs[i][self.channelsPerPulse] # Take only pulse channels
+            subset = self.dfs[i][channels] # Take only pulse channels
             is_null = subset.loc[0].isnull().values.compute() # Find which column(s) contain NaNs.
             # Statement executed if there is more than one NaN value in the first row from all columns
             if is_null.sum() > 0: 
                 # Select channel names with only NaNs
-                channels_to_overwrite = list(compress(self.channelsPerPulse, is_null[0]))
+                channels_to_overwrite = list(compress(channels, is_null[0]))
                 # Get the values for those channels from previous file
-                values = self.dfs[i-1][self.channelsPerPulse].tail(1).values[0]
+                values = self.dfs[i-1][channels].tail(1).values[0]
                 # Fill all NaNs by those values
                 subset[channels_to_overwrite] = subset[channels_to_overwrite].fillna(
                                                                 dict(zip(channels_to_overwrite, values)))
                 # Overwrite the dataframes with filled dataframes
-                self.dfs[i][self.channelsPerPulse] = subset
+                self.dfs[i][channels] = subset
 
     def readData(self, runs=None, ignore_missing_runs=False, settings=None, channels=None,
              beamtime_dir=None, parquet_path=None, beamtime_id=None, year=None,
