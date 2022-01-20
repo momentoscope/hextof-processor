@@ -131,7 +131,7 @@ class LabDataframeCreator(DldProcessor):
                 # Overwrite the dataframes with filled dataframes
                 self.dfs[i] = subset
 
-    def readData(self, path=None, filenames = None):
+    def readData(self, path = None, filenames = None, parquet_path = None):
         
         if (self.filenames or filenames) is None:
             raise ValueError('Must provide a file or list of files!')
@@ -144,7 +144,10 @@ class LabDataframeCreator(DldProcessor):
             self.path = Path(path)
         
         # create a per_file directory
-        self.parquet_dir = self.path.joinpath('parquet')
+        if parquet_path is None:
+            self.parquet_dir = self.path.joinpath('parquet')
+        else:
+            self.parquet_dir = Path(parquet_path)
         if not self.parquet_dir.exists():
             os.mkdir(self.parquet_dir)
         
