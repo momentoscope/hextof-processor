@@ -266,6 +266,15 @@ def argnearest(array, val, rettype='vectorized'):
 # %% Data Input/Output
 # ================================================================================
 
+def parse_h5_keys(d,prefix=''):
+    l = []
+    for k in d.keys():
+        try:
+            [l.append(s) for s in parse_h5_keys(d[k],prefix=prefix + '/' + k)]
+        except:
+            l.append(prefix + '/' + k)
+    return l
+
 def save_H5_hyperstack(data_array, filename, path=None, overwrite=True):
     """ Saves an hdf5 file with 4D (Kx,Ky,E,Time) images for import in FIJI
 

@@ -1,4 +1,5 @@
 from processor.DldProcessor import DldProcessor
+from processor.utilities import misc
 import sys, os
 import glob
 import json
@@ -38,8 +39,11 @@ class LabDataframeCreator(DldProcessor):
         else:
             all_channel_list_dir = channels
         # Read all channel info from a json file
-        with open(all_channel_list_dir, "r") as json_file:
-            self.all_channels = json.load(json_file)
+        if isinstance(all_channel_list_dir,dict):
+            self.all_channels = channels
+        else:
+            with open(all_channel_list_dir, "r") as json_file:
+                self.all_channels = json.load(json_file)
         self.channels = self.availableChannels
         
     @property
@@ -54,6 +58,7 @@ class LabDataframeCreator(DldProcessor):
             if each_name in self.all_channels]  # filters for valid channels
         # Only channels with the defined format are selected and stored 
         # in an iterable list
+#         print(valid_names)
         if format_ is not None:
             channels = [each_name
                 for each_name in valid_names
@@ -65,13 +70,28 @@ class LabDataframeCreator(DldProcessor):
             electronID = np.cumsum([0,*h5_file['DLD/NumOfEvents'][:-1]])
             
         elif format_ == "electron":
-            electronID = np.arange(len(h5_file['DLD/times']))
-        
-        dataframes = (Series(h5_file[self.all_channels[channel]['group_name']], 
-                                name = channel, 
-                                index = electronID)
-                      .to_frame() for channel in channels)
+            electronID = np.arange(len(h5_file['DLD/DLD/times']))
+
+        channels_in_h5 = misc.parse_h5_keys(h5_file)
+        bad_channels = []
+        good_channels = []
+        for channel in channels:
+            gn = self.all_channels[channel]['group_name']
+            if gn not in channels_in_h5:
+                bad_channels.append(channel)
+            else:
+                good_channels.append(channel)
+        if len(bad_channels) > 0:
             
+            print(f"ERROR: skipped channels missing in h5 file: {[self.all_channels[channel]['group_name'] for channel in bad_channels]}")
+#         print([self.all_channels[channel]['group_name'] for channel in channels])
+#         print(h5_file)
+
+        dataframes = (Series(h5_file[self.all_channels[channel]['group_name']], 
+                        name = channel, 
+                        index = electronID)
+              .to_frame() for channel in good_channels)
+
         return reduce(DataFrame.combine_first, dataframes)
     
     def readFile(self, filename):
@@ -111,7 +131,7 @@ class LabDataframeCreator(DldProcessor):
                 # Overwrite the dataframes with filled dataframes
                 self.dfs[i] = subset
 
-    def readData(self, path=None, filenames = None):
+    def readData(self, path = None, filenames = None, parquet_path = None):
         
         if (self.filenames or filenames) is None:
             raise ValueError('Must provide a file or list of files!')
@@ -124,7 +144,10 @@ class LabDataframeCreator(DldProcessor):
             self.path = Path(path)
         
         # create a per_file directory
-        self.parquet_dir = self.path.joinpath('parquet')
+        if parquet_path is None:
+            self.parquet_dir = self.path.joinpath('parquet')
+        else:
+            self.parquet_dir = Path(parquet_path)
         if not self.parquet_dir.exists():
             os.mkdir(self.parquet_dir)
         
