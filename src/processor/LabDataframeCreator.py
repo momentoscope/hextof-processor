@@ -1,19 +1,14 @@
-from processor.DldProcessor import DldProcessor
-from processor.utilities import misc
-import sys, os
-import glob
+import os
 import json
 import h5py
 import numpy as np
-from pandas import Series, DataFrame, concat, MultiIndex, read_parquet
-from dask import delayed, compute
+from pandas import Series, DataFrame, concat
 import dask.dataframe as dd
-from dask.diagnostics import ProgressBar
 from pathlib import Path
 from functools import reduce
-from configparser import ConfigParser
 from multiprocessing import Pool, cpu_count
-from itertools import compress
+from processor.DldProcessor import DldProcessor
+from processor.utilities import misc
 
 """
     author:: Muhammad Zain Sohail, Steinn Ymir Agustsson
