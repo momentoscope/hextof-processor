@@ -22,23 +22,13 @@ class LabDataframeCreator(DldProcessor):
     The class generates multidimensional pandas dataframes 
     from the lab data resolved by both macro and microbunches alongside electrons.
     """
-    def __init__(self, path = None, filenames = None, channels = None, settings = None, silent=False):
+    def __init__(self, prc, filenames = None, settings = None, silent=False):
         
         super().__init__(settings=settings,silent=silent)
         self.filenames = filenames
-        self.path = path
-        
-        # Parses and stores the channel names that are defined by the json file
-        if channels is None:
-            all_channel_list_dir = os.path.join(Path(__file__).parent.absolute(), "channels_lab.json")
-        else:
-            all_channel_list_dir = channels
-        # Read all channel info from a json file
-        if isinstance(all_channel_list_dir,dict):
-            self.all_channels = channels
-        else:
-            with open(all_channel_list_dir, "r") as json_file:
-                self.all_channels = json.load(json_file)
+        self.path = prc.DATA_RAW_DIR
+        self.parquet_dir = prc.DATA_PARQUET_DIR
+        self.all_channels = prc.channels
         self.channels = self.availableChannels
         
     @property
@@ -137,14 +127,6 @@ class LabDataframeCreator(DldProcessor):
             raise ValueError('Must provide a path!')
         else:
             self.path = Path(path)
-        
-        # create a per_file directory
-        if parquet_path is None:
-            self.parquet_dir = self.path.joinpath('parquet')
-        else:
-            self.parquet_dir = Path(parquet_path)
-        if not self.parquet_dir.exists():
-            os.mkdir(self.parquet_dir)
         
         # prepare a list of names for the files to read and parquets to write
         try: 

@@ -1,0 +1,72 @@
+---
+general:
+  acquisition: flash
+  beamtime_id: 11008860
+  year: 2020
+  ubid_offset: 5
+  daq: fl1user2
+---
+channels:
+  pulseId:
+    axis: 1
+    format: per_electron
+    group_name: "/FL1/Experiment/PG/Hextof/Detector/monitor/"
+    slice: 2
+  bam:
+    format: per_pulse
+    group_name: "/FL1/Electron Diagnostic/BAM/4DBC3/electron bunch arrival time (low charge)/"
+    slice: ":"
+  delayStage:
+    format: per_train
+    group_name: "/uncategorised/FLASH.SYNC/LASER.LOCK.EXP/FLASH1.MOD1.PG.OSC/FMC0.MD22.1.POSITION.RD/"
+    slice: ":"
+  dldAux:
+    format: per_pulse
+    group_name: "/FL1/Experiment/PG/Hextof/Detector/monitor/"
+    slice: 4
+    axis: 1
+    dldAuxChannels:
+      sampleBias: 0
+      tofVoltage: 1
+      extractorVoltage: 2
+      extractorCurrent: 3
+      cryoTemperature: 4
+      sampleTemperature: 5
+      dldTimeBinSize: 15
+  dldPosX:
+    axis: 1
+    format: per_electron
+    group_name: "/FL1/Experiment/PG/Hextof/Detector/monitor/"
+    slice: 1
+  dldPosY:
+    axis: 1
+    format: per_electron
+    group_name: "/FL1/Experiment/PG/Hextof/Detector/monitor/"
+    slice: 0
+  dldTime:
+    axis: 1
+    format: per_electron
+    group_name: "/FL1/Experiment/PG/Hextof/Detector/monitor/"
+    slice: 3
+  gmdBda:
+    axis: 1
+    format: per_pulse
+    group_name: "/FL1/Photon Diagnostic/GMD/Pulse resolved energy/energy BDA/"
+    slice: 0
+  gmdTunnel:
+    axis: 1
+    format: per_pulse
+    group_name: "/FL1/Photon Diagnostic/GMD/Pulse resolved energy/energy tunnel/"
+    slice: 0
+  monochromatorPhotonEnergy:
+    format: per_train
+    group_name: "/FL1/Beamlines/PG/Monochromator/monochromator photon energy/"
+    slice: ":"
+  timeStamp:
+    format: per_train
+    group_name: "/FL1/Timing/Bunch pattern/train index 1/"
+    slice: ":"
+---
+paths:
+  data_raw_dir: /asap3/flash/gpfs/pg2/2020/data/11008860/raw/hdf/express/
+  data_parquet_dir: /asap3/flash/gpfs/pg2/2020/data/11008860/processed/parquet/

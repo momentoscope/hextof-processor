@@ -24,57 +24,14 @@ class DldFlashProcessorExpress(DldProcessor):
     The class generates multiindexed multidimensional pandas dataframes 
     from the new FLASH dataformat resolved by both macro and microbunches alongside electrons.
     """
-    def __init__(self, runNumber = None, channels = None, settings = None, beamtime_dir=None, 
-                parquet_path=None, parquet_dir=None, beamtime_id=None, year=None, daq="fl1user2", silent=False):
+    def __init__(self, prc, runNumber = None, settings = None, silent=False):
         super().__init__(settings=settings,silent=silent)
         self.runNumber = runNumber
         
-        # Parses and stores the channel names that are defined by the json file
-        if channels is None:
-            all_channel_list_dir = os.path.join(Path(__file__).parent.absolute(), "channels.json")
-        else:
-            all_channel_list_dir = channels
-        # Read all channel info from a json file
-        with open(all_channel_list_dir, "r") as json_file:
-            self.all_channels = json.load(json_file)
+        self.all_channels = prc.channels
         self.channels = self.availableChannels # Set all channels, exluding pulseId as default
-        
-        # Prases to locate the raw beamtime directory from settings file 
-        if 'paths' in self.settings.keys():
-            self.DATA_RAW_DIR = Path(self.settings['paths']['data_raw_dir'])
-        else:    
-            if beamtime_dir is None:
-                if beamtime_id is None:
-                    beamtime_id = self.settings['processor']['beamtime_id']
-                if year is None:
-                    year = self.settings['processor']['year']
-                if beamtime_id is None or year is None:
-                    raise ValueError('Either the beamtime_dir or beamtime_id and year or a settings file\
-                    containing such info is needed to find the data.')
-                self.beamtime_dir = Path(f'/asap3/flash/gpfs/pg2/{year}/data/{beamtime_id}/')
-
-            else:
-                self.beamtime_dir = Path(beamtime_dir)
-
-            # Folder naming convention till end of October
-            self.DATA_RAW_DIR = self.beamtime_dir.joinpath('raw/hdf/express')
-            # Use new convention if express doesn't exist
-            if not self.DATA_RAW_DIR.exists(): 
-                self.DATA_RAW_DIR = self.beamtime_dir.joinpath(f'raw/hdf/{daq.upper()}')
-        
-        # Parses and creates directory to store parquet files
-        if 'paths' in self.settings.keys():
-            self.DATA_PARQUET_DIR = Path(self.settings['paths']['data_parquet_dir'])
-        else:
-            if parquet_dir is None:
-                if parquet_path is None:
-                    self.parquet_path = 'processed/parquet'
-                self.DATA_PARQUET_DIR = self.beamtime_dir.joinpath(self.parquet_path)
-            else:
-                self.DATA_PARQUET_DIR = Path(parquet_dir)
-
-            if not self.DATA_PARQUET_DIR.exists():
-                os.mkdir(self.DATA_PARQUET_DIR)   
+        self.DATA_RAW_DIR = prc.DATA_RAW_DIR
+        self.DATA_PARQUET_DIR = prc.DATA_PARQUET_DIR
          
     @property
     def removeChannels(self, channel_names):
