@@ -447,7 +447,7 @@ class DldFlashProcessorExpress(DldProcessor):
             self.fillNA()
             df = dd.concat(self.dfs)
             df_electron = df.dropna(subset=self.channelsPerElectron)
-            pulse_columns = ['trainId','pulseId','electronId'] + self.channelsPerPulse
+            pulse_columns = ['trainId','pulseId','electronId'] + self.channelsPerPulse + self.channelsPerTrain
             df_pulse = df[pulse_columns]
             df_pulse = df_pulse[(df_pulse['electronId']==0)|(np.isnan(df_pulse['electronId']))]
 
