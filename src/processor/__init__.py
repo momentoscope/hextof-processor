@@ -2,3 +2,4 @@
 """The processor module"""
 
 from processor import DldProcessor
+__version__ = 'not implemented'
