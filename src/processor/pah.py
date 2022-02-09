@@ -17,10 +17,14 @@ except ModuleNotFoundError:
     import configparser
 
     settings = configparser.ConfigParser()  # TODO: find a smarter way
-    if os.path.isfile(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini')):
-        settings.read(os.path.join(os.path.dirname(__file__), 'SETTINGS.ini'))
+    root_folder = os.path.dirname(os.path.dirname(__file__))
+    if 'src' in root_folder:
+        root_folder = os.path.dirname(root_folder)
+    
+    if os.path.isfile(os.path.join(root_folder, 'SETTINGS.ini')):
+        settings.read(os.path.join(root_folder, 'SETTINGS.ini'))
     else:
-        settings.read(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'SETTINGS.ini'))
+        raise FileNotFoundError(f'could not locate SETTINGS.ini in {root_folder}')
     sys.path.append(settings['paths']['PAH_MODULE_DIR'])
 
     from camp.pah.beamtimedaqaccess import BeamtimeDaqAccess as _BeamtimeDaqAccess, H5FileDataAccess as _H5FileDataAccess, \
