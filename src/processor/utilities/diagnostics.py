@@ -79,8 +79,8 @@ def channel_statistics(dd,columns=None):
             chan_dict[chan]['amp'] = chan_dict[chan]['max'] - chan_dict[chan]['min']
             chan_dict[chan]['mean'] = vals.mean()
             chan_dict[chan]['std'] = vals.std()
-#             chan_dict[chan]['len'] = vals.size
-#             chan_dict[chan]['len_nan'] = vals.size - vals.isna().size
+            # chan_dict[chan]['len'] = vals.size
+            # chan_dict[chan]['len_nan'] = vals.size - vals.isna().size
 
         except KeyError:
             print(f'No column {chan} in dataframe')
@@ -180,7 +180,7 @@ def plot_GMD_vs_bunches(self):
 
 def fit_spot_size(data,guess=None,l_bound=None,u_bound=None,
                   px_to_um=None,optical_diode_mean=None,
-                  photoemission_order=None,optical_transmission=1,od_2_uj=4.0926e-06,
+                  photoemission_order=None,optical_transmission=1,od_2_uj=1,
                   reflectivity=None,penetration_depth=None,
                   figsize=(8,8),
                  sigma_is_fwhm=False):
@@ -190,8 +190,18 @@ def fit_spot_size(data,guess=None,l_bound=None,u_bound=None,
         guess: guess parameters for the fit.
             the order of the parameters is: 
             ['amplitude',    'xo',    'yo',  'sigma_x',  'sigma_y', 'theta', 'offset']
+            where:
+            - amplitude: amplitude of the 2D gaussian
+            - x0,y0 coordinates (in pixel units) of the center of the gaussian
+            - simga_x,sigma_y sigma of the two perpendicular gaussians along the major and minor axis
+            - theta: angle between the x axis and the major axis of the 2D gaussian
+            - offset: constant offset
+            the default values are [30., 275., 215., 30., 70., 3., 0]
         l_bound: lower bounds for the fit, same order as guess
+            default values: [0., 170., 150., 5., 5., 0., -np.inf]
         u_bound: upper bounds for the fit, same order as guess
+            default values: [np.inf, 330., 250., 170., 200., 5., np.inf]
+
         optical_diode_mean: mean value of the optical diode, used for fluence evaluation.
             any value can be passed, and the fluence evaluation will use that.
             if None, it tries to evaluate the mean optical diode value from data, if 
@@ -200,7 +210,9 @@ def fit_spot_size(data,guess=None,l_bound=None,u_bound=None,
         optical_transmission:transmission factor of the microscope
             to account for losses from the laser power measurement 
             point to the sample position, typically 0.7
-        od_2_uj: conversion from optical diode values to microjoule, obtained with calibration tables
+        od_2_uj: conversion from optical diode values to microjoule, obtained with calibration tables.
+            The old laser system had 4.0926e-06, currently the values are already reported in uJ.
+            Therefore the conversion factor 1 as defauly.
         figsize: size of the output figure
         sigma_is_fwhm: if true, it interpretates the parameter sigma of the gaussian as FWHM
     returns:
@@ -213,7 +225,7 @@ def fit_spot_size(data,guess=None,l_bound=None,u_bound=None,
     #calibration:
 
     #px_to_um = 0.6 # pixel size in micrometers. if =1 will report in pixels.
-#     px_to_um = 1.0673331251301068#450/len(res.dldPosX) # FoV in micrometers over number of pixels in X or Y direction. if =1 will report in pixels.
+    # px_to_um = 1.0673331251301068#450/len(res.dldPosX) # FoV in micrometers over number of pixels in X or Y direction. if =1 will report in pixels.
     if px_to_um is None:
         px_to_um = 1
         unit = 'px'
