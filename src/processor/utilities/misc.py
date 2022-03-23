@@ -7,6 +7,7 @@ from datetime import datetime
 import math
 import h5py
 import numpy as np
+from scipy.optimize import curve_fit
 import psutil
 import ast
 import os
@@ -69,6 +70,67 @@ def EnergyDensity800(Diode, Diameter=600):
     """
 
     return PulseEnergy800(Diode) / (np.pi * np.square((Diameter * 0.0001) / 2))
+
+
+def effective_gaussian_area(sigma,sigma_y=None,photoemission_order=1,sigma_is_fwhm=False):
+    """ Effective area of a 2D gaussian
+    Credit to Laurenz Rettig (gaussian), Mac Dendzik(photoemission order)
+    params:
+        x: gaussian sigma along the x drection
+        y: gaussian sigma along the y drection
+        photoemission_order: order of the photoemission process
+        sigma_is_fwhm: if true, sigma and sigma_y are interpreted as FWHM
+    returns 
+        area: effective illumination area
+    """
+    if sigma_y is None:
+        sigma_y = sigma  
+    if not sigma_is_fwhm:
+        FWHM = sigma_to_fwhm(sigma)
+        FWHM_y = sigma_to_fwhm(sigma_y)
+    return (photoemission_order*FWHM*FWHM_y*np.pi)/(4*np.log(2))
+
+def pulse_energy(od,od_2_uj=4.0926e-06,T=1):
+    """ convert optical diode values to microjoule using calibration values
+    
+    params:
+        od_2_uj: conversion factor obtained from calibration tables
+            in µJ / optical diode values
+        T: transmission factor of the microscope
+            to account for losses from the laser power measurement 
+            point to the sample position, typically 0.7
+    returns:
+        pulse energy in µJ
+    """
+    return od * od_2_uj * T
+
+def fluence(pulse_energy,area):
+    """ fluence from pulse energy and area
+    
+    params:
+        pulse_energy: photon pulse energy in µJ
+        area: illuminated area in µm²
+    returns 
+        fluence in mJ/cm²
+    """
+    return pulse_energy * 1e5 / area
+
+def absorbed_energy_density(fluence,reflectivity,penetration_depth=None):
+    """ absorbed energy density from fluence
+    params:
+        fluence: fluence in mJ/cm²
+        reflectivity: sample reflectivity at the frequency of the pump beam
+        penetration_depth: optical penetration depth at the frequency of the pump beam in nanometers
+            if none, the absorbed_energy_density in surface units is returned
+    returns:
+        absorbed energy density in  mJ/cm² or  J/cm³ if the penetration depth is provided
+    """
+    aed = fluence*(1-reflectivity)
+    if penetration_depth is not None:
+        pdepth_cm = penetration_depth * 1e-7
+        aed /= 1000*pdepth_cm
+    return aed
+
 
 
 # %% Settings
@@ -233,6 +295,13 @@ def parse_logbook(log_text):
 # %% Math
 # ================================================================================
 
+def sigma_to_fwhm(sigma):
+    """ get fwhm from the standard deviation of the gaussian distribution"""
+    return sigma * 2*np.sqrt(2*np.log(2))
+
+def fwhm_to_sigma(fwhm):
+    """ get the standard deviation of the gaussian distribution from its FWHM"""
+    return fwhm / 2*np.sqrt(2*np.log(2))
 
 def radius(df, center=(0, 0)):
     """ Calculate the radius.
@@ -463,6 +532,10 @@ def gaussian2D(x,y, amplitude, xo, yo, sigma_x, sigma_y, theta, offset):
     return offset + amplitude*np.exp( - (a*((x-xo)**2) + 2*b*(x-xo)*(y-yo)
                         + c*((y-yo)**2)))
 
+def ravelledGaussian2D(*args,**kwargs):
+        g = gaussian2D(*args,**kwargs)
+        return g.ravel
+
 def lorentzian2D(x,y, amp, mux, muy, g, c):
     numerator = np.abs(amp * g)
     denominator = ((x - mux) ** 2 + (y - muy) ** 2 + g ** 2) ** 1.5
@@ -487,7 +560,26 @@ def multi_gaussian2D(M, *args):
             arr += gaussian2D(x,y, *args[i*n:i*n+n])
     return arr
 
+def fit_2d_gaussian(img, guess=None, bounds=None):
+    """ attempt to fit a 2d gaussian to the given image
 
+    :param img:
+    :return:
+    """
+    if guess is None:
+        yo, xo = np.unravel_index(img.argmax(), img.shape)
+        amplitude = img[yo, xo]
+        guess = [amplitude, xo, yo, 15, 15, np.pi, 1]
+    if bounds is None:
+        bounds = [[0, 0, 0, 0.1, 0.1, 0, -10], [np.inf, np.inf, np.inf, 20, 20, np.pi, np.inf]]
+    leny, lenx = img.shape
+    x = np.linspace(0, lenx - 1, lenx)
+    y = np.linspace(0, leny - 1, leny)
+    x, y = np.meshgrid(x, y)
+
+    popt, pcov = curve_fit(ravelledGaussian2D, (x, y), img.values.ravel(), p0=guess, bounds=bounds)
+    perr = np.sqrt(np.diag(pcov))
+    return popt, perr
 
 
 # %% String operations
