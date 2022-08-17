@@ -1,3 +1,4 @@
+from typing import Iterable, Union,Sequence
 from processor.DldProcessor import DldProcessor
 from processor.utilities import misc
 import sys, os
@@ -31,7 +32,7 @@ class LabDataframeCreator(DldProcessor):
         
         super().__init__(settings=settings,silent=silent)
         self.filenames = filenames
-        self.path = path
+        self.path = self._check_data_path(path)
         
         # Parses and stores the channel names that are defined by the json file
         if channels is None:
@@ -131,17 +132,117 @@ class LabDataframeCreator(DldProcessor):
                 # Overwrite the dataframes with filled dataframes
                 self.dfs[i] = subset
 
-    def readData(self, path = None, filenames = None, parquet_path = None):
-        
-        if (self.filenames or filenames) is None:
-            raise ValueError('Must provide a file or list of files!')
-        else:
-            self.filenames = filenames
-            
-        if (self.path or path) is None:
-            raise ValueError('Must provide a path!')
-        else:
+    def _check_data_path(self,path:Union[str,Path]) -> Path:
+        """ Test the validity of the provided data path.
+
+        Args:
+            path: path to check
+
+        Raises:
+            AttributeError: if the path is not valid
+
+        Returns:
+            the Path instance of the given path.
+        """
+        if path is not None:
             self.path = Path(path)
+        elif self.path is None:
+            raise AttributeError('Must provide a path to the raw data.')
+        return path
+
+    def getAvailableRuns(self,path:Union[str,Path]=None) -> dict:        
+        """ find all run numbers available at the given path
+
+        Args:
+            path: path to parse. Overwrites the instance value of path
+        Returns:
+            dictionary with run numbers and file path pairs
+        """
+        path = self._check_data_path(path)
+
+        runs_dict = {}
+        for file in path.iterdir():
+            run_number = int(file.stem.split('_')[-1])
+            if run_number not in runs_dict.keys():
+                runs_dict[run_number] = file
+            else:
+                raise RuntimeError(
+                    f'Found duplicate run number {run_number} in {path}.')
+        return runs_dict
+
+    def readRuns(
+        self,
+        run_numbers:Union[int,str,Sequence],
+        path:Union[str,Path,None]=None,
+        parquet_path:Union[str,Path,None]=None,
+        ) -> dd.DataFrame:
+        """ Read data by run number.
+
+        Args:
+            run_numbers: one or a list of run numbers
+            data_path: path to the data directory, if None, uses the class instance 
+                value. Defaults to None.
+            parquet_path:  Path to the parquet directory where to store the intermediate
+                parquet files. Defaults to None.
+        """
+        if isinstance(run_numbers,[int,str]):
+            run_numbers = [run_numbers]
+        avaliable_runs = self.getAvailableRuns(run_numbers,path=path)
+        files_to_read = [
+            filepath for run_number,filepath in avaliable_runs.items() 
+            if run_number in run_numbers
+            ]
+        return self.readData(files_to_read,parquet_path=parquet_path)
+
+    def readFiles(
+        self,
+        files:Union[int,str,Sequence[int,str]],
+        path:Union[str,Path,None]=None,
+        parquet_path:Union[str,Path,None]=None,
+        ignore_missing_files:bool=False
+        ) -> dd.DataFrame:
+        """ Read data by run number.
+
+        Args:
+            files: one or a list of file names of full file paths to load.
+            data_path: path to the data directory, if None, uses the class instance 
+                value. Defaults to None.
+            parquet_path: Path to the parquet directory where to store the intermediate
+                parquet files. Defaults to None.
+        """
+        path = self._check_data_path(path)
+
+        if isinstance(files,(str,Path)):
+            files = [files]
+        files_to_read = []
+        not_found = []
+        for file in files:
+            filepath = Path(file)
+            if not filepath.isfile():
+                filepath = path/file
+                if not filepath.isfile():
+                    not_found.append(file)
+                    continue
+            files_to_read.append(file)
+        if len(not_found) > 0 and not ignore_missing_files:
+            raise FileNotFoundError(
+                f'Failed to find {len(not_found)} of {len(files)} files: {not_found}'
+                )
+        return self.readData(files_to_read,parquet_path=parquet_path)
+
+    def readData(self, files_to_read=None, parquet_path = None) -> dd.DataFrame:
+        """ load data from the list of provided pahts.
+
+        THis is for internal use, please refer to readRuns or readFiles instead.
+
+        Args:
+            files_to_read: list of paths to the files to load. Defaults to None.
+            parquet_path: Path to the parquet directory where to store the intermediate
+                parquet files. Defaults to None.
+
+        Returns:
+            the generated dataframe
+        """
         
         # create a per_file directory
         if parquet_path is None:
@@ -151,12 +252,16 @@ class LabDataframeCreator(DldProcessor):
         if not self.parquet_dir.exists():
             os.mkdir(self.parquet_dir)
         
+        if files_to_read is not None:
+            assert isinstance(files_to_read,Iterable), 'files_to_read must be iterable'
+            assert isinstance(files_to_read[0],Path), 'files_to_read must contain Paths'
+            self.filenames = files_to_read
+   
         # prepare a list of names for the files to read and parquets to write
-        try: 
-            files_str = f'Files {self.filenames[0]} to {self.filenames[-1]}'
-        except TypeError:
+        if len(self.filenames) > 1:
             files_str = f'File {self.filenames}'
-            self.filenames = [self.filenames]
+        else:
+            files_str = f'Files {self.filenames[0]} to {self.filenames[-1]}'
 
         self.prq_names = [f'{self.parquet_dir}/{filename}' for filename in self.filenames]
         self.filenames = [f'{self.path}/{filename}.h5' for filename in self.filenames]
@@ -194,3 +299,4 @@ class LabDataframeCreator(DldProcessor):
             self.fillNA()
 
         self.dd  = dd.concat(self.dfs).repartition(npartitions=len(self.prq_names))
+        return self.dd
