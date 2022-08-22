@@ -132,7 +132,7 @@ class LabDataframeCreator(DldProcessor):
                 # Overwrite the dataframes with filled dataframes
                 self.dfs[i] = subset
 
-    def _check_data_path(self,path:Union[str,Path]) -> Path:
+    def _check_data_path(self,path:Union[str,Path,None]) -> Path:
         """ Test the validity of the provided data path.
 
         Args:
@@ -150,7 +150,7 @@ class LabDataframeCreator(DldProcessor):
             raise AttributeError('Must provide a path to the raw data.')
         return path
 
-    def getAvailableRuns(self,path:Union[str,Path]=None) -> dict:        
+    def getAvailableRuns(self,path:Union[str,Path,None]=None) -> dict:        
         """ find all run numbers available at the given path
 
         Args:
@@ -172,7 +172,7 @@ class LabDataframeCreator(DldProcessor):
 
     def readRuns(
         self,
-        run_numbers:Union[int,str,Sequence],
+        run_numbers:Union[int,str,Sequence[Union[int,str]]],
         path:Union[str,Path,None]=None,
         parquet_path:Union[str,Path,None]=None,
         ) -> dd.DataFrame:
@@ -196,7 +196,7 @@ class LabDataframeCreator(DldProcessor):
 
     def readFiles(
         self,
-        files:Union[int,str,Sequence[int,str]],
+        files:Union[int,str,Sequence[Union[int,str]]],
         path:Union[str,Path,None]=None,
         parquet_path:Union[str,Path,None]=None,
         ignore_missing_files:bool=False
@@ -233,7 +233,7 @@ class LabDataframeCreator(DldProcessor):
     def readData(self, files_to_read=None, parquet_path = None) -> dd.DataFrame:
         """ load data from the list of provided pahts.
 
-        THis is for internal use, please refer to readRuns or readFiles instead.
+        This is for internal use, please refer to readRuns or readFiles instead.
 
         Args:
             files_to_read: list of paths to the files to load. Defaults to None.
