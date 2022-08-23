@@ -59,7 +59,7 @@ class LabDataframeCreator(DldProcessor):
             if each_name in self.all_channels]  # filters for valid channels
         # Only channels with the defined format are selected and stored 
         # in an iterable list
-#         print(valid_names)
+        # print(valid_names)
         if format_ is not None:
             channels = [each_name
                 for each_name in valid_names
@@ -85,8 +85,8 @@ class LabDataframeCreator(DldProcessor):
         if len(bad_channels) > 0:
             
             print(f"ERROR: skipped channels missing in h5 file: {[self.all_channels[channel]['group_name'] for channel in bad_channels]}")
-#         print([self.all_channels[channel]['group_name'] for channel in channels])
-#         print(h5_file)
+        # print([self.all_channels[channel]['group_name'] for channel in channels])
+        # print(h5_file)
 
         dataframes = (Series(h5_file[self.all_channels[channel]['group_name']], 
                         name = channel, 
@@ -132,7 +132,7 @@ class LabDataframeCreator(DldProcessor):
                 # Overwrite the dataframes with filled dataframes
                 self.dfs[i] = subset
 
-    def _check_data_path(self,path:Union[str,Path,None]) -> Path:
+    def _check_data_path(self,path:Union[str,Path,None]=None) -> Path:
         """ Test the validity of the provided data path.
 
         Args:
@@ -146,9 +146,11 @@ class LabDataframeCreator(DldProcessor):
         """
         if path is not None:
             self.path = Path(path)
-        elif self.path is None:
-            raise AttributeError('Must provide a path to the raw data.')
-        return path
+        else:
+            self.path = Path(self.DATA_RAW_DIR)
+            if self.path is None:
+                raise AttributeError('Must provide a path to the raw data.')
+        return self.path
 
     def getAvailableRuns(self,path:Union[str,Path,None]=None) -> dict:        
         """ find all run numbers available at the given path
@@ -185,9 +187,9 @@ class LabDataframeCreator(DldProcessor):
             parquet_path:  Path to the parquet directory where to store the intermediate
                 parquet files. Defaults to None.
         """
-        if isinstance(run_numbers,[int,str]):
+        if isinstance(run_numbers,(int,str)):
             run_numbers = [run_numbers]
-        avaliable_runs = self.getAvailableRuns(run_numbers,path=path)
+        avaliable_runs = self.getAvailableRuns(path=path)
         files_to_read = [
             filepath for run_number,filepath in avaliable_runs.items() 
             if run_number in run_numbers
@@ -218,9 +220,11 @@ class LabDataframeCreator(DldProcessor):
         not_found = []
         for file in files:
             filepath = Path(file)
-            if not filepath.isfile():
+            if filepath.suffix == '':
+                filepath = filepath.with_suffix('.h5')
+            if not filepath.is_file():
                 filepath = path/file
-                if not filepath.isfile():
+                if not filepath.is_file():
                     not_found.append(file)
                     continue
             files_to_read.append(file)
@@ -263,8 +267,12 @@ class LabDataframeCreator(DldProcessor):
         else:
             files_str = f'Files {self.filenames[0]} to {self.filenames[-1]}'
 
-        self.prq_names = [f'{self.parquet_dir}/{filename}' for filename in self.filenames]
-        self.filenames = [f'{self.path}/{filename}.h5' for filename in self.filenames]
+        # self.prq_names = [f'{self.parquet_dir}/{filename}' for filename in self.filenames]
+        # self.filenames = [f'{self.path}/{filename}.h5' for filename in self.filenames]
+        self.prq_names = [f'{self.parquet_dir}/{filename.stem}'for filename in self.filenames]
+        self.filenames = [str(filename.with_suffix('.h5')) for filename in self.filenames]
+
+        
         missing_files = []
         missing_prq_names = []
         
