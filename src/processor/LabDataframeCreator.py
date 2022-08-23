@@ -164,12 +164,15 @@ class LabDataframeCreator(DldProcessor):
 
         runs_dict = {}
         for file in path.iterdir():
-            run_number = int(file.stem.split('_')[-1])
-            if run_number not in runs_dict.keys():
-                runs_dict[run_number] = file
-            else:
-                raise RuntimeError(
-                    f'Found duplicate run number {run_number} in {path}.')
+            try:
+                run_number = int(file.stem.split('_')[-1])
+                if run_number not in runs_dict.keys():
+                    runs_dict[run_number] = file
+                else:
+                    raise RuntimeError(
+                        f'Found duplicate run number {run_number} in {path}.')
+            except ValueError:
+                pass
         return runs_dict
 
     def readRuns(
@@ -227,7 +230,7 @@ class LabDataframeCreator(DldProcessor):
                 if not filepath.is_file():
                     not_found.append(file)
                     continue
-            files_to_read.append(file)
+            files_to_read.append(filepath)
         if len(not_found) > 0 and not ignore_missing_files:
             raise FileNotFoundError(
                 f'Failed to find {len(not_found)} of {len(files)} files: {not_found}'
