@@ -348,9 +348,12 @@ class DldFlashProcessorExpress(DldProcessor):
                 channels_to_overwrite = list(compress(channels, is_null[0]))
                 # Get the values for those channels from previous file
                 values = self.dfs[i-1][channels].tail(1).values[0]
+
+                fill_dict = dict(zip(channels, values))
+                fill_dict = {k: v for k, v in fill_dict.items() if k in channels_to_overwrite}
                 # Fill all NaNs by those values
-                subset[channels_to_overwrite] = subset[channels_to_overwrite].fillna(
-                                                                dict(zip(channels_to_overwrite, values)))
+
+                subset[channels_to_overwrite] = subset[channels_to_overwrite].fillna(fill_dict)
                 # Overwrite the dataframes with filled dataframes
                 self.dfs[i][channels] = subset
 
