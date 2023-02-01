@@ -355,7 +355,7 @@ class DldFlashProcessorExpress(DldProcessor):
                 self.dfs[i][channels] = subset
 
     def readData(self, runs=None, ignore_missing_runs=False, settings=None, channels=None,
-             beamtime_dir=None, parquet_path=None, beamtime_id=None, year=None,
+             beamtime_dir=None, parquet_path=None, beamtime_id=None, year=None, force_full_read=False,
             daq="fl1user2"):
         """ Read express data from DAQ, generating a parquet in between.
 
@@ -402,7 +402,6 @@ class DldFlashProcessorExpress(DldProcessor):
         except TypeError:
             runs_str = f'Run {runs}'
             runs = [runs]
-        parquet_name = f'{self.temp_parquet_dir}/'
         all_files = []
         for run in runs:
             files = self.runFilesNames(run, daq, self.DATA_RAW_DIR)
@@ -410,16 +409,19 @@ class DldFlashProcessorExpress(DldProcessor):
             if len(files) == 0 and not ignore_missing_runs:
                 raise FileNotFoundError(f'No file found for run {run}')
 
-        self.prq_names = [parquet_name + all_files[i].stem for i in range(len(all_files))]
+        self.prq_names = [self.temp_parquet_dir.joinpath(all_files[i].stem) for i in range(len(all_files))]
         missing_files = []
         missing_prq_names = []
         
         # only read and write files which were not read already 
         for i in range(len(self.prq_names)): 
-            if not Path(self.prq_names[i]).exists():
+            if not Path(self.prq_names[i]).exists() or self.force_full_read:
                 missing_files.append(all_files[i])
                 missing_prq_names.append(self.prq_names[i])
-        
+
+
+
+
         print(f'Reading {runs_str}: {len(missing_files)} new files of {len(all_files)} total.')
         self.failed_str = []
         
