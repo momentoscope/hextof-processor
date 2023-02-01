@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 """The processor module"""
 
-from processor import DldProcessor
+from src.processor import DldProcessor
