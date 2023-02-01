@@ -415,7 +415,7 @@ class DldFlashProcessorExpress(DldProcessor):
         
         # only read and write files which were not read already 
         for i in range(len(self.prq_names)): 
-            if not Path(self.prq_names[i]).exists() or self.force_full_read:
+            if not Path(self.prq_names[i]).exists() or force_full_read:
                 missing_files.append(all_files[i])
                 missing_prq_names.append(self.prq_names[i])
 
