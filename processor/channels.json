@@ -39,14 +39,14 @@
         "format": "per_electron",
         "group_name": "/FL1/Experiment/PG/Hextof/Detector/monitor/",
         "old_name": "/FL1/Experiment/PG/Hextof/Detector/monitor 1",
-        "slice": 1
+        "slice": 0
     },
     "dldPosY": {
         "axis": 1,
         "format": "per_electron",
         "group_name": "/FL1/Experiment/PG/Hextof/Detector/monitor/",
         "old_name": "/FL1/Experiment/PG/Hextof/Detector/monitor 2",
-        "slice": 0
+        "slice": 1
     },
     "dldTime": {
         "axis": 1,
