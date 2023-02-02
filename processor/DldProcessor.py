@@ -17,7 +17,7 @@ from tqdm.auto import tqdm
 from configparser import ConfigParser
 from processor.utilities import misc, io, dfops
 import processor
-from _version import __version__
+from ._version import __version__
 # warnings.resetwarnings()
 
 _VERBOSE = False
