@@ -275,10 +275,7 @@ class DldProcessor:
             metadata['runInfo'] = {
                 'runNumber': self.runNumber,
                 'pulseIdInterval': [pulseIdFrom, pulseIdTo],
-                if pulseIdTo is not None and pulseIdFrom is not None:
-                    'numberOfMacrobunches': pulseIdTo - pulseIdFrom,
-                else:
-                    'numberOfMacrobunches': None,
+                'numberOfMacrobunches': (pulseIdTo - pulseIdFrom) if pulseIdTo is not None and pulseIdFrom is not None else None,
             }
             try:
                 metadata['runInfo']['numberOfElectrons'] = self.numOfElectrons
