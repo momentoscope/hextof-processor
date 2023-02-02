@@ -262,7 +262,7 @@ class DldProcessor:
                               }
         metadata['settings'] = dict(self.settings._sections['processor'])#misc.parse_category('processor')
         metadata['DAQ channels'] = dict(self.settings._sections['DAQ channels'])#misc.parse_category('DAQ channels')
-        metadata['hextof-processor'] = {'version':processor.__version__}
+        metadata['hextof-processor'] = {'version':self.__version__}
 
         try:
             metadata['runInfo']=self.runInfo
