@@ -52,12 +52,12 @@ class DldProcessor:
         
     """
     root_folder = os.path.dirname(os.path.dirname(processor.__file__))
+    __version__ = __version__
     if 'src' in root_folder:
         root_folder = os.path.dirname(root_folder)
     def __init__(self, settings=None,silent=False):
         """ Create and manage a dask DataFrame from the data recorded at FLASH.
         """
-        self.__version__ = __version__
         self._settings = None
 
         if settings is None:
