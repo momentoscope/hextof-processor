@@ -57,6 +57,7 @@ class DldProcessor:
     def __init__(self, settings=None,silent=False):
         """ Create and manage a dask DataFrame from the data recorded at FLASH.
         """
+        self.__version__ = __version__
         self._settings = None
 
         if settings is None:
