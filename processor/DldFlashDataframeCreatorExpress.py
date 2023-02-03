@@ -458,3 +458,7 @@ class DldFlashProcessorExpress(DldProcessor):
 
         self.dd  = df_electron.repartition(npartitions=len(self.prq_names))
         self.ddMicrobunches = df_pulse.repartition(npartitions=len(self.prq_names))
+
+        if self.DLD_ID_BITS > 0 and 'dldTime' in self.dd.columns:
+            self.dd['dldSectorId'] = self.dd['dldTime'].astype(int) % np.power(2,self.DLD_ID_BITS)
+            self.dd['dldDetectorId'] = self.dd['dldTime'].astype(int) % 2
