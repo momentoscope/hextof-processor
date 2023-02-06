@@ -255,15 +255,6 @@ class DldProcessor:
         else:
             start, stop = 0, 1
 
-        metadata['timing'] = {
-            'timestampStart': int(start),
-            'timestampStop': int(stop),
-            'timestampDuration': str(timedelta(seconds=int(stop - start))),
-            'timeStart': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
-            'timeStop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
-            'timeDuration': datetime.fromtimestamp(stop - start),
-            # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        }
         metadata['settings'] = dict(self.settings._sections['processor'])#misc.parse_category('processor')
         metadata['DAQ channels'] = dict(self.settings._sections['DAQ channels'])#misc.parse_category('DAQ channels')
         metadata['hextof-processor'] = {'version':self.__version__}
@@ -286,9 +277,19 @@ class DldProcessor:
                 metadata['runInfo']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
             except:
                 self.numOfElectrons = dask.compute(self.dd.shape)[0][0]
-                self.electronsPerMacrobunch = self.numOfElectrons/(pulseIdTo - pulseIdFrom)
+                self.electronsPerMacrobunch = int(self.numOfElectrons/(pulseIdTo - pulseIdFrom))
                 metadata['runInfo']['numberOfElectrons'] = self.numOfElectrons
                 metadata['runInfo']['electronsPerMacrobunch'] = self.electronsPerMacrobunch
+        
+        metadata['runInfo'] = {
+            'timestampStart': int(start),
+            'timestampStop': int(stop),
+            'timestampDuration': int(stop - start),
+            'timeStart': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
+            'timeStop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
+            'timeDuration': str(timedelta(seconds=int(stop - start))),
+            # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        }
 
 
         if compute_histograms:
