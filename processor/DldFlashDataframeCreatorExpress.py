@@ -329,7 +329,8 @@ class DldFlashProcessorExpress(DldProcessor):
         except ValueError as e:
             self.failed_str.append(f'{prq}: {e}')
             self.prq_names.remove(prq)
-            
+
+    @delayed       
     def fillNA(self):
         """Routine to fill the NaN values with intrafile forward filling. """
         # First use forward filling method to fill each file's pulse and train resolved channels.
