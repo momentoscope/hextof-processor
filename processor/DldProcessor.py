@@ -287,15 +287,13 @@ class DldProcessor:
                 metadata['runInfo']['numberOfElectrons'] = self.numOfElectrons
                 metadata['runInfo']['electronsPerMacrobunch'] = self.electronsPerMacrobunch
         
-        metadata['runInfo'] = {
-            'timestampStart': int(start),
-            'timestampStop': int(stop),
-            'timestampDuration': int(stop - start),
-            'timeStart': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
-            'timeStop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
-            'timeDuration': str(timedelta(seconds=int(stop - start))),
+        metadata['runInfo']['timestampStart'] = int(start)
+        metadata['runInfo']['timestampStop'] = int(stop)
+        metadata['runInfo']['timestampDuration'] = int(stop - start)
+        metadata['runInfo']['timeStart'] = datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S')
+        metadata['runInfo']['timeStop'] = datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S')
+        metadata['runInfo']['timeDuration'] = str(timedelta(seconds=int(stop - start)))
             # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        }
 
 
         if compute_histograms:
