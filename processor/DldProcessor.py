@@ -268,7 +268,7 @@ class DldProcessor:
                 try:
                     pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
                 except TypeError:
-                    pulseIdFrom, pulseIdTo = 0,0
+                    pulseIdFrom, pulseIdTo = None,None
 
             metadata['runInfo'] = {
                 'runNumber': self.runNumber,
@@ -280,7 +280,10 @@ class DldProcessor:
                 metadata['runInfo']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
             except:
                 self.numOfElectrons = dask.compute(self.dd.shape)[0][0]
-                self.electronsPerMacrobunch = int(self.numOfElectrons/(pulseIdTo - pulseIdFrom))
+                try:
+                    self.electronsPerMacrobunch = int(self.numOfElectrons/(pulseIdTo - pulseIdFrom))
+                except TypeError:
+                    self.electronsPerMacrobunch = None
                 metadata['runInfo']['numberOfElectrons'] = self.numOfElectrons
                 metadata['runInfo']['electronsPerMacrobunch'] = self.electronsPerMacrobunch
         
