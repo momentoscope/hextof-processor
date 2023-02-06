@@ -80,7 +80,7 @@ class DldProcessor:
             if not silent:
                 print(f'Using settings from {settings}')
         self.runNumber = None
-        self.pulseIdInterval = [None,None]
+        self.pulseIdInterval = None
 
         self.initAttributes()
         self.resetBins()
@@ -255,11 +255,15 @@ class DldProcessor:
         else:
             start, stop = 0, 1
 
-        metadata['timing'] = {'acquisition start': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
-                              'acquisition stop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
-                              'acquisition duration': int(stop - start),
-                              # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                              }
+        metadata['timing'] = {
+            'timestampStart': datetime.fromtimestamp(start),
+            'timestampStop': datetime.fromtimestamp(stop),
+            'timestampDuration': datetime.fromtimestamp(stop - start),
+            'timeStart': datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M:%S'),
+            'timeStop': datetime.fromtimestamp(stop).strftime('%Y-%m-%d %H:%M:%S'),
+            'timeDuration': int(stop - start),
+            # 'bin array creation': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        }
         metadata['settings'] = dict(self.settings._sections['processor'])#misc.parse_category('processor')
         metadata['DAQ channels'] = dict(self.settings._sections['DAQ channels'])#misc.parse_category('DAQ channels')
         metadata['hextof-processor'] = {'version':self.__version__}
