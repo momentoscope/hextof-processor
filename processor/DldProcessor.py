@@ -265,7 +265,10 @@ class DldProcessor:
             if self.pulseIdInterval is None and not fast_mode:
                 pulseIdFrom,pulseIdTo = dask.compute(self.dd['macroBunchPulseId'].min(),self.dd['macroBunchPulseId'].max())
             else:
-                pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
+                try:
+                    pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
+                except AttributeError:
+                    pulseIdFrom, pulseIdTo = 0,0
 
             metadata['runInfo'] = {
                 'runNumber': self.runNumber,
