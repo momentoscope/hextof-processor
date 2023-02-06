@@ -267,7 +267,7 @@ class DldProcessor:
             else:
                 try:
                     pulseIdFrom, pulseIdTo = self.pulseIdInterval[0], self.pulseIdInterval[1]
-                except AttributeError:
+                except TypeError:
                     pulseIdFrom, pulseIdTo = 0,0
 
             metadata['runInfo'] = {
