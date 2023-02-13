@@ -277,7 +277,7 @@ class DldProcessor:
             }
             try:
                 metadata['runInfo']['numberOfElectrons'] = self.numOfElectrons
-                metadata['runInfo']['electronsPerMacrobunch'] = self.electronsPerMacrobunch,
+                metadata['runInfo']['electronsPerMacrobunch'] = self.electronsPerMacrobunch
             except:
                 self.numOfElectrons = dask.compute(self.dd.shape)[0][0]
                 try:
